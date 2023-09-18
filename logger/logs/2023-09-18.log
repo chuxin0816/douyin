@@ -1,0 +1,13 @@
+{"level":"debug","ts":1695025775.826253,"msg":"HERTZ: Method=GET    absolutePath=/hello                    --> handlerName=main.main.func1 (num=2 handlers)"}
+{"level":"info","ts":1695025775.826603,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1695025775.826994,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"info","ts":1695025780.3396952,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1695025780.339862,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1695025780.340158,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"error","ts":1695050688.0354402,"msg":"mysql init failed, err:%vdial tcp 127.0.0.1:3306: connect: connection refused"}
+{"level":"debug","ts":1695050797.877833,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=github.com/chuxin0816/Hertz/router.Setup.func1 (num=2 handlers)"}
+{"level":"info","ts":1695050797.878369,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1695050797.878485,"msg":"HERTZ: HTTP server listening on address=127.0.0.1:8080"}
+{"level":"info","ts":1695050863.7162602,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1695050863.71735,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1695050868.718623,"msg":"HERTZ: Execute OnShutdownHooks finish"}

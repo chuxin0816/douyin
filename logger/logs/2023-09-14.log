@@ -1,0 +1,13 @@
+{"level":"debug","ts":1694656347.1386409,"msg":"HERTZ: Method=GET    absolutePath=/hello                    --> handlerName=main.main.func1 (num=2 handlers)"}
+{"level":"info","ts":1694656347.139061,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1694656347.1395872,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"info","ts":1694656403.611773,"msg":"Hello, hertz"}
+{"level":"info","ts":1694656495.677016,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1694656495.67716,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1694656495.6773388,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1694656509.261526,"msg":"HERTZ: Method=GET    absolutePath=/hello                    --> handlerName=main.main.func1 (num=2 handlers)"}
+{"level":"info","ts":1694656509.261882,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1694656509.262052,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"info","ts":1694658310.137001,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1694658310.138174,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1694658310.1385012,"msg":"HERTZ: Execute OnShutdownHooks finish"}
