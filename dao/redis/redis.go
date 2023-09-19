@@ -3,17 +3,17 @@ package redis
 import (
 	"fmt"
 
+	"github.com/chuxin0816/Scaffold/config"
 	"github.com/go-redis/redis"
-	"github.com/spf13/viper"
 )
 
 var RDB *redis.Client
 
-func Init() error {
+func Init(conf *config.RedisConfig) error {
 	RDB = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", viper.GetString("redis.host"), viper.GetInt("redis.port")),
-		Password: viper.GetString("redis.password"),
-		DB:       viper.GetInt("redis.db"),
+		Addr:     fmt.Sprintf("%s:%d", conf.Host, conf.Port),
+		Password: conf.Password,
+		DB:       conf.DB,
 	})
 	_, err := RDB.Ping().Result()
 	return err
