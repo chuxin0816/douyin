@@ -44,9 +44,12 @@ type RedisConfig struct {
 }
 
 func Init() error {
+	//指定配置文件类型(专门用于解析远程配置文件）
+	// viper.SetConfigType("json")    
+
 	viper.SetConfigName("config")   //指定配置文件的文件名称(不需要扩展名)
-	viper.SetConfigType("json")     //指定配置文件类型(专门用于读取远程配置文件）
 	viper.AddConfigPath("./config") //指定查找配置文件的路径(这里使用相对路径)
+	
 	err := viper.ReadInConfig()
 	if err != nil {
 		return err
@@ -63,7 +66,7 @@ func Init() error {
 		if err := viper.Unmarshal(Conf); err != nil {
 			hlog.Error("viper unmarshal failed, err:%v", err)
 		} else {
-			hlog.Info("config file changed")
+			hlog.Notice("config file changed")
 		}
 	})
 	return nil
