@@ -5,7 +5,6 @@ import (
 	"douyin/models"
 	"douyin/response"
 	"douyin/service"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -29,9 +28,6 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 返回结果
-	for _, video := range resp.VideoList {
-		fmt.Println(*video)
-	}
 	response.Success(ctx, response.FeedResponse{
 		Response:  &response.Response{StatusCode: response.CodeSuccess, StatusMsg: resp.StatusCode.Msg()},
 		NextTime:  resp.NextTime,
