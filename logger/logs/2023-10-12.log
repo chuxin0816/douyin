@@ -207,3 +207,4 @@
 {"level":"info","ts":1697044412.9780211,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
 {"level":"info","ts":1697044624.072243,"msg":"HERTZ: Received signal: interrupt\n"}
 {"level":"info","ts":1697044624.073389,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697044629.074177,"msg":"HERTZ: Execute OnShutdownHooks timeout: error=context deadline exceeded"}
