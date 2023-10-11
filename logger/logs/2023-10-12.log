@@ -208,3 +208,10 @@
 {"level":"info","ts":1697044624.072243,"msg":"HERTZ: Received signal: interrupt\n"}
 {"level":"info","ts":1697044624.073389,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
 {"level":"info","ts":1697044629.074177,"msg":"HERTZ: Execute OnShutdownHooks timeout: error=context deadline exceeded"}
+{"level":"debug","ts":1697045577.0229251,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697045577.0252311,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697045577.025373,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697045577.025575,"msg":"HERTZ: HTTP server listening on address=[::]:8887"}
+{"level":"info","ts":1697045584.5069351,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697045584.507143,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697045584.507354,"msg":"HERTZ: Execute OnShutdownHooks finish"}

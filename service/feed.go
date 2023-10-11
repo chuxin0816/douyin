@@ -32,7 +32,7 @@ func Feed(req *models.FeedRequest) (resp *response.FeedResponse, err error) {
 	}
 	return &response.FeedResponse{
 		Response:  &response.Response{StatusCode: response.CodeSuccess},
-		NextTime:  time.Now().Unix(),
 		VideoList: videoList,
+		NextTime:  time.Now().Unix(),
 	}, nil
 }

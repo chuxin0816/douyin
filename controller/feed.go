@@ -30,7 +30,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	// 返回结果
 	response.Success(ctx, response.FeedResponse{
 		Response:  &response.Response{StatusCode: response.CodeSuccess, StatusMsg: resp.StatusCode.Msg()},
-		NextTime:  resp.NextTime,
 		VideoList: resp.VideoList,
+		NextTime:  resp.NextTime,
 	})
 }

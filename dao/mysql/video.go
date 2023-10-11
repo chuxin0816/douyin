@@ -37,13 +37,13 @@ func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoR
 	// 将models.Video转换为response.VideoResponse
 	for idx, dVideo := range dVideoList {
 		videoList = append(videoList, &response.VideoResponse{
+			ID:            dVideo.ID,
 			Author:        authors[idx],
 			CommentCount:  dVideo.CommentCount,
+			PlayURL:       dVideo.PlayURL,
 			CoverURL:      dVideo.CoverURL,
 			FavoriteCount: dVideo.FavoriteCount,
-			ID:            dVideo.ID,
 			IsFavorite:    false, // 需要登录后通过用户id查询数据库判断
-			PlayURL:       dVideo.PlayURL,
 			Title:         dVideo.Title,
 		})
 	}
