@@ -1,5 +1,6 @@
 {
   "version": "v0.1",
+  "jwt_key": "simple douyin jwt key",
   "hertz": {
     "host": "127.0.0.1",
     "port": 8888

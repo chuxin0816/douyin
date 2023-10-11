@@ -6,6 +6,7 @@ require (
 	github.com/cloudwego/hertz v0.6.8
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/hertz-contrib/logger/zap v1.0.0
 	github.com/spf13/viper v1.16.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
