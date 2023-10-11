@@ -2,9 +2,9 @@ package controller
 
 import (
 	"context"
+	"douyin/models"
+	"douyin/service"
 
-	"github.com/chuxin0816/Scaffold/models"
-	"github.com/chuxin0816/Scaffold/service"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -16,11 +16,11 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	req := &models.FeedRequest{}
 	ctx.Bind(req)
 
-	//TODO: 业务逻辑
+	// 业务逻辑处理
 	resp, err := service.Feed(req)
 	if err != nil {
 		ctx.JSON(consts.StatusInternalServerError, nil)
-		hlog.Errorf("Feed service error: %v", err)
+		hlog.Error("controller.Feed: 业务逻辑处理失败", err)
 		return
 	}
 

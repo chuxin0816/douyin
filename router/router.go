@@ -2,10 +2,10 @@ package router
 
 import (
 	"context"
+	"douyin/config"
+	"douyin/controller"
 	"fmt"
 
-	"github.com/chuxin0816/Scaffold/config"
-	"github.com/chuxin0816/Scaffold/controller"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -24,26 +24,26 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	apiRouter := h.Group("/douyin")
 
 	// basic apis
-	apiRouter.GET("/feed/", controller.Feed)
-	// apiRouter.GET("/user/", controller.UserInfo)
-	// apiRouter.POST("/user/register/", controller.Register)
-	// apiRouter.POST("/user/login/", controller.Login)
-	// apiRouter.POST("/publish/action/", controller.Publish)
-	// apiRouter.GET("/publish/list/", controller.PublishList)
+	apiRouter.GET("/feed", controller.Feed)
+	// apiRouter.GET("/user", controller.UserInfo)
+	// apiRouter.POST("/user/register", controller.Register)
+	// apiRouter.POST("/user/login", controller.Login)
+	// apiRouter.POST("/publish/action", controller.Publish)
+	// apiRouter.GET("/publish/list", controller.PublishList)
 
 	// interaction apis
-	// apiRouter.POST("/favorite/action/", controller.FavoriteAction)
-	// apiRouter.GET("/favorite/list/", controller.FavoriteList)
-	// apiRouter.POST("/comment/action/", controller.CommentAction)
-	// apiRouter.GET("/comment/list/", controller.CommentList)
+	// apiRouter.POST("/favorite/action", controller.FavoriteAction)
+	// apiRouter.GET("/favorite/list", controller.FavoriteList)
+	// apiRouter.POST("/comment/action", controller.CommentAction)
+	// apiRouter.GET("/comment/list", controller.CommentList)
 
 	// social apis
-	// apiRouter.POST("/relation/action/", controller.RelationAction)
-	// apiRouter.GET("/relation/follow/list/", controller.FollowList)
-	// apiRouter.GET("/relation/follower/list/", controller.FollowerList)
-	// apiRouter.GET("/relation/friend/list/", controller.FriendList)
-	// apiRouter.GET("/message/chat/", controller.MessageChat)
-	// apiRouter.POST("/message/action/", controller.MessageAction)
+	// apiRouter.POST("/relation/action", controller.RelationAction)
+	// apiRouter.GET("/relation/follow/list", controller.FollowList)
+	// apiRouter.GET("/relation/follower/list", controller.FollowerList)
+	// apiRouter.GET("/relation/friend/list", controller.FriendList)
+	// apiRouter.GET("/message/chat", controller.MessageChat)
+	// apiRouter.POST("/message/action", controller.MessageAction)
 
 	return h
 }
