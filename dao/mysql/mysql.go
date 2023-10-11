@@ -1,14 +1,13 @@
 package mysql
 
 import (
+	"douyin/config"
 	"douyin/models"
 	"fmt"
 
-	"github.com/chuxin0816/Scaffold/config"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
@@ -22,8 +21,7 @@ func Init(conf *config.MysqlConfig) (err error) {
 		conf.DBName,
 	)
 
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent)}) // 禁用gorm日志
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		hlog.Error("mysql.Init: 连接数据库失败")
 		return err

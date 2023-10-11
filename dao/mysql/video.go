@@ -4,6 +4,7 @@ import (
 	"douyin/models"
 	"douyin/response"
 	"strconv"
+	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
@@ -11,7 +12,7 @@ import (
 func GetVideoList(latestTime int64, count int) (videoList []*response.VideoResponse, err error) {
 	// 查询数据库
 	var dVideoList []*models.Video
-	err = db.Where("upload_time <= ?", latestTime).Order("upload_time DESC").Limit(count).Find(&dVideoList).Error
+	err = db.Debug().Where("upload_time <= ?", time.Unix(latestTime, 0)).Order("upload_time DESC").Limit(count).Find(&dVideoList).Error
 	if err != nil {
 		hlog.Error("mysql.GetVideoList: 查询数据库失败")
 		return nil, err
@@ -24,7 +25,7 @@ func GetVideoList(latestTime int64, count int) (videoList []*response.VideoRespo
 	}
 	authors, err := GetUserByIDs(authorIDs)
 	if err != nil {
-		hlog.Error("mysql.GetVideoList: 通过作者id查询作者信息")
+		hlog.Error("mysql.GetVideoList: 通过作者id查询作者信息失败")
 		return nil, err
 	}
 

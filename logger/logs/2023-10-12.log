@@ -1,0 +1,18 @@
+{"level":"debug","ts":1697040317.53855,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697040317.538879,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697040317.539218,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697040317.539482,"msg":"HERTZ: HTTP server listening on address=127.0.0.1:8888"}
+{"level":"error","ts":1697040320.192663,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697040320.1937,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697040320.193731,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697040320.1937652,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"info","ts":1697040348.4024389,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697040348.40298,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697040353.4043489,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697040568.5620859,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697040568.5626318,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697040568.5627332,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697040568.562807,"msg":"HERTZ: HTTP server listening on address=127.0.0.1:8888"}
+{"level":"info","ts":1697040662.8327858,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697040662.833874,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697040667.835158,"msg":"HERTZ: Execute OnShutdownHooks finish"}

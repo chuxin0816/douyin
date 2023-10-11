@@ -1,11 +1,11 @@
 package logger
 
 import (
+	"douyin/config"
 	"os"
 	"path"
 	"time"
 
-	"github.com/chuxin0816/Scaffold/config"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/hertz-contrib/logger/zap"
 	"gopkg.in/natefinch/lumberjack.v2"

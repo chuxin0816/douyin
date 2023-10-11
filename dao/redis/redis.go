@@ -1,9 +1,9 @@
 package redis
 
 import (
+	"douyin/config"
 	"fmt"
 
-	"github.com/chuxin0816/Scaffold/config"
 	"github.com/go-redis/redis"
 )
 
