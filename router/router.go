@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/chuxin0816/Scaffold/config"
+	"github.com/chuxin0816/Scaffold/controller"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/utils"
