@@ -9,10 +9,15 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-func GetVideoList(latestTime int64, count int) (videoList []*response.VideoResponse, err error) {
+func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoResponse, err error) {
 	// 查询数据库
+	year := latestTime.Year()
+	if year < 1 || year > 9999 {
+		hlog.Error("mysql.GetVideoList: 时间超出限制")
+		latestTime = time.Now()
+	}
 	var dVideoList []*models.Video
-	err = db.Where("upload_time <= ?", time.Unix(latestTime, 0)).Order("upload_time DESC").Limit(count).Find(&dVideoList).Error
+	err = db.Where("upload_time <= ?", latestTime).Order("upload_time DESC").Limit(count).Find(&dVideoList).Error
 	if err != nil {
 		hlog.Error("mysql.GetVideoList: 查询数据库失败")
 		return nil, err

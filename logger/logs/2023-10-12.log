@@ -23,3 +23,133 @@
 {"level":"info","ts":1697040817.306464,"msg":"HERTZ: Received signal: interrupt\n"}
 {"level":"info","ts":1697040817.30748,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
 {"level":"info","ts":1697040822.308631,"msg":"HERTZ: Execute OnShutdownHooks timeout: error=context deadline exceeded"}
+{"level":"debug","ts":1697040858.24771,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697040858.248289,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697040858.2484548,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697040858.2485828,"msg":"HERTZ: HTTP server listening on address=127.0.0.1:8888"}
+{"level":"info","ts":1697041004.387966,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697041004.388333,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697041004.3886101,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697041026.127872,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697041026.128223,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697041026.128312,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697041026.1284559,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697041027.036393,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041027.036524,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041027.0365598,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041027.036692,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"error","ts":1697041029.172821,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041029.173009,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041029.173055,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041029.17311,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"error","ts":1697041065.627875,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041065.629089,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041065.629183,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041065.629257,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"error","ts":1697041093.888851,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041093.889976,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041093.890039,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041093.890081,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"error","ts":1697041148.715359,"msg":"mysql.GetVideoList: 查询数据库失败"}
+{"level":"error","ts":1697041148.717055,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041148.717201,"msg":"controller.Feed: 业务逻辑处理失败year is not in the range [1, 9999]: 55747"}
+{"level":"info","ts":1697041242.639977,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697041242.640959,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697041247.642328,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697041385.003861,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697041385.0043242,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697041385.004508,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697041385.004708,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697041400.465376,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041400.465444,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041400.465462,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041400.4655418,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"error","ts":1697041489.29224,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697041489.292353,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \" \": invalid syntax"}
+{"level":"error","ts":1697041528.4586508,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041528.45889,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041528.458943,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041528.459006,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"info","ts":1697041586.994616,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697041586.994695,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697041591.9959779,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697041597.659519,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697041597.659969,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697041597.660128,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697041597.6603992,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697041604.019892,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041604.0200021,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041604.020027,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041604.020062,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"error","ts":1697041620.1992068,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041620.199401,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041620.199451,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041620.199539,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"error","ts":1697041693.0126169,"msg":"mysql.GetVideoList: 时间超出限制"}
+{"level":"error","ts":1697041699.558985,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041699.559167,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041699.559219,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041699.559274,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"error","ts":1697041704.372177,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041704.372351,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041704.3724039,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041704.372457,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"error","ts":1697041710.316454,"msg":"mysql.GetVideoList: 时间超出限制"}
+{"level":"error","ts":1697041751.58432,"msg":"mysql.GetUserByIDs: 查询数据库失败"}
+{"level":"error","ts":1697041751.584558,"msg":"mysql.GetVideoList: 通过作者id查询作者信息失败"}
+{"level":"error","ts":1697041751.584605,"msg":"service.Feed: 查询视频列表失败"}
+{"level":"error","ts":1697041751.584687,"msg":"controller.Feed: 业务逻辑处理失败Error 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1"}
+{"level":"info","ts":1697041838.550724,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697041838.5509188,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697041843.552338,"msg":"HERTZ: Execute OnShutdownHooks timeout: error=context deadline exceeded"}
+{"level":"debug","ts":1697041848.482157,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697041848.482581,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697041848.482775,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697041848.483039,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697041852.035789,"msg":"mysql.GetVideoList: 时间超出限制"}
+{"level":"info","ts":1697041889.7896461,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697041889.789747,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697041894.791094,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697042083.474117,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697042083.474786,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697042083.474954,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697042083.475235,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697042102.39303,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042102.394521,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \"\": invalid syntax"}
+{"level":"error","ts":1697042111.1543229,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042111.1544151,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \" 0\": invalid syntax"}
+{"level":"error","ts":1697042128.019989,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042128.021405,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \" 0\": invalid syntax"}
+{"level":"error","ts":1697042164.126751,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042164.1276522,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \" 0\": invalid syntax"}
+{"level":"error","ts":1697042175.952547,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042175.952833,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \" 0\": invalid syntax"}
+{"level":"error","ts":1697042187.6637928,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042187.663931,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \" 242\": invalid syntax"}
+{"level":"error","ts":1697042253.137844,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042253.138751,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \" 242\": invalid syntax"}
+{"level":"error","ts":1697042313.772793,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042313.774314,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \"\": invalid syntax"}
+{"level":"error","ts":1697042331.981199,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042331.981316,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \"\": invalid syntax"}
+{"level":"error","ts":1697042434.6822882,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042434.6833549,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \"\": invalid syntax"}
+{"level":"info","ts":1697042591.5344,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697042591.535455,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697042596.5362072,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697042601.558741,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697042601.559199,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697042601.559357,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697042601.5596302,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697042605.7309818,"msg":"service.Feed: 解析请求失败"}
+{"level":"error","ts":1697042605.731122,"msg":"controller.Feed: 业务逻辑处理失败strconv.ParseInt: parsing \"2023-10-12 00:43:25\": invalid syntax"}
+{"level":"info","ts":1697042645.9577742,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697042645.957925,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697042650.9591758,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697042742.536552,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697042742.537251,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697042742.5373912,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697042742.537536,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"info","ts":1697042952.838816,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697042952.8399282,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697042957.8407848,"msg":"HERTZ: Execute OnShutdownHooks finish"}
