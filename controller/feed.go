@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"douyin/models"
+	"douyin/response"
 	"douyin/service"
 	"strconv"
 	"time"
@@ -27,5 +28,5 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 返回结果
-	ctx.JSON(consts.StatusOK, resp)
+	response.Success(ctx, resp)
 }
