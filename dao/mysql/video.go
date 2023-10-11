@@ -12,7 +12,7 @@ import (
 func GetVideoList(latestTime int64, count int) (videoList []*response.VideoResponse, err error) {
 	// 查询数据库
 	var dVideoList []*models.Video
-	err = db.Debug().Where("upload_time <= ?", time.Unix(latestTime, 0)).Order("upload_time DESC").Limit(count).Find(&dVideoList).Error
+	err = db.Where("upload_time <= ?", time.Unix(latestTime, 0)).Order("upload_time DESC").Limit(count).Find(&dVideoList).Error
 	if err != nil {
 		hlog.Error("mysql.GetVideoList: 查询数据库失败")
 		return nil, err
