@@ -19,7 +19,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	err := ctx.Bind(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)
-		hlog.Error("controller.Feed: 参数解析失败", err)
+		hlog.Error("controller.Feed: 参数解析失败, err: ", err)
 		return
 	}
 
@@ -27,7 +27,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	resp, err := service.Feed(req)
 	if err != nil {
 		response.Error(ctx, response.CodeServerBusy)
-		hlog.Error("controller.Feed: 业务逻辑处理失败", err)
+		hlog.Error("controller.Feed: 业务逻辑处理失败, err: ", err)
 		return
 	}
 

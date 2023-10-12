@@ -12,6 +12,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/hertz-contrib/logger/zap v1.1.0
 	github.com/spf13/viper v1.17.0
+	golang.org/x/crypto v0.13.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/gorm v1.25.5

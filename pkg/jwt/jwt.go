@@ -8,11 +8,15 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-var jwtKey = []byte(config.Conf.JwtKey)
-var ErrInvalidToken = errors.New("invalid token")
+var (
+	jwtKey          = []byte(config.Conf.JwtKey)
+	ErrInvalidToken = errors.New("invalid token")
+)
 
-const issuer = "chuxin"
-const tokenDuration = time.Hour * 24
+const (
+	issuer        = "chuxin"
+	tokenDuration = time.Hour * 24
+)
 
 type Claims struct {
 	UserID int64
