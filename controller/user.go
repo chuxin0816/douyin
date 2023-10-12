@@ -40,7 +40,35 @@ func Register(c context.Context, ctx *app.RequestContext) {
 }
 
 func Login(c context.Context, ctx *app.RequestContext) {
-	hlog.Debug("controller.Login: 登录成功")
+	// 获取参数
+	req := &models.UserRequest{}
+	err := ctx.BindAndValidate(req)
+	if err != nil {
+		response.Error(ctx, response.CodeInvalidParam)
+		hlog.Error("controller.Login: 参数校验失败, err: ", err)
+		return
+	}
+
+	// 业务逻辑处理
+	resp, err := service.Login(req)
+	if err != nil {
+		if errors.Is(err, mysql.ErrUserNotExist) {
+			response.Error(ctx, response.CodeUserNotExist)
+			hlog.Error("controller.Login: 用户不存在")
+			return
+		}
+		if errors.Is(err, mysql.ErrPassword) {
+			response.Error(ctx, response.CodeInvalidPassword)
+			hlog.Error("controller.Login: 密码错误")
+			return
+		}
+		response.Error(ctx, response.CodeServerBusy)
+		hlog.Error("controller.Login: 业务处理失败, err: ", err)
+		return
+	}
+
+	// 返回响应
+	response.Success(ctx, resp)
 }
 
 func UserInfo(c context.Context, ctx *app.RequestContext) {

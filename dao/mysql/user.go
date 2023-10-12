@@ -43,13 +43,14 @@ func GetUserByIDs(ids []string) (users []*response.UserResponse, err error) {
 	return
 }
 
-func CheckUsernameExist(username string) error {
+// GetUserByName 根据用户名查询用户信息, 如果用户不存在则返回nil
+func GetUserByName(username string) *models.User {
 	user := &models.User{}
-	db.Where("name = ?", username).First(user)
-	if user.ID != 0 {
-		return ErrUserExist
+	db.Where("name = ?", username).Find(user)
+	if user.ID == 0 {
+		return nil
 	}
-	return nil
+	return user
 }
 
 func CreateUser(req *models.UserRequest) error {

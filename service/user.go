@@ -18,13 +18,10 @@ var (
 
 func Register(req *models.UserRequest) (*response.RegisterResponse, error) {
 	// 查询用户是否已存在
-	err := mysql.CheckUsernameExist(req.Username)
-	if err != nil {
-		if errors.Is(err, mysql.ErrUserExist) {
-			return nil, err
-		}
-		hlog.Error("service.Register: 查询用户是否已存在失败")
-		return nil, err
+	user := mysql.GetUserByName(req.Username)
+	if user != nil {
+		hlog.Error("service.Register: 用户已存在")
+		return nil, mysql.ErrUserExist
 	}
 
 	// 生成用户id
@@ -46,7 +43,7 @@ func Register(req *models.UserRequest) (*response.RegisterResponse, error) {
 	req.Password = string(password)
 
 	// 保存用户信息
-	err = mysql.CreateUser(req)
+	mysql.CreateUser(req)
 	if err != nil {
 		hlog.Error("service.Register: 保存用户信息失败")
 		return nil, err
@@ -56,6 +53,39 @@ func Register(req *models.UserRequest) (*response.RegisterResponse, error) {
 	return &response.RegisterResponse{
 		Response: &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
 		UserID:   userID,
+		Token:    token,
+	}, nil
+}
+
+func Login(req *models.UserRequest) (*response.LoginResponse, error) {
+	// 查询用户是否存在
+	user := mysql.GetUserByName(req.Username)
+	if user == nil {
+		hlog.Error("service.Login: 用户不存在")
+		return nil, mysql.ErrUserNotExist
+	}
+
+	// 校验密码
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return nil, mysql.ErrPassword
+		}
+		hlog.Error("service.Login: 校验密码失败")
+		return nil, err
+	}
+
+	// 生成用户token
+	token, err := jwt.GenerateToken(user.ID)
+	if err != nil {
+		hlog.Error("service.Login: 生成用户token失败")
+		return nil, err
+	}
+
+	// 返回响应
+	return &response.LoginResponse{
+		Response: &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
+		UserID:   user.ID,
 		Token:    token,
 	}, nil
 }

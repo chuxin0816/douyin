@@ -650,3 +650,51 @@
 {"level":"debug","ts":1697112751.310339,"msg":"controller.Login: 登录成功"}
 {"level":"debug","ts":1697112751.4915578,"msg":"controller.Login: 登录成功"}
 {"level":"debug","ts":1697112751.6817632,"msg":"controller.Login: 登录成功"}
+{"level":"debug","ts":1697115261.1293771,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697115261.134474,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697115261.1345,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697115261.1345122,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697115261.1345222,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697115261.134646,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697115261.1347919,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697115436.958736,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697115451.198019,"msg":"controller.Register: 用户已存在"}
+{"level":"debug","ts":1697115457.3778691,"msg":"controller.UserInfo: 获取用户信息成功"}
+{"level":"debug","ts":1697116025.560166,"msg":"controller.Login: 登录成功"}
+{"level":"debug","ts":1697116030.5021162,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697116035.9692469,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697116043.6419861,"msg":"controller.Login: 登录成功"}
+{"level":"debug","ts":1697116054.456726,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697116062.820172,"msg":"controller.Login: 登录成功"}
+{"level":"error","ts":1697116068.26842,"msg":"controller.Register: 用户已存在"}
+{"level":"debug","ts":1697116075.710093,"msg":"controller.UserInfo: 获取用户信息成功"}
+{"level":"debug","ts":1697124842.588059,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697124842.5888839,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697124842.58892,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697124842.5889401,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697124842.5889568,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697124842.589153,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697124842.5894349,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697124866.083921,"msg":"service.Register: 用户已存在"}
+{"level":"error","ts":1697124866.0847769,"msg":"controller.Register: 用户已存在"}
+{"level":"error","ts":1697124878.1877482,"msg":"service.Login: 用户不存在"}
+{"level":"error","ts":1697124878.187844,"msg":"controller.Login: 用户不存在"}
+{"level":"error","ts":1697124884.985017,"msg":"controller.Login: 业务处理失败, err: 密码错误"}
+{"level":"debug","ts":1697124946.208278,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697124946.2098088,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697124946.209832,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697124946.209849,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697124946.209864,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697124946.209993,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697124946.210123,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697124948.81885,"msg":"controller.Login: 密码错误"}
+{"level":"debug","ts":1697124974.214603,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697124974.215035,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697124974.21506,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697124974.215074,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697124974.215086,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697124974.215242,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697124974.2154508,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697124980.0459478,"msg":"controller.Login: 密码错误"}
+{"level":"error","ts":1697124989.56127,"msg":"service.Register: 用户已存在"}
+{"level":"error","ts":1697124989.561641,"msg":"controller.Register: 用户已存在"}

@@ -21,3 +21,10 @@ type RegisterResponse struct {
 	UserID int64  `json:"user_id"` // 用户id
 	Token  string `json:"token"`   // 用户鉴权token
 }
+
+// LoginResponse 登录响应
+type LoginResponse struct {
+	*Response
+	UserID int64  `json:"user_id"` // 用户id
+	Token  string `json:"token"`   // 用户鉴权token
+}
