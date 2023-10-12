@@ -9,3 +9,8 @@ type UserRequest struct {
 	Username string `query:"username" vd:"0<len($)&&len($)<33"` // 注册用户名，最长32个字符
 	Password string `query:"password" vd:"5<len($)&&len($)<33"` // 密码，最长32个字符
 }
+
+type UserInfoRequest struct {
+	UserID int64  `query:"user_id" vd:"$>0"`    // 用户id
+	Token  string `query:"token" vd:"len($)>0"` // 用户登录状态下设置
+}

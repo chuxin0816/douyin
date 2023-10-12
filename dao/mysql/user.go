@@ -3,17 +3,19 @@ package mysql
 import (
 	"douyin/models"
 	"douyin/response"
-	"errors"
 	"strings"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-var (
-	ErrUserExist    = errors.New("用户已存在")
-	ErrUserNotExist = errors.New("用户不存在")
-	ErrPassword     = errors.New("密码错误")
-)
+func GetUserByID(id string) *models.User {
+	user := &models.User{}
+	db.Where("id = ?", id).Find(user)
+	if user.ID == 0 {
+		return nil
+	}
+	return user
+}
 
 func GetUserByIDs(ids []string) (users []*response.UserResponse, err error) {
 	// 查询数据库
@@ -26,19 +28,7 @@ func GetUserByIDs(ids []string) (users []*response.UserResponse, err error) {
 
 	// 将models.User转换为response.UserResponse
 	for _, dUser := range dUsers {
-		users = append(users, &response.UserResponse{
-			Avatar:          dUser.Avatar,
-			BackgroundImage: dUser.BackgroundImage,
-			FavoriteCount:   dUser.FavoriteCount,
-			FollowCount:     dUser.FollowCount,
-			FollowerCount:   dUser.FollowerCount,
-			ID:              dUser.ID,
-			IsFollow:        false, // 需要登录后通过用户id查询数据库判断
-			Name:            dUser.Name,
-			Signature:       dUser.Signature,
-			TotalFavorited:  dUser.TotalFavorited,
-			WorkCount:       dUser.WorkCount,
-		})
+		users = append(users, response.ToUserResponse(dUser))
 	}
 	return
 }
