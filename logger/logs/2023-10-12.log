@@ -215,3 +215,159 @@
 {"level":"info","ts":1697045584.5069351,"msg":"HERTZ: Received signal: interrupt\n"}
 {"level":"info","ts":1697045584.507143,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
 {"level":"info","ts":1697045584.507354,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697045809.79619,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697045809.796662,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697045809.796774,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697045809.79698,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697045842.391319,"msg":"mysql.GetVideoList: 时间超出限制"}
+{"level":"error","ts":1697046164.261044,"msg":"mysql.GetVideoList: 时间超出限制"}
+{"level":"info","ts":1697046372.6267378,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697046372.6269078,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697046372.627139,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697075295.348062,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697075295.3491688,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697075295.3493068,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"debug","ts":1697075396.006928,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697075396.0074291,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697075396.0075772,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697075396.0077271,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697075457.29523,"msg":"mysql.GetVideoList: 时间超出限制"}
+{"level":"info","ts":1697075615.2959301,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697075615.296184,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697075620.296915,"msg":"HERTZ: Execute OnShutdownHooks timeout: error=context deadline exceeded"}
+{"level":"debug","ts":1697075722.939463,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697075722.940435,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697075722.940625,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697075722.9408572,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"info","ts":1697076036.544043,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697076036.54426,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697076041.544994,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697076091.3270059,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076091.328116,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076091.328295,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076091.3285592,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"info","ts":1697076265.274208,"msg":"HERTZ: Received signal: interrupt\n"}
+{"level":"info","ts":1697076265.275431,"msg":"HERTZ: Begin graceful shutdown, wait at most num=5 seconds..."}
+{"level":"info","ts":1697076270.27691,"msg":"HERTZ: Execute OnShutdownHooks finish"}
+{"level":"debug","ts":1697076273.774558,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076273.775425,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076273.775539,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076273.775684,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697076310.402965,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076310.4032881,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076310.4034162,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076310.403573,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697076385.494517,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697076455.754709,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076455.755615,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076455.755768,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076455.755896,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697076641.523871,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076641.524676,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076641.5247831,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076641.524941,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697076653.990436,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697076706.602232,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076706.602713,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076706.6028302,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076706.602973,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697076727.211703,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697076743.180114,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076743.180715,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076743.180845,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076743.1809762,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697076754.518498,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076754.518912,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076754.518995,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076754.519093,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697076777.046876,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076777.0476348,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076777.047887,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076777.0481138,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697076786.646343,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076786.6465988,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076786.64671,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076786.646827,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697076819.893059,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076819.893557,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076819.893755,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076819.894037,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697076891.025205,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076891.025934,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076891.0262709,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076891.0266082,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697076955.4609962,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076955.461503,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076955.461731,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076955.461921,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697076980.653271,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697076980.653781,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697076980.6538858,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697076980.654001,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697077025.370802,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697077097.12976,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077097.13017,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077097.130335,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077097.130527,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697077112.047161,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077112.0476,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077112.0477161,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077112.0478451,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697077123.094929,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077123.095744,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077123.095843,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077123.095998,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697077167.240184,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077167.240798,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077167.240949,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077167.241153,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697077212.434277,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077212.434732,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077212.434925,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077212.43518,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697077214.123446,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697077265.0216022,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077265.0221272,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077265.022305,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077265.022519,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697077268.5704582,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697077305.967295,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077305.9677188,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077305.9678888,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077305.968201,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697077327.79292,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077327.793567,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077327.793659,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077327.793776,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697077344.2775471,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697077359.3085198,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077359.308792,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077359.3089018,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077359.309031,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697077362.397579,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697077468.195523,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697077478.1425128,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077478.142844,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077478.142976,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077478.143148,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697077484.0497742,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697077500.490091,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077500.490446,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077500.4905941,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077500.49079,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697077504.123126,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697077520.047986,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697077528.0930429,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697077567.3020968,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697077584.4046621,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697077603.656841,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697077611.7470238,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697077619.8354402,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697077743.922894,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077743.923351,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077743.923469,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077743.923711,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697077751.598068,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697077751.5985558,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed              --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"info","ts":1697077751.598838,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697077751.599091,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}

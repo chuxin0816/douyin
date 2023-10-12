@@ -13,7 +13,7 @@ func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoR
 	// 查询数据库
 	year := latestTime.Year()
 	if year < 1 || year > 9999 {
-		hlog.Error("mysql.GetVideoList: 时间超出限制")
+		hlog.Error("mysql.GetVideoList: 参数时间超出限制")
 		latestTime = time.Now()
 	}
 	var dVideoList []*models.Video

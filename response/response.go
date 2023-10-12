@@ -17,6 +17,6 @@ func Error(ctx *app.RequestContext, code ResCode, msg string) {
 }
 
 type Response struct {
-	StatusCode ResCode `json:"status_code"` // 状态码，0-成功，其他值-失败
-	StatusMsg  string  `json:"status_msg"`  // 返回状态描述
+	StatusCode ResCode `json:"status_code"`          // 状态码，0-成功，其他值-失败
+	StatusMsg  string  `json:"status_msg,omitempty"` // 返回状态描述
 }
