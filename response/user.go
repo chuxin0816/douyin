@@ -1,5 +1,6 @@
 package response
 
+// UserResponse 用户响应
 type UserResponse struct {
 	Avatar          string `json:"avatar"`           // 用户头像
 	BackgroundImage string `json:"background_image"` // 用户个人页顶部大图
@@ -12,4 +13,11 @@ type UserResponse struct {
 	Signature       string `json:"signature"`        // 个人简介
 	TotalFavorited  string `json:"total_favorited"`  // 获赞数量
 	WorkCount       int64  `json:"work_count"`       // 作品数
+}
+
+// RegisterResponse 注册响应
+type RegisterResponse struct {
+	*Response
+	UserID int64  `json:"user_id"` // 用户id
+	Token  string `json:"token"`   // 用户鉴权token
 }

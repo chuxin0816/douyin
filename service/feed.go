@@ -31,7 +31,7 @@ func Feed(req *models.FeedRequest) (resp *response.FeedResponse, err error) {
 		return nil, err
 	}
 	return &response.FeedResponse{
-		Response:  &response.Response{StatusCode: response.CodeSuccess},
+		Response:  &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
 		VideoList: videoList,
 		NextTime:  time.Now().Unix(),
 	}, nil
