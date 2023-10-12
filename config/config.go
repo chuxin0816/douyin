@@ -9,8 +9,9 @@ import (
 var Conf = &Config{}
 
 type Config struct {
-	Version      string `mapstructure:"version"`
 	JwtKey       string `mapstructure:"jwt_key"`
+	StartTime    string `mapstructure:"start_time"`
+	MachineID    int64  `mapstructure:"machine_id"`
 	*HertzConfig `mapstructure:"hertz"`
 	*LogConfig   `mapstructure:"log"`
 	*MysqlConfig `mapstructure:"mysql"`
