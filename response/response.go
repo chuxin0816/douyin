@@ -9,11 +9,8 @@ func Success(ctx *app.RequestContext, data any) {
 	ctx.JSON(consts.StatusOK, data)
 }
 
-func Error(ctx *app.RequestContext, code ResCode, msg string) {
-	if len(msg) == 0 {
-		msg = code.Msg()
-	}
-	ctx.JSON(consts.StatusOK, &Response{StatusCode: code, StatusMsg: msg})
+func Error(ctx *app.RequestContext, code ResCode) {
+	ctx.JSON(consts.StatusOK, &Response{StatusCode: code, StatusMsg: code.Msg()})
 }
 
 type Response struct {
