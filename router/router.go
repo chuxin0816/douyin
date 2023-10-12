@@ -25,9 +25,12 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 
 	// basic apis
 	apiRouter.GET("/feed/", controller.Feed)
-	apiRouter.GET("/user/", controller.UserInfo)
-	apiRouter.POST("/user/register/", controller.Register)
-	apiRouter.POST("/user/login/", controller.Login)
+	userRouter := apiRouter.Group("/user")
+	{
+		userRouter.GET("/", controller.UserInfo)
+		userRouter.POST("/register/", controller.Register)
+		userRouter.POST("/login/", controller.Login)
+	}
 	// apiRouter.POST("/publish/action", controller.Publish)
 	// apiRouter.GET("/publish/list", controller.PublishList)
 
