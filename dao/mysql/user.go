@@ -8,7 +8,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-func GetUserByID(id string) *models.User {
+func GetUserByID(id int64) *models.User {
 	user := &models.User{}
 	db.Where("id = ?", id).Find(user)
 	if user.ID == 0 {
@@ -43,8 +43,9 @@ func GetUserByName(username string) *models.User {
 	return user
 }
 
-func CreateUser(req *models.UserRequest) error {
+func CreateUser(req *models.UserRequest, userID int64) error {
 	user := &models.User{
+		ID:       userID,
 		Name:     req.Username,
 		Password: req.Password,
 	}

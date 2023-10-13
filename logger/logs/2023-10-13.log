@@ -40,3 +40,381 @@
 {"level":"error","ts":1697128231.567893,"msg":"controller.Login: 密码错误"}
 {"level":"error","ts":1697128235.362852,"msg":"service.Login: 用户不存在"}
 {"level":"error","ts":1697128235.3630662,"msg":"controller.Login: 用户不存在"}
+{"level":"debug","ts":1697129645.417096,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697129645.41749,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697129645.417512,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697129645.417526,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697129645.4175391,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697129645.4176729,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697129645.417846,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697129653.70788,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697129660.322078,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697129680.601771,"msg":"controller.Register: 注册成功"}
+{"level":"error","ts":1697129681.740659,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697129681.740916,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697129820.3129642,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697129820.313177,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697129820.313201,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697129820.313216,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697129820.31323,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697129820.313387,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697129820.3135202,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697130107.398315,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697130107.399062,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697130107.399078,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697130107.3990872,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697130107.399096,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697130107.399211,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697130107.39936,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697130142.280638,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697130153.005122,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697130153.0052211,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697162650.348437,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697162650.349235,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697162650.349264,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697162650.349281,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697162650.3492968,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697162650.349491,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697162650.349797,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697162821.918816,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697162840.271897,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697162840.272628,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697162840.2726521,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697162840.272663,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697162840.272672,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697162840.272768,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697162840.2729301,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697162847.5819762,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697162867.638197,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697162867.638418,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697162947.4720461,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697163083.189492,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697163083.189843,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697163083.189873,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697163083.189897,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697163083.189919,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697163083.19014,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697163083.190332,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697163123.075479,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697163123.075737,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697163123.075756,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697163123.075768,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697163123.075779,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697163123.075895,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697163123.0760489,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697163123.500871,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697163137.149492,"msg":"service.Register: 插入数据成功"}
+{"level":"debug","ts":1697163137.149648,"msg":"service.Register: response.userID: 1120453968007168"}
+{"level":"debug","ts":1697163138.381542,"msg":"service.UserInfo: request.userID: 1120453968007168"}
+{"level":"error","ts":1697163138.3850791,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697163138.385243,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697163469.1425679,"msg":"service.UserInfo: request.userID: 93429234984"}
+{"level":"debug","ts":1697163538.332924,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697163538.333201,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697163538.3332212,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697163538.333237,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697163538.3332531,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697163538.3334231,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697163538.333636,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697163573.7033541,"msg":"service.UserInfo: request.userID: 93429234998"}
+{"level":"debug","ts":1697163576.354516,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697163586.079542,"msg":"service.Register: 插入数据成功"}
+{"level":"debug","ts":1697163586.079656,"msg":"service.Register: response.userID: 1122336933679104"}
+{"level":"debug","ts":1697163587.1094348,"msg":"service.UserInfo: request.userID: 1122336933679104"}
+{"level":"error","ts":1697163587.1131,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697163587.1132789,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164377.8722072,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697164377.872779,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697164377.8728,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697164377.8728168,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697164377.872832,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697164377.87295,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697164377.873141,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697164382.356118,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697164393.356267,"msg":"service.Login: 用户不存在"}
+{"level":"error","ts":1697164393.356622,"msg":"controller.Login: 用户不存在"}
+{"level":"debug","ts":1697164399.250635,"msg":"mysql.CreateUser RowsAffected: 1"}
+{"level":"debug","ts":1697164399.2507021,"msg":"service.Register: 插入数据成功"}
+{"level":"debug","ts":1697164399.250779,"msg":"service.Register: response.userID: 1125747594891264"}
+{"level":"debug","ts":1697164400.370125,"msg":"service.UserInfo: request.userID: 1125747594891264"}
+{"level":"error","ts":1697164400.373655,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164400.373803,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164506.684621,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697164506.6857972,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697164506.6858182,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697164506.685832,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697164506.685845,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697164506.686006,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697164506.686226,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697164510.429847,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697164536.109313,"msg":"mysql.CreateUser RowsAffected: 1"}
+{"level":"debug","ts":1697164536.109378,"msg":"service.Register: 插入数据成功"}
+{"level":"debug","ts":1697164536.109455,"msg":"service.Register: response.userID: 1126321665085440"}
+{"level":"debug","ts":1697164537.206746,"msg":"service.UserInfo: request.userID: 1126321665085440"}
+{"level":"error","ts":1697164538.211033,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164538.211276,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164551.068034,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697164551.068314,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697164551.068341,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697164551.0683572,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697164551.068371,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697164551.0685382,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697164551.0687292,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697164553.3720489,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697164563.694935,"msg":"mysql.CreateUser RowsAffected: 1"}
+{"level":"debug","ts":1697164563.695031,"msg":"service.Register: 插入数据成功"}
+{"level":"debug","ts":1697164563.695102,"msg":"service.Register: response.userID: 1126437364961280"}
+{"level":"debug","ts":1697164564.9244301,"msg":"service.UserInfo: request.userID: 1126437364961280"}
+{"level":"error","ts":1697164574.927768,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164574.928024,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164587.725924,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697164587.726424,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697164587.726447,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697164587.726466,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697164587.7264798,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697164587.726687,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697164587.726848,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697164590.090969,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697164590.091271,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697164590.0912929,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697164590.0913112,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697164590.0913239,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697164590.0915022,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697164590.091695,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697164593.1528552,"msg":"service.UserInfo: request.userID: 93429235002"}
+{"level":"debug","ts":1697164595.4593978,"msg":"service.UserInfo: request.userID: 93429235002"}
+{"level":"debug","ts":1697164604.97742,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697164608.175683,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697164621.349466,"msg":"mysql.CreateUser RowsAffected: 1"}
+{"level":"debug","ts":1697164621.3495429,"msg":"service.Register: 插入数据成功"}
+{"level":"debug","ts":1697164621.349579,"msg":"service.Register: response.userID: 1126679170781184"}
+{"level":"debug","ts":1697164622.390857,"msg":"service.UserInfo: request.userID: 1126679170781184"}
+{"level":"error","ts":1697164627.395734,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164627.3960462,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164686.073204,"msg":"mysql.CreateUser RowsAffected: 1"}
+{"level":"debug","ts":1697164686.073269,"msg":"service.Register: 插入数据成功"}
+{"level":"debug","ts":1697164686.0733051,"msg":"service.Register: response.userID: 1126950626136064"}
+{"level":"debug","ts":1697164743.7692878,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697164743.7697222,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697164743.769737,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697164743.769747,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697164743.7697542,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697164743.769859,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697164743.76999,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697164811.876768,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697164811.877098,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697164811.8771179,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697164811.877131,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697164811.8771431,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697164811.877271,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697164811.877449,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697164839.900584,"msg":"service.UserInfo: request.userID: 93429234984"}
+{"level":"debug","ts":1697164845.972605,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164845.975119,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164845.975276,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164855.902427,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"error","ts":1697164867.3634508,"msg":"service.Login: 用户不存在"}
+{"level":"error","ts":1697164867.3637068,"msg":"controller.Login: 用户不存在"}
+{"level":"debug","ts":1697164870.7508721,"msg":"mysql.CreateUser RowsAffected: 1"}
+{"level":"debug","ts":1697164870.7509482,"msg":"service.Register: 插入数据成功"}
+{"level":"debug","ts":1697164870.751014,"msg":"service.Register: response.userID: 1"}
+{"level":"debug","ts":1697164871.847048,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164871.8503602,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164871.850494,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164872.609078,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164872.6113338,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164872.6114318,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164873.682842,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164873.68526,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164873.685364,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164874.377666,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164874.3802009,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164874.38032,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164875.031174,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164875.0334332,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164875.033532,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164875.6642141,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164875.666371,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164875.6664739,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164876.369927,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164876.371835,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164876.3719301,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164876.9175239,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164876.919753,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164876.919893,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164877.512956,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164877.5140748,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164877.514119,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164878.058743,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164878.061005,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164878.061093,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164878.73144,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164878.733611,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164878.733703,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164879.394895,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164879.396214,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164879.396263,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164880.050377,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164880.052495,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164880.052587,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164880.707617,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164880.709145,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164880.709206,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164881.278869,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164881.2801101,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164881.280159,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164881.872104,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164881.874374,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164881.874461,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164882.509374,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164882.51177,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164882.511839,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164883.0641139,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164883.0754418,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164883.0755358,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164883.758759,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164883.75998,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164883.760028,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164884.4373279,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164884.4387798,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164884.438932,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164885.116262,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164885.118455,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164885.1185448,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164885.755571,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164885.75811,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164885.7582269,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164886.41788,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164886.419096,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164886.4191418,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164887.087594,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164887.089565,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164887.089675,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164887.7588449,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164887.762523,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164887.762629,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164888.470237,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164888.471304,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164888.471363,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164889.141,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164889.142383,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164889.142436,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164889.771035,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164889.773035,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164889.773128,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164890.48739,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164890.489048,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164890.489123,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164891.217227,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164891.219399,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164891.21949,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164891.8597991,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164891.861084,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164891.86114,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164892.618167,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164892.619968,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164892.62005,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164893.31404,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164893.316182,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164893.316273,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164894.058273,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164894.0602,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164894.0602958,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164894.718818,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164894.7201018,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164894.72017,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164895.456528,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164895.458862,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164895.458976,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164896.178187,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164896.180464,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164896.180587,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164896.930272,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164896.932416,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164896.93251,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164897.723009,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164897.7241821,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164897.724236,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164898.4709098,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164898.471909,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164898.471951,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164899.2241201,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164899.2254562,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164899.2255418,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164936.646949,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697164936.6489222,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697164936.648941,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697164936.648952,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697164936.64896,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697164936.649046,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697164936.64917,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697164941.260573,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697164977.597406,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164977.601635,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164977.60177,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164979.1482759,"msg":"mysql.CreateUser RowsAffected: 1"}
+{"level":"debug","ts":1697164979.148333,"msg":"service.Register: 插入数据成功"}
+{"level":"debug","ts":1697164979.148422,"msg":"service.Register: response.userID: 1"}
+{"level":"debug","ts":1697164980.2823732,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164980.285485,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164980.2856529,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164981.302759,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164981.304082,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164981.3041549,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164981.983048,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164981.98525,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164981.98535,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164982.709623,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164982.710853,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164982.710902,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164983.352007,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164983.3554811,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164983.3555799,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164984.018516,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164984.019766,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164984.0198212,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164984.6889238,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164984.6907551,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164984.690861,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164985.430778,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164985.431968,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164985.432022,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164986.1318688,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164986.134073,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164986.1342,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164986.904578,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164986.9070048,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164986.907074,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164987.48057,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164987.4820778,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164987.482163,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164988.15202,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164988.154185,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164988.1542761,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164988.885036,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164988.8871171,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164988.887198,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164989.610719,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164989.613045,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164989.6131399,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164990.214219,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164990.216386,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164990.216477,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697164990.79643,"msg":"service.UserInfo: request.userID: 1"}
+{"level":"error","ts":1697164990.798702,"msg":"service.UserInfo: 用户不存在"}
+{"level":"error","ts":1697164990.798796,"msg":"controller.UserInfo: 用户不存在"}
+{"level":"debug","ts":1697165325.733737,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697165325.735253,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697165325.735269,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697165325.7352781,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697165325.735287,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697165325.73537,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697165325.735508,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697165535.8667068,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697165535.8695428,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697165535.86958,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.UserInfo (num=2 handlers)"}
+{"level":"debug","ts":1697165535.8696,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.Register (num=2 handlers)"}
+{"level":"debug","ts":1697165535.869618,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.Login (num=2 handlers)"}
+{"level":"info","ts":1697165535.869856,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697165535.8701,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697165710.070839,"msg":"mysql.GetVideoList: 参数时间超出限制"}

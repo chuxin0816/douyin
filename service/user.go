@@ -7,7 +7,6 @@ import (
 	"douyin/pkg/snowflake"
 	"douyin/response"
 	"errors"
-	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"golang.org/x/crypto/bcrypt"
@@ -22,7 +21,7 @@ var (
 
 func UserInfo(req *models.UserInfoRequest) (*response.UserInfoResponse, error) {
 	// 查询用户信息
-	user := mysql.GetUserByID(strconv.FormatInt(req.UserID, 10))
+	user := mysql.GetUserByID(req.UserID)
 	if user == nil {
 		hlog.Error("service.UserInfo: 用户不存在")
 		return nil, ErrUserNotExist
@@ -55,7 +54,7 @@ func Register(req *models.UserRequest) (*response.RegisterResponse, error) {
 	req.Password = string(password)
 
 	// 保存用户信息
-	mysql.CreateUser(req)
+	mysql.CreateUser(req, userID)
 	if err != nil {
 		hlog.Error("service.Register: 保存用户信息失败")
 		return nil, err
