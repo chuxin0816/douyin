@@ -27,12 +27,18 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	apiRouter.GET("/feed/", controller.Feed)
 	userRouter := apiRouter.Group("/user")
 	{
-		userRouter.GET("/", controller.UserInfo)
-		userRouter.POST("/register/", controller.Register)
-		userRouter.POST("/login/", controller.Login)
+		userController := controller.NewUserController()
+		userRouter.GET("/", userController.Info)
+		userRouter.POST("/register/", userController.Register)
+		userRouter.POST("/login/", userController.Login)
 	}
-	// apiRouter.POST("/publish/action", controller.Publish)
-	// apiRouter.GET("/publish/list", controller.PublishList)
+
+	publishRouter := apiRouter.Group("/publish")
+	{
+		publishController := controller.NewPublishController()
+		publishRouter.POST("/action/", publishController.Publish)
+		// publishRouter.GET("/list/", publishController.PublishList)
+	}
 
 	// interaction apis
 	// apiRouter.POST("/favorite/action", controller.FavoriteAction)

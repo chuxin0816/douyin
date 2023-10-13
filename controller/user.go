@@ -11,7 +11,13 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-func UserInfo(c context.Context, ctx *app.RequestContext) {
+type UserController struct{}
+
+func NewUserController() *UserController {
+	return &UserController{}
+}
+
+func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
 	req := &models.UserInfoRequest{}
 	err := ctx.BindAndValidate(req)
@@ -38,7 +44,7 @@ func UserInfo(c context.Context, ctx *app.RequestContext) {
 	response.Success(ctx, resp)
 }
 
-func Register(c context.Context, ctx *app.RequestContext) {
+func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
 	req := &models.UserRequest{}
 	err := ctx.BindAndValidate(req)
@@ -65,7 +71,7 @@ func Register(c context.Context, ctx *app.RequestContext) {
 	response.Success(ctx, resp)
 }
 
-func Login(c context.Context, ctx *app.RequestContext) {
+func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
 	req := &models.UserRequest{}
 	err := ctx.BindAndValidate(req)
