@@ -418,3 +418,21 @@
 {"level":"info","ts":1697165535.869856,"msg":"HERTZ: Using network library=netpoll"}
 {"level":"info","ts":1697165535.8701,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
 {"level":"debug","ts":1697165710.070839,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697202091.9117298,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697202091.914825,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697202091.914853,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.(*UserController).Info-fm (num=2 handlers)"}
+{"level":"debug","ts":1697202091.914869,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.(*UserController).Register-fm (num=2 handlers)"}
+{"level":"debug","ts":1697202091.914882,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.(*UserController).Login-fm (num=2 handlers)"}
+{"level":"debug","ts":1697202091.914895,"msg":"HERTZ: Method=POST   absolutePath=/douyin/publish/action/   --> handlerName=douyin/controller.(*PublishController).Publish-fm (num=2 handlers)"}
+{"level":"info","ts":1697202091.915068,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697202091.915374,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697202160.756918,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697210060.764909,"msg":"mysql.GetVideoList: 参数时间超出限制"}
+{"level":"debug","ts":1697210090.471286,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697210090.473671,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697210090.4736938,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.(*UserController).Info-fm (num=2 handlers)"}
+{"level":"debug","ts":1697210090.473706,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.(*UserController).Register-fm (num=2 handlers)"}
+{"level":"debug","ts":1697210090.473716,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.(*UserController).Login-fm (num=2 handlers)"}
+{"level":"debug","ts":1697210090.473727,"msg":"HERTZ: Method=POST   absolutePath=/douyin/publish/action/   --> handlerName=douyin/controller.(*PublishController).Publish-fm (num=2 handlers)"}
+{"level":"info","ts":1697210090.473897,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697210090.474122,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}

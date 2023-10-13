@@ -15,7 +15,7 @@ var (
 
 const (
 	issuer        = "chuxin"
-	tokenDuration = time.Hour * 24
+	tokenDuration = time.Hour * 24 * 30
 )
 
 type Claims struct {
