@@ -5,6 +5,7 @@ import (
 	"douyin/dao/mysql"
 	"douyin/dao/redis"
 	"douyin/logger"
+	"douyin/pkg/oss"
 	"douyin/pkg/snowflake"
 	"douyin/router"
 	"fmt"
@@ -37,6 +38,11 @@ func main() {
 	// 初始化雪花算法
 	if err := snowflake.Init(config.Conf.StartTime, config.Conf.MachineID); err != nil {
 		hlog.Error("snowflake init failed, err: ", err)
+		return
+	}
+	// 初始化oss
+	if err := oss.Init(config.Conf.OssConfig); err != nil {
+		hlog.Error("oss init failed, err: ", err)
 		return
 	}
 	// 注册路由

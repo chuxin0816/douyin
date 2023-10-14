@@ -2,6 +2,7 @@ package service
 
 import (
 	"douyin/pkg/ffmpeg"
+	"douyin/pkg/oss"
 	"douyin/response"
 	"mime/multipart"
 	"os"
@@ -39,6 +40,11 @@ func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHe
 	}
 
 	// 上传视频和封面到oss
+	err := oss.UploadFile(data.Filename, coverName)
+	if err != nil {
+		hlog.Error("service.PublishAction: 上传文件失败, err: ", err)
+		return nil, err
+	}
 
 	// 删除本地视频和封面
 	go func() {

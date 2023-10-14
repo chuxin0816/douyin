@@ -363,3 +363,24 @@
 {"level":"debug","ts":1697262463.1336908,"msg":"HERTZ: Method=POST   absolutePath=/douyin/publish/action/   --> handlerName=douyin/controller.(*PublishController).Action-fm (num=2 handlers)"}
 {"level":"info","ts":1697262463.133878,"msg":"HERTZ: Using network library=netpoll"}
 {"level":"info","ts":1697262463.133996,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"debug","ts":1697276230.597127,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697276230.598787,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697276230.5988219,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.(*UserController).Info-fm (num=2 handlers)"}
+{"level":"debug","ts":1697276230.5988429,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.(*UserController).Register-fm (num=2 handlers)"}
+{"level":"debug","ts":1697276230.5988579,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.(*UserController).Login-fm (num=2 handlers)"}
+{"level":"debug","ts":1697276230.5988748,"msg":"HERTZ: Method=POST   absolutePath=/douyin/publish/action/   --> handlerName=douyin/controller.(*PublishController).Action-fm (num=2 handlers)"}
+{"level":"info","ts":1697276230.599046,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697276230.599276,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697276242.919143,"msg":"oss.UploadFile: 上传视频失败oss: service returned error: StatusCode=404, ErrorCode=NoSuchBucket, ErrorMessage=\"The specified bucket does not exist.\", RequestId=652A61520E28CD34360595F3, Ec=0015-00000101"}
+{"level":"error","ts":1697276242.920064,"msg":"service.PublishAction: 上传文件失败, err: oss: service returned error: StatusCode=404, ErrorCode=NoSuchBucket, ErrorMessage=\"The specified bucket does not exist.\", RequestId=652A61520E28CD34360595F3, Ec=0015-00000101"}
+{"level":"warn","ts":1697276313.390081,"msg":"config file changed"}
+{"level":"debug","ts":1697276316.75709,"msg":"HERTZ: Method=GET    absolutePath=/ping                     --> handlerName=douyin/router.Setup.func1 (num=2 handlers)"}
+{"level":"debug","ts":1697276316.759916,"msg":"HERTZ: Method=GET    absolutePath=/douyin/feed/             --> handlerName=douyin/controller.Feed (num=2 handlers)"}
+{"level":"debug","ts":1697276316.759939,"msg":"HERTZ: Method=GET    absolutePath=/douyin/user/             --> handlerName=douyin/controller.(*UserController).Info-fm (num=2 handlers)"}
+{"level":"debug","ts":1697276316.7599502,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/register/    --> handlerName=douyin/controller.(*UserController).Register-fm (num=2 handlers)"}
+{"level":"debug","ts":1697276316.759958,"msg":"HERTZ: Method=POST   absolutePath=/douyin/user/login/       --> handlerName=douyin/controller.(*UserController).Login-fm (num=2 handlers)"}
+{"level":"debug","ts":1697276316.759966,"msg":"HERTZ: Method=POST   absolutePath=/douyin/publish/action/   --> handlerName=douyin/controller.(*PublishController).Action-fm (num=2 handlers)"}
+{"level":"info","ts":1697276316.760055,"msg":"HERTZ: Using network library=netpoll"}
+{"level":"info","ts":1697276316.7601569,"msg":"HERTZ: HTTP server listening on address=[::]:8888"}
+{"level":"error","ts":1697276336.775362,"msg":"oss.UploadFile: 上传视频失败oss: service returned error: StatusCode=403, ErrorCode=AccessDenied, ErrorMessage=\"You have no right to access this object because of bucket acl.\", RequestId=652A61B0E0DCB935343D7C6F, Ec=0003-00000001"}
+{"level":"error","ts":1697276336.7756622,"msg":"service.PublishAction: 上传文件失败, err: oss: service returned error: StatusCode=403, ErrorCode=AccessDenied, ErrorMessage=\"You have no right to access this object because of bucket acl.\", RequestId=652A61B0E0DCB935343D7C6F, Ec=0003-00000001"}

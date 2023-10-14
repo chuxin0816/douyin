@@ -12,10 +12,18 @@ type Config struct {
 	JwtKey       string `mapstructure:"jwt_key"`
 	StartTime    string `mapstructure:"start_time"`
 	MachineID    int64  `mapstructure:"machine_id"`
+	*OssConfig   `mapstructure:"oss"`
 	*HertzConfig `mapstructure:"hertz"`
 	*LogConfig   `mapstructure:"log"`
 	*MysqlConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
+}
+
+type OssConfig struct {
+	Endpoint        string `mapstructure:"endpoint"`
+	AccessKeyId     string `mapstructure:"access_key_id"`
+	AccessKeySecret string `mapstructure:"access_key_secret"`
+	BucketName      string `mapstructure:"bucket_name"`
 }
 
 type HertzConfig struct {

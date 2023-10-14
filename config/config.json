@@ -6,6 +6,12 @@
     "host": "0.0.0.0",
     "port": 8888
   },
+  "oss": {
+    "endpoint": "oss-cn-shenzhen.aliyuncs.com",
+    "access_key_id": "LTAI5tLBZ8inC2J6f4oLE9cN",
+    "access_key_secret": "tPprAQsfyc0dgWTRJ3fYIrdS1I5Bgm",
+    "bucket_name": "douyin-chuxin"
+  },
   "log": {
     "path": "./logger/logs/",
     "max_size": 20,
