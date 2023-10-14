@@ -29,6 +29,7 @@ func Init(conf *config.OssConfig) error {
 	return err
 }
 
+// UploadFile 上传文件到oss
 func UploadFile(uuidName string) error {
 	// 获取视频封面
 	videoName := uuidName + ".mp4"
@@ -62,9 +63,10 @@ func UploadFile(uuidName string) error {
 	return nil
 }
 
+// GetCoverImage 获取视频第15帧作为封面
 func GetCoverImage(videoName string) (io.Reader, error) {
 	buf := bytes.NewBuffer(nil)
-	err := ffmpeg.Input(videoName).Filter("select", ffmpeg.Args{"gte(n,0)"}).
+	err := ffmpeg.Input(videoName).Filter("select", ffmpeg.Args{"gte(n,15)"}).
 		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
 		WithOutput(buf, nil).
 		Run()

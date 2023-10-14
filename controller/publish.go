@@ -47,6 +47,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 		hlog.Error("controller.Action: jwt解析出错, err: ", err)
 		return
 	}
+
 	// 业务逻辑处理
 	resp, err := service.PublishAction(ctx, userID, req.Data, req.Title)
 	if err != nil {
