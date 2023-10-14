@@ -24,8 +24,8 @@ go.work
 .vscode
 
 # config file
-config.yaml
-config.json
+**/config.yaml
+**/config.json
 
 # log file
 *.log
