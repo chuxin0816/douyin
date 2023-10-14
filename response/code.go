@@ -9,6 +9,7 @@ const (
 	CodeUserExist
 	CodeUserNotExist
 	CodeInvalidPassword
+	CodeFileTooLarge
 	CodeServerBusy
 )
 
@@ -19,6 +20,7 @@ var codeMsgMap = map[ResCode]string{
 	CodeUserExist:       "用户名已存在",
 	CodeUserNotExist:    "用户名不存在",
 	CodeInvalidPassword: "密码错误",
+	CodeFileTooLarge:    "文件太大",
 	CodeServerBusy:      "服务器繁忙",
 }
 

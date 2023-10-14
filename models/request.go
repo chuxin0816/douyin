@@ -1,5 +1,7 @@
 package models
 
+import "mime/multipart"
+
 type FeedRequest struct {
 	LatestTime string `query:"latest_time"` // 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
 	Token      string `query:"token"`       // 用户登录状态下设置
@@ -13,4 +15,10 @@ type UserRequest struct {
 type UserInfoRequest struct {
 	UserID int64  `query:"user_id" vd:"$>0"`    // 用户id
 	Token  string `query:"token" vd:"len($)>0"` // 用户登录状态下设置
+}
+
+type ActionRequest struct {
+	Data  *multipart.FileHeader `form:"data"`                // 视频数据
+	Token string                `form:"token" vd:"len($)>0"` // 用户鉴权token
+	Title string                `form:"title" vd:"len($)>0"` // 视频标题
 }

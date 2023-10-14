@@ -36,7 +36,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	publishRouter := apiRouter.Group("/publish")
 	{
 		publishController := controller.NewPublishController()
-		publishRouter.POST("/action/", publishController.Publish)
+		publishRouter.POST("/action/", publishController.Action)
 		// publishRouter.GET("/list/", publishController.PublishList)
 	}
 

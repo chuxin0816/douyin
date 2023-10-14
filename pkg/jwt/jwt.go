@@ -35,16 +35,16 @@ func GenerateToken(userID int64) (string, error) {
 	return token.SignedString(jwtKey)
 }
 
-func ParseToken(tokenStr string) (*Claims, error) {
+func ParseToken(tokenStr string) (userID int64, err error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	if !token.Valid {
-		return nil, ErrInvalidToken
+		return 0, ErrInvalidToken
 	}
-	return claims, nil
+	return claims.UserID, nil
 }
