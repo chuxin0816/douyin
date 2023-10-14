@@ -22,3 +22,10 @@ go.work
 
 .idea
 .vscode
+
+# config file
+config.yaml
+config.json
+
+# log file
+*.log
