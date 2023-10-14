@@ -3,10 +3,16 @@ package mysql
 import (
 	"douyin/models"
 	"douyin/response"
+	"path"
 	"strconv"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+)
+
+const (
+	videoPrefix = "https://douyin-chuxin.oss-cn-shenzhen.aliyuncs.com/video/"
+	imagePrefix = "https://douyin-chuxin.oss-cn-shenzhen.aliyuncs.com/image/"
 )
 
 func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoResponse, err error) {
@@ -48,4 +54,21 @@ func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoR
 		})
 	}
 	return
+}
+
+func SaveVideo(userID int64, videoName, coverName, title string) error {
+	// 保存视频信息到数据库
+	video := &models.Video{
+		AuthorID:   userID,
+		PlayURL:    path.Join(videoPrefix, videoName),
+		CoverURL:   path.Join(imagePrefix, coverName),
+		UploadTime: time.Now(),
+		Title:      title,
+	}
+	err := db.Create(video).Error
+	if err != nil {
+		hlog.Error("mysql.SaveVideo: 保存视频信息到数据库失败")
+		return err
+	}
+	return nil
 }

@@ -8,8 +8,8 @@
   },
   "oss": {
     "endpoint": "oss-cn-shenzhen.aliyuncs.com",
-    "access_key_id": "LTAI5tLBZ8inC2J6f4oLE9cN",
-    "access_key_secret": "tPprAQsfyc0dgWTRJ3fYIrdS1I5Bgm",
+    "access_key_id": "LTAI5tSXQEwSDF1pNWwJ7tNj",
+    "access_key_secret": "j3XeggAuTHMOiWo1uQYEqPufbH0lND",
     "bucket_name": "douyin-chuxin"
   },
   "log": {

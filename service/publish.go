@@ -1,6 +1,7 @@
 package service
 
 import (
+	"douyin/dao/mysql"
 	"douyin/pkg/ffmpeg"
 	"douyin/pkg/oss"
 	"douyin/response"
@@ -55,6 +56,12 @@ func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHe
 			hlog.Error("service.PublishAction: 删除封面失败, err: ", err)
 		}
 	}()
+
 	// 保存视频信息到数据库
-	return nil, nil
+	err = mysql.SaveVideo(userID, data.Filename, coverName, title)
+	if err != nil {
+		hlog.Error("service.PublishAction: 保存视频信息到数据库失败, err: ", err)
+		return nil, err
+	}
+	return &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()}, nil
 }
