@@ -13,9 +13,10 @@ import (
 )
 
 func Setup(conf *config.HertzConfig) *server.Hertz {
-	h := server.Default(server.WithHostPorts(
-		fmt.Sprintf("%s:%d", conf.Host, conf.Port),
-	))
+	h := server.Default(
+		server.WithHostPorts(fmt.Sprintf("%s:%d", conf.Host, conf.Port)),
+		server.WithMaxRequestBodySize(1024*1024*128),
+	)
 
 	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
 		ctx.JSON(consts.StatusOK, utils.H{"message": "pong"})

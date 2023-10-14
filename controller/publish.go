@@ -48,5 +48,13 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 		return
 	}
 	// 业务逻辑处理
-	service.PublishAction(ctx, userID, req.Data, req.Title)
+	resp, err := service.PublishAction(ctx, userID, req.Data, req.Title)
+	if err != nil {
+		response.Error(ctx, response.CodeServerBusy)
+		hlog.Error("controller.Action: 业务处理失败, err: ", err)
+		return
+	}
+
+	// 返回响应
+	response.Success(ctx, resp)
 }
