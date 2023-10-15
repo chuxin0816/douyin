@@ -4,6 +4,7 @@ import (
 	"context"
 	"douyin/dao/mysql"
 	"douyin/models"
+	"douyin/pkg/jwt"
 	"douyin/response"
 	"douyin/service"
 	"errors"
@@ -28,8 +29,24 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
+	// 验证token
+	var userID int64
+	if len(req.Token) > 0 {
+		userID, err = jwt.ParseToken(req.Token)
+		if err != nil {
+			if errors.Is(err, jwt.ErrInvalidToken) {
+				response.Error(ctx, response.CodeNoAuthority)
+				hlog.Error("controller.Action: token无效")
+				return
+			}
+			response.Error(ctx, response.CodeServerBusy)
+			hlog.Error("controller.Action: jwt解析出错, err: ", err)
+			return
+		}
+	}
+
 	// 业务逻辑处理
-	resp, err := service.UserInfo(req)
+	resp, err := service.UserInfo(req, userID)
 	if err != nil {
 		if errors.Is(err, mysql.ErrUserNotExist) {
 			response.Error(ctx, response.CodeUserNotExist)

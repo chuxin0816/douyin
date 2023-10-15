@@ -14,6 +14,7 @@ const (
 	imagePrefix = "https://douyin-chuxin.oss-cn-shenzhen.aliyuncs.com/image/"
 )
 
+// GetVideoList 获取视频Feed流
 func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoResponse, nextTime *int64, err error) {
 	// 查询数据库
 	year := latestTime.Year()
@@ -28,7 +29,7 @@ func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoR
 	}
 
 	// 通过作者id查询作者信息
-	var authorIDs []int64
+	authorIDs := make([]int64, 0, len(dVideoList))
 	for _, dVideo := range dVideoList {
 		authorIDs = append(authorIDs, dVideo.AuthorID)
 	}
@@ -39,10 +40,11 @@ func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoR
 	}
 
 	// 将models.Video转换为response.VideoResponse
+	videoList = make([]*response.VideoResponse, 0, len(dVideoList))
 	for idx, dVideo := range dVideoList {
 		videoList = append(videoList, &response.VideoResponse{
 			ID:            dVideo.ID,
-			Author:        authors[idx],
+			Author:        response.ToUserResponse(authors[idx]),
 			CommentCount:  dVideo.CommentCount,
 			PlayURL:       dVideo.PlayURL,
 			CoverURL:      dVideo.CoverURL,
@@ -51,13 +53,14 @@ func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoR
 			Title:         dVideo.Title,
 		})
 	}
-	nextTime = new(int64)
 	if len(dVideoList) > 0 {
+		nextTime = new(int64)
 		*nextTime = dVideoList[len(dVideoList)-1].UploadTime.Unix()
 	}
 	return
 }
 
+// SaveVideo 保存视频信息到数据库
 func SaveVideo(userID int64, videoName, coverName, title string) error {
 	// 保存视频信息到数据库
 	video := &models.Video{
@@ -73,4 +76,38 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 		return err
 	}
 	return nil
+}
+
+// GetPublishList 获取用户发布的视频列表
+func GetPublishList(authorID int64) (videoList []*response.VideoResponse, err error) {
+	// 查询数据库
+	var dVideoList []*models.Video
+	err = db.Where("author_id = ?", authorID).Order("upload_time DESC").Find(&dVideoList).Error
+	if err != nil {
+		hlog.Error("mysql.GetPublishList: 查询数据库失败")
+		return nil, err
+	}
+
+	// 查询作者信息
+	author, err := GetUserByID(authorID)
+	if err != nil {
+		hlog.Error("mysql.GetPublishList: 查询作者信息失败")
+		return nil, err
+	}
+
+	// 将models.Video转换为response.VideoResponse
+	videoList = make([]*response.VideoResponse, 0, len(dVideoList))
+	for _, dVideo := range dVideoList {
+		videoList = append(videoList, &response.VideoResponse{
+			ID:            dVideo.ID,
+			Author:        response.ToUserResponse(author),
+			CommentCount:  dVideo.CommentCount,
+			PlayURL:       dVideo.PlayURL,
+			CoverURL:      dVideo.CoverURL,
+			FavoriteCount: dVideo.FavoriteCount,
+			IsFavorite:    false, // 需要登录后通过用户id查询数据库判断
+			Title:         dVideo.Title,
+		})
+	}
+	return
 }

@@ -11,7 +11,7 @@ import (
 
 const count = 30
 
-func Feed(req *models.FeedRequest) (resp *response.FeedResponse, err error) {
+func Feed(req *models.FeedRequest, userID int64) (resp *response.FeedResponse, err error) {
 	// 解析请求
 	var latestTime int64
 	latestTime = req.LatestTime
@@ -25,6 +25,10 @@ func Feed(req *models.FeedRequest) (resp *response.FeedResponse, err error) {
 		hlog.Error("service.Feed: 查询视频列表失败")
 		return nil, err
 	}
+
+	// TODO: 通过用户id查询数据库判断是否点赞
+
+	// 返回响应
 	return &response.FeedResponse{
 		Response:  &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
 		VideoList: videoList,

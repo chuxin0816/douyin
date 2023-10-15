@@ -62,5 +62,36 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 
 func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	// req := &models.ListRequest{}
+	req := &models.ListRequest{}
+	err := ctx.BindAndValidate(req)
+	if err != nil {
+		response.Error(ctx, response.CodeInvalidParam)
+		hlog.Error("controller.List: 参数校验失败, err: ", err)
+		return
+	}
+	authorID := req.UserID
+
+	// 验证token
+	userID, err := jwt.ParseToken(req.Token)
+	if err != nil {
+		if errors.Is(err, jwt.ErrInvalidToken) {
+			response.Error(ctx, response.CodeNoAuthority)
+			hlog.Error("controller.Action: token无效")
+			return
+		}
+		response.Error(ctx, response.CodeServerBusy)
+		hlog.Error("controller.Action: jwt解析出错, err: ", err)
+		return
+	}
+
+	// 业务逻辑处理
+	resp, err := service.PublishList(userID, authorID)
+	if err != nil {
+		response.Error(ctx, response.CodeServerBusy)
+		hlog.Error("controller.Action: 业务处理失败, err: ", err)
+		return
+	}
+
+	// 返回响应
+	response.Success(ctx, resp)
 }

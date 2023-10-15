@@ -13,5 +13,5 @@ type VideoResponse struct {
 
 type PublishListResponse struct {
 	*Response
-	*VideoResponse
+	VideoList []*VideoResponse `json:"video_list"` // 视频列表
 }

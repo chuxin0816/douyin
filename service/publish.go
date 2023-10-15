@@ -36,3 +36,20 @@ func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHe
 	}
 	return &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()}, nil
 }
+
+func PublishList(userID, authorID int64) (*response.PublishListResponse, error) {
+	// 查询视频列表
+	resp, err := mysql.GetPublishList(authorID)
+	if err != nil {
+		hlog.Error("service.PublishList: 查询视频列表失败, err: ", err)
+		return nil, err
+	}
+
+	// TODO: 通过用户id查询数据库判断是否点赞
+
+	// 返回响应
+	return &response.PublishListResponse{
+		Response:  &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
+		VideoList: resp,
+	}, nil
+}

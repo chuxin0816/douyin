@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"douyin/models"
-	"douyin/response"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -14,6 +13,7 @@ var (
 	ErrPassword     = errors.New("密码错误")
 )
 
+// GetUserByID 根据用户id查询用户信息
 func GetUserByID(id int64) (*models.User, error) {
 	user := &models.User{}
 	err := db.Where("id = ?", id).Find(user).Error
@@ -27,10 +27,10 @@ func GetUserByID(id int64) (*models.User, error) {
 }
 
 // GetUserByIDs 根据用户id列表查询用户信息
-func GetUserByIDs(ids []int64) ([]*response.UserResponse, error) {
+func GetUserByIDs(ids []int64) ([]*models.User, error) {
 	// 查询数据库
-	var dUsers []*models.User
-	err := db.Where("id IN (?)", ids).Find(&dUsers).Error
+	var users []*models.User
+	err := db.Where("id IN (?)", ids).Find(&users).Error
 	if err != nil {
 		hlog.Error("mysql.GetUserByIDs: 查询数据库失败")
 		return nil, err
@@ -38,19 +38,19 @@ func GetUserByIDs(ids []int64) ([]*response.UserResponse, error) {
 
 	// 解决重复字段缺少问题
 	userMap := make(map[int64]*models.User)
-	for _, dUser := range dUsers {
+	for _, dUser := range users {
 		userMap[dUser.ID] = dUser
 	}
 
-	// 将models.User转换为response.UserResponse
-	users := make([]*response.UserResponse, 0, len(ids))
+	// 将users按照ids的顺序排列
+	users = make([]*models.User, 0, len(ids))
 	for _, id := range ids {
 		user, ok := userMap[id]
 		if !ok {
 			hlog.Error("mysql.GetUserByIDs: 用户不存在,id: ", id)
 			return nil, ErrUserNotExist
 		}
-		users = append(users, response.ToUserResponse(user))
+		users = append(users, user)
 	}
 	return users, nil
 }
