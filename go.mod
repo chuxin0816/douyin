@@ -8,7 +8,6 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cloudwego/hertz v0.7.1
-	github.com/disintegration/imaging v1.6.2
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -62,7 +61,6 @@ require (
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
-	golang.org/x/image v0.13.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect

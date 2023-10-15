@@ -13,18 +13,19 @@ import (
 )
 
 var (
-	ErrUserExist    = errors.New("用户已存在")
-	ErrUserNotExist = errors.New("用户不存在")
-	ErrPassword     = errors.New("密码错误")
-	ErrBcrypt       = errors.New("加密密码失败")
+	ErrBcrypt = errors.New("加密密码失败")
 )
 
 func UserInfo(req *models.UserInfoRequest) (*response.UserInfoResponse, error) {
 	// 查询用户信息
-	user := mysql.GetUserByID(req.UserID)
-	if user == nil {
-		hlog.Error("service.UserInfo: 用户不存在")
-		return nil, ErrUserNotExist
+	user, err := mysql.GetUserByID(req.UserID)
+	if err != nil {
+		if errors.Is(err, mysql.ErrUserNotExist) {
+			hlog.Error("service.UserInfo: 用户不存在")
+			return nil, mysql.ErrUserNotExist
+		}
+		hlog.Error("service.UserInfo: 查询用户信息失败")
+		return nil, err
 	}
 
 	// 返回响应
@@ -39,7 +40,7 @@ func Register(req *models.UserRequest) (*response.RegisterResponse, error) {
 	user := mysql.GetUserByName(req.Username)
 	if user != nil {
 		hlog.Error("service.Register: 用户已存在")
-		return nil, ErrUserExist
+		return nil, mysql.ErrUserExist
 	}
 
 	// 生成用户id
@@ -80,14 +81,14 @@ func Login(req *models.UserRequest) (*response.LoginResponse, error) {
 	user := mysql.GetUserByName(req.Username)
 	if user == nil {
 		hlog.Error("service.Login: 用户不存在")
-		return nil, ErrUserNotExist
+		return nil, mysql.ErrUserNotExist
 	}
 
 	// 校验密码
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return nil, ErrPassword
+			return nil, mysql.ErrPassword
 		}
 		hlog.Error("service.Login: 校验密码失败")
 		return nil, err

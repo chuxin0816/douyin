@@ -25,7 +25,7 @@ func Feed(req *models.FeedRequest) (resp *response.FeedResponse, err error) {
 	}
 
 	// 查询视频列表
-	videoList, err := mysql.GetVideoList(time.Unix(latestTime, 0), count)
+	videoList, nextTime, err := mysql.GetVideoList(time.Unix(latestTime, 0), count)
 	if err != nil {
 		hlog.Error("service.Feed: 查询视频列表失败")
 		return nil, err
@@ -33,6 +33,6 @@ func Feed(req *models.FeedRequest) (resp *response.FeedResponse, err error) {
 	return &response.FeedResponse{
 		Response:  &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
 		VideoList: videoList,
-		NextTime:  time.Now().Unix(),
+		NextTime:  nextTime,
 	}, nil
 }

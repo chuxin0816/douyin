@@ -4,7 +4,6 @@ import (
 	"douyin/models"
 	"douyin/response"
 	"path"
-	"strconv"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -15,29 +14,28 @@ const (
 	imagePrefix = "https://douyin-chuxin.oss-cn-shenzhen.aliyuncs.com/image/"
 )
 
-func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoResponse, err error) {
+func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoResponse, nextTime int64, err error) {
 	// 查询数据库
 	year := latestTime.Year()
 	if year < 1 || year > 9999 {
-		hlog.Debug("mysql.GetVideoList: 参数时间超出限制")
 		latestTime = time.Now()
 	}
 	var dVideoList []*models.Video
 	err = db.Where("upload_time <= ?", latestTime).Order("upload_time DESC").Limit(count).Find(&dVideoList).Error
 	if err != nil {
 		hlog.Error("mysql.GetVideoList: 查询数据库失败")
-		return nil, err
+		return nil, 0, err
 	}
 
 	// 通过作者id查询作者信息
-	var authorIDs []string
+	var authorIDs []int64
 	for _, dVideo := range dVideoList {
-		authorIDs = append(authorIDs, strconv.FormatInt(dVideo.AuthorID, 10))
+		authorIDs = append(authorIDs, dVideo.AuthorID)
 	}
 	authors, err := GetUserByIDs(authorIDs)
 	if err != nil {
 		hlog.Error("mysql.GetVideoList: 通过作者id查询作者信息失败")
-		return nil, err
+		return nil, 0, err
 	}
 
 	// 将models.Video转换为response.VideoResponse
@@ -52,6 +50,9 @@ func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoR
 			IsFavorite:    false, // 需要登录后通过用户id查询数据库判断
 			Title:         dVideo.Title,
 		})
+	}
+	if len(dVideoList) > 0 {
+		nextTime = dVideoList[len(dVideoList)-1].UploadTime.Unix()
 	}
 	return
 }
