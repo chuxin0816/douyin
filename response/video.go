@@ -10,3 +10,8 @@ type VideoResponse struct {
 	IsFavorite    bool          `json:"is_favorite"`    // true-已点赞，false-未点赞
 	Title         string        `json:"title"`          // 视频标题
 }
+
+type PublishListResponse struct {
+	*Response
+	*VideoResponse
+}

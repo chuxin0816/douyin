@@ -38,7 +38,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	{
 		publishController := controller.NewPublishController()
 		publishRouter.POST("/action/", publishController.Action)
-		// publishRouter.GET("/list/", publishController.PublishList)
+		publishRouter.GET("/list/", publishController.List)
 	}
 
 	// interaction apis

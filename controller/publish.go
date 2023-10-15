@@ -59,3 +59,8 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	// 返回响应
 	response.Success(ctx, resp)
 }
+
+func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
+	// 获取参数
+	// req := &models.ListRequest{}
+}

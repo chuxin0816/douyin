@@ -5,7 +5,6 @@ import (
 	"douyin/models"
 	"douyin/response"
 	"douyin/service"
-	"strconv"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -15,7 +14,7 @@ import (
 // Feed 不限制登录状态，返回按投稿时间倒序的视频列表，视频数由服务端控制，单次最多30个
 func Feed(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	req := &models.FeedRequest{LatestTime: strconv.FormatInt(time.Now().Unix(), 10)}
+	req := &models.FeedRequest{LatestTime: time.Now().Unix()}
 	err := ctx.Bind(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)
