@@ -46,7 +46,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	{
 		favoriteController := controller.NewFavoriteController()
 		favoriteRouter.POST("/action/", favoriteController.Action)
-		// favoriteRouter.GET("/list/", favoriteController.List)
+		favoriteRouter.GET("/list/", favoriteController.List)
 	}
 	// apiRouter.POST("/comment/action", controller.CommentAction)
 	// apiRouter.GET("/comment/list", controller.CommentList)

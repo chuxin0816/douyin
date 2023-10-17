@@ -33,3 +33,8 @@ type FavoriteActionRequest struct {
 	VideoID    int64  `query:"video_id,string" vd:"$>0"`           // 视频id
 	ActionType int    `query:"action_type,string" vd:"$==1||$==2"` // 1-点赞，2-取消点赞
 }
+
+type FavoriteListRequest struct {
+	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
+	Token  string `query:"token" vd:"len($)>0"`     // 用户鉴权token
+}

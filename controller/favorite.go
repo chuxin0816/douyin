@@ -63,3 +63,38 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	// 返回响应
 	response.Success(ctx, resp)
 }
+
+func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
+	// 获取参数
+	req := &models.FavoriteListRequest{}
+	err := ctx.BindAndValidate(req)
+	if err != nil {
+		response.Error(ctx, response.CodeInvalidParam)
+		hlog.Error("FavoriteController: 参数校验失败, err: ", err)
+		return
+	}
+
+	// 验证token
+	userID, err := jwt.ParseToken(req.Token)
+	if err != nil {
+		if errors.Is(err, jwt.ErrInvalidToken) {
+			response.Error(ctx, response.CodeNoAuthority)
+			hlog.Error("FavoriteController.List: token无效")
+			return
+		}
+		response.Error(ctx, response.CodeServerBusy)
+		hlog.Error("FavoriteController.List: jwt解析出错, err: ", err)
+		return
+	}
+
+	// 业务逻辑处理
+	resp, err := service.FavoriteList(userID, req.UserID)
+	if err != nil {
+		response.Error(ctx, response.CodeServerBusy)
+		hlog.Error("FavoriteController.List: 业务处理失败, err: ", err)
+		return
+	}
+
+	// 返回响应
+	response.Success(ctx, resp)
+}

@@ -17,7 +17,7 @@ const (
 )
 
 // GetVideoList 获取视频Feed流
-func GetVideoList(userID int64, latestTime time.Time, count int) (videoList []*response.VideoResponse, nextTime *int64, err error) {
+func GetFeedList(userID int64, latestTime time.Time, count int) (videoList []*response.VideoResponse, nextTime *int64, err error) {
 	// 查询数据库
 	year := latestTime.Year()
 	if year < 1 || year > 9999 {
@@ -58,20 +58,20 @@ func GetVideoList(userID int64, latestTime time.Time, count int) (videoList []*r
 	// 通过用户id查询是否点赞
 	if userID > 0 && len(dVideoList) > 0 {
 		// 获取用户喜欢列表
-		favoriteList, err := GetFavoriteList(userID)
+		videoIDs, err := GetFavoriteList(userID)
 		if err != nil {
 			return nil, nil, err
 		}
 
 		// 将喜欢列表转换为map加快查询速度
-		favoriteListMap := make(map[int64]struct{}, len(favoriteList))
-		for _, v := range favoriteList {
-			favoriteListMap[v.VideoID] = struct{}{}
+		videoIDMap := make(map[int64]struct{}, len(videoIDs))
+		for _, v := range videoIDs {
+			videoIDMap[v] = struct{}{}
 		}
 
 		// 判断是否点赞
 		for _, video := range videoList {
-			if _, exist := favoriteListMap[video.ID]; exist {
+			if _, exist := videoIDMap[video.ID]; exist {
 				video.IsFavorite = true
 			}
 		}
@@ -119,11 +119,11 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 
 // GetPublishList 获取用户发布的视频列表
 func GetPublishList(userID, authorID int64) (videoList []*response.VideoResponse, err error) {
-	// 查询数据库
+	// 查询视频信息
 	var dVideoList []*models.Video
 	err = db.Where("author_id = ?", authorID).Order("upload_time DESC").Find(&dVideoList).Error
 	if err != nil {
-		hlog.Error("mysql.GetPublishList: 查询数据库失败")
+		hlog.Error("mysql.GetPublishList: 查询视频信息失败")
 		return nil, err
 	}
 
@@ -152,23 +152,82 @@ func GetPublishList(userID, authorID int64) (videoList []*response.VideoResponse
 	// 通过用户id查询是否点赞
 	if len(videoList) > 0 {
 		// 获取用户喜欢列表
-		favoriteList, err := GetFavoriteList(userID)
+		videoIDs, err := GetFavoriteList(userID)
 		if err != nil {
 			return nil, err
 		}
 
 		// 将喜欢列表转换为map加快查询速度
-		favoriteListMap := make(map[int64]struct{}, len(favoriteList))
-		for _, v := range favoriteList {
-			favoriteListMap[v.VideoID] = struct{}{}
+		videoIDMap := make(map[int64]struct{}, len(videoIDs))
+		for _, v := range videoIDs {
+			videoIDMap[v] = struct{}{}
 		}
 
 		// 判断是否点赞
 		for _, video := range videoList {
-			if _, exist := favoriteListMap[video.ID]; exist {
+			if _, exist := videoIDMap[video.ID]; exist {
 				video.IsFavorite = true
 			}
 		}
 	}
 	return
+}
+
+func GetVideoList(userID int64, videoIDs []int64) ([]*response.VideoResponse, error) {
+	// 查询视频信息
+	var dVideoList []*models.Video
+	err := db.Where("id IN ?", videoIDs).Order("upload_time DESC").Find(&dVideoList).Error
+	if err != nil {
+		hlog.Error("mysql.GetVideoList: 查询视频信息失败")
+		return nil, err
+	}
+
+	// 通过作者id查询作者信息
+	authorIDs := make([]int64, 0, len(dVideoList))
+	for _, dVideo := range dVideoList {
+		authorIDs = append(authorIDs, dVideo.AuthorID)
+	}
+	authors, err := GetUserByIDs(userID, authorIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// 将models.Video转换为response.VideoResponse
+	videoList := make([]*response.VideoResponse, 0, len(dVideoList))
+	for idx, dVideo := range dVideoList {
+		videoList = append(videoList, &response.VideoResponse{
+			ID:            dVideo.ID,
+			Author:        response.ToUserResponse(authors[idx]),
+			CommentCount:  dVideo.CommentCount,
+			PlayURL:       dVideo.PlayURL,
+			CoverURL:      dVideo.CoverURL,
+			FavoriteCount: dVideo.FavoriteCount,
+			IsFavorite:    false,
+			Title:         dVideo.Title,
+		})
+	}
+
+	// 通过用户id查询是否点赞
+	if userID > 0 && len(dVideoList) > 0 {
+		// 获取用户喜欢列表
+		videoIDs, err := GetFavoriteList(userID)
+		if err != nil {
+			return nil, err
+		}
+
+		// 将喜欢列表转换为map加快查询速度
+		videoIDMap := make(map[int64]struct{}, len(videoIDs))
+		for _, v := range videoIDs {
+			videoIDMap[v] = struct{}{}
+		}
+
+		// 判断是否点赞
+		for _, video := range videoList {
+			if _, exist := videoIDMap[video.ID]; exist {
+				video.IsFavorite = true
+			}
+		}
+	}
+
+	return videoList, nil
 }
