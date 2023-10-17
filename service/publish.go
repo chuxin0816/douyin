@@ -28,10 +28,10 @@ func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHe
 		return nil, err
 	}
 
-	// 保存视频信息到数据库
+	// 操作数据库
 	err = mysql.SaveVideo(userID, data.Filename, coverName, title)
 	if err != nil {
-		hlog.Error("service.PublishAction: 保存视频信息到数据库失败, err: ", err)
+		hlog.Error("service.PublishAction: 操作数据库失败, err: ", err)
 		return nil, err
 	}
 	return &response.PublishActionResponse{

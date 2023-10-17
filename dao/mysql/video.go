@@ -83,6 +83,7 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 		hlog.Error("mysql.SaveVideo: 修改用户发布视频数失败")
 		return err
 	}
+
 	return nil
 }
 
