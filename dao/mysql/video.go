@@ -144,9 +144,31 @@ func GetPublishList(userID, authorID int64) (videoList []*response.VideoResponse
 			PlayURL:       dVideo.PlayURL,
 			CoverURL:      dVideo.CoverURL,
 			FavoriteCount: dVideo.FavoriteCount,
-			IsFavorite:    false, // 需要登录后通过用户id查询数据库判断
+			IsFavorite:    false,
 			Title:         dVideo.Title,
 		})
+	}
+
+	// 通过用户id查询是否点赞
+	if len(videoList) > 0 {
+		// 获取用户喜欢列表
+		favoriteList, err := GetFavoriteList(userID)
+		if err != nil {
+			return nil, err
+		}
+
+		// 将喜欢列表转换为map加快查询速度
+		favoriteListMap := make(map[int64]struct{}, len(favoriteList))
+		for _, v := range favoriteList {
+			favoriteListMap[v.VideoID] = struct{}{}
+		}
+
+		// 判断是否点赞
+		for _, video := range videoList {
+			if _, exist := favoriteListMap[video.ID]; exist {
+				video.IsFavorite = true
+			}
+		}
 	}
 	return
 }

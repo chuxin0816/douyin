@@ -47,8 +47,6 @@ func PublishList(userID, authorID int64) (*response.PublishListResponse, error) 
 		return nil, err
 	}
 
-	// TODO: 通过用户id查询数据库判断是否点赞
-
 	// 返回响应
 	return &response.PublishListResponse{
 		Response:  &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
