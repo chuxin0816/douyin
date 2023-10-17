@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"gorm.io/gorm"
 )
 
 const (
@@ -73,6 +74,13 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 	err := db.Create(video).Error
 	if err != nil {
 		hlog.Error("mysql.SaveVideo: 保存视频信息到数据库失败")
+		return err
+	}
+
+	// 修改用户发布视频数
+	err = db.Model(&models.User{}).Where("id = ?", userID).Update("publish_count", gorm.Expr("publish_count + ?", 1)).Error
+	if err != nil {
+		hlog.Error("mysql.SaveVideo: 修改用户发布视频数失败")
 		return err
 	}
 	return nil
