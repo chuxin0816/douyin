@@ -10,6 +10,7 @@ import (
 
 var (
 	ErrAlreadyFavorite = errors.New("已经点赞过了")
+	ErrNotFavorite     = errors.New("还没有点赞过")
 )
 
 func FavoriteAction(userID int64, videoID int64, actionType int) (err error) {
@@ -20,38 +21,50 @@ func FavoriteAction(userID int64, videoID int64, actionType int) (err error) {
 		hlog.Error("mysql.FavoriteAction: 查看是否已经点赞失败, err: ", err)
 		return err
 	}
-	if favorite.ID != 0 {
+	if favorite.ID != 0 && actionType == 1 {
 		hlog.Error("mysql.FavoriteAction: 已经点赞过了")
 		return ErrAlreadyFavorite
+	} else if favorite.ID == 0 && actionType == -1 {
+		hlog.Error("mysql.FavoriteAction: 还没有点赞过")
+		return ErrNotFavorite
 	}
+
+	// 开启事务
+	tx := db.Begin()
 
 	// 更新favorite表
 	if actionType == 1 {
-		err = db.Create(&models.Favorite{
+		err = tx.Create(&models.Favorite{
 			UserID:  userID,
 			VideoID: videoID,
 		}).Error
 	} else {
-		err = db.Where("user_id = ? AND video_id = ?", userID, videoID).Delete(&models.Favorite{}).Error
+		err = tx.Where("user_id = ? AND video_id = ?", userID, videoID).Delete(&models.Favorite{}).Error
 	}
 	if err != nil {
+		tx.Rollback()
 		hlog.Error("mysql.FavoriteAction: 更新favorite表失败, err: ", err)
 		return err
 	}
 
 	// 更新video表中的favorite_count字段
-	err = db.Model(&models.Video{}).Where("id = ?", videoID).Update("favorite_count", gorm.Expr("favorite_count + ?", actionType)).Error
+	err = tx.Model(&models.Video{}).Where("id = ?", videoID).Update("favorite_count", gorm.Expr("favorite_count + ?", actionType)).Error
 	if err != nil {
+		tx.Rollback()
 		hlog.Error("mysql.FavoriteAction: 更新video表中的favorite_count字段失败, err: ", err)
 		return err
 	}
 
 	// 更新user表中的favorite_count字段
-	err = db.Model(models.User{}).Where("id = ?", userID).Update("favorite_count", gorm.Expr("favorite_count + ?", actionType)).Error
+	err = tx.Model(models.User{}).Where("id = ?", userID).Update("favorite_count", gorm.Expr("favorite_count + ?", actionType)).Error
 	if err != nil {
+		tx.Rollback()
 		hlog.Error("mysql.FavoriteAction: 更新user表中的favorite_count字段失败, err: ", err)
 		return err
 	}
+
+	// 提交事务
+	tx.Commit()
 
 	return nil
 }

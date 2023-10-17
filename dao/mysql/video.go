@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"douyin/models"
+	"douyin/pkg/snowflake"
 	"douyin/response"
 	"path"
 	"time"
@@ -63,28 +64,34 @@ func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoR
 
 // SaveVideo 保存视频信息到数据库
 func SaveVideo(userID int64, videoName, coverName, title string) error {
-	// 保存视频信息到数据库
 	video := &models.Video{
+		ID:         snowflake.GenerateID(),
 		AuthorID:   userID,
 		PlayURL:    path.Join(videoPrefix, videoName),
 		CoverURL:   path.Join(imagePrefix, coverName),
 		UploadTime: time.Now(),
 		Title:      title,
 	}
-	err := db.Create(video).Error
-	if err != nil {
-		hlog.Error("mysql.SaveVideo: 保存视频信息到数据库失败")
-		return err
-	}
 
-	// 修改用户发布视频数
-	err = db.Model(&models.User{}).Where("id = ?", userID).Update("publish_count", gorm.Expr("publish_count + ?", 1)).Error
-	if err != nil {
-		hlog.Error("mysql.SaveVideo: 修改用户发布视频数失败")
-		return err
-	}
+	// 开启事务
+	err := db.Transaction(func(tx *gorm.DB) error {
+		// 保存视频信息到数据库
+		if err := db.Create(video).Error; err != nil {
+			hlog.Error("mysql.SaveVideo: 保存视频信息到数据库失败")
+			return err
+		}
 
-	return nil
+		// 修改用户发布视频数
+		if err := db.Model(&models.User{}).Where("id = ?", userID).Update("work_count", gorm.Expr("work_count + ?", 1)).Error; err != nil {
+			hlog.Error("mysql.SaveVideo: 修改用户发布视频数失败")
+			return err
+		}
+
+		// 提交事务
+		return nil
+	})
+
+	return err
 }
 
 // GetPublishList 获取用户发布的视频列表

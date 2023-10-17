@@ -11,6 +11,7 @@ const (
 	CodeInvalidPassword
 	CodeFileTooLarge
 	CodeAlreadyFavorite
+	CodeNotFavorite
 	CodeServerBusy
 )
 
@@ -23,6 +24,7 @@ var codeMsgMap = map[ResCode]string{
 	CodeInvalidPassword: "密码错误",
 	CodeFileTooLarge:    "文件太大",
 	CodeAlreadyFavorite: "已经点赞过了",
+	CodeNotFavorite:     "还没有点赞过",
 	CodeServerBusy:      "服务器繁忙",
 }
 

@@ -50,6 +50,11 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 			hlog.Error("FavoriteController.Action: 已经点赞过了")
 			return
 		}
+		if errors.Is(err, mysql.ErrNotFavorite) {
+			response.Error(ctx, response.CodeNotFavorite)
+			hlog.Error("FavoriteController.Action: 还没有点赞过")
+			return
+		}
 		response.Error(ctx, response.CodeServerBusy)
 		hlog.Error("FavoriteController.Action: 业务处理失败, err: ", err)
 		return
