@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"douyin/dao/mysql"
 	"douyin/models"
 	"douyin/pkg/jwt"
 	"douyin/response"
@@ -44,6 +45,11 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	// 业务逻辑处理
 	resp, err := service.FavoriteAction(userID, req.VideoID, req.ActionType)
 	if err != nil {
+		if errors.Is(err, mysql.ErrAlreadyFavorite) {
+			response.Error(ctx, response.CodeAlreadyFavorite)
+			hlog.Error("FavoriteController.Action: 已经点赞过了")
+			return
+		}
 		response.Error(ctx, response.CodeServerBusy)
 		hlog.Error("FavoriteController.Action: 业务处理失败, err: ", err)
 		return
