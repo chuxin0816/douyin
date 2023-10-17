@@ -42,8 +42,12 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	}
 
 	// interaction apis
-	// apiRouter.POST("/favorite/action", controller.FavoriteAction)
-	// apiRouter.GET("/favorite/list", controller.FavoriteList)
+	favoriteRouter := apiRouter.Group("/favorite")
+	{
+		favoriteController := controller.NewFavoriteController()
+		favoriteRouter.POST("/action/", favoriteController.Action)
+		// favoriteRouter.GET("/list/", favoriteController.List)
+	}
 	// apiRouter.POST("/comment/action", controller.CommentAction)
 	// apiRouter.GET("/comment/list", controller.CommentList)
 

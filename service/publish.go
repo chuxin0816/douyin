@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHeader, title string) (*response.Response, error) {
+func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHeader, title string) (*response.PublishActionResponse, error) {
 	// 保存视频到本地
 	uuidName := uuid.New().String()
 	data.Filename = uuidName + ".mp4"
@@ -34,7 +34,9 @@ func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHe
 		hlog.Error("service.PublishAction: 保存视频信息到数据库失败, err: ", err)
 		return nil, err
 	}
-	return &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()}, nil
+	return &response.PublishActionResponse{
+		Response: &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
+	}, nil
 }
 
 func PublishList(userID, authorID int64) (*response.PublishListResponse, error) {

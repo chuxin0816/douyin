@@ -11,6 +11,10 @@ type VideoResponse struct {
 	Title         string        `json:"title"`          // 视频标题
 }
 
+type PublishActionResponse struct {
+	*Response
+}
+
 type PublishListResponse struct {
 	*Response
 	VideoList []*VideoResponse `json:"video_list"` // 视频列表

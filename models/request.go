@@ -17,13 +17,19 @@ type UserInfoRequest struct {
 	Token  string `query:"token" vd:"len($)>0"`     // 用户登录状态下设置
 }
 
-type ActionRequest struct {
+type PublishActionRequest struct {
 	Data  *multipart.FileHeader `form:"data"`                // 视频数据
 	Token string                `form:"token" vd:"len($)>0"` // 用户鉴权token
 	Title string                `form:"title" vd:"len($)>0"` // 视频标题
 }
 
-type ListRequest struct {
+type PublishListRequest struct {
 	Token  string `query:"token" vd:"len($)>0"`     // 用户鉴权token
 	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
+}
+
+type FavoriteActionRequest struct {
+	Token      string `query:"token" vd:"len($)>0"`                // 用户鉴权token
+	VideoID    int64  `query:"video_id,string" vd:"$>0"`           // 视频id
+	ActionType int    `query:"action_type,string" vd:"$==1||$==2"` // 1-点赞，2-取消点赞
 }
