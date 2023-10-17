@@ -18,7 +18,7 @@ var (
 
 func UserInfo(req *models.UserInfoRequest, userID int64) (*response.UserInfoResponse, error) {
 	// 查询用户信息
-	user, err := mysql.GetUserByID(req.UserID)
+	user, err := mysql.GetUserByID(userID, req.UserID)
 	if err != nil {
 		if errors.Is(err, mysql.ErrUserNotExist) {
 			hlog.Error("service.UserInfo: 用户不存在")
@@ -27,8 +27,6 @@ func UserInfo(req *models.UserInfoRequest, userID int64) (*response.UserInfoResp
 		hlog.Error("service.UserInfo: 查询用户信息失败")
 		return nil, err
 	}
-
-	// TODO: 通过用户id查询数据库判断是否关注
 
 	// 返回响应
 	return &response.UserInfoResponse{

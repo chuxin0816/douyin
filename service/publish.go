@@ -41,7 +41,7 @@ func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHe
 
 func PublishList(userID, authorID int64) (*response.PublishListResponse, error) {
 	// 查询视频列表
-	resp, err := mysql.GetPublishList(authorID)
+	resp, err := mysql.GetPublishList(userID, authorID)
 	if err != nil {
 		hlog.Error("service.PublishList: 查询视频列表失败, err: ", err)
 		return nil, err

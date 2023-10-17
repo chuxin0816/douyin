@@ -68,3 +68,13 @@ func FavoriteAction(userID int64, videoID int64, actionType int) (err error) {
 
 	return nil
 }
+
+func GetFavoriteList(userID int64) ([]*models.Favorite, error) {
+	var favoriteList []*models.Favorite
+	err := db.Where("user_id = ?", userID).Find(&favoriteList).Error
+	if err != nil {
+		hlog.Error("mysql.GetFavoriteList: 查询favorite表失败, err: ", err)
+		return nil, err
+	}
+	return favoriteList, nil
+}

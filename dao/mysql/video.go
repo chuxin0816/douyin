@@ -17,7 +17,7 @@ const (
 )
 
 // GetVideoList 获取视频Feed流
-func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoResponse, nextTime *int64, err error) {
+func GetVideoList(userID int64, latestTime time.Time, count int) (videoList []*response.VideoResponse, nextTime *int64, err error) {
 	// 查询数据库
 	year := latestTime.Year()
 	if year < 1 || year > 9999 {
@@ -35,9 +35,8 @@ func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoR
 	for _, dVideo := range dVideoList {
 		authorIDs = append(authorIDs, dVideo.AuthorID)
 	}
-	authors, err := GetUserByIDs(authorIDs)
+	authors, err := GetUserByIDs(userID, authorIDs)
 	if err != nil {
-		hlog.Error("mysql.GetVideoList: 通过作者id查询作者信息失败")
 		return nil, nil, err
 	}
 
@@ -51,10 +50,34 @@ func GetVideoList(latestTime time.Time, count int) (videoList []*response.VideoR
 			PlayURL:       dVideo.PlayURL,
 			CoverURL:      dVideo.CoverURL,
 			FavoriteCount: dVideo.FavoriteCount,
-			IsFavorite:    false, // 需要登录后通过用户id查询数据库判断
+			IsFavorite:    false,
 			Title:         dVideo.Title,
 		})
 	}
+
+	// 通过用户id查询是否点赞
+	if userID > 0 && len(dVideoList) > 0 {
+		// 获取用户喜欢列表
+		favoriteList, err := GetFavoriteList(userID)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		// 将喜欢列表转换为map加快查询速度
+		favoriteListMap := make(map[int64]struct{}, len(favoriteList))
+		for _, v := range favoriteList {
+			favoriteListMap[v.VideoID] = struct{}{}
+		}
+
+		// 判断是否点赞
+		for _, video := range videoList {
+			if _, exist := favoriteListMap[video.ID]; exist {
+				video.IsFavorite = true
+			}
+		}
+	}
+
+	// 计算下次请求的时间
 	if len(dVideoList) > 0 {
 		nextTime = new(int64)
 		*nextTime = dVideoList[len(dVideoList)-1].UploadTime.Unix()
@@ -95,7 +118,7 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 }
 
 // GetPublishList 获取用户发布的视频列表
-func GetPublishList(authorID int64) (videoList []*response.VideoResponse, err error) {
+func GetPublishList(userID, authorID int64) (videoList []*response.VideoResponse, err error) {
 	// 查询数据库
 	var dVideoList []*models.Video
 	err = db.Where("author_id = ?", authorID).Order("upload_time DESC").Find(&dVideoList).Error
@@ -105,7 +128,7 @@ func GetPublishList(authorID int64) (videoList []*response.VideoResponse, err er
 	}
 
 	// 查询作者信息
-	author, err := GetUserByID(authorID)
+	author, err := GetUserByID(userID, authorID)
 	if err != nil {
 		hlog.Error("mysql.GetPublishList: 查询作者信息失败")
 		return nil, err
