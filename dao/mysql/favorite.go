@@ -14,8 +14,12 @@ var (
 
 func FavoriteAction(userID int64, videoID int64, actionType int) (err error) {
 	// 查看是否已经点赞
-	favorite := &models.Favorite{UserID: userID, VideoID: videoID}
-	db.Find(favorite)
+	favorite := &models.Favorite{}
+	err = db.Where("user_id = ? AND video_id = ?", userID, videoID).Find(favorite).Error
+	if err != nil {
+		hlog.Error("mysql.FavoriteAction: 查看是否已经点赞失败, err: ", err)
+		return err
+	}
 	if favorite.ID != 0 {
 		hlog.Error("mysql.FavoriteAction: 已经点赞过了")
 		return ErrAlreadyFavorite
