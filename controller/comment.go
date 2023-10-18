@@ -5,6 +5,7 @@ import (
 	"douyin/models"
 	"douyin/pkg/jwt"
 	"douyin/response"
+	"fmt"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -33,4 +34,5 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 		hlog.Error("CommentController.Action: token无效, err: ", err)
 		return
 	}
+	fmt.Println(userID)
 }
