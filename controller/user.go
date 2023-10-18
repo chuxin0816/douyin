@@ -34,13 +34,8 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	if len(req.Token) > 0 {
 		userID, err = jwt.ParseToken(req.Token)
 		if err != nil {
-			if errors.Is(err, jwt.ErrInvalidToken) {
-				response.Error(ctx, response.CodeNoAuthority)
-				hlog.Error("controller.Action: token无效")
-				return
-			}
-			response.Error(ctx, response.CodeServerBusy)
-			hlog.Error("controller.Action: jwt解析出错, err: ", err)
+			response.Error(ctx, response.CodeNoAuthority)
+			hlog.Error("controller.Action: token无效: ", err)
 			return
 		}
 	}

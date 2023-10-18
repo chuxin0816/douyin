@@ -48,7 +48,11 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 		favoriteRouter.POST("/action/", favoriteController.Action)
 		favoriteRouter.GET("/list/", favoriteController.List)
 	}
-	// apiRouter.POST("/comment/action", controller.CommentAction)
+	commentRouter := apiRouter.Group("/comment")
+	{
+		commentController := controller.NewCommentController()
+		commentRouter.POST("/action/", commentController.Action)
+	}
 	// apiRouter.GET("/comment/list", controller.CommentList)
 
 	// social apis

@@ -6,7 +6,6 @@ import (
 	"douyin/pkg/jwt"
 	"douyin/response"
 	"douyin/service"
-	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -38,13 +37,8 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	// 验证token
 	userID, err := jwt.ParseToken(req.Token)
 	if err != nil {
-		if errors.Is(err, jwt.ErrInvalidToken) {
-			response.Error(ctx, response.CodeNoAuthority)
-			hlog.Error("PublishController.Action: token无效")
-			return
-		}
-		response.Error(ctx, response.CodeServerBusy)
-		hlog.Error("PublishController.Action: jwt解析出错, err: ", err)
+		response.Error(ctx, response.CodeNoAuthority)
+		hlog.Error("PublishController.Action: token无效, err: ", err)
 		return
 	}
 
@@ -74,13 +68,8 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	// 验证token
 	userID, err := jwt.ParseToken(req.Token)
 	if err != nil {
-		if errors.Is(err, jwt.ErrInvalidToken) {
-			response.Error(ctx, response.CodeNoAuthority)
-			hlog.Error("PublishController.Action: token无效")
-			return
-		}
-		response.Error(ctx, response.CodeServerBusy)
-		hlog.Error("PublishController.Action: jwt解析出错, err: ", err)
+		response.Error(ctx, response.CodeNoAuthority)
+		hlog.Error("PublishController.Action: token无效, err: ", err)
 		return
 	}
 

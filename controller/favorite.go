@@ -32,13 +32,8 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	// 验证token
 	userID, err := jwt.ParseToken(req.Token)
 	if err != nil {
-		if errors.Is(err, jwt.ErrInvalidToken) {
-			response.Error(ctx, response.CodeNoAuthority)
-			hlog.Error("FavoriteController.Action: token无效")
-			return
-		}
-		response.Error(ctx, response.CodeServerBusy)
-		hlog.Error("FavoriteController.Action: jwt解析出错, err: ", err)
+		response.Error(ctx, response.CodeNoAuthority)
+		hlog.Error("FavoriteController.Action: token无效, err: ", err)
 		return
 	}
 
@@ -77,13 +72,8 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	// 验证token
 	userID, err := jwt.ParseToken(req.Token)
 	if err != nil {
-		if errors.Is(err, jwt.ErrInvalidToken) {
-			response.Error(ctx, response.CodeNoAuthority)
-			hlog.Error("FavoriteController.List: token无效")
-			return
-		}
-		response.Error(ctx, response.CodeServerBusy)
-		hlog.Error("FavoriteController.List: jwt解析出错, err: ", err)
+		response.Error(ctx, response.CodeNoAuthority)
+		hlog.Error("FavoriteController.List: token无效, err: ", err)
 		return
 	}
 
