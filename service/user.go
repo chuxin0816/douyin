@@ -20,10 +20,6 @@ func UserInfo(req *models.UserInfoRequest, userID int64) (*response.UserInfoResp
 	// 查询用户信息
 	user, err := mysql.GetUserByID(userID, req.UserID)
 	if err != nil {
-		if errors.Is(err, mysql.ErrUserNotExist) {
-			hlog.Error("service.UserInfo: 用户不存在")
-			return nil, mysql.ErrUserNotExist
-		}
 		hlog.Error("service.UserInfo: 查询用户信息失败")
 		return nil, err
 	}
@@ -87,9 +83,6 @@ func Login(req *models.UserRequest) (*response.LoginResponse, error) {
 	// 校验密码
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
-		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return nil, mysql.ErrPassword
-		}
 		hlog.Error("service.Login: 校验密码失败")
 		return nil, err
 	}

@@ -2,10 +2,12 @@ package controller
 
 import (
 	"context"
+	"douyin/dao/mysql"
 	"douyin/models"
 	"douyin/pkg/jwt"
 	"douyin/response"
-	"fmt"
+	"douyin/service"
+	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -34,5 +36,20 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 		hlog.Error("CommentController.Action: token无效, err: ", err)
 		return
 	}
-	fmt.Println(userID)
+
+	// 业务逻辑处理
+	resp, err := service.CommentAction(userID, req.ActionType, req.VideoID, req.CommentID, req.CommentText)
+	if err != nil {
+		if errors.Is(err, mysql.ErrCommentNotExist) {
+			response.Error(ctx, response.CodeCommentNotExist)
+			hlog.Error("controller.CommentAction: 评论不存在")
+			return
+		}
+		response.Error(ctx, response.CodeServerBusy)
+		hlog.Error("CommentController.Action: 业务逻辑处理失败, err: ", err)
+		return
+	}
+
+	// 返回响应
+	response.Success(ctx, resp)
 }

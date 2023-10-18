@@ -12,6 +12,7 @@ const (
 	CodeFileTooLarge
 	CodeAlreadyFavorite
 	CodeNotFavorite
+	CodeCommentNotExist
 	CodeServerBusy
 )
 
@@ -25,6 +26,7 @@ var codeMsgMap = map[ResCode]string{
 	CodeFileTooLarge:    "文件太大",
 	CodeAlreadyFavorite: "已经点赞过了",
 	CodeNotFavorite:     "还没有点赞过",
+	CodeCommentNotExist: "评论不存在",
 	CodeServerBusy:      "服务器繁忙",
 }
 
