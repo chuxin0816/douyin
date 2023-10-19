@@ -52,8 +52,8 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	{
 		commentController := controller.NewCommentController()
 		commentRouter.POST("/action/", commentController.Action)
+		commentRouter.GET("/list/", commentController.List)
 	}
-	// apiRouter.GET("/comment/list", controller.CommentList)
 
 	// social apis
 	// apiRouter.POST("/relation/action", controller.RelationAction)

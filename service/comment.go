@@ -50,11 +50,38 @@ func CommentAction(userID, actionType, videoID, commentID int64, commentText str
 	// 返回响应
 	return &response.CommentActionResponse{
 		Response: &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
-		Comment: &response.CommentResponse{
-			ID:         comment.ID,
-			User:       *response.ToUserResponse(user),
-			Content:    comment.Content,
-			CreateDate: comment.CreateTime.Format("01-02"),
-		},
+		Comment:  response.ToCommentResponse(comment, user),
+	}, nil
+}
+
+func CommentList(userID, videoID int64) (*response.CommentListResponse, error) {
+	// 获取评论列表
+	dCommentList, err := mysql.GetCommentList(videoID)
+	if err != nil {
+		hlog.Error("service.CommentList: 获取评论列表失败, err: ", err)
+		return nil, err
+	}
+
+	// 获取用户信息
+	userIDs := make([]int64, 0, len(dCommentList))
+	for _, comment := range dCommentList {
+		userIDs = append(userIDs, comment.UserID)
+	}
+	users, err := mysql.GetUserByIDs(userID, userIDs)
+	if err != nil {
+		hlog.Error("service.CommentList: 获取用户信息失败, err: ", err)
+		return nil, err
+	}
+
+	// 将用户信息与评论列表进行关联
+	commentList := make([]*response.CommentResponse, 0, len(dCommentList))
+	for idx, comment := range dCommentList {
+		commentList = append(commentList, response.ToCommentResponse(comment, users[idx]))
+	}
+
+	// 返回响应
+	return &response.CommentListResponse{
+		Response:    &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
+		CommentList: commentList,
 	}, nil
 }

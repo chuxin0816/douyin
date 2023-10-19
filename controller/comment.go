@@ -58,3 +58,38 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	// 返回响应
 	response.Success(ctx, resp)
 }
+
+func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
+	// 获取参数
+	req := &models.CommentListRequest{}
+	err := ctx.BindAndValidate(req)
+	if err != nil {
+		response.Error(ctx, response.CodeInvalidParam)
+		hlog.Error("CommentController.List: 参数校验失败, err: ", err)
+		return
+	}
+
+	// 验证token
+	userID, err := jwt.ParseToken(req.Token)
+	if err != nil {
+		response.Error(ctx, response.CodeNoAuthority)
+		hlog.Error("CommentController.List: token无效, err: ", err)
+		return
+	}
+
+	// 业务逻辑处理
+	resp, err := service.CommentList(userID, req.VideoID)
+	if err != nil {
+		if errors.Is(err, mysql.ErrVideoNotExist) {
+			response.Error(ctx, response.CodeVideoNotExist)
+			hlog.Error("controller.CommentList: 视频不存在")
+			return
+		}
+		response.Error(ctx, response.CodeServerBusy)
+		hlog.Error("CommentController.List: 业务逻辑处理失败, err: ", err)
+		return
+	}
+
+	// 返回响应
+	response.Success(ctx, resp)
+}

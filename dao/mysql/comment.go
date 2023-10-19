@@ -89,3 +89,13 @@ func DeleteComment(commentID, videoID int64) error {
 	}
 	return nil
 }
+
+func GetCommentList(videoID int64) ([]*models.Comment, error) {
+	var commentList []*models.Comment
+	err := db.Where("video_id = ?", videoID).Find(&commentList).Error
+	if err != nil {
+		hlog.Error("mysql.GetCommentList: 查询评论列表失败, err: ", err)
+		return nil, err
+	}
+	return commentList, nil
+}
