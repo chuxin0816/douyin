@@ -3,6 +3,7 @@ package service
 import (
 	"douyin/dao/mysql"
 	"douyin/models"
+	"douyin/pkg/snowflake"
 	"douyin/response"
 	"time"
 
@@ -15,7 +16,8 @@ func CommentAction(userID, actionType, videoID, commentID int64, commentText str
 	// 判断actionType
 	if actionType == 1 {
 		// 发布评论
-		err = mysql.PublishComment(userID, videoID, commentText)
+		commentID = snowflake.GenerateID()
+		err = mysql.PublishComment(userID, commentID, videoID, commentText)
 		if err != nil {
 			hlog.Error("service.CommentAction: 发布评论失败, err: ", err)
 			return nil, err
@@ -31,7 +33,7 @@ func CommentAction(userID, actionType, videoID, commentID int64, commentText str
 			hlog.Error("service.CommentAction: 评论作者id与当前用户id不一致")
 			return nil, err
 		}
-		err = mysql.DeleteComment(commentID)
+		err = mysql.DeleteComment(commentID, videoID)
 		if err != nil {
 			hlog.Error("service.CommentAction: 删除评论失败, err: ", err)
 			return nil, err
@@ -49,9 +51,9 @@ func CommentAction(userID, actionType, videoID, commentID int64, commentText str
 	return &response.CommentActionResponse{
 		Response: &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
 		Comment: &response.CommentResponse{
-			ID:         commentID,
+			ID:         comment.ID,
 			User:       *response.ToUserResponse(user),
-			Content:    commentText,
+			Content:    comment.Content,
 			CreateDate: comment.CreateTime.Format("01-02"),
 		},
 	}, nil

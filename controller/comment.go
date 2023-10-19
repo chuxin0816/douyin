@@ -40,6 +40,11 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	// 业务逻辑处理
 	resp, err := service.CommentAction(userID, req.ActionType, req.VideoID, req.CommentID, req.CommentText)
 	if err != nil {
+		if errors.Is(err, mysql.ErrVideoNotExist) {
+			response.Error(ctx, response.CodeVideoNotExist)
+			hlog.Error("controller.CommentAction: 视频不存在")
+			return
+		}
 		if errors.Is(err, mysql.ErrCommentNotExist) {
 			response.Error(ctx, response.CodeCommentNotExist)
 			hlog.Error("controller.CommentAction: 评论不存在")
