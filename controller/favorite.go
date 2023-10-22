@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"douyin/dao/mysql"
-	"douyin/models"
 	"douyin/pkg/jwt"
 	"douyin/response"
 	"douyin/service"
@@ -15,13 +14,24 @@ import (
 
 type FavoriteController struct{}
 
+type FavoriteActionRequest struct {
+	Token      string `query:"token" vd:"len($)>0"`                // 用户鉴权token
+	VideoID    int64  `query:"video_id,string" vd:"$>0"`           // 视频id
+	ActionType int    `query:"action_type,string" vd:"$==1||$==2"` // 1-点赞，2-取消点赞
+}
+
+type FavoriteListRequest struct {
+	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
+	Token  string `query:"token" vd:"len($)>0"`     // 用户鉴权token
+}
+
 func NewFavoriteController() *FavoriteController {
 	return &FavoriteController{}
 }
 
 func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	req := &models.FavoriteActionRequest{}
+	req := &FavoriteActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)
@@ -61,7 +71,7 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 
 func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	req := &models.FavoriteListRequest{}
+	req := &FavoriteListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)

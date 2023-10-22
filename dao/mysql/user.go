@@ -71,11 +71,11 @@ func GetUserByName(username string) *models.User {
 	return user
 }
 
-func CreateUser(req *models.UserRequest, userID int64) error {
+func CreateUser(username, password string, userID int64) error {
 	user := &models.User{
 		ID:       userID,
-		Name:     req.Username,
-		Password: req.Password,
+		Name:     username,
+		Password: password,
 	}
 	err := db.Create(user).Error
 	if err != nil {

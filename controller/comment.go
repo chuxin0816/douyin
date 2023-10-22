@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"douyin/dao/mysql"
-	"douyin/models"
 	"douyin/pkg/jwt"
 	"douyin/response"
 	"douyin/service"
@@ -15,13 +14,26 @@ import (
 
 type CommentController struct{}
 
+type CommentActionRequest struct {
+	Token       string `query:"token" vd:"len($)>0"`                                              // 用户鉴权token
+	VideoID     int64  `query:"video_id,string" vd:"$>0"`                                         // 视频id
+	ActionType  int64  `query:"action_type,string" vd:"$==1||$==2"`                               // 1-发布评论，2-删除评论
+	CommentID   int64  `query:"comment_id,string" vd:"((ActionType)$==2&&$>0)||(ActionType)$==1"` // 要删除的评论id，在action_type=2的时候使用
+	CommentText string `query:"comment_text" vd:"((ActionType)$==1&&len($)>0)||(ActionType)$==2"` // 用户填写的评论内容，在action_type=1的时候使用
+}
+
+type CommentListRequest struct {
+	Token   string `query:"token" vd:"len($)>0"`      // 用户鉴权token
+	VideoID int64  `query:"video_id,string" vd:"$>0"` // 视频id
+}
+
 func NewCommentController() *CommentController {
 	return &CommentController{}
 }
 
 func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	req := &models.CommentActionRequest{}
+	req := &CommentActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)
@@ -61,7 +73,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 
 func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	req := &models.CommentListRequest{}
+	req := &CommentListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)

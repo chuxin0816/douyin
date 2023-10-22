@@ -2,7 +2,6 @@ package service
 
 import (
 	"douyin/dao/mysql"
-	"douyin/models"
 	"douyin/response"
 	"time"
 
@@ -11,10 +10,8 @@ import (
 
 const count = 30
 
-func Feed(req *models.FeedRequest, userID int64) (resp *response.FeedResponse, err error) {
+func Feed(latestTime, userID int64) (resp *response.FeedResponse, err error) {
 	// 解析请求
-	var latestTime int64
-	latestTime = req.LatestTime
 	if latestTime == 0 {
 		latestTime = time.Now().Unix()
 	}

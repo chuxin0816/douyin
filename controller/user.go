@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"douyin/dao/mysql"
-	"douyin/models"
 	"douyin/pkg/jwt"
 	"douyin/response"
 	"douyin/service"
@@ -15,13 +14,23 @@ import (
 
 type UserController struct{}
 
+type UserInfoRequest struct {
+	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
+	Token  string `query:"token" vd:"len($)>0"`     // 用户登录状态下设置
+}
+
+type UserRequest struct {
+	Username string `query:"username" vd:"0<len($)&&len($)<33"` // 注册用户名，最长32个字符
+	Password string `query:"password" vd:"5<len($)&&len($)<33"` // 密码，最长32个字符
+}
+
 func NewUserController() *UserController {
 	return &UserController{}
 }
 
 func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	req := &models.UserInfoRequest{}
+	req := &UserInfoRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)
@@ -41,7 +50,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := service.UserInfo(req, userID)
+	resp, err := service.UserInfo(req.UserID, userID)
 	if err != nil {
 		if errors.Is(err, mysql.ErrUserNotExist) {
 			response.Error(ctx, response.CodeUserNotExist)
@@ -59,7 +68,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 
 func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	req := &models.UserRequest{}
+	req := &UserRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)
@@ -68,7 +77,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := service.Register(req)
+	resp, err := service.Register(req.Username, req.Password)
 	if err != nil {
 		if errors.Is(err, mysql.ErrUserExist) {
 			response.Error(ctx, response.CodeUserExist)
@@ -86,7 +95,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 
 func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	req := &models.UserRequest{}
+	req := &UserRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)
@@ -95,7 +104,7 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := service.Login(req)
+	resp, err := service.Login(req.Username, req.Password)
 	if err != nil {
 		if errors.Is(err, mysql.ErrUserNotExist) {
 			response.Error(ctx, response.CodeUserNotExist)

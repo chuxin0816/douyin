@@ -2,10 +2,10 @@ package controller
 
 import (
 	"context"
-	"douyin/models"
 	"douyin/pkg/jwt"
 	"douyin/response"
 	"douyin/service"
+	"mime/multipart"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -13,13 +13,24 @@ import (
 
 type PublishController struct{}
 
+type PublishActionRequest struct {
+	Data  *multipart.FileHeader `form:"data"`                // 视频数据
+	Token string                `form:"token" vd:"len($)>0"` // 用户鉴权token
+	Title string                `form:"title" vd:"len($)>0"` // 视频标题
+}
+
+type PublishListRequest struct {
+	Token  string `query:"token" vd:"len($)>0"`     // 用户鉴权token
+	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
+}
+
 func NewPublishController() *PublishController {
 	return &PublishController{}
 }
 
 func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	req := &models.PublishActionRequest{}
+	req := &PublishActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)
@@ -56,7 +67,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 
 func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
-	req := &models.PublishListRequest{}
+	req := &PublishListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		response.Error(ctx, response.CodeInvalidParam)
