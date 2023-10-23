@@ -14,6 +14,8 @@ const (
 	CodeNotFavorite
 	CodeVideoNotExist
 	CodeCommentNotExist
+	CodeAlreadyFollow
+	CodeNotFollow
 	CodeServerBusy
 )
 
@@ -29,6 +31,8 @@ var codeMsgMap = map[ResCode]string{
 	CodeNotFavorite:     "还没有点赞过",
 	CodeVideoNotExist:   "视频不存在",
 	CodeCommentNotExist: "评论不存在",
+	CodeAlreadyFollow:   "已经关注过了",
+	CodeNotFollow:       "还没有关注过",
 	CodeServerBusy:      "服务器繁忙",
 }
 

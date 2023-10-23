@@ -2,7 +2,7 @@ package models
 
 type User struct {
 	ID              int64  `json:"id" gorm:"primaryKey"`               // 用户id
-	Name            string `json:"name" gorm:"index"`                  // 用户名称
+	Name            string `json:"name" gorm:"index:idx_name"`         // 用户名称
 	Avatar          string `json:"avatar"`                             // 用户头像
 	BackgroundImage string `json:"background_image"`                   // 用户个人页顶部大图
 	FavoriteCount   int64  `json:"favorite_count" gorm:"default:0"`    // 喜欢数

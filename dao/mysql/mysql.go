@@ -27,7 +27,7 @@ func Init(conf *config.MysqlConfig) (err error) {
 		return err
 	}
 
-	err = db.AutoMigrate(&models.User{}, &models.Video{}, &models.Favorite{}, &models.Comment{})
+	err = db.AutoMigrate(&models.User{}, &models.Video{}, &models.Favorite{}, &models.Comment{}, &models.Relation{})
 	if err != nil {
 		hlog.Error("mysql.Init: 数据库迁移失败")
 		return err

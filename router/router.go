@@ -56,10 +56,15 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	}
 
 	// social apis
-	// apiRouter.POST("/relation/action", controller.RelationAction)
-	// apiRouter.GET("/relation/follow/list", controller.FollowList)
-	// apiRouter.GET("/relation/follower/list", controller.FollowerList)
-	// apiRouter.GET("/relation/friend/list", controller.FriendList)
+	relationRouter := apiRouter.Group("/relation")
+	{
+		relationController := controller.NewRelationController()
+		relationRouter.POST("/action/", relationController.Action)
+		// relationRouter.GET("/follow/list/", relationController.FollowList)
+		// relationRouter.GET("/follower/list/", relationController.FollowerList)
+		// relationRouter.GET("/friend/list/", relationController.FriendList) 
+	}
+
 	// apiRouter.GET("/message/chat", controller.MessageChat)
 	// apiRouter.POST("/message/action", controller.MessageAction)
 
