@@ -25,6 +25,11 @@ type FollowListRequest struct {
 	Token  string `query:"token" vd:"len($)>0"`     // 用户鉴权token
 }
 
+type FollowerListRequest struct {
+	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
+	Token  string `query:"token" vd:"len($)>0"`     // 用户鉴权token
+}
+
 func NewRelationController() *RelationController {
 	return &RelationController{}
 }
@@ -89,6 +94,35 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 
 	// 业务逻辑处理
 	resp, err := service.FollowList(userID, req.UserID)
+	if err != nil {
+		hlog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
+		response.Error(ctx, response.CodeServerBusy)
+		return
+	}
+
+	// 返回响应
+	response.Success(ctx, resp)
+}
+
+func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestContext) {
+	// 获取参数
+	req := &FollowerListRequest{}
+	err := ctx.BindAndValidate(req)
+	if err != nil {
+		hlog.Error("RelationController.FollowerList: 参数校验失败, err: ", err)
+		return
+	}
+
+	// 验证token
+	userID, err := jwt.ParseToken(req.Token)
+	if err != nil {
+		response.Error(ctx, response.CodeNoAuthority)
+		hlog.Error("RelationController.FollowerList: token无效, err: ", err)
+		return
+	}
+
+	// 业务逻辑处理
+	resp, err := service.FollowerList(userID, req.UserID)
 	if err != nil {
 		hlog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
 		response.Error(ctx, response.CodeServerBusy)

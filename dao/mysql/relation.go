@@ -85,3 +85,22 @@ func FollowList(userID, toUserID int64) ([]*models.User, error) {
 
 	return userList, nil
 }
+
+func FollowerList(userID, toUserID int64) ([]*models.User, error) {
+	// 查询粉丝ID列表
+	var followerIDList []int64
+	err := db.Table("relations").Select("follower_id").Where("user_id = ?", toUserID).Find(&followerIDList).Error
+	if err != nil {
+		hlog.Error("mysql.FollowerList 查询粉丝ID列表失败, err: ", err)
+		return nil, err
+	}
+
+	// 查询粉丝列表
+	followerList, err := GetUserByIDs(userID, followerIDList)
+	if err != nil {
+		hlog.Error("mysql.FollowerList 查询粉丝列表失败, err: ", err)
+		return nil, err
+	}
+
+	return followerList, nil
+}
