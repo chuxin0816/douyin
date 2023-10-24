@@ -37,7 +37,7 @@ func FollowList(userID, toUserID int64) (*response.FollowListResponse, error) {
 	// 将models.User转换为response.UserResponse
 	userList := make([]*response.UserResponse, 0, len(dUserList))
 	for _, user := range dUserList {
-		userList = append(userList, response.ToUserResponse(user))
+		userList = append(userList, mysql.ToUserResponse(userID, user))
 	}
 
 	// 返回响应
@@ -58,7 +58,7 @@ func FollowerList(userID, toUserID int64) (*response.FollowerListResponse, error
 	// 将models.User转换为response.UserResponse
 	userList := make([]*response.UserResponse, 0, len(dUserList))
 	for _, user := range dUserList {
-		userList = append(userList, response.ToUserResponse(user))
+		userList = append(userList, mysql.ToUserResponse(userID, user))
 	}
 
 	// 返回响应

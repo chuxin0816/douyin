@@ -1,7 +1,5 @@
 package response
 
-import "douyin/models"
-
 // UserResponse 用户响应
 type UserResponse struct {
 	ID              int64  `json:"id"`               // 用户id
@@ -34,20 +32,4 @@ type LoginResponse struct {
 type UserInfoResponse struct {
 	*Response
 	User *UserResponse `json:"user"` // 用户信息
-}
-
-func ToUserResponse(user *models.User) *UserResponse {
-	return &UserResponse{
-		ID:              user.ID,
-		Name:            user.Name,
-		Avatar:          user.Avatar,
-		BackgroundImage: user.BackgroundImage,
-		FavoriteCount:   user.FavoriteCount,
-		FollowCount:     user.FollowCount,
-		FollowerCount:   user.FollowerCount,
-		WorkCount:       user.WorkCount,
-		IsFollow:        false, // 需要登录后通过用户id查询数据库判断
-		Signature:       user.Signature,
-		TotalFavorited:  user.TotalFavorited,
-	}
 }

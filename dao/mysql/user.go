@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"douyin/models"
+	"douyin/response"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -23,8 +24,6 @@ func GetUserByID(userID, authorID int64) (*models.User, error) {
 	if user.ID == 0 {
 		return nil, ErrUserNotExist
 	}
-
-	// TODO: 通过用户id查询数据库判断是否关注
 
 	return user, nil
 }
@@ -53,11 +52,9 @@ func GetUserByIDs(userID int64, authorIDs []int64) ([]*models.User, error) {
 			hlog.Error("mysql.GetUserByIDs: 用户不存在,id: ", id)
 			return nil, ErrUserNotExist
 		}
-
-		// TODO: 通过用户id查询数据库判断是否关注
-
 		users = append(users, user)
 	}
+
 	return users, nil
 }
 
@@ -83,4 +80,29 @@ func CreateUser(username, password string, userID int64) error {
 		return err
 	}
 	return nil
+}
+
+func ToUserResponse(userID int64, user *models.User) *response.UserResponse {
+	userResponse := &response.UserResponse{
+		ID:              user.ID,
+		Name:            user.Name,
+		Avatar:          user.Avatar,
+		BackgroundImage: user.BackgroundImage,
+		FavoriteCount:   user.FavoriteCount,
+		FollowCount:     user.FollowCount,
+		FollowerCount:   user.FollowerCount,
+		WorkCount:       user.WorkCount,
+		IsFollow:        false,
+		Signature:       user.Signature,
+		TotalFavorited:  user.TotalFavorited,
+	}
+
+	// 判断是否关注
+	relation := &models.Relation{}
+	db.Where("user_id = ? AND follower_id = ?", user.ID, userID).Find(relation)
+	if relation.ID != 0 {
+		userResponse.IsFollow = true
+	}
+
+	return userResponse
 }

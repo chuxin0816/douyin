@@ -50,7 +50,7 @@ func CommentAction(userID, actionType, videoID, commentID int64, commentText str
 	// 返回响应
 	return &response.CommentActionResponse{
 		Response: &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
-		Comment:  response.ToCommentResponse(comment, user),
+		Comment:  mysql.ToCommentResponse(userID, comment, user),
 	}, nil
 }
 
@@ -76,7 +76,7 @@ func CommentList(userID, videoID int64) (*response.CommentListResponse, error) {
 	// 将用户信息与评论列表进行关联
 	commentList := make([]*response.CommentResponse, 0, len(dCommentList))
 	for idx, comment := range dCommentList {
-		commentList = append(commentList, response.ToCommentResponse(comment, users[idx]))
+		commentList = append(commentList, mysql.ToCommentResponse(userID, comment, users[idx]))
 	}
 
 	// 返回响应

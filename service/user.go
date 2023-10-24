@@ -26,7 +26,7 @@ func UserInfo(authorID, userID int64) (*response.UserInfoResponse, error) {
 	// 返回响应
 	return &response.UserInfoResponse{
 		Response: &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
-		User:     response.ToUserResponse(user),
+		User:     mysql.ToUserResponse(userID, user),
 	}, nil
 }
 

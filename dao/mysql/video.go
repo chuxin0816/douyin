@@ -45,7 +45,7 @@ func GetFeedList(userID int64, latestTime time.Time, count int) (videoList []*re
 	for idx, dVideo := range dVideoList {
 		videoList = append(videoList, &response.VideoResponse{
 			ID:            dVideo.ID,
-			Author:        response.ToUserResponse(authors[idx]),
+			Author:        ToUserResponse(userID, authors[idx]),
 			CommentCount:  dVideo.CommentCount,
 			PlayURL:       dVideo.PlayURL,
 			CoverURL:      dVideo.CoverURL,
@@ -139,7 +139,7 @@ func GetPublishList(userID, authorID int64) (videoList []*response.VideoResponse
 	for _, dVideo := range dVideoList {
 		videoList = append(videoList, &response.VideoResponse{
 			ID:            dVideo.ID,
-			Author:        response.ToUserResponse(author),
+			Author:        ToUserResponse(userID, author),
 			CommentCount:  dVideo.CommentCount,
 			PlayURL:       dVideo.PlayURL,
 			CoverURL:      dVideo.CoverURL,
@@ -197,7 +197,7 @@ func GetVideoList(userID int64, videoIDs []int64) ([]*response.VideoResponse, er
 	for idx, dVideo := range dVideoList {
 		videoList = append(videoList, &response.VideoResponse{
 			ID:            dVideo.ID,
-			Author:        response.ToUserResponse(authors[idx]),
+			Author:        ToUserResponse(userID, authors[idx]),
 			CommentCount:  dVideo.CommentCount,
 			PlayURL:       dVideo.PlayURL,
 			CoverURL:      dVideo.CoverURL,

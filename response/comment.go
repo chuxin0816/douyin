@@ -1,9 +1,5 @@
 package response
 
-import (
-	"douyin/models"
-)
-
 type CommentResponse struct {
 	ID         int64         `json:"id"`          // 评论id
 	User       *UserResponse `json:"user"`        // 评论用户信息
@@ -19,13 +15,4 @@ type CommentActionResponse struct {
 type CommentListResponse struct {
 	*Response
 	CommentList []*CommentResponse `json:"comment_list"`
-}
-
-func ToCommentResponse(comment *models.Comment, user *models.User) *CommentResponse {
-	return &CommentResponse{
-		ID:         comment.ID,
-		User:       ToUserResponse(user),
-		Content:    comment.Content,
-		CreateDate: comment.CreateTime.Format("01-02"),
-	}
 }

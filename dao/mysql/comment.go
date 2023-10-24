@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"douyin/models"
+	"douyin/response"
 	"errors"
 	"time"
 
@@ -98,4 +99,13 @@ func GetCommentList(videoID int64) ([]*models.Comment, error) {
 		return nil, err
 	}
 	return commentList, nil
+}
+
+func ToCommentResponse(userID int64, comment *models.Comment, user *models.User) *response.CommentResponse {
+	return &response.CommentResponse{
+		ID:         comment.ID,
+		User:       ToUserResponse(userID, user),
+		Content:    comment.Content,
+		CreateDate: comment.CreateTime.Format("01-02"),
+	}
 }
