@@ -66,3 +66,22 @@ func RelationAction(userID, toUserID int64, actionType int) error {
 
 	return nil
 }
+
+func FollowList(userID, toUserID int64) ([]*models.User, error) {
+	// 查询用户ID列表
+	var userIDList []int64
+	err := db.Table("relations").Select("user_id").Where("follower_id = ?", toUserID).Find(&userIDList).Error
+	if err != nil {
+		hlog.Error("mysql.FollowList 查询用户ID列表失败, err: ", err)
+		return nil, err
+	}
+
+	// 查询用户列表
+	userList, err := GetUserByIDs(userID, userIDList)
+	if err != nil {
+		hlog.Error("mysql.FollowList 查询用户列表失败, err: ", err)
+		return nil, err
+	}
+
+	return userList, nil
+}
