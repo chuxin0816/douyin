@@ -4,7 +4,6 @@ import (
 	"douyin/models"
 	"douyin/pkg/snowflake"
 	"douyin/response"
-	"path"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -12,8 +11,8 @@ import (
 )
 
 const (
-	videoPrefix = "https://douyin-chuxin.oss-cn-shenzhen.aliyuncs.com/video/"
-	imagePrefix = "https://douyin-chuxin.oss-cn-shenzhen.aliyuncs.com/image/"
+	videoPrefix = "http://oss.chuxin0816.com/video/"
+	imagePrefix = "http://oss.chuxin0816.com/image/"
 )
 
 // GetVideoList 获取视频Feed流
@@ -90,8 +89,8 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 	video := &models.Video{
 		ID:         snowflake.GenerateID(),
 		AuthorID:   userID,
-		PlayURL:    path.Join(videoPrefix, videoName),
-		CoverURL:   path.Join(imagePrefix, coverName),
+		PlayURL:    videoPrefix + videoName,
+		CoverURL:   imagePrefix + coverName,
 		UploadTime: time.Now(),
 		Title:      title,
 	}

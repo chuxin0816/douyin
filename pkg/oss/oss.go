@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"douyin/config"
 	"io"
+	"mime/multipart"
 	"os"
 	"path"
+	"sync"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -30,37 +32,56 @@ func Init(conf *config.OssConfig) error {
 }
 
 // UploadFile 上传文件到oss
-func UploadFile(uuidName string) error {
+func UploadFile(file *multipart.FileHeader, uuidName string) error {
+	// 打开视频获取视频流
+	videoStream, err := file.Open()
+	if err != nil {
+		hlog.Error("oss.UploadFile: 打开视频失败, err: ", err)
+		return err
+	}
+
 	// 获取视频封面
 	videoName := uuidName + ".mp4"
 	coverName := uuidName + ".jpeg"
 	imageData, err := GetCoverImage(videoName)
 	if err != nil {
-		hlog.Error("service.PublishAction: 获取封面失败, err: ", err)
+		hlog.Error("oss.UploadFile: 获取封面失败, err: ", err)
 		return err
 	}
 
-	// 上传视频
-	err = bucket.PutObjectFromFile(path.Join(videoPath, videoName), videoName)
-	if err != nil {
-		hlog.Error("oss.UploadFile: 上传视频失败", err)
-		return err
-	}
-
-	// 删除本地视频和封面
+	// 删除本地视频
 	go func() {
 		if err := os.Remove(videoName); err != nil {
 			hlog.Error("service.PublishAction: 删除视频失败, err: ", err)
 		}
 	}()
 
-	// 上传封面
-	err = bucket.PutObject(path.Join(imagePath, coverName), imageData)
-	if err != nil {
-		hlog.Error("oss.UploadFile: 上传封面失败", err)
-		return err
-	}
-	return nil
+	// 使用协程并发执行文件上传操作
+	var uploadErr error
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+
+	// 协程1: 上传视频
+	go func() {
+		defer wg.Done()
+		if err := bucket.PutObject(path.Join(videoPath, videoName), videoStream); err != nil {
+			hlog.Error("oss.UploadFile: 上传视频失败", err)
+			uploadErr = err
+		}
+	}()
+	// 协程2: 上传封面
+	go func() {
+		defer wg.Done()
+		if err := bucket.PutObject(path.Join(imagePath, coverName), imageData); err != nil {
+			hlog.Error("oss.UploadFile: 上传封面失败", err)
+			uploadErr = err
+		}
+	}()
+
+	wg.Wait()
+
+	return uploadErr
 }
 
 // GetCoverImage 获取视频第15帧作为封面
