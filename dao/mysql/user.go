@@ -15,7 +15,7 @@ var (
 )
 
 // GetUserByID 用户通过作者id查询作者信息
-func GetUserByID(userID, authorID int64) (*models.User, error) {
+func GetUserByID(authorID int64) (*models.User, error) {
 	user := &models.User{}
 	err := db.Where("id = ?", authorID).Find(user).Error
 	if err != nil {
@@ -29,7 +29,7 @@ func GetUserByID(userID, authorID int64) (*models.User, error) {
 }
 
 // GetUserByIDs 根据用户id列表查询用户信息
-func GetUserByIDs(userID int64, authorIDs []int64) ([]*models.User, error) {
+func GetUserByIDs(authorIDs []int64) ([]*models.User, error) {
 	// 查询数据库
 	var users []*models.User
 	err := db.Where("id IN (?)", authorIDs).Find(&users).Error

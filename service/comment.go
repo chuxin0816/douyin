@@ -41,7 +41,7 @@ func CommentAction(userID, actionType, videoID, commentID int64, commentText str
 	}
 
 	// 获取用户信息
-	user, err := mysql.GetUserByID(userID, comment.UserID)
+	user, err := mysql.GetUserByID(comment.UserID)
 	if err != nil {
 		hlog.Error("service.CommentAction: 获取用户信息失败, err: ", err)
 		return nil, err
@@ -67,7 +67,7 @@ func CommentList(userID, videoID int64) (*response.CommentListResponse, error) {
 	for _, comment := range dCommentList {
 		userIDs = append(userIDs, comment.UserID)
 	}
-	users, err := mysql.GetUserByIDs(userID, userIDs)
+	users, err := mysql.GetUserByIDs(userIDs)
 	if err != nil {
 		hlog.Error("service.CommentList: 获取用户信息失败, err: ", err)
 		return nil, err

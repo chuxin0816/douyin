@@ -17,7 +17,7 @@ var (
 
 func UserInfo(authorID, userID int64) (*response.UserInfoResponse, error) {
 	// 查询用户信息
-	user, err := mysql.GetUserByID(userID, authorID)
+	user, err := mysql.GetUserByID(authorID)
 	if err != nil {
 		hlog.Error("service.UserInfo: 查询用户信息失败")
 		return nil, err

@@ -34,7 +34,7 @@ func GetFeedList(userID int64, latestTime time.Time, count int) (videoList []*re
 	for _, dVideo := range dVideoList {
 		authorIDs = append(authorIDs, dVideo.AuthorID)
 	}
-	authors, err := GetUserByIDs(userID, authorIDs)
+	authors, err := GetUserByIDs(authorIDs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -127,7 +127,7 @@ func GetPublishList(userID, authorID int64) (videoList []*response.VideoResponse
 	}
 
 	// 查询作者信息
-	author, err := GetUserByID(userID, authorID)
+	author, err := GetUserByID(authorID)
 	if err != nil {
 		hlog.Error("mysql.GetPublishList: 查询作者信息失败")
 		return nil, err
@@ -186,7 +186,7 @@ func GetVideoList(userID int64, videoIDs []int64) ([]*response.VideoResponse, er
 	for _, dVideo := range dVideoList {
 		authorIDs = append(authorIDs, dVideo.AuthorID)
 	}
-	authors, err := GetUserByIDs(userID, authorIDs)
+	authors, err := GetUserByIDs(authorIDs)
 	if err != nil {
 		return nil, err
 	}

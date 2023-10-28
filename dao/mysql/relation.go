@@ -67,7 +67,7 @@ func RelationAction(userID, toUserID int64, actionType int) error {
 	return nil
 }
 
-func FollowList(userID, toUserID int64) ([]*models.User, error) {
+func FollowList(toUserID int64) ([]*models.User, error) {
 	// 查询用户ID列表
 	var userIDList []int64
 	err := db.Table("relations").Select("user_id").Where("follower_id = ?", toUserID).Find(&userIDList).Error
@@ -77,7 +77,7 @@ func FollowList(userID, toUserID int64) ([]*models.User, error) {
 	}
 
 	// 查询用户列表
-	userList, err := GetUserByIDs(userID, userIDList)
+	userList, err := GetUserByIDs(userIDList)
 	if err != nil {
 		hlog.Error("mysql.FollowList 查询用户列表失败, err: ", err)
 		return nil, err
@@ -86,7 +86,7 @@ func FollowList(userID, toUserID int64) ([]*models.User, error) {
 	return userList, nil
 }
 
-func FollowerList(userID, toUserID int64) ([]*models.User, error) {
+func FollowerList(toUserID int64) ([]*models.User, error) {
 	// 查询粉丝ID列表
 	var followerIDList []int64
 	err := db.Table("relations").Select("follower_id").Where("user_id = ?", toUserID).Find(&followerIDList).Error
@@ -96,7 +96,7 @@ func FollowerList(userID, toUserID int64) ([]*models.User, error) {
 	}
 
 	// 查询粉丝列表
-	followerList, err := GetUserByIDs(userID, followerIDList)
+	followerList, err := GetUserByIDs(followerIDList)
 	if err != nil {
 		hlog.Error("mysql.FollowerList 查询粉丝列表失败, err: ", err)
 		return nil, err
