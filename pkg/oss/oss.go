@@ -33,46 +33,41 @@ func Init(conf *config.OssConfig) error {
 
 // UploadFile 上传文件到oss
 func UploadFile(file *multipart.FileHeader, uuidName string) error {
-	// 打开视频获取视频流
-	videoStream, err := file.Open()
-	if err != nil {
-		hlog.Error("oss.UploadFile: 打开视频失败, err: ", err)
-		return err
-	}
-
-	// 获取视频封面
 	videoName := uuidName + ".mp4"
 	coverName := uuidName + ".jpeg"
-	imageData, err := GetCoverImage(videoName)
-	if err != nil {
-		hlog.Error("oss.UploadFile: 获取封面失败, err: ", err)
-		return err
-	}
-
-	// 删除本地视频
-	go func() {
-		if err := os.Remove(videoName); err != nil {
-			hlog.Error("service.PublishAction: 删除视频失败, err: ", err)
-		}
-	}()
-
+	
 	// 使用协程并发执行文件上传操作
 	var uploadErr error
 	var wg sync.WaitGroup
 
 	wg.Add(2)
 
-	// 协程1: 上传视频
 	go func() {
 		defer wg.Done()
+		// 打开视频获取视频流
+		videoStream, err := file.Open()
+		if err != nil {
+			hlog.Error("oss.UploadFile: 打开视频失败, err: ", err)
+			uploadErr = err
+			return
+		}
+
+		// 上传视频
 		if err := bucket.PutObject(path.Join(videoPath, videoName), videoStream); err != nil {
 			hlog.Error("oss.UploadFile: 上传视频失败", err)
 			uploadErr = err
 		}
 	}()
-	// 协程2: 上传封面
+
 	go func() {
 		defer wg.Done()
+		// 获取视频封面
+		imageData, err := GetCoverImage(videoName)
+		if err != nil {
+			hlog.Error("oss.UploadFile: 获取封面失败, err: ", err)
+			uploadErr = err
+			return
+		}
 		if err := bucket.PutObject(path.Join(imagePath, coverName), imageData); err != nil {
 			hlog.Error("oss.UploadFile: 上传封面失败", err)
 			uploadErr = err
@@ -80,6 +75,13 @@ func UploadFile(file *multipart.FileHeader, uuidName string) error {
 	}()
 
 	wg.Wait()
+
+	// 删除本地视频
+	go func() {
+		if err := os.Remove(videoName); err != nil {
+			hlog.Error("service.PublishAction: 删除视频失败, err: ", err)
+		}
+	}()
 
 	return uploadErr
 }

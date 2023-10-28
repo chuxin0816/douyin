@@ -18,52 +18,43 @@ func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHe
 	data.Filename = uuidName + ".mp4"
 	coverName := uuidName + ".jpeg"
 
+	// 保存视频到本地
+	if err := ctx.SaveUploadedFile(data, data.Filename); err != nil {
+		hlog.Error("service.PublishAction: 保存视频失败, err: ", err)
+		return nil, err
+	}
+
 	// 使用协程并发执行文件保存和上传到oss操作
-	var saveErr, uploadErr, dbErr error
+	var uploadErr, dbErr error
 	var wg sync.WaitGroup
 
-	wg.Add(3)
+	wg.Add(2)
 
-	// 协程1: 保存视频到本地
+	// 上传视频和封面到oss
 	go func() {
 		defer wg.Done()
-		if err := ctx.SaveUploadedFile(data, data.Filename); err != nil {
-			saveErr = err
-		}
-	}()
-
-	// 协程2: 上传视频和封面到oss
-	go func() {
-		defer wg.Done()
-		err := oss.UploadFile(data, uuidName)
-		if err != nil {
+		if err := oss.UploadFile(data, uuidName); err != nil {
+			hlog.Error("service.PublishAction: 上传文件失败, err: ", uploadErr)
 			uploadErr = err
 		}
 	}()
 
-	// 协程3: 操作数据库
+	// 操作数据库
 	go func() {
 		defer wg.Done()
-		err := mysql.SaveVideo(userID, data.Filename, coverName, title)
-		if err != nil {
+		if err := mysql.SaveVideo(userID, data.Filename, coverName, title); err != nil {
+			hlog.Error("service.PublishAction: 操作数据库失败, err: ", dbErr)
 			dbErr = err
 		}
 	}()
 
-	wg.Wait() // 等待所有协程完成
-
-	if saveErr != nil {
-		hlog.Error("service.PublishAction: 保存视频失败, err: ", saveErr)
-		return nil, saveErr
-	}
+	wg.Wait()
 
 	if uploadErr != nil {
-		hlog.Error("service.PublishAction: 上传文件失败, err: ", uploadErr)
 		return nil, uploadErr
 	}
 
 	if dbErr != nil {
-		hlog.Error("service.PublishAction: 操作数据库失败, err: ", dbErr)
 		return nil, dbErr
 	}
 
