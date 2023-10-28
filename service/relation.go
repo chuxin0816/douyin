@@ -90,12 +90,12 @@ func FriendList(userID, toUserID int64) (*response.RelationListResponse, error) 
 		size = len(dFollowerList)
 	}
 	dFriendList := make([]*models.User, 0, size)
-	mp := make(map[*models.User]struct{}, len(dFollowList))
+	mp := make(map[int64]struct{}, len(dFollowList))
 	for _, user := range dFollowList {
-		mp[user] = struct{}{}
+		mp[user.ID] = struct{}{}
 	}
 	for _, user := range dFollowerList {
-		if _, ok := mp[user]; ok {
+		if _, ok := mp[user.ID]; ok {
 			dFriendList = append(dFriendList, user)
 		}
 	}
