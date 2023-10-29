@@ -27,5 +27,6 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y \
     --no-install-recommends \
+    ffmpeg \
     netcat; \
     chmod 755 wait-for.sh

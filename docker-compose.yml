@@ -24,5 +24,5 @@ services:
       - mysql
       - redis
     ports:
-      - "8888:8888"
+      - "8080:8080"
     container_name: App-douyin
