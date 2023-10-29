@@ -63,6 +63,14 @@ func FavoriteAction(userID int64, videoID int64, actionType int) (err error) {
 		return err
 	}
 
+	// 更新user表中的total_favorited字段
+	err = tx.Model(models.User{}).Where("id = ?", userID).Update("total_favorited", gorm.Expr("total_favorited + ?", actionType)).Error
+	if err != nil {
+		tx.Rollback()
+		hlog.Error("mysql.FavoriteAction: 更新user表中的total_favorited字段失败, err: ", err)
+		return err
+	}
+
 	// 提交事务
 	tx.Commit()
 
