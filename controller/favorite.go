@@ -15,14 +15,14 @@ import (
 type FavoriteController struct{}
 
 type FavoriteActionRequest struct {
-	Token      string `query:"token" vd:"len($)>0"`                // 用户鉴权token
-	VideoID    int64  `query:"video_id,string" vd:"$>0"`           // 视频id
+	Token      string `query:"token"              vd:"len($)>0"`   // 用户鉴权token
+	VideoID    int64  `query:"video_id,string"    vd:"$>0"`        // 视频id
 	ActionType int    `query:"action_type,string" vd:"$==1||$==2"` // 1-点赞，2-取消点赞
 }
 
 type FavoriteListRequest struct {
-	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
-	Token  string `query:"token" vd:"len($)>0"`     // 用户鉴权token
+	UserID int64  `query:"user_id,string" vd:"$>0"`      // 用户id
+	Token  string `query:"token"          vd:"len($)>0"` // 用户鉴权token
 }
 
 func NewFavoriteController() *FavoriteController {

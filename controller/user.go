@@ -16,7 +16,7 @@ type UserController struct{}
 
 type UserInfoRequest struct {
 	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
-	Token  string `query:"token" vd:"len($)>0"`     // 用户登录状态下设置
+	Token  string `query:"token"          vd:"len($)>0"`     // 用户登录状态下设置
 }
 
 type UserRequest struct {

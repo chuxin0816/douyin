@@ -20,7 +20,7 @@ type PublishActionRequest struct {
 }
 
 type PublishListRequest struct {
-	Token  string `query:"token" vd:"len($)>0"`     // 用户鉴权token
+	Token  string `query:"token"          vd:"len($)>0"`     // 用户鉴权token
 	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
 }
 

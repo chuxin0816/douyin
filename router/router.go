@@ -65,6 +65,11 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 		relationRouter.GET("/friend/list/", relationController.FriendList) 
 	}
 
+	messageRouter := apiRouter.Group("/message")
+	{
+		messageController := controller.NewMessageController()
+		messageRouter.POST("/action/", messageController.Action)
+	}
 	// apiRouter.GET("/message/chat", controller.MessageChat)
 	// apiRouter.POST("/message/action", controller.MessageAction)
 
