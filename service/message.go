@@ -21,9 +21,9 @@ func MessageAction(userID, toUserID int64, actionType int, content string) (*res
 	}, nil
 }
 
-func MessageChat(userID, toUserID int64) (*response.MessageChatResponse, error) {
+func MessageChat(userID, toUserID, lastTime int64) (*response.MessageChatResponse, error) {
 	// 操作数据库
-	messageList, err := mysql.MessageList(userID, toUserID)
+	messageList, err := mysql.MessageList(userID, toUserID, lastTime)
 	if err != nil {
 		hlog.Error("service.MessageChat: 操作数据库失败, err: ", err)
 		return nil, err
