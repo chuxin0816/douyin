@@ -20,3 +20,18 @@ func MessageAction(userID, toUserID int64, actionType int, content string) (*res
 		Response: &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
 	}, nil
 }
+
+func MessageChat(userID, toUserID int64) (*response.MessageChatResponse, error) {
+	// 操作数据库
+	messageList, err := mysql.MessageList(userID, toUserID)
+	if err != nil {
+		hlog.Error("service.MessageChat: 操作数据库失败, err: ", err)
+		return nil, err
+	}
+
+	// 返回响应
+	return &response.MessageChatResponse{
+		Response:    &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
+		MessageList: messageList,
+	}, nil
+}
