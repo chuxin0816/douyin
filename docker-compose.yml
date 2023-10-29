@@ -1,0 +1,28 @@
+version: '3.7'
+services:
+  mysql:
+    image: mysql
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: '123456'
+      MYSQL_DATABASE: douyin
+    container_name: Mysql-douyin
+
+  redis:
+    image: redis
+    ports:
+      - "16379:6379"
+    container_name: Redis-douyin
+
+  douyin:
+    build:
+      context: .
+      dockerfile: dockerfile
+    command: sh -c "./wait-for.sh Mysql-douyin:3306 Redis-douyin:6379 -- ./douyin"
+    depends_on:
+      - mysql
+      - redis
+    ports:
+      - "8888:8888"
+    container_name: App-douyin
