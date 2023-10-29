@@ -2,8 +2,12 @@ package controller
 
 import (
 	"context"
+	"douyin/pkg/jwt"
+	"douyin/response"
+	"douyin/service"
 
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
 type MessageController struct{}
@@ -22,5 +26,29 @@ func NewMessageController() *MessageController {
 func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
 	req := &MessageActionRequest{}
-	ctx.BindAndValidate(req)
+	err := ctx.BindAndValidate(req)
+	if err != nil {
+		response.Error(ctx, response.CodeInvalidParam)
+		hlog.Error("MessageController.Action: 参数校验失败, err: ", err)
+		return
+	}
+
+	// 验证token
+	userID, err := jwt.ParseToken(req.Token)
+	if err != nil {
+		response.Error(ctx, response.CodeNoAuthority)
+		hlog.Error("MessageController.Action: token无效, err: ", err)
+		return
+	}
+
+	// 业务逻辑处理
+	resp, err := service.MessageAction(userID, req.ToUserID, req.ActionType, req.Content)
+	if err != nil {
+		response.Error(ctx, response.CodeServerBusy)
+		hlog.Error("MessageController.Action: 业务处理失败, err: ", err)
+		return
+	}
+
+	// 返回响应
+	response.Success(ctx, resp)
 }
