@@ -23,7 +23,7 @@ func MessageAction(userID, toUserID int64, content string) error {
 
 func MessageList(userID, toUserID, lastTime int64) ([]*response.MessageResponse, error) {
 	var dMessageList []*models.Message
-	err := db.Debug().Where("from_user_id = ? and to_user_id = ? and create_time > ?", userID, toUserID, lastTime).
+	err := db.Where("from_user_id = ? and to_user_id = ? and create_time > ?", userID, toUserID, lastTime).
 		Or("from_user_id = ? and to_user_id = ? and create_time > ?", toUserID, userID, lastTime).
 		Order("create_time").Find(&dMessageList).Error
 	if err != nil {
