@@ -14,21 +14,6 @@ var (
 )
 
 func FavoriteAction(userID int64, videoID int64, actionType int64) (err error) {
-	// 查看是否已经点赞
-	favorite := &models.Favorite{}
-	err = db.Where("user_id = ? AND video_id = ?", userID, videoID).Find(favorite).Error
-	if err != nil {
-		hlog.Error("mysql.FavoriteAction: 查看是否已经点赞失败, err: ", err)
-		return err
-	}
-	if favorite.ID != 0 && actionType == 1 {
-		hlog.Error("mysql.FavoriteAction: 已经点赞过了")
-		return ErrAlreadyFavorite
-	} else if favorite.ID == 0 && actionType == -1 {
-		hlog.Error("mysql.FavoriteAction: 还没有点赞过")
-		return ErrNotFavorite
-	}
-
 	// 开启事务
 	tx := db.Begin()
 

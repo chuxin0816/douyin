@@ -3,7 +3,7 @@ package redis
 const (
 	Prefix           = "douyin:"
 	KeyVideoFavorite = "video:favorite"
-	KeyVideoLiker    = "video:liker"
+	KeyVideoLikerPF    = "video:liker:"
 	KeyVideoComment  = "video:comment"
 )
 

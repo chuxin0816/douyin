@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"douyin/dao/mysql"
+	"douyin/dao/redis"
 	"douyin/pkg/jwt"
 	"douyin/response"
 	"douyin/service"
@@ -17,7 +17,7 @@ type FavoriteController struct{}
 type FavoriteActionRequest struct {
 	Token      string `query:"token"              vd:"len($)>0"`   // 用户鉴权token
 	VideoID    int64  `query:"video_id,string"    vd:"$>0"`        // 视频id
-	ActionType int64    `query:"action_type,string" vd:"$==1||$==2"` // 1-点赞，2-取消点赞
+	ActionType int64  `query:"action_type,string" vd:"$==1||$==2"` // 1-点赞，2-取消点赞
 }
 
 type FavoriteListRequest struct {
@@ -50,12 +50,12 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	// 业务逻辑处理
 	resp, err := service.FavoriteAction(userID, req.VideoID, req.ActionType)
 	if err != nil {
-		if errors.Is(err, mysql.ErrAlreadyFavorite) {
+		if errors.Is(err, redis.ErrAlreadyFavorite) {
 			response.Error(ctx, response.CodeAlreadyFavorite)
 			hlog.Error("FavoriteController.Action: 已经点赞过了")
 			return
 		}
-		if errors.Is(err, mysql.ErrNotFavorite) {
+		if errors.Is(err, redis.ErrNotFavorite) {
 			response.Error(ctx, response.CodeNotFavorite)
 			hlog.Error("FavoriteController.Action: 还没有点赞过")
 			return
