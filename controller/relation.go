@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 	"douyin/dao/mysql"
-	"douyin/pkg/jwt"
+	"douyin/middleware"
 	"douyin/response"
 	"douyin/service"
 	"errors"
@@ -15,14 +15,12 @@ import (
 type RelationController struct{}
 
 type RelationActionRequest struct {
-	Token      string `query:"token"              vd:"len($)>0"`                // 用户鉴权token
-	ToUserID   int64  `query:"to_user_id,string"  vd:"$>0"`         // 对方用户id
-	ActionType int64    `query:"action_type,string" vd:"$==1||$==2"` // 1-关注，2-取消关注
+	ToUserID   int64 `query:"to_user_id,string"  vd:"$>0"`        // 对方用户id
+	ActionType int64 `query:"action_type,string" vd:"$==1||$==2"` // 1-关注，2-取消关注
 }
 
 type RelationListRequest struct {
-	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
-	Token  string `query:"token"          vd:"len($)>0"`     // 用户鉴权token
+	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
 }
 
 func NewRelationController() *RelationController {
@@ -39,13 +37,8 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 		return
 	}
 
-	// 验证token
-	userID, err := jwt.ParseToken(req.Token)
-	if err != nil {
-		response.Error(ctx, response.CodeNoAuthority)
-		hlog.Error("RelationController.Action: token无效, err: ", err)
-		return
-	}
+	// 从认证中间件中获取userID
+	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.RelationAction(userID, req.ToUserID, req.ActionType)
@@ -79,13 +72,8 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 		return
 	}
 
-	// 验证token
-	userID, err := jwt.ParseToken(req.Token)
-	if err != nil {
-		response.Error(ctx, response.CodeNoAuthority)
-		hlog.Error("RelationController.FollowList: token无效, err: ", err)
-		return
-	}
+	// 从认证中间件中获取userID
+	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.FollowList(userID, req.UserID)
@@ -108,13 +96,8 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 		return
 	}
 
-	// 验证token
-	userID, err := jwt.ParseToken(req.Token)
-	if err != nil {
-		response.Error(ctx, response.CodeNoAuthority)
-		hlog.Error("RelationController.FollowerList: token无效, err: ", err)
-		return
-	}
+	// 从认证中间件中获取userID
+	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.FollowerList(userID, req.UserID)
@@ -128,7 +111,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	response.Success(ctx, resp)
 }
 
-func (rc *RelationController)FriendList(c context.Context,ctx *app.RequestContext){
+func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
@@ -137,16 +120,11 @@ func (rc *RelationController)FriendList(c context.Context,ctx *app.RequestContex
 		return
 	}
 
-	// 验证token
-	userID, err := jwt.ParseToken(req.Token)
-	if err != nil {
-		response.Error(ctx, response.CodeNoAuthority)
-		hlog.Error("RelationController.FriendList: token无效, err: ", err)
-		return
-	}
+	// 从认证中间件中获取userID
+	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err:= service.FriendList(userID, req.UserID)
+	resp, err := service.FriendList(userID, req.UserID)
 	if err != nil {
 		hlog.Error("RelationController.FriendList: 业务逻辑处理失败, err: ", err)
 		response.Error(ctx, response.CodeServerBusy)

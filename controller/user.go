@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 	"douyin/dao/mysql"
-	"douyin/pkg/jwt"
+	"douyin/middleware"
 	"douyin/response"
 	"douyin/service"
 	"errors"
@@ -15,8 +15,7 @@ import (
 type UserController struct{}
 
 type UserInfoRequest struct {
-	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
-	Token  string `query:"token"          vd:"len($)>0"`     // 用户登录状态下设置
+	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
 }
 
 type UserRequest struct {
@@ -38,16 +37,8 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
-	// 验证token
-	var userID int64
-	if len(req.Token) > 0 {
-		userID, err = jwt.ParseToken(req.Token)
-		if err != nil {
-			response.Error(ctx, response.CodeNoAuthority)
-			hlog.Error("controller.Action: token无效: ", err)
-			return
-		}
-	}
+	// 从认证中间件中获取userID
+	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.UserInfo(req.UserID, userID)
