@@ -12,6 +12,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.1.2
 	github.com/hertz-contrib/logger/zap v1.1.0
+	github.com/juju/ratelimit v1.0.2
 	github.com/redis/go-redis/v9 v9.3.0
 	github.com/spf13/viper v1.17.0
 	github.com/u2takey/ffmpeg-go v0.5.0
