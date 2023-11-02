@@ -2,19 +2,27 @@ package service
 
 import (
 	"douyin/dao/mysql"
+	"douyin/dao/redis"
 	"douyin/response"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-func FavoriteAction(userID int64, videoID int64, actionType int) (*response.FavoriteActionResponse, error) {
+func FavoriteAction(userID int64, videoID int64, actionType int64) (*response.FavoriteActionResponse, error) {
 	// 解析视频点赞类型
 	if actionType == 2 {
 		actionType = -1
 	}
 
+	// 写入redis
+	err := redis.FavoriteAction(userID, videoID, actionType)
+	if err != nil {
+		hlog.Error("service.FavoriteAction: 写入redis失败, err: ", err)
+		return nil, err
+	}
+
 	// 操作数据库
-	err := mysql.FavoriteAction(userID, videoID, actionType)
+	err = mysql.FavoriteAction(userID, videoID, actionType)
 	if err != nil {
 		hlog.Error("service.FavoriteAction: 操作数据库失败, err: ", err)
 		return nil, err

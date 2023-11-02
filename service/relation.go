@@ -8,7 +8,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-func RelationAction(userID, toUserID int64, actionType int) (*response.RelationActionResponse, error) {
+func RelationAction(userID, toUserID int64, actionType int64) (*response.RelationActionResponse, error) {
 	// 解析关注类型
 	if actionType == 2 {
 		actionType = -1

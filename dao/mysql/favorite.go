@@ -13,7 +13,7 @@ var (
 	ErrNotFavorite     = errors.New("还没有点赞过")
 )
 
-func FavoriteAction(userID int64, videoID int64, actionType int) (err error) {
+func FavoriteAction(userID int64, videoID int64, actionType int64) (err error) {
 	// 查看是否已经点赞
 	favorite := &models.Favorite{}
 	err = db.Where("user_id = ? AND video_id = ?", userID, videoID).Find(favorite).Error

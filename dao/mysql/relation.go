@@ -13,7 +13,7 @@ var (
 	ErrNotFollow     = errors.New("还没有关注过")
 )
 
-func RelationAction(userID, toUserID int64, actionType int) error {
+func RelationAction(userID, toUserID int64, actionType int64) error {
 	// 查看是否关注
 	relation := &models.Relation{}
 	err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Find(relation).Error

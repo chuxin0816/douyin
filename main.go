@@ -34,7 +34,7 @@ func main() {
 		hlog.Error("redis init failed, err: ", err)
 		return
 	}
-	defer redis.RDB.Close()
+	defer redis.Close()
 	// 初始化雪花算法
 	if err := snowflake.Init(config.Conf.StartTime, config.Conf.MachineID); err != nil {
 		hlog.Error("snowflake init failed, err: ", err)

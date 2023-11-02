@@ -1,20 +1,24 @@
 package redis
 
 import (
+	"context"
 	"douyin/config"
 	"fmt"
 
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 )
 
-var RDB *redis.Client
+var rdb *redis.Client
 
 func Init(conf *config.RedisConfig) error {
-	RDB = redis.NewClient(&redis.Options{
+	rdb = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", conf.Host, conf.Port),
 		Password: conf.Password,
 		DB:       conf.DB,
 	})
-	_, err := RDB.Ping().Result()
-	return err
+	return rdb.Ping(context.Background()).Err()
+}
+
+func Close() {
+	rdb.Close()
 }

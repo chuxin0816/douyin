@@ -17,7 +17,7 @@ type RelationController struct{}
 type RelationActionRequest struct {
 	Token      string `query:"token"              vd:"len($)>0"`                // 用户鉴权token
 	ToUserID   int64  `query:"to_user_id,string"  vd:"$>0"`         // 对方用户id
-	ActionType int    `query:"action_type,string" vd:"$==1||$==2"` // 1-关注，2-取消关注
+	ActionType int64    `query:"action_type,string" vd:"$==1||$==2"` // 1-关注，2-取消关注
 }
 
 type RelationListRequest struct {
