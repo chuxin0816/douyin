@@ -35,8 +35,9 @@ RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ lunar main restr
     echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ lunar-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
     echo "deb http://ports.ubuntu.com/ubuntu-ports/ lunar-security main restricted universe multiverse" >> /etc/apt/sources.list
 
-RUN apt-get update; \
+RUN set -eux; \
+    apt-get update; \
     apt-get install -y \
     ffmpeg \
-    netcat; \
+    netcat-traditional; \
     chmod 755 wait-for.sh
