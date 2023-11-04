@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"douyin/dao/mysql"
+	"douyin/dao"
 	"douyin/middleware"
 	"douyin/response"
 	"douyin/service"
@@ -43,12 +43,12 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	// 业务逻辑处理
 	resp, err := service.RelationAction(userID, req.ToUserID, req.ActionType)
 	if err != nil {
-		if errors.Is(err, mysql.ErrAlreadyFollow) {
+		if errors.Is(err, dao.ErrAlreadyFollow) {
 			hlog.Error("RelationController.Action: 已经关注过了, err: ", err)
 			response.Error(ctx, response.CodeAlreadyFollow)
 			return
 		}
-		if errors.Is(err, mysql.ErrNotFollow) {
+		if errors.Is(err, dao.ErrNotFollow) {
 			hlog.Error("RelationController.Action: 还没有关注过, err: ", err)
 			response.Error(ctx, response.CodeNotFollow)
 			return

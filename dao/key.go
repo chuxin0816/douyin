@@ -1,4 +1,4 @@
-package redis
+package dao
 
 const (
 	Prefix           = "douyin:"

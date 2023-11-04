@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"douyin/dao/redis"
+	"douyin/dao"
 	"douyin/middleware"
 	"douyin/response"
 	"douyin/service"
@@ -43,12 +43,12 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	// 业务逻辑处理
 	resp, err := service.FavoriteAction(userID, req.VideoID, req.ActionType)
 	if err != nil {
-		if errors.Is(err, redis.ErrAlreadyFavorite) {
+		if errors.Is(err, dao.ErrAlreadyFavorite) {
 			response.Error(ctx, response.CodeAlreadyFavorite)
 			hlog.Error("FavoriteController.Action: 已经点赞过了")
 			return
 		}
-		if errors.Is(err, redis.ErrNotFavorite) {
+		if errors.Is(err, dao.ErrNotFavorite) {
 			response.Error(ctx, response.CodeNotFavorite)
 			hlog.Error("FavoriteController.Action: 还没有点赞过")
 			return

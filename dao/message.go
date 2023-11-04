@@ -1,4 +1,4 @@
-package mysql
+package dao
 
 import (
 	"douyin/models"

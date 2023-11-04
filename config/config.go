@@ -14,8 +14,7 @@ type Config struct {
 	*OssConfig       `mapstructure:"oss"`
 	*HertzConfig     `mapstructure:"hertz"`
 	*LogConfig       `mapstructure:"log"`
-	*MysqlConfig     `mapstructure:"mysql"`
-	*RedisConfig     `mapstructure:"redis"`
+	*DatabaseConfig  `mapstructure:"database"`
 	*KafkaConfig     `mapstructure:"kafka"`
 }
 
@@ -41,6 +40,11 @@ type LogConfig struct {
 	MaxSize    int    `mapstructure:"max_size"`
 	MaxBackups int    `mapstructure:"max_backups"`
 	MaxAge     int    `mapstructure:"max_age"`
+}
+
+type DatabaseConfig struct {
+	*MysqlConfig `mapstructure:"mysql"`
+	*RedisConfig `mapstructure:"redis"`
 }
 
 type MysqlConfig struct {

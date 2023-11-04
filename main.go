@@ -2,8 +2,7 @@ package main
 
 import (
 	"douyin/config"
-	"douyin/dao/mysql"
-	"douyin/dao/redis"
+	"douyin/dao"
 	"douyin/logger"
 	"douyin/middleware"
 	"douyin/pkg/oss"
@@ -25,17 +24,12 @@ func main() {
 		fmt.Printf("logger init failed, err:%v\n", err)
 		return
 	}
-	// 初始化mysql
-	if err := mysql.Init(config.Conf.MysqlConfig); err != nil {
-		hlog.Error("mysql init failed, err: ", err)
+	// 初始化database
+	if err := dao.Init(config.Conf.DatabaseConfig); err != nil {
+		hlog.Error("dao init failed, err: ", err)
 		return
 	}
-	// 初始化redis
-	if err := redis.Init(config.Conf.RedisConfig); err != nil {
-		hlog.Error("redis init failed, err: ", err)
-		return
-	}
-	defer redis.Close()
+	defer dao.Close()
 	// 初始化kafka
 	if err := middleware.Init(config.Conf.KafkaConfig); err != nil {
 		hlog.Error("kafka init failed, err: ", err)

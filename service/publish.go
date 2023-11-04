@@ -1,7 +1,7 @@
 package service
 
 import (
-	"douyin/dao/mysql"
+	"douyin/dao"
 	"douyin/pkg/oss"
 	"douyin/response"
 	"mime/multipart"
@@ -42,7 +42,7 @@ func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHe
 	// 操作数据库
 	go func() {
 		defer wg.Done()
-		if err := mysql.SaveVideo(userID, data.Filename, coverName, title); err != nil {
+		if err := dao.SaveVideo(userID, data.Filename, coverName, title); err != nil {
 			hlog.Error("service.PublishAction: 操作数据库失败, err: ", dbErr)
 			dbErr = err
 		}
@@ -65,7 +65,7 @@ func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHe
 
 func PublishList(userID, authorID int64) (*response.PublishListResponse, error) {
 	// 查询视频列表
-	resp, err := mysql.GetPublishList(userID, authorID)
+	resp, err := dao.GetPublishList(userID, authorID)
 	if err != nil {
 		hlog.Error("service.PublishList: 查询视频列表失败, err: ", err)
 		return nil, err

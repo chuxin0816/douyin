@@ -1,7 +1,7 @@
 package service
 
 import (
-	"douyin/dao/mysql"
+	"douyin/dao"
 	"douyin/response"
 	"time"
 
@@ -17,7 +17,7 @@ func Feed(latestTime, userID int64) (resp *response.FeedResponse, err error) {
 	}
 
 	// 查询视频列表
-	videoList, nextTime, err := mysql.GetFeedList(userID, time.Unix(latestTime, 0), count)
+	videoList, nextTime, err := dao.GetFeedList(userID, time.Unix(latestTime, 0), count)
 	if err != nil {
 		hlog.Error("service.Feed: 查询视频列表失败")
 		return nil, err

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"douyin/dao/mysql"
+	"douyin/dao"
 	"douyin/pkg/jwt"
 	"douyin/pkg/snowflake"
 	"douyin/response"
@@ -17,7 +17,7 @@ var (
 
 func UserInfo(authorID, userID int64) (*response.UserInfoResponse, error) {
 	// 查询用户信息
-	user, err := mysql.GetUserByID(authorID)
+	user, err := dao.GetUserByID(authorID)
 	if err != nil {
 		hlog.Error("service.UserInfo: 查询用户信息失败")
 		return nil, err
@@ -26,16 +26,16 @@ func UserInfo(authorID, userID int64) (*response.UserInfoResponse, error) {
 	// 返回响应
 	return &response.UserInfoResponse{
 		Response: &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
-		User:     mysql.ToUserResponse(userID, user),
+		User:     dao.ToUserResponse(userID, user),
 	}, nil
 }
 
 func Register(username, password string) (*response.RegisterResponse, error) {
 	// 查询用户是否已存在
-	user := mysql.GetUserByName(username)
+	user := dao.GetUserByName(username)
 	if user != nil {
 		hlog.Error("service.Register: 用户已存在")
-		return nil, mysql.ErrUserExist
+		return nil, dao.ErrUserExist
 	}
 
 	// 生成用户id
@@ -50,7 +50,7 @@ func Register(username, password string) (*response.RegisterResponse, error) {
 	password = string(bPassword)
 
 	// 保存用户信息
-	mysql.CreateUser(username, password, userID)
+	dao.CreateUser(username, password, userID)
 	if err != nil {
 		hlog.Error("service.Register: 保存用户信息失败")
 		return nil, err
@@ -73,10 +73,10 @@ func Register(username, password string) (*response.RegisterResponse, error) {
 
 func Login(username, password string) (*response.LoginResponse, error) {
 	// 查询用户是否存在
-	user := mysql.GetUserByName(username)
+	user := dao.GetUserByName(username)
 	if user == nil {
 		hlog.Error("service.Login: 用户不存在")
-		return nil, mysql.ErrUserNotExist
+		return nil, dao.ErrUserNotExist
 	}
 
 	// 校验密码

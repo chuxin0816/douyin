@@ -1,24 +1,29 @@
-package mysql
+package dao
 
 import (
+	"context"
 	"douyin/config"
 	"douyin/models"
 	"fmt"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+var (
+	db  *gorm.DB
+	rdb *redis.Client
+)
 
-func Init(conf *config.MysqlConfig) (err error) {
+func Init(conf *config.DatabaseConfig) (err error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		conf.User,
-		conf.Password,
-		conf.Host,
-		conf.Port,
-		conf.DBName,
+		conf.MysqlConfig.Password,
+		conf.MysqlConfig.Host,
+		conf.MysqlConfig.Port,
+		conf.MysqlConfig.DBName,
 	)
 
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -32,5 +37,15 @@ func Init(conf *config.MysqlConfig) (err error) {
 		hlog.Error("mysql.Init: 数据库迁移失败")
 		return err
 	}
-	return nil
+
+	rdb = redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%d", conf.RedisConfig.Host, conf.RedisConfig.Port),
+		Password: conf.RedisConfig.Password,
+		DB:       conf.RedisConfig.DB,
+	})
+	return rdb.Ping(context.Background()).Err()
+}
+
+func Close() {
+	rdb.Close()
 }

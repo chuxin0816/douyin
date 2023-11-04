@@ -1,7 +1,7 @@
 package service
 
 import (
-	"douyin/dao/mysql"
+	"douyin/dao"
 	"douyin/models"
 	"douyin/response"
 
@@ -15,7 +15,7 @@ func RelationAction(userID, toUserID int64, actionType int64) (*response.Relatio
 	}
 
 	// 操作数据库
-	err := mysql.RelationAction(userID, toUserID, actionType)
+	err := dao.RelationAction(userID, toUserID, actionType)
 	if err != nil {
 		hlog.Error("service.RelationAction: 操作数据库失败, err: ", err)
 		return nil, err
@@ -29,7 +29,7 @@ func RelationAction(userID, toUserID int64, actionType int64) (*response.Relatio
 
 func FollowList(userID, toUserID int64) (*response.RelationListResponse, error) {
 	// 操作数据库
-	dUserList, err := mysql.FollowList(toUserID)
+	dUserList, err := dao.FollowList(toUserID)
 	if err != nil {
 		hlog.Error("service.FollowList: 操作数据库失败, err: ", err)
 		return nil, err
@@ -38,7 +38,7 @@ func FollowList(userID, toUserID int64) (*response.RelationListResponse, error) 
 	// 将models.User转换为response.UserResponse
 	userList := make([]*response.UserResponse, 0, len(dUserList))
 	for _, user := range dUserList {
-		userList = append(userList, mysql.ToUserResponse(userID, user))
+		userList = append(userList, dao.ToUserResponse(userID, user))
 	}
 
 	// 返回响应
@@ -50,7 +50,7 @@ func FollowList(userID, toUserID int64) (*response.RelationListResponse, error) 
 
 func FollowerList(userID, toUserID int64) (*response.RelationListResponse, error) {
 	// 操作数据库
-	dUserList, err := mysql.FollowerList(toUserID)
+	dUserList, err := dao.FollowerList(toUserID)
 	if err != nil {
 		hlog.Error("service.FollowerList: 操作数据库失败, err: ", err)
 		return nil, err
@@ -59,7 +59,7 @@ func FollowerList(userID, toUserID int64) (*response.RelationListResponse, error
 	// 将models.User转换为response.UserResponse
 	userList := make([]*response.UserResponse, 0, len(dUserList))
 	for _, user := range dUserList {
-		userList = append(userList, mysql.ToUserResponse(userID, user))
+		userList = append(userList, dao.ToUserResponse(userID, user))
 	}
 
 	// 返回响应
@@ -71,14 +71,14 @@ func FollowerList(userID, toUserID int64) (*response.RelationListResponse, error
 
 func FriendList(userID, toUserID int64) (*response.RelationListResponse, error) {
 	// 获取关注列表
-	dFollowList, err := mysql.FollowList(toUserID)
+	dFollowList, err := dao.FollowList(toUserID)
 	if err != nil {
 		hlog.Error("service.FriendList: 获取关注列表失败, err: ", err)
 		return nil, err
 	}
 
 	// 获取粉丝列表
-	dFollowerList, err := mysql.FollowerList(toUserID)
+	dFollowerList, err := dao.FollowerList(toUserID)
 	if err != nil {
 		hlog.Error("service.FriendList: 获取粉丝列表失败, err: ", err)
 		return nil, err
@@ -103,7 +103,7 @@ func FriendList(userID, toUserID int64) (*response.RelationListResponse, error) 
 	// 将models.User转换为response.UserResponse
 	friendList := make([]*response.UserResponse, 0, len(dFriendList))
 	for _, user := range dFriendList {
-		friendList = append(friendList, mysql.ToUserResponse(userID, user))
+		friendList = append(friendList, dao.ToUserResponse(userID, user))
 	}
 
 	// 返回响应

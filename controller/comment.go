@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"douyin/dao/mysql"
+	"douyin/dao"
 	"douyin/middleware"
 	"douyin/response"
 	"douyin/service"
@@ -45,12 +45,12 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	// 业务逻辑处理
 	resp, err := service.CommentAction(userID, req.ActionType, req.VideoID, req.CommentID, req.CommentText)
 	if err != nil {
-		if errors.Is(err, mysql.ErrVideoNotExist) {
+		if errors.Is(err, dao.ErrVideoNotExist) {
 			response.Error(ctx, response.CodeVideoNotExist)
 			hlog.Error("controller.CommentAction: 视频不存在")
 			return
 		}
-		if errors.Is(err, mysql.ErrCommentNotExist) {
+		if errors.Is(err, dao.ErrCommentNotExist) {
 			response.Error(ctx, response.CodeCommentNotExist)
 			hlog.Error("controller.CommentAction: 评论不存在")
 			return
@@ -80,7 +80,7 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	// 业务逻辑处理
 	resp, err := service.CommentList(userID, req.VideoID)
 	if err != nil {
-		if errors.Is(err, mysql.ErrVideoNotExist) {
+		if errors.Is(err, dao.ErrVideoNotExist) {
 			response.Error(ctx, response.CodeVideoNotExist)
 			hlog.Error("controller.CommentList: 视频不存在")
 			return
