@@ -5,6 +5,7 @@ import (
 	"douyin/dao/mysql"
 	"douyin/dao/redis"
 	"douyin/logger"
+	"douyin/middleware"
 	"douyin/pkg/oss"
 	"douyin/pkg/snowflake"
 	"douyin/router"
@@ -35,8 +36,13 @@ func main() {
 		return
 	}
 	defer redis.Close()
+	// 初始化kafka
+	if err := middleware.Init(config.Conf.KafkaConfig); err != nil {
+		hlog.Error("kafka init failed, err: ", err)
+		return
+	}
 	// 初始化雪花算法
-	if err := snowflake.Init(config.Conf.StartTime, config.Conf.MachineID); err != nil {
+	if err := snowflake.Init(config.Conf.SnowflakeConfig); err != nil {
 		hlog.Error("snowflake init failed, err: ", err)
 		return
 	}

@@ -1,0 +1,45 @@
+jwt_key: "simple douyin jwt key"
+snowflake:
+  start_time: "2023-10-10"
+  machine_id: 1
+hertz:
+  host: "0.0.0.0"
+  port: 8888
+oss:
+  endpoint: "oss-cn-shenzhen.aliyuncs.com"
+  domain: "oss.chuxin0816.com"
+  access_key_id: "LTAI5tP3zBUzqrygmXZCTcgF"
+  access_key_secret: "QkFjbV9bFfVWDVoo79MlcRiFczpQRH"
+  bucket_name: "douyin-chuxin"
+log:
+  path: "./logger/logs/"
+  max_size: 20
+  max_backups: 10
+  max_age: 30
+mysql:
+  user: "root"
+  password: "123456"
+# 开发环境
+  host: "127.0.0.1"
+# 正式环境
+#host: "Mysql-douyin"
+  port: 3306
+  dbname: "douyin"
+redis:
+# 开发环境
+  host: "127.0.0.1"
+# 正式环境
+# host: "Redis-douyin"
+  port: 6379
+  password: ""
+  db: 0
+kafka:
+  brokers:
+# 开发环境
+    - "127.0.0.1:9092"
+    - "127.0.0.1:9093"
+    - "127.0.0.1:9094"
+# 正式环境
+# - "Kafka-1-douyin:9092"
+# - "Kafka-2-douyin:9092"
+# - "Kafka-3-douyin:9092"
