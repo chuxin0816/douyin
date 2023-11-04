@@ -1,4 +1,4 @@
-FROM golang:1.21.2 AS builder
+FROM golang:latest AS builder
 
 ENV GO111MODULE=on \
     CGO_ENABLED=0 \
@@ -16,17 +16,27 @@ COPY . .
 
 RUN go build -o douyin
 
-FROM ubuntu:jammy
+FROM ubuntu:lunar
 
 COPY ./wait-for.sh /
 COPY ./config/config.json /config/config.json
 
 COPY --from=builder /build/douyin /
 
-RUN set -eux; \
-    apt-get update; \
+# x86架构
+# RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ lunar main restricted universe multiverse" > /etc/apt/sources.list && \
+#     echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ lunar-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+#     echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ lunar-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
+#     echo "http://security.ubuntu.com/ubuntu/ lunar-security main restricted universe multiverse" >> /etc/apt/sources.list 
+
+# arm架构
+RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ lunar main restricted universe multiverse" > /etc/apt/sources.list && \
+    echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ lunar-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ lunar-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb http://ports.ubuntu.com/ubuntu-ports/ lunar-security main restricted universe multiverse" >> /etc/apt/sources.list
+
+RUN apt-get update; \
     apt-get install -y \
-    --no-install-recommends \
     ffmpeg \
     netcat; \
     chmod 755 wait-for.sh
