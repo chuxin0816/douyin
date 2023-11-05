@@ -79,7 +79,7 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 
 	// 先查询作者的ID
 	var authorID int64
-	err := db.Model(&models.Video{}).Where("id = ?", videoID).Select("author_id").Scan(&authorID).Error
+	err := db.Model(&models.Video{}).Where("id = ?", videoID).Select("author_id").Find(&authorID).Error
 	if err != nil {
 		hlog.Error("mysql.FavoriteAction: 查询作者的ID失败, err: ", err)
 		return err

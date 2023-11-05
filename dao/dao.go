@@ -6,6 +6,7 @@ import (
 	"douyin/models"
 	"fmt"
 
+	"github.com/bits-and-blooms/bloom/v3"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
@@ -13,8 +14,9 @@ import (
 )
 
 var (
-	db  *gorm.DB
-	rdb *redis.Client
+	db          *gorm.DB
+	rdb         *redis.Client
+	bloomFilter *bloom.BloomFilter
 )
 
 func Init(conf *config.DatabaseConfig) (err error) {
@@ -43,7 +45,22 @@ func Init(conf *config.DatabaseConfig) (err error) {
 		Password: conf.RedisConfig.Password,
 		DB:       conf.RedisConfig.DB,
 	})
-	return rdb.Ping(context.Background()).Err()
+	err = rdb.Ping(context.Background()).Err()
+	if err != nil {
+		hlog.Error("redis.Init: 连接redis失败")
+	}
+
+	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
+	// 初始化布隆过滤器
+	var usernames []string
+	if err = db.Table("users").Select("name").Find(&usernames).Error; err != nil {
+		hlog.Error("dao.Init: 查询用户名失败")
+		return err
+	}
+	for _, username := range usernames {
+		bloomFilter.Add([]byte(username))
+	}
+	return
 }
 
 func Close() {
