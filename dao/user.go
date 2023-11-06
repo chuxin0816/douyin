@@ -60,6 +60,11 @@ func GetUserByIDs(authorIDs []int64) ([]*models.User, error) {
 
 // GetUserByName 根据用户名查询用户信息, 如果用户不存在则返回nil
 func GetUserByName(username string) *models.User {
+	// 先判断布隆过滤器中是否存在
+	if !bloomFilter.Test([]byte(username)) {
+		return nil
+	}
+	
 	user := &models.User{}
 	db.Where("name = ?", username).Find(user)
 	if user.ID == 0 {
@@ -69,6 +74,9 @@ func GetUserByName(username string) *models.User {
 }
 
 func CreateUser(username, password string, userID int64) error {
+	// 写入布隆过滤器
+	bloomFilter.Add([]byte(username))
+
 	user := &models.User{
 		ID:       userID,
 		Name:     username,
