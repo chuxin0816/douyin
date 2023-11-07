@@ -10,15 +10,18 @@ import (
 )
 
 func MessageAction(userID, toUserID int64, content string) error {
-	err := db.Create(&models.Message{
+	if err := db.Create(&models.Message{
 		ID:         snowflake.GenerateID(),
 		FromUserID: userID,
 		ToUserID:   toUserID,
 		Content:    content,
 		CreateTime: time.Now().Unix(),
-	}).Error
+	}).Error; err != nil {
+		hlog.Error("mysql.MessageAction: 插入数据库失败, err: ", err)
+		return err
+	}
 
-	return err
+	return nil
 }
 
 func MessageList(userID, toUserID, lastTime int64) ([]*response.MessageResponse, error) {
