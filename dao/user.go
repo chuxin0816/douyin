@@ -4,16 +4,9 @@ import (
 	"context"
 	"douyin/models"
 	"douyin/response"
-	"errors"
 	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-)
-
-var (
-	ErrUserExist    = errors.New("用户已存在")
-	ErrUserNotExist = errors.New("用户不存在")
-	ErrPassword     = errors.New("密码错误")
 )
 
 // GetUserByID 用户通过作者id查询作者信息
@@ -119,7 +112,7 @@ func ToUserResponse(followerID int64, user *models.User) *response.UserResponse 
 	// 判断是否关注
 	// 从缓存中查询是否关注
 	key := getRedisKey(KeyUserFollowerPF + strconv.FormatInt(user.ID, 10))
-	if exist := rdb.SIsMember(context.Background(), key, followerID).Val(); exist {
+	if rdb.SIsMember(context.Background(), key, followerID).Val() {
 		userResponse.IsFollow = true
 		return userResponse
 	}

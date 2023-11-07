@@ -4,7 +4,9 @@ import (
 	"context"
 	"douyin/config"
 	"douyin/models"
+	"errors"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"sync"
 	"time"
@@ -15,6 +17,26 @@ import (
 	"golang.org/x/sync/singleflight"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+)
+
+const (
+	expireTime = time.Hour * 72
+	timeout    = time.Second * 5
+	delayTime  = 100 * time.Millisecond
+	randFactor = 30
+)
+
+var (
+	randomDuration     = time.Duration(rand.Intn(randFactor)) * time.Minute
+	ErrUserExist       = errors.New("用户已存在")
+	ErrUserNotExist    = errors.New("用户不存在")
+	ErrPassword        = errors.New("密码错误")
+	ErrAlreadyFollow   = errors.New("已经关注过了")
+	ErrNotFollow       = errors.New("还没有关注过")
+	ErrAlreadyFavorite = errors.New("已经点赞过了")
+	ErrNotFavorite     = errors.New("还没有点赞过")
+	ErrCommentNotExist = errors.New("comment not exist")
+	ErrVideoNotExist   = errors.New("video not exist")
 )
 
 var (

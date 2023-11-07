@@ -3,16 +3,10 @@ package dao
 import (
 	"douyin/models"
 	"douyin/response"
-	"errors"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrCommentNotExist = errors.New("comment not exist")
-	ErrVideoNotExist   = errors.New("video not exist")
 )
 
 func PublishComment(userID, commentID, videoID int64, commentText string) error {

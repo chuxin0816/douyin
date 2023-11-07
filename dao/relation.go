@@ -2,15 +2,9 @@ package dao
 
 import (
 	"douyin/models"
-	"errors"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrAlreadyFollow = errors.New("已经关注过了")
-	ErrNotFollow     = errors.New("还没有关注过")
 )
 
 func RelationAction(userID, toUserID int64, actionType int64) error {

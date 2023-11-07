@@ -3,26 +3,11 @@ package dao
 import (
 	"context"
 	"douyin/models"
-	"errors"
-	"math/rand"
 	"strconv"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"gorm.io/gorm"
-)
-
-const (
-	expireTime = time.Hour * 72
-	timeout    = time.Second * 5
-	delayTime  = 100 * time.Millisecond
-	randFactor = 30
-)
-
-var (
-	ErrAlreadyFavorite = errors.New("已经点赞过了")
-	ErrNotFavorite     = errors.New("还没有点赞过")
-	randomDuration     = time.Duration(rand.Intn(randFactor)) * time.Minute
 )
 
 func FavoriteAction(userID int64, videoID int64, actionType int64) error {

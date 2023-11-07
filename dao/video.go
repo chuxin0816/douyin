@@ -1,9 +1,11 @@
 package dao
 
 import (
+	"context"
 	"douyin/models"
 	"douyin/pkg/snowflake"
 	"douyin/response"
+	"strconv"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -42,16 +44,7 @@ func GetFeedList(userID int64, latestTime time.Time, count int) (videoList []*re
 	// 将models.Video转换为response.VideoResponse
 	videoList = make([]*response.VideoResponse, 0, len(dVideoList))
 	for idx, dVideo := range dVideoList {
-		videoList = append(videoList, &response.VideoResponse{
-			ID:            dVideo.ID,
-			Author:        ToUserResponse(userID, authors[idx]),
-			CommentCount:  dVideo.CommentCount,
-			PlayURL:       dVideo.PlayURL,
-			CoverURL:      dVideo.CoverURL,
-			FavoriteCount: dVideo.FavoriteCount,
-			IsFavorite:    false,
-			Title:         dVideo.Title,
-		})
+		videoList = append(videoList, ToVideoResponse(userID, dVideo, authors[idx]))
 	}
 
 	// 通过用户id查询是否点赞
@@ -117,11 +110,10 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 }
 
 // GetPublishList 获取用户发布的视频列表
-func GetPublishList(userID, authorID int64) (videoList []*response.VideoResponse, err error) {
+func GetPublishList(userID, authorID int64) ([]*response.VideoResponse, error) {
 	// 查询视频信息
 	var dVideoList []*models.Video
-	err = db.Where("author_id = ?", authorID).Order("upload_time DESC").Find(&dVideoList).Error
-	if err != nil {
+	if err := db.Where("author_id = ?", authorID).Order("upload_time DESC").Find(&dVideoList).Error; err != nil {
 		hlog.Error("mysql.GetPublishList: 查询视频信息失败")
 		return nil, err
 	}
@@ -134,42 +126,12 @@ func GetPublishList(userID, authorID int64) (videoList []*response.VideoResponse
 	}
 
 	// 将models.Video转换为response.VideoResponse
-	videoList = make([]*response.VideoResponse, 0, len(dVideoList))
+	videoList := make([]*response.VideoResponse, 0, len(dVideoList))
 	for _, dVideo := range dVideoList {
-		videoList = append(videoList, &response.VideoResponse{
-			ID:            dVideo.ID,
-			Author:        ToUserResponse(userID, author),
-			CommentCount:  dVideo.CommentCount,
-			PlayURL:       dVideo.PlayURL,
-			CoverURL:      dVideo.CoverURL,
-			FavoriteCount: dVideo.FavoriteCount,
-			IsFavorite:    false,
-			Title:         dVideo.Title,
-		})
+		videoList = append(videoList, ToVideoResponse(userID, dVideo, author))
 	}
 
-	// 通过用户id查询是否点赞
-	if len(videoList) > 0 {
-		// 获取用户喜欢列表
-		videoIDs, err := GetFavoriteList(userID)
-		if err != nil {
-			return nil, err
-		}
-
-		// 将喜欢列表转换为map加快查询速度
-		videoIDMap := make(map[int64]struct{}, len(videoIDs))
-		for _, v := range videoIDs {
-			videoIDMap[v] = struct{}{}
-		}
-
-		// 判断是否点赞
-		for _, video := range videoList {
-			if _, exist := videoIDMap[video.ID]; exist {
-				video.IsFavorite = true
-			}
-		}
-	}
-	return
+	return videoList, nil
 }
 
 func GetVideoList(userID int64, videoIDs []int64) ([]*response.VideoResponse, error) {
@@ -194,39 +156,63 @@ func GetVideoList(userID int64, videoIDs []int64) ([]*response.VideoResponse, er
 	// 将models.Video转换为response.VideoResponse
 	videoList := make([]*response.VideoResponse, 0, len(dVideoList))
 	for idx, dVideo := range dVideoList {
-		videoList = append(videoList, &response.VideoResponse{
-			ID:            dVideo.ID,
-			Author:        ToUserResponse(userID, authors[idx]),
-			CommentCount:  dVideo.CommentCount,
-			PlayURL:       dVideo.PlayURL,
-			CoverURL:      dVideo.CoverURL,
-			FavoriteCount: dVideo.FavoriteCount,
-			IsFavorite:    false,
-			Title:         dVideo.Title,
-		})
-	}
-
-	// 通过用户id查询是否点赞
-	if userID > 0 && len(dVideoList) > 0 {
-		// 获取用户喜欢列表
-		videoIDs, err := GetFavoriteList(userID)
-		if err != nil {
-			return nil, err
-		}
-
-		// 将喜欢列表转换为map加快查询速度
-		videoIDMap := make(map[int64]struct{}, len(videoIDs))
-		for _, v := range videoIDs {
-			videoIDMap[v] = struct{}{}
-		}
-
-		// 判断是否点赞
-		for _, video := range videoList {
-			if _, exist := videoIDMap[video.ID]; exist {
-				video.IsFavorite = true
-			}
-		}
+		videoList = append(videoList, ToVideoResponse(userID, dVideo, authors[idx]))
 	}
 
 	return videoList, nil
+}
+
+func ToVideoResponse(userID int64, dVideo *models.Video, author *models.User) *response.VideoResponse {
+	video := &response.VideoResponse{
+		ID:            dVideo.ID,
+		Author:        ToUserResponse(userID, author),
+		CommentCount:  dVideo.CommentCount,
+		PlayURL:       dVideo.PlayURL,
+		CoverURL:      dVideo.CoverURL,
+		FavoriteCount: dVideo.FavoriteCount,
+		IsFavorite:    false,
+		Title:         dVideo.Title,
+	}
+	// 未登录直接返回
+	if userID == 0 {
+		return video
+	}
+
+	// 查询缓存判断是否点赞
+	key := getRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
+	if rdb.SIsMember(context.Background(), key, dVideo.ID).Val() {
+		video.IsFavorite = true
+		return video
+	}
+
+	// 缓存未命中, 查询数据库
+	// 获取用户喜欢列表
+	videoIDs, err := GetFavoriteList(userID)
+	if err != nil {
+		hlog.Error("mysql.ToVideoResponse: 获取用户喜欢列表失败")
+		return video
+	}
+
+	// 判断是否点赞
+	for _, videoID := range videoIDs {
+		if videoID == dVideo.ID {
+			video.IsFavorite = true
+			break
+		}
+	}
+
+	// 将点赞信息写入缓存
+	if video.IsFavorite {
+		go func() {
+			if err := rdb.SAdd(context.Background(), key, dVideo.ID).Err(); err != nil {
+				hlog.Error("redis.ToVideoResponse: 将点赞信息写入缓存失败, err: ", err)
+				return
+			}
+			if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+				hlog.Error("redis.ToVideoResponse: 设置缓存过期时间失败, err: ", err)
+				return
+			}
+		}()
+	}
+	return video
 }
