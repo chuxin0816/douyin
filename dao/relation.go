@@ -55,6 +55,11 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 		}
 	}
 
+	// 使用延迟双删策略
+	if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
+		hlog.Error("redis.RelationAction 延迟双删策略失败, err: ", err)
+	}
+
 	// 更新relation表
 	if actionType == 1 {
 		if err := db.Create(&models.Relation{UserID: toUserID, FollowerID: userID}).Error; err != nil {
@@ -65,6 +70,14 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 			hlog.Error("mysql.RelationAction 更新relation表失败, err: ", err)
 		}
 	}
+
+	// 延迟后删除redis缓存
+	go func() {
+		time.Sleep(delayTime)
+		if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
+			hlog.Error("redis.RelationAction: 删除redis缓存失败, err: ", err)
+		}
+	}()
 
 	// 更新user的follow_count和follower_count字段
 	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserFollowCountPF+strconv.FormatInt(userID, 10)), actionType).Err(); err != nil {

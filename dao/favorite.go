@@ -70,7 +70,6 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	// 删除redis缓存
 	if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
 		hlog.Error("redis.FavoriteAction: 删除redis缓存失败, err: ", err)
-		return err
 	}
 
 	// 更新favorite表
@@ -85,6 +84,14 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 			return err
 		}
 	}
+
+	// 延迟后删除redis缓存
+	go func() {
+		time.Sleep(delayTime)
+		if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
+			hlog.Error("redis.FavoriteAction: 删除redis缓存失败, err: ", err)
+		}
+	}()
 
 	// 更新video的favorite_count字段
 	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyVideoFavoriteCountPF+strconv.FormatInt(videoID, 10)), actionType).Err(); err != nil {
@@ -101,13 +108,6 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	// 更新user作者的total_favorited字段
 	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserTotalFavoritedPF+strconv.FormatInt(authorID, 10)), actionType).Err(); err != nil {
 		hlog.Error("redis.FavoriteAction: 更新user作者的total_favorited字段失败, err: ", err)
-		return err
-	}
-
-	// 延迟后删除redis缓存
-	time.Sleep(delayTime)
-	if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
-		hlog.Error("redis.FavoriteAction: 删除redis缓存失败, err: ", err)
 		return err
 	}
 
