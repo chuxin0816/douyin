@@ -13,16 +13,8 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) (*response.Fa
 		actionType = -1
 	}
 
-	// 写入redis
-	err := dao.FavoriteAction(userID, videoID, actionType)
-	if err != nil {
-		hlog.Error("service.FavoriteAction: 写入redis失败, err: ", err)
-		return nil, err
-	}
-
 	// 操作数据库
-	err = dao.FavoriteAction(userID, videoID, actionType)
-	if err != nil {
+	if err := dao.FavoriteAction(userID, videoID, actionType); err != nil {
 		hlog.Error("service.FavoriteAction: 操作数据库失败, err: ", err)
 		return nil, err
 	}

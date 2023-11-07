@@ -171,6 +171,7 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 		for _, videoID := range videoIDs {
 			pipeline.SAdd(context.Background(), key, videoID)
 		}
+		pipeline.Expire(context.Background(), key, expireTime+randomDuration)
 		_, err := pipeline.Exec(context.Background())
 		if err != nil {
 			hlog.Error("redis.GetFavoriteList: 写入redis缓存失败, err: ", err)
