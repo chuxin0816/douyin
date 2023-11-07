@@ -1,62 +1,67 @@
 package dao
 
 import (
+	"context"
 	"douyin/models"
+	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"gorm.io/gorm"
 )
 
 func RelationAction(userID, toUserID int64, actionType int64) error {
 	// 查看是否关注
-	relation := &models.Relation{}
-	err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Find(relation).Error
-	if err != nil {
-		hlog.Error("mysql.RelationAction 查看是否关注失败, err: ", err)
-		return err
-	}
-	if relation.ID != 0 && actionType == 1 {
+	key := getRedisKey(KeyUserFollowerPF + strconv.FormatInt(toUserID, 10))
+	exist := rdb.SIsMember(context.Background(), key, userID).Val()
+	if exist && actionType == 1 {
 		hlog.Error("mysql.RelationAction 已经关注过了")
 		return ErrAlreadyFollow
-	} else if relation.ID == 0 && actionType == -1 {
-		hlog.Error("mysql.RelationAction 还没有关注过")
-		return ErrNotFollow
 	}
 
-	// 开启事务
-	tx := db.Begin()
+	// 缓存未命中, 查询数据库
+	if !exist {
+		relation := &models.Relation{}
+		if err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Find(relation).Error; err != nil {
+			hlog.Error("mysql.RelationAction 查看是否关注失败, err: ", err)
+			return err
+		}
+		if relation.ID != 0 && actionType == 1 {
+			// 写入redis缓存
+			go func() {
+				if err := rdb.SAdd(context.Background(), key, userID).Err(); err != nil {
+					hlog.Error("redis.RelationAction 写入redis缓存失败, err: ", err)
+					return
+				}
+				if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+					hlog.Error("redis.RelationAction 设置redis缓存过期时间失败, err: ", err)
+					return
+				}
+			}()
+			return ErrAlreadyFollow
+		}
+		if relation.ID == 0 && actionType == -1 {
+			return ErrNotFollow
+		}
+	}
 
 	// 更新relation表
 	if actionType == 1 {
-		err = tx.Create(&models.Relation{
-			UserID:     toUserID,
-			FollowerID: userID,
-		}).Error
+		if err := db.Create(&models.Relation{UserID: toUserID, FollowerID: userID}).Error; err != nil {
+			hlog.Error("mysql.RelationAction 更新relation表失败, err: ", err)
+		}
 	} else {
-		err = tx.Where("user_id = ? AND follower_id = ?", toUserID, userID).Delete(&models.Relation{}).Error
-	}
-	if err != nil {
-		tx.Rollback()
-		hlog.Error("mysql.RelationAction 更新relation表失败, err: ", err)
-		return err
+		if err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Delete(&models.Relation{}).Error; err != nil {
+			hlog.Error("mysql.RelationAction 更新relation表失败, err: ", err)
+		}
 	}
 
-	// 更新user表
-	err = tx.Model(&models.User{}).Where("id = ?", userID).Update("follow_count", gorm.Expr("follow_count + ?", actionType)).Error
-	if err != nil {
-		tx.Rollback()
-		hlog.Error("mysql.RelationAction 更新user表follow_count字段失败, err: ", err)
+	// 更新user的follow_count和follower_count字段
+	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserFollowCountPF+strconv.FormatInt(userID, 10)), actionType).Err(); err != nil {
+		hlog.Error("redis.RelationAction 更新user的follow_count字段失败, err: ", err)
 		return err
 	}
-	err = tx.Model(&models.User{}).Where("id = ?", toUserID).Update("follower_count", gorm.Expr("follower_count + ?", actionType)).Error
-	if err != nil {
-		tx.Rollback()
-		hlog.Error("mysql.RelationAction 更新user表follower_count字段失败, err: ", err)
-		return err
+	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserFollowerCountPF+strconv.FormatInt(toUserID, 10)), actionType).Err(); err != nil {
+		hlog.Error("redis.RelationAction 更新user的follower_count字段失败, err: ", err)
 	}
-
-	// 提交事务
-	tx.Commit()
 
 	return nil
 }
