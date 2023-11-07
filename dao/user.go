@@ -17,8 +17,7 @@ func GetUserByID(authorID int64) (*models.User, error) {
 	}
 
 	user := &models.User{}
-	err := db.Where("id = ?", authorID).Find(user).Error
-	if err != nil {
+	if err := db.Where("id = ?", authorID).Find(user).Error; err != nil {
 		return nil, err
 	}
 	if user.ID == 0 {
@@ -39,8 +38,7 @@ func GetUserByIDs(authorIDs []int64) ([]*models.User, error) {
 	}
 	// 查询数据库
 	var users []*models.User
-	err := db.Where("id IN (?)", authorIDs).Find(&users).Error
-	if err != nil {
+	if err := db.Where("id IN (?)", authorIDs).Find(&users).Error; err != nil {
 		hlog.Error("mysql.GetUserByIDs: 查询数据库失败")
 		return nil, err
 	}
@@ -69,7 +67,10 @@ func GetUserByName(username string) *models.User {
 	}
 
 	user := &models.User{}
-	db.Where("name = ?", username).Find(user)
+	if err := db.Where("name = ?", username).Find(user).Error; err != nil {
+		hlog.Error("mysql.GetUserByName: 查询数据库失败")
+		return nil
+	}
 	if user.ID == 0 {
 		return nil
 	}
@@ -86,8 +87,7 @@ func CreateUser(username, password string, userID int64) error {
 		Name:     username,
 		Password: password,
 	}
-	err := db.Create(user).Error
-	if err != nil {
+	if err := db.Create(user).Error; err != nil {
 		hlog.Error("mysql.CreateUser: 保存用户信息失败")
 		return err
 	}
