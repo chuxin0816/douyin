@@ -22,8 +22,8 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	if exist && actionType == 1 {
 		return ErrAlreadyFavorite
 	}
+	// 缓存未命中，查询mysql中是否有记录
 	if !exist {
-		// 缓存未命中，查询mysql中是否有记录
 		// 使用singleflight避免缓存击穿
 		_, err, _ := g.Do(key, func() (interface{}, error) {
 			go func() {

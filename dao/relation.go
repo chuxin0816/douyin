@@ -4,6 +4,7 @@ import (
 	"context"
 	"douyin/models"
 	"strconv"
+	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
@@ -19,27 +20,37 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 
 	// 缓存未命中, 查询数据库
 	if !exist {
-		relation := &models.Relation{}
-		if err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Find(relation).Error; err != nil {
-			hlog.Error("mysql.RelationAction 查看是否关注失败, err: ", err)
-			return err
-		}
-		if relation.ID != 0 && actionType == 1 {
-			// 写入redis缓存
+		_, err, _ := g.Do(key, func() (interface{}, error) {
 			go func() {
-				if err := rdb.SAdd(context.Background(), key, userID).Err(); err != nil {
-					hlog.Error("redis.RelationAction 写入redis缓存失败, err: ", err)
-					return
-				}
-				if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
-					hlog.Error("redis.RelationAction 设置redis缓存过期时间失败, err: ", err)
-					return
-				}
+				time.Sleep(delayTime)
+				g.Forget(key)
 			}()
-			return ErrAlreadyFollow
-		}
-		if relation.ID == 0 && actionType == -1 {
-			return ErrNotFollow
+			relation := &models.Relation{}
+			if err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Find(relation).Error; err != nil {
+				hlog.Error("mysql.RelationAction 查看是否关注失败, err: ", err)
+				return nil, err
+			}
+			if relation.ID != 0 && actionType == 1 {
+				// 写入redis缓存
+				go func() {
+					if err := rdb.SAdd(context.Background(), key, userID).Err(); err != nil {
+						hlog.Error("redis.RelationAction 写入redis缓存失败, err: ", err)
+						return
+					}
+					if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+						hlog.Error("redis.RelationAction 设置redis缓存过期时间失败, err: ", err)
+						return
+					}
+				}()
+				return nil, ErrAlreadyFollow
+			}
+			if relation.ID == 0 && actionType == -1 {
+				return nil, ErrNotFollow
+			}
+			return nil, nil
+		})
+		if err != nil {
+			return err
 		}
 	}
 
