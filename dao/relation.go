@@ -20,6 +20,7 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 
 	// 缓存未命中, 查询数据库
 	if !exist {
+		// 使用singleflight避免缓存击穿
 		_, err, _ := g.Do(key, func() (interface{}, error) {
 			go func() {
 				time.Sleep(delayTime)
