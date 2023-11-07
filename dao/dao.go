@@ -24,6 +24,7 @@ const (
 	timeout    = time.Second * 5
 	delayTime  = 100 * time.Millisecond
 	randFactor = 30
+	tickerTime = time.Second * 10
 )
 
 var (
@@ -112,7 +113,7 @@ func Close() {
 }
 
 func syncRedisToMySQL() {
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(tickerTime)
 	defer ticker.Stop()
 	for {
 		<-ticker.C

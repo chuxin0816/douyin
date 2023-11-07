@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"gorm.io/gorm"
 )
 
 const (
@@ -47,28 +46,6 @@ func GetFeedList(userID int64, latestTime time.Time, count int) (videoList []*re
 		videoList = append(videoList, ToVideoResponse(userID, dVideo, authors[idx]))
 	}
 
-	// 通过用户id查询是否点赞
-	if userID > 0 && len(dVideoList) > 0 {
-		// 获取用户喜欢列表
-		videoIDs, err := GetFavoriteList(userID)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		// 将喜欢列表转换为map加快查询速度
-		videoIDMap := make(map[int64]struct{}, len(videoIDs))
-		for _, v := range videoIDs {
-			videoIDMap[v] = struct{}{}
-		}
-
-		// 判断是否点赞
-		for _, video := range videoList {
-			if _, exist := videoIDMap[video.ID]; exist {
-				video.IsFavorite = true
-			}
-		}
-	}
-
 	// 计算下次请求的时间
 	if len(dVideoList) > 0 {
 		nextTime = new(int64)
@@ -88,25 +65,20 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 		Title:      title,
 	}
 
-	// 开启事务
-	err := db.Transaction(func(tx *gorm.DB) error {
-		// 保存视频信息到数据库
-		if err := db.Create(video).Error; err != nil {
-			hlog.Error("mysql.SaveVideo: 保存视频信息到数据库失败")
-			return err
-		}
+	// 保存视频信息到数据库
+	if err := db.Create(video).Error; err != nil {
+		hlog.Error("mysql.SaveVideo: 保存视频信息到数据库失败")
+		return err
+	}
 
-		// 修改用户发布视频数
-		if err := db.Model(&models.User{}).Where("id = ?", userID).Update("work_count", gorm.Expr("work_count + ?", 1)).Error; err != nil {
-			hlog.Error("mysql.SaveVideo: 修改用户发布视频数失败")
-			return err
-		}
+	// 修改用户发布视频数
+	key := getRedisKey(KeyUserWorkCountPF + strconv.FormatInt(userID, 10))
+	if err := rdb.Incr(context.Background(), key).Err(); err != nil {
+		hlog.Error("redis.SaveVideo: 修改用户发布视频数失败")
+		return err
+	}
 
-		// 提交事务
-		return nil
-	})
-
-	return err
+	return nil
 }
 
 // GetPublishList 获取用户发布的视频列表
