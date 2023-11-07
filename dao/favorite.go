@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"gorm.io/gorm"
 )
 
 func FavoriteAction(userID int64, videoID int64, actionType int64) error {
@@ -16,13 +15,11 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 		hlog.Error("mysql.FavoriteAction: 视频不存在, videoID: ", videoID)
 		return ErrVideoNotExist
 	}
-	videoIDStr := strconv.FormatInt(videoID, 10)
-	key := getRedisKey(KeyVideoFavoritePF) + videoIDStr
 
 	// 查看是否已经点赞
+	key := getRedisKey(KeyVideoFavoritePF + strconv.FormatInt(videoID, 10))
 	exist := rdb.SIsMember(context.Background(), key, userID).Val()
 	if exist && actionType == 1 {
-		hlog.Error("redis.FavoriteAction: 已经点赞过了")
 		return ErrAlreadyFavorite
 	}
 	if !exist {
@@ -49,12 +46,10 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 					hlog.Error("redis.FavoriteAction: 设置redis缓存过期时间失败, err: ", err)
 					return nil, err
 				}
-				hlog.Error("redis.FavoriteAction: 已经点赞过了")
 				return nil, ErrAlreadyFavorite
 			}
 			// mysql中没有记录
 			if id == 0 && actionType == -1 {
-				hlog.Error("redis.FavoriteAction: 还没有点赞过")
 				return nil, ErrNotFavorite
 			}
 			return nil, nil
@@ -66,8 +61,7 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 
 	// 先查询作者的ID
 	var authorID int64
-	err := db.Model(&models.Video{}).Where("id = ?", videoID).Select("author_id").Find(&authorID).Error
-	if err != nil {
+	if err := db.Model(&models.Video{}).Where("id = ?", videoID).Select("author_id").Find(&authorID).Error; err != nil {
 		hlog.Error("mysql.FavoriteAction: 查询作者的ID失败, err: ", err)
 		return err
 	}
@@ -79,47 +73,36 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 		return err
 	}
 
-	// 开启事务
-	tx := db.Begin()
-
 	// 更新favorite表
 	if actionType == 1 {
-		err = tx.Create(&models.Favorite{UserID: userID, VideoID: videoID}).Error
+		if err := db.Create(&models.Favorite{UserID: userID, VideoID: videoID}).Error; err != nil {
+			hlog.Error("mysql.FavoriteAction: 更新favorite表失败, err: ", err)
+			return err
+		}
 	} else {
-		err = tx.Where("user_id = ? AND video_id = ?", userID, videoID).Delete(&models.Favorite{}).Error
+		if err := db.Where("user_id = ? AND video_id = ?", userID, videoID).Delete(&models.Favorite{}).Error; err != nil {
+			hlog.Error("mysql.FavoriteAction: 更新favorite表失败, err: ", err)
+			return err
+		}
 	}
-	if err != nil {
-		tx.Rollback()
-		hlog.Error("mysql.FavoriteAction: 更新favorite表失败, err: ", err)
+
+	// 更新video的favorite_count字段
+	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyVideoFavoriteCountPF+strconv.FormatInt(videoID, 10)), actionType).Err(); err != nil {
+		hlog.Error("redis.FavoriteAction: 更新video的favorite_count字段失败, err: ", err)
 		return err
 	}
 
-	// 更新video表中的favorite_count字段
-	err = tx.Model(&models.Video{}).Where("id = ?", videoID).Update("favorite_count", gorm.Expr("favorite_count + ?", actionType)).Error
-	if err != nil {
-		tx.Rollback()
-		hlog.Error("mysql.FavoriteAction: 更新video表中的favorite_count字段失败, err: ", err)
+	// 更新user当前用户的favorite_count字段
+	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserFavoriteCountPF+strconv.FormatInt(userID, 10)), actionType).Err(); err != nil {
+		hlog.Error("redis.FavoriteAction: 更新user当前用户的favorite_count字段失败, err: ", err)
 		return err
 	}
 
-	// 更新user表中当前用户的favorite_count字段
-	err = tx.Model(models.User{}).Where("id = ?", userID).Update("favorite_count", gorm.Expr("favorite_count + ?", actionType)).Error
-	if err != nil {
-		tx.Rollback()
-		hlog.Error("mysql.FavoriteAction: 更新user表中当前用户的favorite_count字段失败, err: ", err)
+	// 更新user作者的total_favorited字段
+	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserTotalFavoritedPF+strconv.FormatInt(authorID, 10)), actionType).Err(); err != nil {
+		hlog.Error("redis.FavoriteAction: 更新user作者的total_favorited字段失败, err: ", err)
 		return err
 	}
-
-	// 更新user表中作者的total_favorited字段
-	err = tx.Model(models.User{}).Where("id = ?", authorID).Update("total_favorited", gorm.Expr("total_favorited + ?", actionType)).Error
-	if err != nil {
-		tx.Rollback()
-		hlog.Error("mysql.FavoriteAction: 更新user表中作者的total_favorited字段失败, err: ", err)
-		return err
-	}
-
-	// 提交事务
-	tx.Commit()
 
 	// 延迟后删除redis缓存
 	time.Sleep(delayTime)
@@ -151,17 +134,18 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 	}
 
 	// 写入redis缓存
-	go func() {
-		pipeline := rdb.Pipeline()
-		for _, videoID := range videoIDs {
-			pipeline.SAdd(context.Background(), key, videoID)
-		}
-		pipeline.Expire(context.Background(), key, expireTime+randomDuration)
-		_, err := pipeline.Exec(context.Background())
-		if err != nil {
-			hlog.Error("redis.GetFavoriteList: 写入redis缓存失败, err: ", err)
-		}
-	}()
-
+	if len(videoIDs) > 0 {
+		go func() {
+			pipeline := rdb.Pipeline()
+			for _, videoID := range videoIDs {
+				pipeline.SAdd(context.Background(), key, videoID)
+			}
+			pipeline.Expire(context.Background(), key, expireTime+randomDuration)
+			_, err := pipeline.Exec(context.Background())
+			if err != nil {
+				hlog.Error("redis.GetFavoriteList: 写入redis缓存失败, err: ", err)
+			}
+		}()
+	}
 	return videoIDs, nil
 }
