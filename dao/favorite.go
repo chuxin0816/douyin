@@ -27,7 +27,7 @@ var (
 
 func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	videoIDStr := strconv.FormatInt(videoID, 10)
-	key := getRedisKey(KeyVideoLikerPF) + videoIDStr
+	key := getRedisKey(KeyVideoFavoritePF) + videoIDStr
 
 	// 查看是否已经点赞
 	exist := rdb.SIsMember(context.Background(), key, userID).Val()
