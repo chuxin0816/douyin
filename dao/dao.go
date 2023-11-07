@@ -58,13 +58,14 @@ func Init(conf *config.DatabaseConfig) (err error) {
 
 	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
 	// 初始化布隆过滤器
-	var usernames []string
-	if err = db.Table("users").Select("name").Find(&usernames).Error; err != nil {
+	var users []*models.User
+	if err = db.Select("id", "name").Find(&users).Error; err != nil {
 		hlog.Error("dao.Init: 查询用户名失败")
 		return err
 	}
-	for _, username := range usernames {
-		bloomFilter.Add([]byte(username))
+	for _, user := range users {
+		bloomFilter.Add([]byte(strconv.FormatInt(user.ID, 10)))
+		bloomFilter.Add([]byte(user.Name))
 	}
 	// 开启定时同步任务
 	go syncRedisToMySQL()
