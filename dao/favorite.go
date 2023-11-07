@@ -15,8 +15,8 @@ import (
 const (
 	expireTime = time.Hour * 72
 	timeout    = time.Second * 5
+	delayTime  = 100 * time.Millisecond
 	randFactor = 30
-	lock       = "favoriteLock"
 )
 
 var (
@@ -26,6 +26,11 @@ var (
 )
 
 func FavoriteAction(userID int64, videoID int64, actionType int64) error {
+	// 先判断布隆过滤器中是否存在
+	if !bloomFilter.Test([]byte(strconv.FormatInt(videoID, 10))) {
+		hlog.Error("mysql.FavoriteAction: 视频不存在, videoID: ", videoID)
+		return ErrVideoNotExist
+	}
 	videoIDStr := strconv.FormatInt(videoID, 10)
 	key := getRedisKey(KeyVideoFavoritePF) + videoIDStr
 
@@ -37,43 +42,40 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	}
 	if !exist {
 		// 缓存未命中，查询mysql中是否有记录
-		var id int64
-		if err := db.Model(&models.Favorite{}).Where("user_id = ? AND video_id = ?", userID, videoID).Select("id").Scan(&id).Error; err != nil {
-			hlog.Error("mysql.FavoriteAction: 查询mysql中是否有记录失败, err: ", err)
-			return err
-		}
-		// mysql中有记录
-		if id != 0 && actionType == 1 {
-			// 写入redis缓存
+		// 使用singleflight避免缓存击穿
+		_, err, _ := g.Do(key, func() (interface{}, error) {
 			go func() {
-				ok, err := rdb.SetNX(context.Background(), lock, 1, timeout).Result()
-				if err != nil {
-					hlog.Error("redis.FavoriteAction: 加锁失败, err: ", err)
-					return
-				}
-				if !ok {
-					return
-				}
+				time.Sleep(delayTime)
+				g.Forget(key)
+			}()
+			var id int64
+			if err := db.Model(&models.Favorite{}).Where("user_id = ? AND video_id = ?", userID, videoID).Select("id").Scan(&id).Error; err != nil {
+				hlog.Error("mysql.FavoriteAction: 查询mysql中是否有记录失败, err: ", err)
+				return nil, err
+			}
+			// mysql中有记录
+			if id != 0 && actionType == 1 {
+				// 写入redis缓存
 				if err := rdb.SAdd(context.Background(), key, userID).Err(); err != nil {
 					hlog.Error("redis.FavoriteAction: 写入redis缓存失败, err: ", err)
-					return
+					return nil, err
 				}
 				if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
 					hlog.Error("redis.FavoriteAction: 设置redis缓存过期时间失败, err: ", err)
-					return
+					return nil, err
 				}
-				if err := rdb.Del(context.Background(), lock).Err(); err != nil {
-					hlog.Error("redis.FavoriteAction: 释放锁失败, err: ", err)
-					return
-				}
-			}()
-			hlog.Error("redis.FavoriteAction: 已经点赞过了")
-			return ErrAlreadyFavorite
-		}
-		// mysql中没有记录
-		if id == 0 && actionType == -1 {
-			hlog.Error("redis.FavoriteAction: 还没有点赞过")
-			return ErrNotFavorite
+				hlog.Error("redis.FavoriteAction: 已经点赞过了")
+				return nil, ErrAlreadyFavorite
+			}
+			// mysql中没有记录
+			if id == 0 && actionType == -1 {
+				hlog.Error("redis.FavoriteAction: 还没有点赞过")
+				return nil, ErrNotFavorite
+			}
+			return nil, nil
+		})
+		if err != nil {
+			return err
 		}
 	}
 
@@ -134,7 +136,8 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	// 提交事务
 	tx.Commit()
 
-	// 删除redis缓存
+	// 延迟后删除redis缓存
+	time.Sleep(delayTime)
 	if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
 		hlog.Error("redis.FavoriteAction: 删除redis缓存失败, err: ", err)
 		return err
@@ -144,17 +147,35 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 }
 
 func GetFavoriteList(userID int64) ([]int64, error) {
-	var favoriteList []*models.Favorite
-	err := db.Where("user_id = ?", userID).Find(&favoriteList).Error
-	if err != nil {
+	// 先查询redis缓存
+	key := getRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
+	videoIDStrs := rdb.SMembers(context.Background(), key).Val()
+	if len(videoIDStrs) != 0 {
+		videoIDs := make([]int64, 0, len(videoIDStrs))
+		for _, videoIDStr := range videoIDStrs {
+			videoID, _ := strconv.ParseInt(videoIDStr, 10, 64)
+			videoIDs = append(videoIDs, videoID)
+		}
+		return videoIDs, nil
+	}
+
+	// 查询mysql
+	if err := db.Model(&models.Favorite{}).Where("user_id = ?", userID).Select("video_id").Find(&videoIDs).Error; err != nil {
 		hlog.Error("mysql.GetFavoriteList: 查询favorite表失败, err: ", err)
 		return nil, err
 	}
 
-	// 将models.Favorite视频ID提取出来
-	videoIDs := make([]int64, 0, len(favoriteList))
-	for _, favorite := range favoriteList {
-		videoIDs = append(videoIDs, favorite.VideoID)
-	}
+	// 写入redis缓存
+	go func() {
+		pipeline := rdb.Pipeline()
+		for _, videoID := range videoIDs {
+			pipeline.SAdd(context.Background(), key, videoID)
+		}
+		_, err := pipeline.Exec(context.Background())
+		if err != nil {
+			hlog.Error("redis.GetFavoriteList: 写入redis缓存失败, err: ", err)
+		}
+	}()
+
 	return videoIDs, nil
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/bits-and-blooms/bloom/v3"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/sync/singleflight"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -19,6 +20,7 @@ import (
 var (
 	db          *gorm.DB
 	rdb         *redis.Client
+	g           *singleflight.Group
 	bloomFilter *bloom.BloomFilter
 	userIDs     []int64
 	videoIDs    []int64
@@ -59,13 +61,24 @@ func Init(conf *config.DatabaseConfig) (err error) {
 	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
 	// 初始化布隆过滤器
 	var users []*models.User
-	if err = db.Select("id", "name").Find(&users).Error; err != nil {
-		hlog.Error("dao.Init: 查询用户名失败")
-		return err
-	}
+	var videoIDs []int64
+	db.Transaction(func(tx *gorm.DB) error {
+		if err = db.Select("id", "name").Find(&users).Error; err != nil {
+			hlog.Error("dao.Init: 查询用户名和id失败")
+			return err
+		}
+		if err = db.Model(&models.Video{}).Select("id").Find(&videoIDs).Error; err != nil {
+			hlog.Error("dao.Init: 查询视频id失败")
+			return err
+		}
+		return nil
+	})
 	for _, user := range users {
 		bloomFilter.Add([]byte(strconv.FormatInt(user.ID, 10)))
 		bloomFilter.Add([]byte(user.Name))
+	}
+	for _, videoID := range videoIDs {
+		bloomFilter.Add([]byte(strconv.FormatInt(videoID, 10)))
 	}
 	// 开启定时同步任务
 	go syncRedisToMySQL()
@@ -84,7 +97,7 @@ func syncRedisToMySQL() {
 
 		// 备份缓存中的用户ID和视频ID并清空
 		rwLock.Lock()
-		backupUserIDs := make([]int64, len(userIDs))
+		backupUserIDs := make([]int64, 0, len(userIDs))
 		backupVideoIDs := make([]int64, len(videoIDs))
 		copy(backupUserIDs, userIDs)
 		copy(backupVideoIDs, videoIDs)

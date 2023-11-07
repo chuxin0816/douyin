@@ -6,6 +6,7 @@ toolchain go1.21.2
 
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
+	github.com/bits-and-blooms/bloom/v3 v3.6.0
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cloudwego/hertz v0.7.1
 	github.com/fsnotify/fsnotify v1.6.0
@@ -26,7 +27,6 @@ require (
 require (
 	github.com/aws/aws-sdk-go v1.38.20 // indirect
 	github.com/bits-and-blooms/bitset v1.11.0 // indirect
-	github.com/bits-and-blooms/bloom/v3 v3.6.0 // indirect
 	github.com/bytedance/go-tagexpr/v2 v2.9.2 // indirect
 	github.com/bytedance/gopkg v0.0.0-20220413063733-65bf48ffb3a7 // indirect
 	github.com/bytedance/sonic v1.8.1 // indirect
@@ -66,6 +66,7 @@ require (
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
+	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
