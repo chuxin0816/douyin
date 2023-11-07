@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"context"
 	"douyin/models"
 	"douyin/response"
 	"errors"
@@ -100,7 +101,7 @@ func CreateUser(username, password string, userID int64) error {
 	return nil
 }
 
-func ToUserResponse(userID int64, user *models.User) *response.UserResponse {
+func ToUserResponse(followerID int64, user *models.User) *response.UserResponse {
 	userResponse := &response.UserResponse{
 		ID:              user.ID,
 		Name:            user.Name,
@@ -117,10 +118,21 @@ func ToUserResponse(userID int64, user *models.User) *response.UserResponse {
 
 	// 判断是否关注
 	// 从缓存中查询是否关注
+	key := getRedisKey(KeyUserFollowerPF + strconv.FormatInt(user.ID, 10))
+	if exist := rdb.SIsMember(context.Background(), key, followerID).Val(); exist {
+		userResponse.IsFollow = true
+		return userResponse
+	}
 	relation := &models.Relation{}
-	db.Where("user_id = ? AND follower_id = ?", user.ID, userID).Find(relation)
+	db.Where("user_id = ? AND follower_id = ?", user.ID, followerID).Find(relation)
 	if relation.ID != 0 {
 		userResponse.IsFollow = true
+		// 写入缓存
+		go func() {
+			if err := rdb.SAdd(context.Background(), key, followerID).Err(); err != nil {
+				hlog.Error("redis.ToUserResponse: 写入缓存失败, err: ", err)
+			}
+		}()
 	}
 
 	return userResponse
