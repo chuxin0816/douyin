@@ -41,13 +41,13 @@ var (
 )
 
 var (
-	db          *gorm.DB
-	rdb         *redis.Client
-	g           *singleflight.Group
-	bloomFilter *bloom.BloomFilter
-	userIDs     []int64
-	videoIDs    []int64
-	rwLock      sync.RWMutex
+	db            *gorm.DB
+	rdb           *redis.Client
+	g             *singleflight.Group
+	bloomFilter   *bloom.BloomFilter
+	cacheUserID   []int64
+	cacheVideoIDs []int64
+	rwLock        sync.RWMutex
 )
 
 func Init(conf *config.DatabaseConfig) (err error) {
@@ -83,7 +83,7 @@ func Init(conf *config.DatabaseConfig) (err error) {
 
 	// 初始化singleflight
 	g = &singleflight.Group{}
-	
+
 	// 初始化布隆过滤器
 	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
 	var users []*models.User
@@ -123,12 +123,12 @@ func syncRedisToMySQL() {
 
 		// 备份缓存中的用户ID和视频ID并清空
 		rwLock.Lock()
-		backupUserIDs := make([]int64, 0, len(userIDs))
-		backupVideoIDs := make([]int64, len(videoIDs))
-		copy(backupUserIDs, userIDs)
-		copy(backupVideoIDs, videoIDs)
-		userIDs = userIDs[:0]
-		videoIDs = videoIDs[:0]
+		backupUserIDs := make([]int64, 0, len(cacheUserID))
+		backupVideoIDs := make([]int64, len(cacheUserID))
+		copy(backupUserIDs, cacheUserID)
+		copy(backupVideoIDs, cacheVideoIDs)
+		cacheUserID = cacheUserID[:0]
+		cacheVideoIDs = cacheVideoIDs[:0]
 		rwLock.Unlock()
 
 		// 同步redis的用户缓存到Mysql

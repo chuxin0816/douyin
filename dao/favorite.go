@@ -128,6 +128,7 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 	}
 
 	// 缓存未命中 ,查询mysql, 使用singleflight防止缓存击穿
+	var videoIDs []int64
 	_, err, _ := g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
@@ -146,13 +147,12 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 					pipeline.SAdd(context.Background(), key, videoID)
 				}
 				pipeline.Expire(context.Background(), key, expireTime+randomDuration)
-				_, err := pipeline.Exec(context.Background())
-				if err != nil {
+				if _, err := pipeline.Exec(context.Background()); err != nil {
 					hlog.Error("redis.GetFavoriteList: 写入redis缓存失败, err: ", err)
 				}
 			}()
 		}
-		return nil, nil
+		return videoIDs, nil
 	})
 	if err != nil {
 		return nil, err

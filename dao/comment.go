@@ -39,7 +39,7 @@ func PublishComment(userID, commentID, videoID int64, commentText string) error 
 
 	// 更新video的comment_count字段
 	if err := rdb.Incr(context.Background(), getRedisKey(KeyVideoCommentCountPF+strconv.FormatInt(videoID, 10))).Err(); err != nil {
-		hlog.Error("redis.MessageAction: 更新video的comment_count字段失败, err: ", err)
+		hlog.Error("redis.PublishMessage: 更新video的comment_count字段失败, err: ", err)
 		return err
 	}
 	return nil
