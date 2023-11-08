@@ -5,7 +5,6 @@ import (
 	"douyin/pkg/oss"
 	"douyin/response"
 	"mime/multipart"
-	"sync"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -24,38 +23,17 @@ func PublishAction(ctx *app.RequestContext, userID int64, data *multipart.FileHe
 		return nil, err
 	}
 
-	// 使用协程并发执行文件保存和上传到oss操作
-	var uploadErr, dbErr error
-	var wg sync.WaitGroup
-
-	wg.Add(2)
-
 	// 上传视频和封面到oss
 	go func() {
-		defer wg.Done()
 		if err := oss.UploadFile(data, uuidName); err != nil {
-			hlog.Error("service.PublishAction: 上传文件失败, err: ", uploadErr)
-			uploadErr = err
+			hlog.Error("service.PublishAction: 上传文件失败, err: ", err)
 		}
 	}()
 
 	// 操作数据库
-	go func() {
-		defer wg.Done()
-		if err := dao.SaveVideo(userID, data.Filename, coverName, title); err != nil {
-			hlog.Error("service.PublishAction: 操作数据库失败, err: ", dbErr)
-			dbErr = err
-		}
-	}()
-
-	wg.Wait()
-
-	if uploadErr != nil {
-		return nil, uploadErr
-	}
-
-	if dbErr != nil {
-		return nil, dbErr
+	if err := dao.SaveVideo(userID, data.Filename, coverName, title); err != nil {
+		hlog.Error("service.PublishAction: 操作数据库失败, err: ", err)
+		return nil, err
 	}
 
 	return &response.PublishActionResponse{
