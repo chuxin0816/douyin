@@ -78,6 +78,11 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 		return err
 	}
 
+	// 写入待同步切片
+	lock.Lock()
+	cacheUserID = append(cacheUserID, userID)
+	lock.Unlock()
+
 	return nil
 }
 
@@ -184,6 +189,6 @@ func ToVideoResponse(userID int64, dVideo *models.Video, author *models.User) *r
 		}
 		return nil, nil
 	})
-	
+
 	return video
 }

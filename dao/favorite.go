@@ -111,6 +111,12 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 		return err
 	}
 
+	// 写入待同步切片
+	lock.Lock()
+	cacheUserID = append(cacheUserID, userID, authorID)
+	cacheVideoIDs = append(cacheVideoIDs, videoID)
+	lock.Unlock()
+
 	return nil
 }
 

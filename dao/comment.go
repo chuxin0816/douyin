@@ -42,6 +42,12 @@ func PublishComment(userID, commentID, videoID int64, commentText string) error 
 		hlog.Error("redis.PublishMessage: 更新video的comment_count字段失败, err: ", err)
 		return err
 	}
+
+	// 写入待同步切片
+	lock.Lock()
+	cacheVideoIDs = append(cacheVideoIDs, videoID)
+	lock.Unlock()
+
 	return nil
 }
 

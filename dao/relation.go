@@ -88,6 +88,11 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 		hlog.Error("redis.RelationAction 更新user的follower_count字段失败, err: ", err)
 	}
 
+	// 写入待同步切片
+	lock.Lock()
+	cacheUserID = append(cacheUserID, userID, toUserID)
+	lock.Unlock()
+
 	return nil
 }
 
