@@ -16,13 +16,19 @@ func AuthMiddleware() app.HandlerFunc {
 		// 获取token
 		token, ok := ctx.GetQuery("token")
 		if !ok {
-			response.Error(ctx, response.CodeInvalidParam)
-			hlog.Error("AuthMiddleware: token不存在")
-			ctx.Abort()
-			return
+			token, ok = ctx.GetPostForm("token")
+			if !ok {
+				response.Error(ctx, response.CodeInvalidParam)
+				hlog.Error("AuthMiddleware: token不存在")
+				ctx.Abort()
+				return
+			}
 		}
 
 		// 验证token
+		if len(token) == 0 {
+			ctx.Abort()
+		}
 		userID, err := jwt.ParseToken(token)
 		if err != nil {
 			response.Error(ctx, response.CodeNoAuthority)
