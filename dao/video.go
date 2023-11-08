@@ -157,34 +157,33 @@ func ToVideoResponse(userID int64, dVideo *models.Video, author *models.User) *r
 		return video
 	}
 
-	// 缓存未命中, 查询数据库
-	// 获取用户喜欢列表
-	videoIDs, err := GetFavoriteList(userID)
-	if err != nil {
-		hlog.Error("mysql.ToVideoResponse: 获取用户喜欢列表失败")
-		return video
-	}
-
-	// 判断是否点赞
-	for _, videoID := range videoIDs {
-		if videoID == dVideo.ID {
-			video.IsFavorite = true
-			break
-		}
-	}
-
-	// 将点赞信息写入缓存
-	if video.IsFavorite {
+	// 缓存未命中, 查询数据库, 使用singleflight防止缓存击穿
+	g.Do(key, func() (interface{}, error) {
 		go func() {
-			if err := rdb.SAdd(context.Background(), key, dVideo.ID).Err(); err != nil {
-				hlog.Error("redis.ToVideoResponse: 将点赞信息写入缓存失败, err: ", err)
-				return
-			}
-			if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
-				hlog.Error("redis.ToVideoResponse: 设置缓存过期时间失败, err: ", err)
-				return
-			}
+			time.Sleep(delayTime)
+			g.Forget(key)
 		}()
-	}
+		favorite := &models.Favorite{}
+		if err := db.Where("user_id = ? AND video_id = ?", userID, dVideo.ID).Find(favorite).Error; err != nil {
+			hlog.Error("mysql.ToVideoResponse: 查询favorite表失败, err: ", err)
+			return nil, err
+		}
+		if favorite.ID != 0 {
+			video.IsFavorite = true
+			// 写入缓存
+			go func() {
+				if err := rdb.SAdd(context.Background(), key, dVideo.ID).Err(); err != nil {
+					hlog.Error("redis.ToVideoResponse: 将点赞信息写入缓存失败, err: ", err)
+					return
+				}
+				if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+					hlog.Error("redis.ToVideoResponse: 设置缓存过期时间失败, err: ", err)
+					return
+				}
+			}()
+		}
+		return nil, nil
+	})
+	
 	return video
 }

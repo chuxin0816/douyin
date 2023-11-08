@@ -127,25 +127,35 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 		return videoIDs, nil
 	}
 
-	// 查询mysql
-	if err := db.Model(&models.Favorite{}).Where("user_id = ?", userID).Select("video_id").Find(&videoIDs).Error; err != nil {
-		hlog.Error("mysql.GetFavoriteList: 查询favorite表失败, err: ", err)
-		return nil, err
-	}
-
-	// 写入redis缓存
-	if len(videoIDs) > 0 {
+	// 缓存未命中 ,查询mysql, 使用singleflight防止缓存击穿
+	_, err, _ := g.Do(key, func() (interface{}, error) {
 		go func() {
-			pipeline := rdb.Pipeline()
-			for _, videoID := range videoIDs {
-				pipeline.SAdd(context.Background(), key, videoID)
-			}
-			pipeline.Expire(context.Background(), key, expireTime+randomDuration)
-			_, err := pipeline.Exec(context.Background())
-			if err != nil {
-				hlog.Error("redis.GetFavoriteList: 写入redis缓存失败, err: ", err)
-			}
+			time.Sleep(delayTime)
+			g.Forget(key)
 		}()
+		if err := db.Model(&models.Favorite{}).Where("user_id = ?", userID).Select("video_id").Find(&videoIDs).Error; err != nil {
+			hlog.Error("mysql.GetFavoriteList: 查询favorite表失败, err: ", err)
+			return nil, err
+		}
+
+		// 写入redis缓存
+		if len(videoIDs) > 0 {
+			go func() {
+				pipeline := rdb.Pipeline()
+				for _, videoID := range videoIDs {
+					pipeline.SAdd(context.Background(), key, videoID)
+				}
+				pipeline.Expire(context.Background(), key, expireTime+randomDuration)
+				_, err := pipeline.Exec(context.Background())
+				if err != nil {
+					hlog.Error("redis.GetFavoriteList: 写入redis缓存失败, err: ", err)
+				}
+			}()
+		}
+		return nil, nil
+	})
+	if err != nil {
+		return nil, err
 	}
 	return videoIDs, nil
 }

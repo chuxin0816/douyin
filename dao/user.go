@@ -5,6 +5,7 @@ import (
 	"douyin/models"
 	"douyin/response"
 	"strconv"
+	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
@@ -116,20 +117,29 @@ func ToUserResponse(followerID int64, user *models.User) *response.UserResponse 
 		userResponse.IsFollow = true
 		return userResponse
 	}
-	relation := &models.Relation{}
-	db.Where("user_id = ? AND follower_id = ?", user.ID, followerID).Find(relation)
-	if relation.ID != 0 {
-		userResponse.IsFollow = true
-		// 写入缓存
+
+	// 缓存未命中, 从数据库中查询, 使用singleflight防止缓存击穿
+	g.Do(key, func() (interface{}, error) {
 		go func() {
-			if err := rdb.SAdd(context.Background(), key, followerID).Err(); err != nil {
-				hlog.Error("redis.ToUserResponse: 写入缓存失败, err: ", err)
-			}
-			if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
-				hlog.Error("redis.ToUserResponse: 设置缓存过期时间失败, err: ", err)
-			}
+			time.Sleep(delayTime)
+			g.Forget(key)
 		}()
-	}
+		relation := &models.Relation{}
+		db.Where("user_id = ? AND follower_id = ?", user.ID, followerID).Find(relation)
+		if relation.ID != 0 {
+			userResponse.IsFollow = true
+			// 写入缓存
+			go func() {
+				if err := rdb.SAdd(context.Background(), key, followerID).Err(); err != nil {
+					hlog.Error("redis.ToUserResponse: 写入缓存失败, err: ", err)
+				}
+				if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+					hlog.Error("redis.ToUserResponse: 设置缓存过期时间失败, err: ", err)
+				}
+			}()
+		}
+		return nil, nil
+	})
 
 	return userResponse
 }
