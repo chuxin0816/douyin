@@ -18,8 +18,6 @@ func AuthMiddleware() app.HandlerFunc {
 		if !ok {
 			token, ok = ctx.GetPostForm("token")
 			if !ok {
-				response.Error(ctx, response.CodeInvalidParam)
-				hlog.Error("AuthMiddleware: token不存在")
 				ctx.Abort()
 				return
 			}
