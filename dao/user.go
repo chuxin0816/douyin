@@ -125,7 +125,10 @@ func ToUserResponse(followerID int64, user *models.User) *response.UserResponse 
 			g.Forget(key)
 		}()
 		relation := &models.Relation{}
-		db.Where("user_id = ? AND follower_id = ?", user.ID, followerID).Find(relation)
+		if err:=db.Where("user_id = ? AND follower_id = ?", user.ID, followerID).Find(relation).Error; err != nil {
+			hlog.Error("mysql.ToUserResponse: 查询数据库失败")
+			return nil, err
+		}
 		if relation.ID != 0 {
 			userResponse.IsFollow = true
 			// 写入缓存

@@ -81,8 +81,11 @@ func Init(conf *config.DatabaseConfig) (err error) {
 		hlog.Error("redis.Init: 连接redis失败")
 	}
 
-	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
+	// 初始化singleflight
+	g = &singleflight.Group{}
+	
 	// 初始化布隆过滤器
+	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
 	var users []*models.User
 	var videoIDs []int64
 	db.Transaction(func(tx *gorm.DB) error {
