@@ -1,15 +1,15 @@
 package service
 
 import (
-	"douyin/dao/mysql"
+	"douyin/dao"
 	"douyin/response"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
-func MessageAction(userID, toUserID int64, actionType int, content string) (*response.MessageActionResponse, error) {
+func MessageAction(userID, toUserID int64, actionType int64, content string) (*response.MessageActionResponse, error) {
 	// 操作数据库
-	err := mysql.MessageAction(userID, toUserID, content)
+	err := dao.MessageAction(userID, toUserID, content)
 	if err != nil {
 		hlog.Error("service.MessageAction: 操作数据库失败, err: ", err)
 		return nil, err
@@ -23,7 +23,7 @@ func MessageAction(userID, toUserID int64, actionType int, content string) (*res
 
 func MessageChat(userID, toUserID, lastTime int64) (*response.MessageChatResponse, error) {
 	// 操作数据库
-	messageList, err := mysql.MessageList(userID, toUserID, lastTime)
+	messageList, err := dao.MessageList(userID, toUserID, lastTime)
 	if err != nil {
 		hlog.Error("service.MessageChat: 操作数据库失败, err: ", err)
 		return nil, err

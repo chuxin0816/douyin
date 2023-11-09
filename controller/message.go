@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"douyin/pkg/jwt"
+	"douyin/middleware"
 	"douyin/response"
 	"douyin/service"
 
@@ -13,16 +13,14 @@ import (
 type MessageController struct{}
 
 type MessageActionRequest struct {
-	Token      string `query:"token"              vd:"len($)>0"` // 用户鉴权token
 	ToUserID   int64  `query:"to_user_id,string"  vd:"$>0"`      // 对方用户id
-	ActionType int    `query:"action_type,string" vd:"$==1"`     // 1-发送消息
+	ActionType int64  `query:"action_type,string" vd:"$==1"`     // 1-发送消息
 	Content    string `query:"content"            vd:"len($)>0"` // 消息内容
 }
 
 type MessageChatRequest struct {
-	Token      string `query:"token"               vd:"len($)>0"` // 用户鉴权token
-	ToUserID   int64  `query:"to_user_id,string"   vd:"$>0"`      // 对方用户id
-	PreMsgTime int64  `query:"pre_msg_time,string"`               // 上一条消息时间
+	ToUserID   int64 `query:"to_user_id,string"   vd:"$>0"` // 对方用户id
+	PreMsgTime int64 `query:"pre_msg_time,string"`          // 上一条消息时间
 }
 
 func NewMessageController() *MessageController {
@@ -39,13 +37,8 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 		return
 	}
 
-	// 验证token
-	userID, err := jwt.ParseToken(req.Token)
-	if err != nil {
-		response.Error(ctx, response.CodeNoAuthority)
-		hlog.Error("MessageController.Action: token无效, err: ", err)
-		return
-	}
+	// 从认证中间件中获取userID
+	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.MessageAction(userID, req.ToUserID, req.ActionType, req.Content)
@@ -69,13 +62,8 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
-	// 验证token
-	userID, err := jwt.ParseToken(req.Token)
-	if err != nil {
-		response.Error(ctx, response.CodeNoAuthority)
-		hlog.Error("MessageController.Chat: token无效, err: ", err)
-		return
-	}
+	// 从认证中间件中获取userID
+	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.MessageChat(userID, req.ToUserID, req.PreMsgTime)

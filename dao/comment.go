@@ -1,32 +1,29 @@
-package mysql
+package dao
 
 import (
+	"context"
 	"douyin/models"
 	"douyin/response"
-	"errors"
+	"strconv"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"gorm.io/gorm"
-)
-
-var (
-	ErrCommentNotExist = errors.New("comment not exist")
-	ErrVideoNotExist   = errors.New("video not exist")
 )
 
 func PublishComment(userID, commentID, videoID int64, commentText string) error {
 	// 判断视频是否存在
+	if !bloomFilter.Test([]byte(strconv.FormatInt(videoID, 10))) {
+		return ErrVideoNotExist
+	}
 	video := &models.Video{ID: videoID}
-	err := db.Find(video).Error
-	if err != nil {
+	if err := db.Find(video).Error; err != nil {
 		hlog.Error("mysql.PublishComment: 查询视频失败, err: ", err)
 		return err
 	}
 	if video.AuthorID == 0 {
-		hlog.Error("mysql.PublishComment: 视频不存在")
 		return ErrVideoNotExist
 	}
+
 	// 创建评论
 	comment := &models.Comment{
 		ID:         commentID,
@@ -35,30 +32,32 @@ func PublishComment(userID, commentID, videoID int64, commentText string) error 
 		Content:    commentText,
 		CreateTime: time.Now(),
 	}
-	err = db.Create(comment).Error
-	if err != nil {
+	if err := db.Create(comment).Error; err != nil {
 		hlog.Error("mysql.PublishComment: 创建评论失败, err: ", err)
 		return err
 	}
 
-	// 更新视频评论数
-	err = db.Model(&models.Video{}).Where("id = ?", videoID).Update("comment_count", gorm.Expr("comment_count + ?", 1)).Error
-	if err != nil {
-		hlog.Error("mysql.PublishComment: 更新视频评论数失败, err: ", err)
+	// 更新video的comment_count字段
+	if err := rdb.Incr(context.Background(), getRedisKey(KeyVideoCommentCountPF+strconv.FormatInt(videoID, 10))).Err(); err != nil {
+		hlog.Error("redis.PublishMessage: 更新video的comment_count字段失败, err: ", err)
 		return err
 	}
+
+	// 写入待同步切片
+	lock.Lock()
+	cacheVideoIDs = append(cacheVideoIDs, videoID)
+	lock.Unlock()
+
 	return nil
 }
 
 func GetCommentByID(commentID int64) (*models.Comment, error) {
 	comment := &models.Comment{ID: commentID}
-	err := db.Find(comment).Error
-	if err != nil {
+	if err := db.Find(comment).Error; err != nil {
 		hlog.Error("mysql.GetCommentUserID: 查询评论失败, err: ", err)
 		return nil, err
 	}
 	if comment.UserID == 0 {
-		hlog.Error("mysql.GetCommentUserID: 评论不存在")
 		return nil, ErrCommentNotExist
 	}
 	return comment, nil
@@ -67,25 +66,23 @@ func GetCommentByID(commentID int64) (*models.Comment, error) {
 func DeleteComment(commentID, videoID int64) error {
 	// 判断视频是否存在
 	video := &models.Video{ID: videoID}
-	err := db.Find(video).Error
-	if err != nil {
+	if err := db.Find(video).Error; err != nil {
 		hlog.Error("mysql.PublishComment: 查询视频失败, err: ", err)
 		return err
 	}
 	if video.AuthorID == 0 {
-		hlog.Error("mysql.PublishComment: 视频不存在")
 		return ErrVideoNotExist
 	}
+
 	// 删除评论
-	err = db.Delete(&models.Comment{ID: commentID}).Error
-	if err != nil {
+	if err := db.Delete(&models.Comment{ID: commentID}).Error; err != nil {
 		hlog.Error("mysql.DeleteComment: 删除评论失败, err: ", err)
 		return err
 	}
+
 	// 更新视频评论数
-	err = db.Model(&models.Video{}).Where("id = ?", videoID).Update("comment_count", gorm.Expr("comment_count - ?", 1)).Error
-	if err != nil {
-		hlog.Error("mysql.DeleteComment: 更新视频评论数失败, err: ", err)
+	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyVideoCommentCountPF+strconv.FormatInt(videoID, 10)), -1).Err(); err != nil {
+		hlog.Error("redis.DeleteComment: 更新视频评论数失败, err: ", err)
 		return err
 	}
 	return nil

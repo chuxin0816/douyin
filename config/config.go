@@ -9,14 +9,18 @@ import (
 var Conf = &Config{}
 
 type Config struct {
-	JwtKey       string `mapstructure:"jwt_key"`
-	StartTime    string `mapstructure:"start_time"`
-	MachineID    int64  `mapstructure:"machine_id"`
-	*OssConfig   `mapstructure:"oss"`
-	*HertzConfig `mapstructure:"hertz"`
-	*LogConfig   `mapstructure:"log"`
-	*MysqlConfig `mapstructure:"mysql"`
-	*RedisConfig `mapstructure:"redis"`
+	JwtKey           string `mapstructure:"jwt_key"`
+	*SnowflakeConfig `mapstructure:"snowflake"`
+	*OssConfig       `mapstructure:"oss"`
+	*HertzConfig     `mapstructure:"hertz"`
+	*LogConfig       `mapstructure:"log"`
+	*DatabaseConfig  `mapstructure:"database"`
+	*KafkaConfig     `mapstructure:"kafka"`
+}
+
+type SnowflakeConfig struct {
+	StartTime string `mapstructure:"start_time"`
+	MachineID int64  `mapstructure:"machine_id"`
 }
 
 type OssConfig struct {
@@ -38,6 +42,11 @@ type LogConfig struct {
 	MaxAge     int    `mapstructure:"max_age"`
 }
 
+type DatabaseConfig struct {
+	*MysqlConfig `mapstructure:"mysql"`
+	*RedisConfig `mapstructure:"redis"`
+}
+
 type MysqlConfig struct {
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
@@ -51,6 +60,10 @@ type RedisConfig struct {
 	Port     int    `mapstructure:"port"`
 	Password string `mapstructure:"password"`
 	DB       int    `mapstructure:"db"`
+}
+
+type KafkaConfig struct {
+	Brokers []string `mapstructure:"brokers"`
 }
 
 func Init() error {

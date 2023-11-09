@@ -1,7 +1,7 @@
 package service
 
 import (
-	"douyin/dao/mysql"
+	"douyin/dao"
 	"douyin/models"
 	"douyin/pkg/snowflake"
 	"douyin/response"
@@ -17,14 +17,14 @@ func CommentAction(userID, actionType, videoID, commentID int64, commentText str
 	if actionType == 1 {
 		// 发布评论
 		commentID = snowflake.GenerateID()
-		err = mysql.PublishComment(userID, commentID, videoID, commentText)
+		err = dao.PublishComment(userID, commentID, videoID, commentText)
 		if err != nil {
 			hlog.Error("service.CommentAction: 发布评论失败, err: ", err)
 			return nil, err
 		}
 	} else {
 		// 删除评论
-		comment, err = mysql.GetCommentByID(commentID)
+		comment, err = dao.GetCommentByID(commentID)
 		if err != nil {
 			hlog.Error("service.CommentAction: 获取评论作者id失败, err: ", err)
 			return nil, err
@@ -33,7 +33,7 @@ func CommentAction(userID, actionType, videoID, commentID int64, commentText str
 			hlog.Error("service.CommentAction: 评论作者id与当前用户id不一致")
 			return nil, err
 		}
-		err = mysql.DeleteComment(commentID, videoID)
+		err = dao.DeleteComment(commentID, videoID)
 		if err != nil {
 			hlog.Error("service.CommentAction: 删除评论失败, err: ", err)
 			return nil, err
@@ -41,7 +41,7 @@ func CommentAction(userID, actionType, videoID, commentID int64, commentText str
 	}
 
 	// 获取用户信息
-	user, err := mysql.GetUserByID(comment.UserID)
+	user, err := dao.GetUserByID(comment.UserID)
 	if err != nil {
 		hlog.Error("service.CommentAction: 获取用户信息失败, err: ", err)
 		return nil, err
@@ -50,13 +50,13 @@ func CommentAction(userID, actionType, videoID, commentID int64, commentText str
 	// 返回响应
 	return &response.CommentActionResponse{
 		Response: &response.Response{StatusCode: response.CodeSuccess, StatusMsg: response.CodeSuccess.Msg()},
-		Comment:  mysql.ToCommentResponse(userID, comment, user),
+		Comment:  dao.ToCommentResponse(userID, comment, user),
 	}, nil
 }
 
 func CommentList(userID, videoID int64) (*response.CommentListResponse, error) {
 	// 获取评论列表
-	dCommentList, err := mysql.GetCommentList(videoID)
+	dCommentList, err := dao.GetCommentList(videoID)
 	if err != nil {
 		hlog.Error("service.CommentList: 获取评论列表失败, err: ", err)
 		return nil, err
@@ -67,7 +67,7 @@ func CommentList(userID, videoID int64) (*response.CommentListResponse, error) {
 	for _, comment := range dCommentList {
 		userIDs = append(userIDs, comment.UserID)
 	}
-	users, err := mysql.GetUserByIDs(userIDs)
+	users, err := dao.GetUserByIDs(userIDs)
 	if err != nil {
 		hlog.Error("service.CommentList: 获取用户信息失败, err: ", err)
 		return nil, err
@@ -76,7 +76,7 @@ func CommentList(userID, videoID int64) (*response.CommentListResponse, error) {
 	// 将用户信息与评论列表进行关联
 	commentList := make([]*response.CommentResponse, 0, len(dCommentList))
 	for idx, comment := range dCommentList {
-		commentList = append(commentList, mysql.ToCommentResponse(userID, comment, users[idx]))
+		commentList = append(commentList, dao.ToCommentResponse(userID, comment, users[idx]))
 	}
 
 	// 返回响应
