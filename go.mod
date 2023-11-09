@@ -2,8 +2,6 @@ module douyin
 
 go 1.21
 
-toolchain go1.21.2
-
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
 	github.com/bits-and-blooms/bloom/v3 v3.6.0
