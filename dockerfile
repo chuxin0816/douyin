@@ -19,7 +19,7 @@ RUN go build -o douyin
 FROM ubuntu:lunar
 
 COPY ./wait-for.sh /
-COPY ./config/config.json /config/config.json
+COPY ./config/config.yml /config/config.yml
 
 COPY --from=builder /build/douyin /
 
