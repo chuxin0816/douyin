@@ -1,14 +1,10 @@
-package controller
+package service
 
 import (
 	"douyin/config"
 	"douyin/dao"
-	"douyin/response"
-	"encoding/json"
 	"testing"
 
-	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/cloudwego/hertz/pkg/common/ut"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,13 +28,11 @@ func init() {
 		panic(err)
 	}
 }
+
 func TestFeed(t *testing.T) {
-	h := server.Default()
-	h.GET("/feed", Feed)
-	w := ut.PerformRequest(h.Engine, "GET", "/feed", nil)
-	resp := w.Result()
-	assert.Equal(t, 200, resp.StatusCode())
-	result := &response.FeedResponse{}
-	json.Unmarshal(resp.Body(), result)
-	assert.Equal(t, 0, int(result.StatusCode))
+	resp, err := Feed(0, 10760536648060928)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, 0, int(resp.StatusCode))
 }
