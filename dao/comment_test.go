@@ -48,6 +48,7 @@ func TestGetCommentByID(t *testing.T) {
 	comment, err := GetCommentByID(12564221107638272)
 	if err != nil {
 		t.Log(err)
+		t.Fail()
 	}
 	assert.Equal(t, comment.ID, int64(12564221107638272))
 }
@@ -56,6 +57,7 @@ func TestGetCommentList(t *testing.T) {
 	comments, err := GetCommentList(10760595804524544)
 	if err != nil {
 		t.Log(err)
+		t.Fail()
 	}
 	assert.Equal(t, 1, len(comments))
 }
