@@ -75,7 +75,7 @@ func DeleteComment(commentID, videoID int64) error {
 	}
 
 	// 删除评论
-	if err := db.Delete(&models.Comment{ID: commentID}).Error; err != nil {
+	if err := db.Delete(&models.Comment{}, commentID).Error; err != nil {
 		hlog.Error("mysql.DeleteComment: 删除评论失败, err: ", err)
 		return err
 	}

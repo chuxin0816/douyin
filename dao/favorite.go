@@ -17,8 +17,8 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	}
 
 	// 查看是否已经点赞
-	key := getRedisKey(KeyVideoFavoritePF + strconv.FormatInt(videoID, 10))
-	exist := rdb.SIsMember(context.Background(), key, userID).Val()
+	key := getRedisKey(KeyUserFavoritePF+ strconv.FormatInt(userID, 10))
+	exist := rdb.SIsMember(context.Background(), key, videoID).Val()
 	if exist && actionType == 1 {
 		return ErrAlreadyFavorite
 	}
@@ -38,7 +38,7 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 			// mysql中有记录
 			if id != 0 && actionType == 1 {
 				// 写入redis缓存
-				if err := rdb.SAdd(context.Background(), key, userID).Err(); err != nil {
+				if err := rdb.SAdd(context.Background(), key, videoID).Err(); err != nil {
 					hlog.Error("redis.FavoriteAction: 写入redis缓存失败, err: ", err)
 					return nil, err
 				}
@@ -68,7 +68,7 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 
 	// 保存用户点赞视频的记录, 采用延迟双删策略
 	// 删除redis缓存
-	if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
+	if err := rdb.SRem(context.Background(), key, videoID).Err(); err != nil {
 		hlog.Error("redis.FavoriteAction: 删除redis缓存失败, err: ", err)
 	}
 
@@ -88,7 +88,7 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	// 延迟后删除redis缓存
 	go func() {
 		time.Sleep(delayTime)
-		if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
+		if err := rdb.SRem(context.Background(), key, videoID).Err(); err != nil {
 			hlog.Error("redis.FavoriteAction: 删除redis缓存失败, err: ", err)
 		}
 	}()

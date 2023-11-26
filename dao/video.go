@@ -78,6 +78,9 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 		return err
 	}
 
+	// 添加到布隆过滤器
+	bloomFilter.Add([]byte(strconv.FormatInt(video.ID, 10)))
+	
 	// 写入待同步切片
 	lock.Lock()
 	cacheUserID = append(cacheUserID, userID)
