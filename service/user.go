@@ -81,7 +81,11 @@ func Login(username, password string) (*response.LoginResponse, error) {
 
 	// 校验密码
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil && err != bcrypt.ErrMismatchedHashAndPassword {
+	if err != nil {
+		if err == bcrypt.ErrMismatchedHashAndPassword {
+			hlog.Info("service.Login: 密码错误, username: ", username)
+			return nil, dao.ErrPassword
+		}
 		hlog.Error("service.Login: 校验密码失败")
 		return nil, err
 	}
