@@ -28,7 +28,6 @@ const (
 )
 
 var (
-	randomDuration     = time.Duration(rand.Intn(randFactor)) * time.Minute
 	ErrUserExist       = errors.New("用户已存在")
 	ErrUserNotExist    = errors.New("用户不存在")
 	ErrPassword        = errors.New("密码错误")
@@ -158,4 +157,9 @@ func syncRedisToMySQL() {
 			}
 		}
 	}
+}
+
+func getRandomTime() time.Duration {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return time.Duration(r.Intn(randFactor)) * time.Minute
 }

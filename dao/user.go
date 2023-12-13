@@ -136,7 +136,7 @@ func ToUserResponse(followerID int64, user *models.User) *response.UserResponse 
 				if err := rdb.SAdd(context.Background(), key, followerID).Err(); err != nil {
 					hlog.Error("redis.ToUserResponse: 写入缓存失败, err: ", err)
 				}
-				if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
 					hlog.Error("redis.ToUserResponse: 设置缓存过期时间失败, err: ", err)
 				}
 			}()

@@ -39,7 +39,7 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 					hlog.Error("redis.RelationAction 写入redis缓存失败, err: ", err)
 					return
 				}
-				if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
 					hlog.Error("redis.RelationAction 设置redis缓存过期时间失败, err: ", err)
 					return
 				}

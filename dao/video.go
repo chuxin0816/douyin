@@ -185,7 +185,7 @@ func ToVideoResponse(userID int64, dVideo *models.Video, author *models.User) *r
 					hlog.Error("redis.ToVideoResponse: 将点赞信息写入缓存失败, err: ", err)
 					return
 				}
-				if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
 					hlog.Error("redis.ToVideoResponse: 设置缓存过期时间失败, err: ", err)
 					return
 				}

@@ -44,7 +44,7 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 				hlog.Error("redis.FavoriteAction: 写入redis缓存失败, err: ", err)
 				return nil, err
 			}
-			if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+			if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
 				hlog.Error("redis.FavoriteAction: 设置redis缓存过期时间失败, err: ", err)
 				return nil, err
 			}
@@ -153,7 +153,7 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 				for _, videoID := range videoIDs {
 					pipeline.SAdd(context.Background(), key, videoID)
 				}
-				pipeline.Expire(context.Background(), key, expireTime+randomDuration)
+				pipeline.Expire(context.Background(), key, expireTime+getRandomTime())
 				if _, err := pipeline.Exec(context.Background()); err != nil {
 					hlog.Error("redis.GetFavoriteList: 写入redis缓存失败, err: ", err)
 				}
