@@ -12,47 +12,47 @@ import (
 func RelationAction(userID, toUserID int64, actionType int64) error {
 	// 查看是否关注
 	key := getRedisKey(KeyUserFollowerPF + strconv.FormatInt(toUserID, 10))
-	exist := rdb.SIsMember(context.Background(), key, userID).Val()
-	if exist && actionType == 1 {
-		hlog.Error("mysql.RelationAction 已经关注过了")
-		return ErrAlreadyFollow
-	}
-
-	// 缓存未命中, 查询数据库
-	if !exist {
-		// 使用singleflight避免缓存击穿
-		_, err, _ := g.Do(key, func() (interface{}, error) {
-			go func() {
-				time.Sleep(delayTime)
-				g.Forget(key)
-			}()
-			relation := &models.Relation{}
-			if err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Find(relation).Error; err != nil {
-				hlog.Error("mysql.RelationAction 查看是否关注失败, err: ", err)
-				return nil, err
-			}
-			if relation.ID != 0 && actionType == 1 {
-				// 写入redis缓存
-				go func() {
-					if err := rdb.SAdd(context.Background(), key, userID).Err(); err != nil {
-						hlog.Error("redis.RelationAction 写入redis缓存失败, err: ", err)
-						return
-					}
-					if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
-						hlog.Error("redis.RelationAction 设置redis缓存过期时间失败, err: ", err)
-						return
-					}
-				}()
+	// 使用singleflight避免缓存击穿和减少缓存压力
+	_, err, _ := g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
+		exist := rdb.SIsMember(context.Background(), key, userID).Val()
+		if exist {
+			if actionType == 1 {
+				hlog.Error("mysql.RelationAction 已经关注过了")
 				return nil, ErrAlreadyFollow
 			}
-			if relation.ID == 0 && actionType == -1 {
-				return nil, ErrNotFollow
-			}
 			return nil, nil
-		})
-		if err != nil {
-			return err
 		}
+		// 缓存未命中, 查询数据库
+		relation := &models.Relation{}
+		if err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Find(relation).Error; err != nil {
+			hlog.Error("mysql.RelationAction 查看是否关注失败, err: ", err)
+			return nil, err
+		}
+		if relation.ID != 0 && actionType == 1 {
+			// 写入redis缓存
+			go func() {
+				if err := rdb.SAdd(context.Background(), key, userID).Err(); err != nil {
+					hlog.Error("redis.RelationAction 写入redis缓存失败, err: ", err)
+					return
+				}
+				if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+					hlog.Error("redis.RelationAction 设置redis缓存过期时间失败, err: ", err)
+					return
+				}
+			}()
+			return nil, ErrAlreadyFollow
+		}
+		if relation.ID == 0 && actionType == -1 {
+			return nil, ErrNotFollow
+		}
+		return nil, nil
+	})
+	if err != nil {
+		return err
 	}
 
 	// 使用延迟双删策略

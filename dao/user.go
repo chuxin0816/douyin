@@ -113,19 +113,19 @@ func ToUserResponse(followerID int64, user *models.User) *response.UserResponse 
 	// 判断是否关注
 	// 从缓存中查询是否关注
 	key := getRedisKey(KeyUserFollowerPF + strconv.FormatInt(user.ID, 10))
-	if rdb.SIsMember(context.Background(), key, followerID).Val() {
-		userResponse.IsFollow = true
-		return userResponse
-	}
-
-	// 缓存未命中, 从数据库中查询, 使用singleflight防止缓存击穿
+	// 使用singleflight避免缓存击穿和减少缓存压力
 	g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
+		if rdb.SIsMember(context.Background(), key, followerID).Val() {
+			userResponse.IsFollow = true
+			return nil, nil
+		}
+
 		relation := &models.Relation{}
-		if err:=db.Where("user_id = ? AND follower_id = ?", user.ID, followerID).Find(relation).Error; err != nil {
+		if err := db.Where("user_id = ? AND follower_id = ?", user.ID, followerID).Find(relation).Error; err != nil {
 			hlog.Error("mysql.ToUserResponse: 查询数据库失败")
 			return nil, err
 		}

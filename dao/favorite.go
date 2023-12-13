@@ -17,46 +17,47 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	}
 
 	// 查看是否已经点赞
-	key := getRedisKey(KeyUserFavoritePF+ strconv.FormatInt(userID, 10))
-	exist := rdb.SIsMember(context.Background(), key, videoID).Val()
-	if exist && actionType == 1 {
-		return ErrAlreadyFavorite
-	}
-	// 缓存未命中，查询mysql中是否有记录
-	if !exist {
-		// 使用singleflight避免缓存击穿
-		_, err, _ := g.Do(key, func() (interface{}, error) {
-			go func() {
-				time.Sleep(delayTime)
-				g.Forget(key)
-			}()
-			var id int64
-			if err := db.Model(&models.Favorite{}).Where("user_id = ? AND video_id = ?", userID, videoID).Select("id").Scan(&id).Error; err != nil {
-				hlog.Error("mysql.FavoriteAction: 查询mysql中是否有记录失败, err: ", err)
-				return nil, err
-			}
-			// mysql中有记录
-			if id != 0 && actionType == 1 {
-				// 写入redis缓存
-				if err := rdb.SAdd(context.Background(), key, videoID).Err(); err != nil {
-					hlog.Error("redis.FavoriteAction: 写入redis缓存失败, err: ", err)
-					return nil, err
-				}
-				if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
-					hlog.Error("redis.FavoriteAction: 设置redis缓存过期时间失败, err: ", err)
-					return nil, err
-				}
+	key := getRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
+	// 使用singleflight避免缓存击穿和减少缓存压力
+	_, err, _ := g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
+		exist := rdb.SIsMember(context.Background(), key, videoID).Val()
+		if exist {
+			if actionType == 1 {
 				return nil, ErrAlreadyFavorite
 			}
-			// mysql中没有记录
-			if id == 0 && actionType == -1 {
-				return nil, ErrNotFavorite
-			}
 			return nil, nil
-		})
-		if err != nil {
-			return err
 		}
+		// 缓存未命中，查询mysql中是否有记录
+		var id int64
+		if err := db.Model(&models.Favorite{}).Where("user_id = ? AND video_id = ?", userID, videoID).Select("id").Scan(&id).Error; err != nil {
+			hlog.Error("mysql.FavoriteAction: 查询mysql中是否有记录失败, err: ", err)
+			return nil, err
+		}
+		// mysql中有记录
+		if id != 0 && actionType == 1 {
+			// 写入redis缓存
+			if err := rdb.SAdd(context.Background(), key, videoID).Err(); err != nil {
+				hlog.Error("redis.FavoriteAction: 写入redis缓存失败, err: ", err)
+				return nil, err
+			}
+			if err := rdb.Expire(context.Background(), key, expireTime+randomDuration).Err(); err != nil {
+				hlog.Error("redis.FavoriteAction: 设置redis缓存过期时间失败, err: ", err)
+				return nil, err
+			}
+			return nil, ErrAlreadyFavorite
+		}
+		// mysql中没有记录
+		if id == 0 && actionType == -1 {
+			return nil, ErrNotFavorite
+		}
+		return nil, nil
+	})
+	if err != nil {
+		return err
 	}
 
 	// 先查询作者的ID

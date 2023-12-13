@@ -80,7 +80,7 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 
 	// 添加到布隆过滤器
 	bloomFilter.Add([]byte(strconv.FormatInt(video.ID, 10)))
-	
+
 	// 写入待同步切片
 	lock.Lock()
 	cacheUserID = append(cacheUserID, userID)
@@ -158,19 +158,20 @@ func ToVideoResponse(userID int64, dVideo *models.Video, author *models.User) *r
 		return video
 	}
 
+	// 使用singleflight避免缓存击穿和减少缓存压力
 	// 查询缓存判断是否点赞
 	key := getRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
-	if rdb.SIsMember(context.Background(), key, dVideo.ID).Val() {
-		video.IsFavorite = true
-		return video
-	}
-
-	// 缓存未命中, 查询数据库, 使用singleflight防止缓存击穿
 	g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
+		if rdb.SIsMember(context.Background(), key, dVideo.ID).Val() {
+			video.IsFavorite = true
+			return nil, nil
+		}
+
+		// 缓存未命中, 查询数据库
 		favorite := &models.Favorite{}
 		if err := db.Where("user_id = ? AND video_id = ?", userID, dVideo.ID).Find(favorite).Error; err != nil {
 			hlog.Error("mysql.ToVideoResponse: 查询favorite表失败, err: ", err)
