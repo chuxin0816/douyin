@@ -40,14 +40,16 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 		// mysql中有记录
 		if id != 0 && actionType == 1 {
 			// 写入redis缓存
-			if err := rdb.SAdd(context.Background(), key, videoID).Err(); err != nil {
-				hlog.Error("redis.FavoriteAction: 写入redis缓存失败, err: ", err)
-				return nil, err
-			}
-			if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
-				hlog.Error("redis.FavoriteAction: 设置redis缓存过期时间失败, err: ", err)
-				return nil, err
-			}
+			go func() {
+				if err := rdb.SAdd(context.Background(), key, videoID).Err(); err != nil {
+					hlog.Error("redis.FavoriteAction: 写入redis缓存失败, err: ", err)
+					return
+				}
+				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
+					hlog.Error("redis.FavoriteAction: 设置redis缓存过期时间失败, err: ", err)
+					return
+				}
+			}()
 			return nil, ErrAlreadyFavorite
 		}
 		// mysql中没有记录
