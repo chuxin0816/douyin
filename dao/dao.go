@@ -85,26 +85,11 @@ func Init(conf *config.DatabaseConfig) (err error) {
 
 	// 初始化布隆过滤器
 	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
-	var users []*models.User
-	var videoIDs []int64
-	db.Transaction(func(tx *gorm.DB) error {
-		if err = db.Select("id", "name").Find(&users).Error; err != nil {
-			hlog.Error("dao.Init: 查询用户名和id失败")
-			return err
-		}
-		if err = db.Model(&models.Video{}).Select("id").Find(&videoIDs).Error; err != nil {
-			hlog.Error("dao.Init: 查询视频id失败")
-			return err
-		}
-		return nil
-	})
-	for _, user := range users {
-		bloomFilter.Add([]byte(strconv.FormatInt(user.ID, 10)))
-		bloomFilter.Add([]byte(user.Name))
+	if err := loadDataToBloom(); err != nil {
+		hlog.Error("dao.Init: 加载数据到布隆过滤器失败")
+		return err
 	}
-	for _, videoID := range videoIDs {
-		bloomFilter.Add([]byte(strconv.FormatInt(videoID, 10)))
-	}
+
 	// 开启定时同步任务
 	go syncRedisToMySQL()
 	return
@@ -136,9 +121,13 @@ func syncRedisToMySQL() {
 			followCount, _ := strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyUserFollowCountPF+userIDStr)).Val(), 10, 64)
 			followerCount, _ := strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyUserFollowerCountPF+userIDStr)).Val(), 10, 64)
 			workCount, _ := strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyUserWorkCountPF+userIDStr)).Val(), 10, 64)
-			if err := db.Table("users").Where("id = ?", userID).Updates(map[string]interface{}{
-				"total_favorited": totalFavorited, "favorite_count": favoriteCount, "follow_count": followCount,
-				"follower_count": followerCount, "work_count": workCount}).Error; err != nil {
+			err := db.Table("users").Where("id = ?", userID).Updates(map[string]interface{}{
+				"total_favorited": totalFavorited,
+				"favorite_count":  favoriteCount,
+				"follow_count":    followCount,
+				"follower_count":  followerCount,
+				"work_count":      workCount}).Error
+			if err != nil {
 				hlog.Error("dao.syncRedisToMySQL: 同步redis用户缓存到mysql失败")
 				continue
 			}
@@ -150,8 +139,10 @@ func syncRedisToMySQL() {
 			videoIDStr := strconv.FormatInt(videoID, 10)
 			videoFavoriteCount, _ = strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyVideoFavoriteCountPF+videoIDStr)).Val(), 10, 64)
 			videoCommentCount, _ = strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyVideoCommentCountPF+videoIDStr)).Val(), 10, 64)
-			if err := db.Table("videos").Where("id = ?", videoID).Updates(map[string]interface{}{
-				"favorite_count": videoFavoriteCount, "comment_count": videoCommentCount}).Error; err != nil {
+			err := db.Table("videos").Where("id = ?", videoID).Updates(map[string]interface{}{
+				"favorite_count": videoFavoriteCount,
+				"comment_count":  videoCommentCount}).Error
+			if err != nil {
 				hlog.Error("dao.syncRedisToMySQL: 同步redis视频缓存到mysql失败")
 				continue
 			}
@@ -162,4 +153,60 @@ func syncRedisToMySQL() {
 func getRandomTime() time.Duration {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return time.Duration(r.Intn(randFactor)) * time.Minute
+}
+
+func loadDataToBloom() error {
+	// 填入用户ID和name
+	var users []*models.User
+	PageSize := 50
+	PageCnt := 0
+	var Cnt int64
+	if err := db.Model(&models.User{}).Count(&Cnt).Error; err != nil {
+		hlog.Error("dao.loadDataToBloom: 查询用户数量失败")
+		return err
+	}
+	count := int(Cnt)
+	if count%PageSize == 0 {
+		PageCnt = count / PageSize
+	} else {
+		PageCnt = count/PageSize + 1
+	}
+	
+	for page := 0; page < PageCnt; page++ {
+		if err := db.Select("id", "name").Offset(PageSize * page).Limit(PageSize).Find(&users).Error; err != nil {
+			hlog.Error("dao.loadDataToBloom: 查询用户名和id失败")
+			return err
+		}
+
+		for _, user := range users {
+			bloomFilter.Add([]byte(strconv.FormatInt(user.ID, 10)))
+			bloomFilter.Add([]byte(user.Name))
+		}
+	}
+
+	// 填入视频ID
+	var videoIDs []int64
+	if err := db.Model(&models.Video{}).Count(&Cnt).Error; err != nil {
+		hlog.Error("dao.loadDataToBloom: 查询视频数量失败")
+		return err
+	}
+	count = int(Cnt)
+	if count%PageSize == 0 {
+		PageCnt = count / PageSize
+	} else {
+		PageCnt = count/PageSize + 1
+	}
+
+	for page := 0; page < PageCnt; page++ {
+		if err := db.Model(&models.Video{}).Select("id").Offset(PageSize * page).Limit(PageSize).Find(&videoIDs).Error; err != nil {
+			hlog.Error("dao.loadDataToBloom: 查询视频id失败")
+			return err
+		}
+
+		for _, videoID := range videoIDs {
+			bloomFilter.Add([]byte(strconv.FormatInt(videoID, 10)))
+		}
+	}
+
+	return nil
 }
