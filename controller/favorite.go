@@ -2,8 +2,6 @@ package controller
 
 import (
 	"context"
-	"douyin/middleware"
-	"douyin/response"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -39,34 +37,34 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	req := &FavoriteActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		response.Error(ctx, response.CodeInvalidParam)
+		Error(ctx, CodeInvalidParam)
 		hlog.Error("FavoriteController: 参数校验失败, err: ", err)
 		return
 	}
 
 	// 从认证中间件中获取userID
-	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
+	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.FavoriteAction(userID, req.VideoID, req.ActionType)
 	if err != nil {
 		if errors.Is(err, dao.ErrAlreadyFavorite) {
-			response.Error(ctx, response.CodeAlreadyFavorite)
+			Error(ctx, CodeAlreadyFavorite)
 			hlog.Error("FavoriteController.Action: 已经点赞过了")
 			return
 		}
 		if errors.Is(err, dao.ErrNotFavorite) {
-			response.Error(ctx, response.CodeNotFavorite)
+			Error(ctx, CodeNotFavorite)
 			hlog.Error("FavoriteController.Action: 还没有点赞过")
 			return
 		}
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		hlog.Error("FavoriteController.Action: 业务处理失败, err: ", err)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }
 
 func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
@@ -74,22 +72,22 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	req := &FavoriteListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		response.Error(ctx, response.CodeInvalidParam)
+		Error(ctx, CodeInvalidParam)
 		hlog.Error("FavoriteController: 参数校验失败, err: ", err)
 		return
 	}
 
 	// 从认证中间件中获取userID
-	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
+	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.FavoriteList(userID, req.UserID)
 	if err != nil {
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		hlog.Error("FavoriteController.List: 业务处理失败, err: ", err)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }

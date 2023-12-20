@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"douyin/pkg/jwt"
-	"douyin/response"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -27,7 +26,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	req := &FeedRequest{LatestTime: time.Now().Unix()}
 	err := ctx.Bind(req)
 	if err != nil {
-		response.Error(ctx, response.CodeInvalidParam)
+		Error(ctx, CodeInvalidParam)
 		hlog.Error("controller.Feed: 参数解析失败, err: ", err)
 		return
 	}
@@ -37,7 +36,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	if len(req.Token) > 0 {
 		userID, err = jwt.ParseToken(req.Token)
 		if err != nil {
-			response.Error(ctx, response.CodeNoAuthority)
+			Error(ctx, CodeNoAuthority)
 			hlog.Error("controller.Action: token无效, err: ", err)
 			return
 		}
@@ -46,14 +45,14 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	// 业务逻辑处理
 	resp, err := service.Feed(req.LatestTime, userID)
 	if err != nil {
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		hlog.Error("controller.Feed: 业务逻辑处理失败, err: ", err)
 		return
 	}
 
 	// 返回结果
-	response.Success(ctx, response.FeedResponse{
-		Response:  &response.Response{StatusCode: response.CodeSuccess, StatusMsg: resp.StatusCode.Msg()},
+	Success(ctx, FeedResponse{
+		Response:  &Response{StatusCode: CodeSuccess, StatusMsg: resp.StatusCode.Msg()},
 		VideoList: resp.VideoList,
 		NextTime:  resp.NextTime,
 	})

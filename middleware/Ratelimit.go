@@ -2,10 +2,10 @@ package middleware
 
 import (
 	"context"
+	"douyin/controller"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/juju/ratelimit"
 )
 
@@ -13,7 +13,7 @@ func RatelimitMiddleware(fillInterval time.Duration, capacity int64) app.Handler
 	rl := ratelimit.NewBucket(fillInterval, capacity)
 	return func(c context.Context, ctx *app.RequestContext) {
 		if rl.TakeAvailable(1) < 1 {
-			ctx.String(consts.StatusOK, "rate limit...")
+			controller.Error(ctx, controller.CodeServerBusy)
 			ctx.Abort()
 			return
 		}

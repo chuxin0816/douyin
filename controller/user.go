@@ -3,8 +3,6 @@ package controller
 import (
 	"context"
 	"douyin/dao"
-	"douyin/middleware"
-	"douyin/response"
 	"douyin/service"
 	"errors"
 
@@ -49,29 +47,29 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	req := &UserInfoRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		response.Error(ctx, response.CodeInvalidParam)
+		Error(ctx, CodeInvalidParam)
 		hlog.Error("controller.UserInfo: 参数校验失败, err: ", err)
 		return
 	}
 
 	// 从认证中间件中获取userID
-	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
+	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.UserInfo(req.UserID, userID)
 	if err != nil {
 		if errors.Is(err, dao.ErrUserNotExist) {
-			response.Error(ctx, response.CodeUserNotExist)
+			Error(ctx, CodeUserNotExist)
 			hlog.Error("controller.UserInfo: 用户不存在")
 			return
 		}
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		hlog.Error("controller.UserInfo: 业务处理失败, err: ", err)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }
 
 func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
@@ -79,7 +77,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	req := &UserRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		response.Error(ctx, response.CodeInvalidParam)
+		Error(ctx, CodeInvalidParam)
 		hlog.Error("controller.Register: 参数校验失败, err: ", err)
 		return
 	}
@@ -88,17 +86,17 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	resp, err := service.Register(req.Username, req.Password)
 	if err != nil {
 		if errors.Is(err, dao.ErrUserExist) {
-			response.Error(ctx, response.CodeUserExist)
+			Error(ctx, CodeUserExist)
 			hlog.Error("controller.Register: 用户已存在")
 			return
 		}
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		hlog.Error("controller.Register: 业务处理失败, err: ", err)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }
 
 func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
@@ -106,7 +104,7 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	req := &UserRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		response.Error(ctx, response.CodeInvalidParam)
+		Error(ctx, CodeInvalidParam)
 		hlog.Error("controller.Login: 参数校验失败, err: ", err)
 		return
 	}
@@ -115,20 +113,20 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	resp, err := service.Login(req.Username, req.Password)
 	if err != nil {
 		if errors.Is(err, dao.ErrUserNotExist) {
-			response.Error(ctx, response.CodeUserNotExist)
+			Error(ctx, CodeUserNotExist)
 			hlog.Error("controller.Login: 用户不存在")
 			return
 		}
 		if errors.Is(err, dao.ErrPassword) {
-			response.Error(ctx, response.CodeInvalidPassword)
+			Error(ctx, CodeInvalidPassword)
 			hlog.Error("controller.Login: 密码错误")
 			return
 		}
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		hlog.Error("controller.Login: 业务处理失败, err: ", err)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }

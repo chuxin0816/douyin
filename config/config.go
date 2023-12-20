@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
@@ -66,7 +66,7 @@ type KafkaConfig struct {
 	Brokers []string `mapstructure:"brokers"`
 }
 
-func Init() error {
+func Init() {
 	//指定配置文件类型(专门用于解析远程配置文件）
 	// viper.SetConfigType("json")
 
@@ -75,22 +75,21 @@ func Init() error {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	// 把读取到的配置信息反序列化到Conf变量中
 	if err := viper.Unmarshal(Conf); err != nil {
-		return err
+		panic(err)
 	}
 
 	// 监控配置文件变化
 	viper.WatchConfig()
 	viper.OnConfigChange(func(in fsnotify.Event) {
 		if err := viper.Unmarshal(Conf); err != nil {
-			hlog.Error("viper unmarshal failed, err:%v", err)
+			klog.Error("viper unmarshal failed, err:%v", err)
 		} else {
-			hlog.Notice("config file changed")
+			klog.Notice("config file changed")
 		}
 	})
-	return nil
 }

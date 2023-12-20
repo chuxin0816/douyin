@@ -15,13 +15,13 @@ var (
 	RDB *redis.Client
 )
 
-func Init(config *config.DatabaseConfig) (err error) {
+func Init(config *config.DatabaseConfig) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.MysqlConfig.User, config.MysqlConfig.Password, config.MysqlConfig.Host, config.MysqlConfig.Port, config.MysqlConfig.DBName)
 
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	DB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	RDB = redis.NewClient(&redis.Options{
@@ -30,8 +30,6 @@ func Init(config *config.DatabaseConfig) (err error) {
 		DB:       config.RedisConfig.DB,
 	})
 	query.SetDefault(DB)
-
-	return nil
 }
 
 func Close() {

@@ -3,8 +3,6 @@ package controller
 import (
 	"context"
 	"douyin/dao"
-	"douyin/middleware"
-	"douyin/response"
 	"douyin/service"
 	"errors"
 
@@ -42,33 +40,33 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		hlog.Error("RelationController Action: 参数校验失败, err: ", err)
-		response.Error(ctx, response.CodeInvalidParam)
+		Error(ctx, CodeInvalidParam)
 		return
 	}
 
 	// 从认证中间件中获取userID
-	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
+	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.RelationAction(userID, req.ToUserID, req.ActionType)
 	if err != nil {
 		if errors.Is(err, dao.ErrAlreadyFollow) {
 			hlog.Error("RelationController.Action: 已经关注过了, err: ", err)
-			response.Error(ctx, response.CodeAlreadyFollow)
+			Error(ctx, CodeAlreadyFollow)
 			return
 		}
 		if errors.Is(err, dao.ErrNotFollow) {
 			hlog.Error("RelationController.Action: 还没有关注过, err: ", err)
-			response.Error(ctx, response.CodeNotFollow)
+			Error(ctx, CodeNotFollow)
 			return
 		}
 		hlog.Error("RelationController.Action: 业务逻辑处理失败, err: ", err)
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }
 
 func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestContext) {
@@ -77,23 +75,23 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		hlog.Error("RelationController.FollowList: 参数校验失败, err: ", err)
-		response.Error(ctx, response.CodeInvalidParam)
+		Error(ctx, CodeInvalidParam)
 		return
 	}
 
 	// 从认证中间件中获取userID
-	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
+	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.FollowList(userID, req.UserID)
 	if err != nil {
 		hlog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }
 
 func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestContext) {
@@ -106,18 +104,18 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	}
 
 	// 从认证中间件中获取userID
-	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
+	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.FollowerList(userID, req.UserID)
 	if err != nil {
 		hlog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }
 
 func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestContext) {
@@ -130,16 +128,16 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	}
 
 	// 从认证中间件中获取userID
-	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
+	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.FriendList(userID, req.UserID)
 	if err != nil {
 		hlog.Error("RelationController.FriendList: 业务逻辑处理失败, err: ", err)
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }

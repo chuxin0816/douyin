@@ -2,8 +2,6 @@ package controller
 
 import (
 	"context"
-	"douyin/middleware"
-	"douyin/response"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -42,34 +40,34 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	req := &CommentActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		response.Error(ctx, response.CodeInvalidParam)
+		Error(ctx, CodeInvalidParam)
 		hlog.Error("CommentController.Action: 参数校验失败, err: ", err)
 		return
 	}
 
 	// 从认证中间件中获取userID
-	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
+	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.CommentAction(userID, req.ActionType, req.VideoID, req.CommentID, req.CommentText)
 	if err != nil {
 		if errors.Is(err, dao.ErrVideoNotExist) {
-			response.Error(ctx, response.CodeVideoNotExist)
+			Error(ctx, CodeVideoNotExist)
 			hlog.Error("controller.CommentAction: 视频不存在")
 			return
 		}
 		if errors.Is(err, dao.ErrCommentNotExist) {
-			response.Error(ctx, response.CodeCommentNotExist)
+			Error(ctx, CodeCommentNotExist)
 			hlog.Error("controller.CommentAction: 评论不存在")
 			return
 		}
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		hlog.Error("CommentController.Action: 业务逻辑处理失败, err: ", err)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }
 
 func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
@@ -77,27 +75,27 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	req := &CommentListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		response.Error(ctx, response.CodeInvalidParam)
+		Error(ctx, CodeInvalidParam)
 		hlog.Error("CommentController.List: 参数校验失败, err: ", err)
 		return
 	}
 
 	// 从认证中间件中获取userID
-	userID := ctx.MustGet(middleware.CtxUserIDKey).(int64)
+	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
 	resp, err := service.CommentList(userID, req.VideoID)
 	if err != nil {
 		if errors.Is(err, dao.ErrVideoNotExist) {
-			response.Error(ctx, response.CodeVideoNotExist)
+			Error(ctx, CodeVideoNotExist)
 			hlog.Error("controller.CommentList: 视频不存在")
 			return
 		}
-		response.Error(ctx, response.CodeServerBusy)
+		Error(ctx, CodeServerBusy)
 		hlog.Error("CommentController.List: 业务逻辑处理失败, err: ", err)
 		return
 	}
 
 	// 返回响应
-	response.Success(ctx, resp)
+	Success(ctx, resp)
 }

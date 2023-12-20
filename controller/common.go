@@ -5,6 +5,8 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
+const CtxUserIDKey = "userID"
+
 func Success(ctx *app.RequestContext, data any) {
 	ctx.JSON(consts.StatusOK, data)
 }
