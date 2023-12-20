@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"douyin/pkg/jwt"
-	"douyin/response"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"

@@ -1,8 +1,9 @@
-package controller
+package router
 
 import (
 	"context"
 	"douyin/config"
+	"douyin/controller"
 	"douyin/middleware"
 	"fmt"
 	"time"
@@ -28,11 +29,11 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	apiRouter := h.Group("/douyin")
 
 	// basic apis
-	apiRouter.GET("/feed/", Feed)
+	apiRouter.GET("/feed/", controller.Feed)
 
 	userRouter := apiRouter.Group("/user")
 	{
-		userController := NewUserController()
+		userController := controller.NewUserController()
 		userRouter.GET("/", middleware.AuthMiddleware(), userController.Info)
 		userRouter.POST("/register/", userController.Register)
 		userRouter.POST("/login/", userController.Login)
@@ -40,22 +41,22 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 
 	publishRouter := apiRouter.Group("/publish", middleware.AuthMiddleware())
 	{
-		publishController := NewPublishController()
+		publishController := controller.NewPublishController()
 		publishRouter.POST("/action/", publishController.Action)
 		publishRouter.GET("/list/", publishController.List)
 	}
 
 	// interaction apis
-	favoriteRouter := apiRouter.Group("/favorite", middleware.AuthMiddleware())
+	favoriteRouter := apiRouter.Group("/favorite",middleware.AuthMiddleware())
 	{
-		favoriteController := NewFavoriteController()
+		favoriteController := controller.NewFavoriteController()
 		favoriteRouter.POST("/action/", favoriteController.Action)
 		favoriteRouter.GET("/list/", favoriteController.List)
 	}
 
 	commentRouter := apiRouter.Group("/comment", middleware.AuthMiddleware())
 	{
-		commentController := NewCommentController()
+		commentController := controller.NewCommentController()
 		commentRouter.POST("/action/", commentController.Action)
 		commentRouter.GET("/list/", commentController.List)
 	}
@@ -63,7 +64,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	// social apis
 	relationRouter := apiRouter.Group("/relation", middleware.AuthMiddleware())
 	{
-		relationController := NewRelationController()
+		relationController := controller.NewRelationController()
 		relationRouter.POST("/action/", relationController.Action)
 		relationRouter.GET("/follow/list/", relationController.FollowList)
 		relationRouter.GET("/follower/list/", relationController.FollowerList)
@@ -72,7 +73,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 
 	messageRouter := apiRouter.Group("/message", middleware.AuthMiddleware())
 	{
-		messageController := NewMessageController()
+		messageController := controller.NewMessageController()
 		messageRouter.POST("/action/", messageController.Action)
 		messageRouter.GET("/chat/", messageController.Chat)
 	}
