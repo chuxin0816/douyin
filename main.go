@@ -2,11 +2,11 @@ package main
 
 import (
 	"douyin/config"
-	"douyin/dao"
+	"douyin/controller"
+	"douyin/dal"
 	"douyin/logger"
 	"douyin/pkg/oss"
 	"douyin/pkg/snowflake"
-	"douyin/router"
 	"fmt"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -24,11 +24,11 @@ func main() {
 		return
 	}
 	// 初始化database
-	if err := dao.Init(config.Conf.DatabaseConfig); err != nil {
+	if err := dal.Init(config.Conf.DatabaseConfig); err != nil {
 		hlog.Error("dao init failed, err: ", err)
 		return
 	}
-	defer dao.Close()
+	defer dal.Close()
 	// 初始化雪花算法
 	if err := snowflake.Init(config.Conf.SnowflakeConfig); err != nil {
 		hlog.Error("snowflake init failed, err: ", err)
@@ -40,7 +40,7 @@ func main() {
 		return
 	}
 	// 注册路由
-	h := router.Setup(config.Conf.HertzConfig)
+	h := controller.Setup(config.Conf.HertzConfig)
 	// 启动服务
 	h.Spin()
 }

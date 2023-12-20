@@ -27,7 +27,7 @@ struct Video {
 }
 
 service FeedService {
-  douyin_feed_response Feed(1: douyin_feed_request req);
+  Feed_response Feed(1: Feed_request req);
 }
 
 

@@ -2,10 +2,8 @@ package controller
 
 import (
 	"context"
-	"douyin/dao"
 	"douyin/middleware"
 	"douyin/response"
-	"douyin/service"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
