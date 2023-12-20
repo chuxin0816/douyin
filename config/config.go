@@ -15,6 +15,7 @@ type Config struct {
 	*HertzConfig     `mapstructure:"hertz"`
 	*LogConfig       `mapstructure:"log"`
 	*DatabaseConfig  `mapstructure:"database"`
+	*ConsulConfig    `mapstructure:"consul"`
 	*KafkaConfig     `mapstructure:"kafka"`
 }
 
@@ -60,6 +61,24 @@ type RedisConfig struct {
 	Port     int    `mapstructure:"port"`
 	Password string `mapstructure:"password"`
 	DB       int    `mapstructure:"db"`
+}
+
+type ConsulConfig struct {
+	Addr                string `mapstructure:"addr"`
+	FeedAddr            string `mapstructure:"feed_addr"`
+	UserAddr            string `mapstructure:"user_addr"`
+	FavoriteAddr        string `mapstructure:"favorite_addr"`
+	CommentAddr         string `mapstructure:"comment_addr"`
+	PublishAddr         string `mapstructure:"publish_addr"`
+	RelationAddr        string `mapstructure:"relation_addr"`
+	MessageAddr         string `mapstructure:"message_addr"`
+	FeedServiceName     string `mapstructure:"feed_service_name"`
+	UserServiceName     string `mapstructure:"user_service_name"`
+	FavoriteServiceName string `mapstructure:"favorite_service_name"`
+	CommentServiceName  string `mapstructure:"comment_service_name"`
+	PublishServiceName  string `mapstructure:"publish_service_name"`
+	RelationServiceName string `mapstructure:"relation_service_name"`
+	MessageServiceName  string `mapstructure:"message_service_name"`
 }
 
 type KafkaConfig struct {

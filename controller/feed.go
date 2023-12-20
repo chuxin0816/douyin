@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"douyin/pkg/jwt"
+	"douyin/rpc/client"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -43,17 +44,23 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := service.Feed(req.LatestTime, userID)
+	resp, err := client.Feed(req.LatestTime, userID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		klog.Error("controller.Feed: 业务逻辑处理失败, err: ", err)
 		return
 	}
 
+	// 数据转换
+	videoList := make([]*VideoResponse, 0, len(resp.VideoList))
+	for _, v := range resp.VideoList {
+		videoList = append(videoList, rpcVideo2httpVideo(v))
+	}
+
 	// 返回结果
 	Success(ctx, FeedResponse{
-		Response:  &Response{StatusCode: CodeSuccess, StatusMsg: resp.StatusCode.Msg()},
-		VideoList: resp.VideoList,
+		Response:  &Response{StatusCode: CodeSuccess},
+		VideoList: videoList,
 		NextTime:  resp.NextTime,
 	})
 }
