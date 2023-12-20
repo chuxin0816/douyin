@@ -23,6 +23,15 @@ type RelationListRequest struct {
 	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
 }
 
+type RelationActionResponse struct {
+	*Response
+}
+
+type RelationListResponse struct {
+	*Response
+	UserList []*UserResponse `json:"user_list"`
+}
+
 func NewRelationController() *RelationController {
 	return &RelationController{}
 }

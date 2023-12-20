@@ -23,6 +23,23 @@ type UserRequest struct {
 	Password string `query:"password" vd:"5<len($)&&len($)<33"` // 密码，最长32个字符
 }
 
+type UserInfoResponse struct {
+	*Response
+	User *UserResponse `json:"user"` // 用户信息
+}
+
+type RegisterResponse struct {
+	*Response
+	UserID int64  `json:"user_id"` // 用户id
+	Token  string `json:"token"`   // 用户鉴权token
+}
+
+type LoginResponse struct {
+	*Response
+	UserID int64  `json:"user_id"` // 用户id
+	Token  string `json:"token"`   // 用户鉴权token
+}
+
 func NewUserController() *UserController {
 	return &UserController{}
 }

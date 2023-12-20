@@ -23,6 +23,15 @@ type MessageChatRequest struct {
 	PreMsgTime int64 `query:"pre_msg_time,string"`          // 上一条消息时间
 }
 
+type MessageActionResponse struct {
+	*Response
+}
+
+type MessageChatResponse struct {
+	*Response
+	MessageList []*MessageResponse `json:"message_list"` // 消息列表
+}
+
 func NewMessageController() *MessageController {
 	return &MessageController{}
 }

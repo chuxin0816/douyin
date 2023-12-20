@@ -4,7 +4,6 @@ import (
 	"context"
 	"douyin/pkg/jwt"
 	"douyin/response"
-	"douyin/service"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -14,6 +13,12 @@ import (
 type FeedRequest struct {
 	LatestTime int64  `query:"latest_time,string"` // 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
 	Token      string `query:"token"`              // 用户登录状态下设置
+}
+
+type FeedResponse struct {
+	*Response
+	VideoList []*VideoResponse `json:"video_list"` // 视频列表
+	NextTime  *int64           `json:"next_time"`  // 本次返回的视频中，发布最早的时间，作为下次请求时的latest_time
 }
 
 // Feed 不限制登录状态，返回按投稿时间倒序的视频列表，视频数由服务端控制，单次最多30个

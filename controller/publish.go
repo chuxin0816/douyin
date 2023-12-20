@@ -22,6 +22,15 @@ type PublishListRequest struct {
 	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
 }
 
+type PublishActionResponse struct {
+	*Response
+}
+
+type PublishListResponse struct {
+	*Response
+	VideoList []*VideoResponse `json:"video_list"` // 视频列表
+}
+
 func NewPublishController() *PublishController {
 	return &PublishController{}
 }

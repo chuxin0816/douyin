@@ -21,6 +21,15 @@ type FavoriteListRequest struct {
 	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
 }
 
+type FavoriteActionResponse struct {
+	*Response
+}
+
+type FavoriteListResponse struct {
+	*Response
+	VideoList []*VideoResponse `json:"video_list"`
+}
+
 func NewFavoriteController() *FavoriteController {
 	return &FavoriteController{}
 }

@@ -23,6 +23,16 @@ type CommentListRequest struct {
 	VideoID int64 `query:"video_id,string" vd:"$>0"` // 视频id
 }
 
+type CommentActionResponse struct {
+	*Response
+	Comment *CommentResponse `json:"comment,omitempty"`
+}
+
+type CommentListResponse struct {
+	*Response
+	CommentList []*CommentResponse `json:"comment_list"`
+}
+
 func NewCommentController() *CommentController {
 	return &CommentController{}
 }
