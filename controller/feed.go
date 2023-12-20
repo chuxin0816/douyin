@@ -52,9 +52,9 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 数据转换
-	videoList := make([]*VideoResponse, 0, len(resp.VideoList))
-	for _, v := range resp.VideoList {
-		videoList = append(videoList, rpcVideo2httpVideo(v))
+	videoList := make([]*VideoResponse, len(resp.VideoList))
+	for i, v := range resp.VideoList {
+		videoList[i] = rpcVideo2httpVideo(v)
 	}
 
 	// 返回结果
