@@ -3,9 +3,9 @@ include "feed.thrift"
 namespace go favorite
 
 struct Favorite_action_request {
-  1: string token; // 用户鉴权token
+  1: i64 user_id; // 用户id
   2: i64 video_id; // 视频id
-  3: string action_type; // 1-点赞，2-取消点赞
+  3: i64 action_type; // 1-点赞，2-取消点赞
 }
 
 struct Favorite_action_response {
@@ -15,7 +15,7 @@ struct Favorite_action_response {
 
 struct Favorite_list_request {
   1: i64 user_id; // 用户id
-  2: string token; // 用户鉴权token
+  2: i64 to_user_id; // 对方用户id
 }
 
 struct Favorite_list_response {

@@ -3,7 +3,7 @@ include "feed.thrift"
 namespace go publish
 
 struct Publish_action_request {
-  1: string token; // 用户鉴权token
+  1: i64 user_id; // 用户id
   2: binary data; // 视频数据
   3: string title; // 视频标题
 }
@@ -15,7 +15,7 @@ struct Publish_action_response {
 
 struct Publish_list_request {
   1: i64 user_id; // 用户id
-  2: string token; // 用户鉴权token
+  2: i64 to_user_id; // 对方用户id
 }
 
 struct Publish_list_response {

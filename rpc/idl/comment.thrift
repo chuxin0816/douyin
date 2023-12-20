@@ -3,9 +3,9 @@ include "user.thrift"
 namespace go comment
 
 struct Comment_action_request {
-  1: string token; // 用户鉴权token
+  1: i64 user_id; // 用户id
   2: i64 video_id; // 视频id
-  3: i32 action_type; // 1-发布评论，2-删除评论
+  3: i64 action_type; // 1-发布评论，2-删除评论
   4: optional string comment_text; // 用户填写的评论内容，在action_type=1的时候使用
   5: optional string comment_id; // 要删除的评论id，在action_type=2的时候使用
 }
@@ -17,7 +17,7 @@ struct Comment_action_response {
 }
 
 struct Comment_list_request {
-  1: string token; // 用户鉴权token
+  1: i64 user_id; // 用户id
   2: i64 video_id; // 视频id
 }
 

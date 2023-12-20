@@ -25,8 +25,8 @@ struct User_login_response {
 }
 
 struct User_info_request {
-  1: i64 user_id; // 用户id
-  2: optional string token; // 用户鉴权token
+  1: i64 to_user_id; // 对方用户id
+  2: optional i64 user_id; // 用户id
 }
 
 struct User {

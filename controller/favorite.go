@@ -83,7 +83,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := client.FavoriteList(userID, req.UserID)
+	resp, err := client.FavoriteList(req.UserID, userID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		klog.Error("FavoriteController.List: 业务处理失败, err: ", err)
