@@ -6,16 +6,17 @@ import (
 	"path"
 	"time"
 
-	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"github.com/hertz-contrib/logger/zap"
+	"github.com/cloudwego/kitex/pkg/klog"
+	kitexlogrus "github.com/kitex-contrib/obs-opentelemetry/logging/logrus"
+
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func Init(conf *config.LogConfig) error {
+func Init(conf *config.LogConfig) {
 	// 可定制的输出目录。
 	var logFilePath string = conf.Path
 	if err := os.MkdirAll(logFilePath, 0o777); err != nil {
-		return err
+		panic(err)
 	}
 
 	// 将文件名设置为日期
@@ -25,11 +26,9 @@ func Init(conf *config.LogConfig) error {
 	// 如果文件不存在，则创建一个新文件
 	if _, err := os.Stat(fileName); err != nil {
 		if _, err := os.Create(fileName); err != nil {
-			return err
+			panic(err)
 		}
 	}
-
-	logger := zap.NewLogger()
 
 	// 提供压缩和删除
 	lumberjackLogger := &lumberjack.Logger{
@@ -40,9 +39,7 @@ func Init(conf *config.LogConfig) error {
 		Compress:   true,            // 用 gzip 压缩。
 	}
 
-	logger.SetOutput(lumberjackLogger)
-	logger.SetLevel(hlog.LevelDebug)
-
-	hlog.SetLogger(logger)
-	return nil
+	klog.SetLogger(kitexlogrus.NewLogger())
+	klog.SetLevel(klog.LevelDebug)
+	klog.SetOutput(lumberjackLogger)
 }
