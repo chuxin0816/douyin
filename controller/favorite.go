@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/u2takey/go-utils/klog"
 )
 
 type FavoriteController struct{}
@@ -38,7 +38,7 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("FavoriteController: 参数校验失败, err: ", err)
+		klog.Error("FavoriteController: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -50,16 +50,16 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	if err != nil {
 		if errors.Is(err, dao.ErrAlreadyFavorite) {
 			Error(ctx, CodeAlreadyFavorite)
-			hlog.Error("FavoriteController.Action: 已经点赞过了")
+			klog.Error("FavoriteController.Action: 已经点赞过了")
 			return
 		}
 		if errors.Is(err, dao.ErrNotFavorite) {
 			Error(ctx, CodeNotFavorite)
-			hlog.Error("FavoriteController.Action: 还没有点赞过")
+			klog.Error("FavoriteController.Action: 还没有点赞过")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		hlog.Error("FavoriteController.Action: 业务处理失败, err: ", err)
+		klog.Error("FavoriteController.Action: 业务处理失败, err: ", err)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("FavoriteController: 参数校验失败, err: ", err)
+		klog.Error("FavoriteController: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	resp, err := service.FavoriteList(userID, req.UserID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		hlog.Error("FavoriteController.List: 业务处理失败, err: ", err)
+		klog.Error("FavoriteController.List: 业务处理失败, err: ", err)
 		return
 	}
 

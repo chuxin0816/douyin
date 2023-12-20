@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/u2takey/go-utils/klog"
 )
 
 type FeedRequest struct {
@@ -27,7 +27,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	err := ctx.Bind(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("controller.Feed: 参数解析失败, err: ", err)
+		klog.Error("controller.Feed: 参数解析失败, err: ", err)
 		return
 	}
 
@@ -37,7 +37,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 		userID, err = jwt.ParseToken(req.Token)
 		if err != nil {
 			Error(ctx, CodeNoAuthority)
-			hlog.Error("controller.Action: token无效, err: ", err)
+			klog.Error("controller.Action: token无效, err: ", err)
 			return
 		}
 	}
@@ -46,7 +46,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	resp, err := service.Feed(req.LatestTime, userID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		hlog.Error("controller.Feed: 业务逻辑处理失败, err: ", err)
+		klog.Error("controller.Feed: 业务逻辑处理失败, err: ", err)
 		return
 	}
 

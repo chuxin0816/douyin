@@ -6,7 +6,7 @@ import (
 	"mime/multipart"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/u2takey/go-utils/klog"
 )
 
 type PublishController struct{}
@@ -39,14 +39,14 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("PublishController.Action: 参数校验失败, err: ", err)
+		klog.Error("PublishController.Action: 参数校验失败, err: ", err)
 		return
 	}
 
 	// 验证大小
 	if req.Data.Size > 1024*1024*100 {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("PublishController.Action: 文件太大")
+		klog.Error("PublishController.Action: 文件太大")
 		return
 	}
 
@@ -57,7 +57,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	resp, err := service.PublishAction(ctx, userID, req.Data, req.Title)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		hlog.Error("PublishController.Action: 业务处理失败, err: ", err)
+		klog.Error("PublishController.Action: 业务处理失败, err: ", err)
 		return
 	}
 
@@ -71,7 +71,7 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("PublishController.List: 参数校验失败, err: ", err)
+		klog.Error("PublishController.List: 参数校验失败, err: ", err)
 		return
 	}
 	authorID := req.UserID
@@ -83,7 +83,7 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	resp, err := service.PublishList(userID, authorID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		hlog.Error("PublishController.Action: 业务处理失败, err: ", err)
+		klog.Error("PublishController.Action: 业务处理失败, err: ", err)
 		return
 	}
 

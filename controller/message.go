@@ -5,7 +5,7 @@ import (
 	"douyin/service"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/u2takey/go-utils/klog"
 )
 
 type MessageController struct{}
@@ -40,7 +40,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("MessageController.Action: 参数校验失败, err: ", err)
+		klog.Error("MessageController.Action: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -51,7 +51,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 	resp, err := service.MessageAction(userID, req.ToUserID, req.ActionType, req.Content)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		hlog.Error("MessageController.Action: 业务处理失败, err: ", err)
+		klog.Error("MessageController.Action: 业务处理失败, err: ", err)
 		return
 	}
 
@@ -65,7 +65,7 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("MessageController.Chat: 参数校验失败, err: ", err)
+		klog.Error("MessageController.Chat: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -76,7 +76,7 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 	resp, err := service.MessageChat(userID, req.ToUserID, req.PreMsgTime)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		hlog.Error("MessageController.Chat: 业务处理失败, err: ", err)
+		klog.Error("MessageController.Chat: 业务处理失败, err: ", err)
 		return
 	}
 

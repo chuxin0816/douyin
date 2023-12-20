@@ -2,12 +2,11 @@ package controller
 
 import (
 	"context"
-	"douyin/dao"
 	"douyin/service"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/u2takey/go-utils/klog"
 )
 
 type RelationController struct{}
@@ -39,7 +38,7 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	req := &RelationActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		hlog.Error("RelationController Action: 参数校验失败, err: ", err)
+		klog.Error("RelationController Action: 参数校验失败, err: ", err)
 		Error(ctx, CodeInvalidParam)
 		return
 	}
@@ -51,16 +50,16 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	resp, err := service.RelationAction(userID, req.ToUserID, req.ActionType)
 	if err != nil {
 		if errors.Is(err, dao.ErrAlreadyFollow) {
-			hlog.Error("RelationController.Action: 已经关注过了, err: ", err)
+			klog.Error("RelationController.Action: 已经关注过了, err: ", err)
 			Error(ctx, CodeAlreadyFollow)
 			return
 		}
 		if errors.Is(err, dao.ErrNotFollow) {
-			hlog.Error("RelationController.Action: 还没有关注过, err: ", err)
+			klog.Error("RelationController.Action: 还没有关注过, err: ", err)
 			Error(ctx, CodeNotFollow)
 			return
 		}
-		hlog.Error("RelationController.Action: 业务逻辑处理失败, err: ", err)
+		klog.Error("RelationController.Action: 业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
 		return
 	}
@@ -74,7 +73,7 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		hlog.Error("RelationController.FollowList: 参数校验失败, err: ", err)
+		klog.Error("RelationController.FollowList: 参数校验失败, err: ", err)
 		Error(ctx, CodeInvalidParam)
 		return
 	}
@@ -85,7 +84,7 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	// 业务逻辑处理
 	resp, err := service.FollowList(userID, req.UserID)
 	if err != nil {
-		hlog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
+		klog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
 		return
 	}
@@ -99,7 +98,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		hlog.Error("RelationController.FollowerList: 参数校验失败, err: ", err)
+		klog.Error("RelationController.FollowerList: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -109,7 +108,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	// 业务逻辑处理
 	resp, err := service.FollowerList(userID, req.UserID)
 	if err != nil {
-		hlog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
+		klog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
 		return
 	}
@@ -123,7 +122,7 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		hlog.Error("RelationController.FriendList: 参数校验失败, err: ", err)
+		klog.Error("RelationController.FriendList: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -133,7 +132,7 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	// 业务逻辑处理
 	resp, err := service.FriendList(userID, req.UserID)
 	if err != nil {
-		hlog.Error("RelationController.FriendList: 业务逻辑处理失败, err: ", err)
+		klog.Error("RelationController.FriendList: 业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
 		return
 	}

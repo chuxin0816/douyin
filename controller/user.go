@@ -7,7 +7,7 @@ import (
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/u2takey/go-utils/klog"
 )
 
 type UserController struct{}
@@ -48,7 +48,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("controller.UserInfo: 参数校验失败, err: ", err)
+		klog.Error("controller.UserInfo: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -60,11 +60,11 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	if err != nil {
 		if errors.Is(err, dao.ErrUserNotExist) {
 			Error(ctx, CodeUserNotExist)
-			hlog.Error("controller.UserInfo: 用户不存在")
+			klog.Error("controller.UserInfo: 用户不存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		hlog.Error("controller.UserInfo: 业务处理失败, err: ", err)
+		klog.Error("controller.UserInfo: 业务处理失败, err: ", err)
 		return
 	}
 
@@ -78,7 +78,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("controller.Register: 参数校验失败, err: ", err)
+		klog.Error("controller.Register: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -87,11 +87,11 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	if err != nil {
 		if errors.Is(err, dao.ErrUserExist) {
 			Error(ctx, CodeUserExist)
-			hlog.Error("controller.Register: 用户已存在")
+			klog.Error("controller.Register: 用户已存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		hlog.Error("controller.Register: 业务处理失败, err: ", err)
+		klog.Error("controller.Register: 业务处理失败, err: ", err)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("controller.Login: 参数校验失败, err: ", err)
+		klog.Error("controller.Login: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -114,16 +114,16 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	if err != nil {
 		if errors.Is(err, dao.ErrUserNotExist) {
 			Error(ctx, CodeUserNotExist)
-			hlog.Error("controller.Login: 用户不存在")
+			klog.Error("controller.Login: 用户不存在")
 			return
 		}
 		if errors.Is(err, dao.ErrPassword) {
 			Error(ctx, CodeInvalidPassword)
-			hlog.Error("controller.Login: 密码错误")
+			klog.Error("controller.Login: 密码错误")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		hlog.Error("controller.Login: 业务处理失败, err: ", err)
+		klog.Error("controller.Login: 业务处理失败, err: ", err)
 		return
 	}
 

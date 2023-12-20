@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/u2takey/go-utils/klog"
 )
 
 type CommentController struct{}
@@ -41,7 +41,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("CommentController.Action: 参数校验失败, err: ", err)
+		klog.Error("CommentController.Action: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -53,16 +53,16 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	if err != nil {
 		if errors.Is(err, dao.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
-			hlog.Error("controller.CommentAction: 视频不存在")
+			klog.Error("controller.CommentAction: 视频不存在")
 			return
 		}
 		if errors.Is(err, dao.ErrCommentNotExist) {
 			Error(ctx, CodeCommentNotExist)
-			hlog.Error("controller.CommentAction: 评论不存在")
+			klog.Error("controller.CommentAction: 评论不存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		hlog.Error("CommentController.Action: 业务逻辑处理失败, err: ", err)
+		klog.Error("CommentController.Action: 业务逻辑处理失败, err: ", err)
 		return
 	}
 
@@ -76,7 +76,7 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		hlog.Error("CommentController.List: 参数校验失败, err: ", err)
+		klog.Error("CommentController.List: 参数校验失败, err: ", err)
 		return
 	}
 
@@ -88,11 +88,11 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	if err != nil {
 		if errors.Is(err, dao.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
-			hlog.Error("controller.CommentList: 视频不存在")
+			klog.Error("controller.CommentList: 视频不存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		hlog.Error("CommentController.List: 业务逻辑处理失败, err: ", err)
+		klog.Error("CommentController.List: 业务逻辑处理失败, err: ", err)
 		return
 	}
 
