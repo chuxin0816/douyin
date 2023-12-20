@@ -11,7 +11,7 @@ import (
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
-	Publish(ctx context.Context, req *publish.PublishActionRequest, callOptions ...callopt.Option) (r *publish.PublishActionResponse, err error)
+	PublishAction(ctx context.Context, req *publish.PublishActionRequest, callOptions ...callopt.Option) (r *publish.PublishActionResponse, err error)
 	PublishList(ctx context.Context, req *publish.PublishListRequest, callOptions ...callopt.Option) (r *publish.PublishListResponse, err error)
 }
 
@@ -44,9 +44,9 @@ type kPublishServiceClient struct {
 	*kClient
 }
 
-func (p *kPublishServiceClient) Publish(ctx context.Context, req *publish.PublishActionRequest, callOptions ...callopt.Option) (r *publish.PublishActionResponse, err error) {
+func (p *kPublishServiceClient) PublishAction(ctx context.Context, req *publish.PublishActionRequest, callOptions ...callopt.Option) (r *publish.PublishActionResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.Publish(ctx, req)
+	return p.kClient.PublishAction(ctx, req)
 }
 
 func (p *kPublishServiceClient) PublishList(ctx context.Context, req *publish.PublishListRequest, callOptions ...callopt.Option) (r *publish.PublishListResponse, err error) {

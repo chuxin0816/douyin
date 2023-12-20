@@ -863,7 +863,7 @@ func (p *PublishListResponse) field3Length() int {
 	return l
 }
 
-func (p *PublishServicePublishArgs) FastRead(buf []byte) (int, error) {
+func (p *PublishServicePublishActionArgs) FastRead(buf []byte) (int, error) {
 	var err error
 	var offset int
 	var l int
@@ -925,7 +925,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return offset, thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_PublishServicePublishArgs[fieldId]), err)
+	return offset, thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_PublishServicePublishActionArgs[fieldId]), err)
 SkipFieldError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 ReadFieldEndError:
@@ -934,7 +934,7 @@ ReadStructEndError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *PublishServicePublishArgs) FastReadField1(buf []byte) (int, error) {
+func (p *PublishServicePublishActionArgs) FastReadField1(buf []byte) (int, error) {
 	offset := 0
 
 	tmp := NewPublishActionRequest()
@@ -948,13 +948,13 @@ func (p *PublishServicePublishArgs) FastReadField1(buf []byte) (int, error) {
 }
 
 // for compatibility
-func (p *PublishServicePublishArgs) FastWrite(buf []byte) int {
+func (p *PublishServicePublishActionArgs) FastWrite(buf []byte) int {
 	return 0
 }
 
-func (p *PublishServicePublishArgs) FastWriteNocopy(buf []byte, binaryWriter bthrift.BinaryWriter) int {
+func (p *PublishServicePublishActionArgs) FastWriteNocopy(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "Publish_args")
+	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "PublishAction_args")
 	if p != nil {
 		offset += p.fastWriteField1(buf[offset:], binaryWriter)
 	}
@@ -963,9 +963,9 @@ func (p *PublishServicePublishArgs) FastWriteNocopy(buf []byte, binaryWriter bth
 	return offset
 }
 
-func (p *PublishServicePublishArgs) BLength() int {
+func (p *PublishServicePublishActionArgs) BLength() int {
 	l := 0
-	l += bthrift.Binary.StructBeginLength("Publish_args")
+	l += bthrift.Binary.StructBeginLength("PublishAction_args")
 	if p != nil {
 		l += p.field1Length()
 	}
@@ -974,7 +974,7 @@ func (p *PublishServicePublishArgs) BLength() int {
 	return l
 }
 
-func (p *PublishServicePublishArgs) fastWriteField1(buf []byte, binaryWriter bthrift.BinaryWriter) int {
+func (p *PublishServicePublishActionArgs) fastWriteField1(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
 	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "req", thrift.STRUCT, 1)
 	offset += p.Req.FastWriteNocopy(buf[offset:], binaryWriter)
@@ -982,7 +982,7 @@ func (p *PublishServicePublishArgs) fastWriteField1(buf []byte, binaryWriter bth
 	return offset
 }
 
-func (p *PublishServicePublishArgs) field1Length() int {
+func (p *PublishServicePublishActionArgs) field1Length() int {
 	l := 0
 	l += bthrift.Binary.FieldBeginLength("req", thrift.STRUCT, 1)
 	l += p.Req.BLength()
@@ -990,7 +990,7 @@ func (p *PublishServicePublishArgs) field1Length() int {
 	return l
 }
 
-func (p *PublishServicePublishResult) FastRead(buf []byte) (int, error) {
+func (p *PublishServicePublishActionResult) FastRead(buf []byte) (int, error) {
 	var err error
 	var offset int
 	var l int
@@ -1052,7 +1052,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return offset, thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_PublishServicePublishResult[fieldId]), err)
+	return offset, thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_PublishServicePublishActionResult[fieldId]), err)
 SkipFieldError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 ReadFieldEndError:
@@ -1061,7 +1061,7 @@ ReadStructEndError:
 	return offset, thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *PublishServicePublishResult) FastReadField0(buf []byte) (int, error) {
+func (p *PublishServicePublishActionResult) FastReadField0(buf []byte) (int, error) {
 	offset := 0
 
 	tmp := NewPublishActionResponse()
@@ -1075,13 +1075,13 @@ func (p *PublishServicePublishResult) FastReadField0(buf []byte) (int, error) {
 }
 
 // for compatibility
-func (p *PublishServicePublishResult) FastWrite(buf []byte) int {
+func (p *PublishServicePublishActionResult) FastWrite(buf []byte) int {
 	return 0
 }
 
-func (p *PublishServicePublishResult) FastWriteNocopy(buf []byte, binaryWriter bthrift.BinaryWriter) int {
+func (p *PublishServicePublishActionResult) FastWriteNocopy(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "Publish_result")
+	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "PublishAction_result")
 	if p != nil {
 		offset += p.fastWriteField0(buf[offset:], binaryWriter)
 	}
@@ -1090,9 +1090,9 @@ func (p *PublishServicePublishResult) FastWriteNocopy(buf []byte, binaryWriter b
 	return offset
 }
 
-func (p *PublishServicePublishResult) BLength() int {
+func (p *PublishServicePublishActionResult) BLength() int {
 	l := 0
-	l += bthrift.Binary.StructBeginLength("Publish_result")
+	l += bthrift.Binary.StructBeginLength("PublishAction_result")
 	if p != nil {
 		l += p.field0Length()
 	}
@@ -1101,7 +1101,7 @@ func (p *PublishServicePublishResult) BLength() int {
 	return l
 }
 
-func (p *PublishServicePublishResult) fastWriteField0(buf []byte, binaryWriter bthrift.BinaryWriter) int {
+func (p *PublishServicePublishActionResult) fastWriteField0(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
 	if p.IsSetSuccess() {
 		offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "success", thrift.STRUCT, 0)
@@ -1111,7 +1111,7 @@ func (p *PublishServicePublishResult) fastWriteField0(buf []byte, binaryWriter b
 	return offset
 }
 
-func (p *PublishServicePublishResult) field0Length() int {
+func (p *PublishServicePublishActionResult) field0Length() int {
 	l := 0
 	if p.IsSetSuccess() {
 		l += bthrift.Binary.FieldBeginLength("success", thrift.STRUCT, 0)
@@ -1379,11 +1379,11 @@ func (p *PublishServicePublishListResult) field0Length() int {
 	return l
 }
 
-func (p *PublishServicePublishArgs) GetFirstArgument() interface{} {
+func (p *PublishServicePublishActionArgs) GetFirstArgument() interface{} {
 	return p.Req
 }
 
-func (p *PublishServicePublishResult) GetResult() interface{} {
+func (p *PublishServicePublishActionResult) GetResult() interface{} {
 	return p.Success
 }
 

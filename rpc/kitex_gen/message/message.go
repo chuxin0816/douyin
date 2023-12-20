@@ -578,9 +578,9 @@ func (p *MessageActionResponse) Field2DeepEqual(src *string) bool {
 }
 
 type MessageChatRequest struct {
-	Token      string `thrift:"token,1" frugal:"1,default,string" json:"token"`
-	ToUserId   int64  `thrift:"to_user_id,2" frugal:"2,default,i64" json:"to_user_id"`
-	PreMsgTime int64  `thrift:"pre_msg_time,3" frugal:"3,default,i64" json:"pre_msg_time"`
+	Token    string `thrift:"token,1" frugal:"1,default,string" json:"token"`
+	ToUserId int64  `thrift:"to_user_id,2" frugal:"2,default,i64" json:"to_user_id"`
+	LastTime int64  `thrift:"last_time,3" frugal:"3,default,i64" json:"last_time"`
 }
 
 func NewMessageChatRequest() *MessageChatRequest {
@@ -599,8 +599,8 @@ func (p *MessageChatRequest) GetToUserId() (v int64) {
 	return p.ToUserId
 }
 
-func (p *MessageChatRequest) GetPreMsgTime() (v int64) {
-	return p.PreMsgTime
+func (p *MessageChatRequest) GetLastTime() (v int64) {
+	return p.LastTime
 }
 func (p *MessageChatRequest) SetToken(val string) {
 	p.Token = val
@@ -608,14 +608,14 @@ func (p *MessageChatRequest) SetToken(val string) {
 func (p *MessageChatRequest) SetToUserId(val int64) {
 	p.ToUserId = val
 }
-func (p *MessageChatRequest) SetPreMsgTime(val int64) {
-	p.PreMsgTime = val
+func (p *MessageChatRequest) SetLastTime(val int64) {
+	p.LastTime = val
 }
 
 var fieldIDToName_MessageChatRequest = map[int16]string{
 	1: "token",
 	2: "to_user_id",
-	3: "pre_msg_time",
+	3: "last_time",
 }
 
 func (p *MessageChatRequest) Read(iprot thrift.TProtocol) (err error) {
@@ -713,7 +713,7 @@ func (p *MessageChatRequest) ReadField3(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadI64(); err != nil {
 		return err
 	} else {
-		p.PreMsgTime = v
+		p.LastTime = v
 	}
 	return nil
 }
@@ -789,10 +789,10 @@ WriteFieldEndError:
 }
 
 func (p *MessageChatRequest) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("pre_msg_time", thrift.I64, 3); err != nil {
+	if err = oprot.WriteFieldBegin("last_time", thrift.I64, 3); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI64(p.PreMsgTime); err != nil {
+	if err := oprot.WriteI64(p.LastTime); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -825,7 +825,7 @@ func (p *MessageChatRequest) DeepEqual(ano *MessageChatRequest) bool {
 	if !p.Field2DeepEqual(ano.ToUserId) {
 		return false
 	}
-	if !p.Field3DeepEqual(ano.PreMsgTime) {
+	if !p.Field3DeepEqual(ano.LastTime) {
 		return false
 	}
 	return true
@@ -847,7 +847,7 @@ func (p *MessageChatRequest) Field2DeepEqual(src int64) bool {
 }
 func (p *MessageChatRequest) Field3DeepEqual(src int64) bool {
 
-	if p.PreMsgTime != src {
+	if p.LastTime != src {
 		return false
 	}
 	return true

@@ -25,6 +25,6 @@ struct Publish_list_response {
 }
 
 service PublishService {
-    Publish_action_response Publish(1: Publish_action_request req)
+    Publish_action_response PublishAction(1: Publish_action_request req)
     Publish_list_response PublishList(1: Publish_list_request req)
 }

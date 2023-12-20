@@ -15,7 +15,7 @@ struct Message_action_response {
 struct Message_chat_request {
   1: string token; // 用户鉴权token
   2: i64 to_user_id; // 对方用户id
-  3: i64 pre_msg_time;//上次最新消息的时间（新增字段-apk更新中）
+  3: i64 last_time;//上次最新消息的时间（新增字段-apk更新中）
 }
 
 struct Message_chat_response {

@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"douyin/dal"
+	"douyin/rpc/client"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -46,14 +48,14 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.FavoriteAction(userID, req.VideoID, req.ActionType)
+	resp, err := client.FavoriteAction(userID, req.VideoID, req.ActionType)
 	if err != nil {
-		if errors.Is(err, dao.ErrAlreadyFavorite) {
+		if errors.Is(err, dal.ErrAlreadyFavorite) {
 			Error(ctx, CodeAlreadyFavorite)
 			klog.Error("FavoriteController.Action: 已经点赞过了")
 			return
 		}
-		if errors.Is(err, dao.ErrNotFavorite) {
+		if errors.Is(err, dal.ErrNotFavorite) {
 			Error(ctx, CodeNotFavorite)
 			klog.Error("FavoriteController.Action: 还没有点赞过")
 			return
@@ -81,7 +83,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.FavoriteList(userID, req.UserID)
+	resp, err := client.FavoriteList(userID, req.UserID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		klog.Error("FavoriteController.List: 业务处理失败, err: ", err)

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"douyin/service"
 	"mime/multipart"
 
 	"github.com/cloudwego/hertz/pkg/app"

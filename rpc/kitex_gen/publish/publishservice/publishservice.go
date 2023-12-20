@@ -19,8 +19,8 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "PublishService"
 	handlerType := (*publish.PublishService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"Publish":     kitex.NewMethodInfo(publishHandler, newPublishServicePublishArgs, newPublishServicePublishResult, false),
-		"PublishList": kitex.NewMethodInfo(publishListHandler, newPublishServicePublishListArgs, newPublishServicePublishListResult, false),
+		"PublishAction": kitex.NewMethodInfo(publishActionHandler, newPublishServicePublishActionArgs, newPublishServicePublishActionResult, false),
+		"PublishList":   kitex.NewMethodInfo(publishListHandler, newPublishServicePublishListArgs, newPublishServicePublishListResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "publish",
@@ -37,22 +37,22 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	return svcInfo
 }
 
-func publishHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
-	realArg := arg.(*publish.PublishServicePublishArgs)
-	realResult := result.(*publish.PublishServicePublishResult)
-	success, err := handler.(publish.PublishService).Publish(ctx, realArg.Req)
+func publishActionHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*publish.PublishServicePublishActionArgs)
+	realResult := result.(*publish.PublishServicePublishActionResult)
+	success, err := handler.(publish.PublishService).PublishAction(ctx, realArg.Req)
 	if err != nil {
 		return err
 	}
 	realResult.Success = success
 	return nil
 }
-func newPublishServicePublishArgs() interface{} {
-	return publish.NewPublishServicePublishArgs()
+func newPublishServicePublishActionArgs() interface{} {
+	return publish.NewPublishServicePublishActionArgs()
 }
 
-func newPublishServicePublishResult() interface{} {
-	return publish.NewPublishServicePublishResult()
+func newPublishServicePublishActionResult() interface{} {
+	return publish.NewPublishServicePublishActionResult()
 }
 
 func publishListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
@@ -83,11 +83,11 @@ func newServiceClient(c client.Client) *kClient {
 	}
 }
 
-func (p *kClient) Publish(ctx context.Context, req *publish.PublishActionRequest) (r *publish.PublishActionResponse, err error) {
-	var _args publish.PublishServicePublishArgs
+func (p *kClient) PublishAction(ctx context.Context, req *publish.PublishActionRequest) (r *publish.PublishActionResponse, err error) {
+	var _args publish.PublishServicePublishActionArgs
 	_args.Req = req
-	var _result publish.PublishServicePublishResult
-	if err = p.c.Call(ctx, "Publish", &_args, &_result); err != nil {
+	var _result publish.PublishServicePublishActionResult
+	if err = p.c.Call(ctx, "PublishAction", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"douyin/service"
+	"douyin/rpc/client"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/u2takey/go-utils/klog"
@@ -48,7 +48,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.MessageAction(userID, req.ToUserID, req.ActionType, req.Content)
+	resp, err := client.MessageAction(userID, req.ToUserID, req.ActionType, req.Content)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		klog.Error("MessageController.Action: 业务处理失败, err: ", err)
@@ -73,7 +73,7 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.MessageChat(userID, req.ToUserID, req.PreMsgTime)
+	resp, err := client.MessageChat(userID, req.ToUserID, req.PreMsgTime)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		klog.Error("MessageController.Chat: 业务处理失败, err: ", err)

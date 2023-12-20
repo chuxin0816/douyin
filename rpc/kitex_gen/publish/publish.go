@@ -1058,7 +1058,7 @@ func (p *PublishListResponse) Field3DeepEqual(src []*feed.Video) bool {
 }
 
 type PublishService interface {
-	Publish(ctx context.Context, req *PublishActionRequest) (r *PublishActionResponse, err error)
+	PublishAction(ctx context.Context, req *PublishActionRequest) (r *PublishActionResponse, err error)
 
 	PublishList(ctx context.Context, req *PublishListRequest) (r *PublishListResponse, err error)
 }
@@ -1089,11 +1089,11 @@ func (p *PublishServiceClient) Client_() thrift.TClient {
 	return p.c
 }
 
-func (p *PublishServiceClient) Publish(ctx context.Context, req *PublishActionRequest) (r *PublishActionResponse, err error) {
-	var _args PublishServicePublishArgs
+func (p *PublishServiceClient) PublishAction(ctx context.Context, req *PublishActionRequest) (r *PublishActionResponse, err error) {
+	var _args PublishServicePublishActionArgs
 	_args.Req = req
-	var _result PublishServicePublishResult
-	if err = p.Client_().Call(ctx, "Publish", &_args, &_result); err != nil {
+	var _result PublishServicePublishActionResult
+	if err = p.Client_().Call(ctx, "PublishAction", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
@@ -1128,7 +1128,7 @@ func (p *PublishServiceProcessor) ProcessorMap() map[string]thrift.TProcessorFun
 
 func NewPublishServiceProcessor(handler PublishService) *PublishServiceProcessor {
 	self := &PublishServiceProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
-	self.AddToProcessorMap("Publish", &publishServiceProcessorPublish{handler: handler})
+	self.AddToProcessorMap("PublishAction", &publishServiceProcessorPublishAction{handler: handler})
 	self.AddToProcessorMap("PublishList", &publishServiceProcessorPublishList{handler: handler})
 	return self
 }
@@ -1150,16 +1150,16 @@ func (p *PublishServiceProcessor) Process(ctx context.Context, iprot, oprot thri
 	return false, x
 }
 
-type publishServiceProcessorPublish struct {
+type publishServiceProcessorPublishAction struct {
 	handler PublishService
 }
 
-func (p *publishServiceProcessorPublish) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-	args := PublishServicePublishArgs{}
+func (p *publishServiceProcessorPublishAction) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := PublishServicePublishActionArgs{}
 	if err = args.Read(iprot); err != nil {
 		iprot.ReadMessageEnd()
 		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
-		oprot.WriteMessageBegin("Publish", thrift.EXCEPTION, seqId)
+		oprot.WriteMessageBegin("PublishAction", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -1168,11 +1168,11 @@ func (p *publishServiceProcessorPublish) Process(ctx context.Context, seqId int3
 
 	iprot.ReadMessageEnd()
 	var err2 error
-	result := PublishServicePublishResult{}
+	result := PublishServicePublishActionResult{}
 	var retval *PublishActionResponse
-	if retval, err2 = p.handler.Publish(ctx, args.Req); err2 != nil {
-		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing Publish: "+err2.Error())
-		oprot.WriteMessageBegin("Publish", thrift.EXCEPTION, seqId)
+	if retval, err2 = p.handler.PublishAction(ctx, args.Req); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing PublishAction: "+err2.Error())
+		oprot.WriteMessageBegin("PublishAction", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -1180,7 +1180,7 @@ func (p *publishServiceProcessorPublish) Process(ctx context.Context, seqId int3
 	} else {
 		result.Success = retval
 	}
-	if err2 = oprot.WriteMessageBegin("Publish", thrift.REPLY, seqId); err2 != nil {
+	if err2 = oprot.WriteMessageBegin("PublishAction", thrift.REPLY, seqId); err2 != nil {
 		err = err2
 	}
 	if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1246,39 +1246,39 @@ func (p *publishServiceProcessorPublishList) Process(ctx context.Context, seqId 
 	return true, err
 }
 
-type PublishServicePublishArgs struct {
+type PublishServicePublishActionArgs struct {
 	Req *PublishActionRequest `thrift:"req,1" frugal:"1,default,PublishActionRequest" json:"req"`
 }
 
-func NewPublishServicePublishArgs() *PublishServicePublishArgs {
-	return &PublishServicePublishArgs{}
+func NewPublishServicePublishActionArgs() *PublishServicePublishActionArgs {
+	return &PublishServicePublishActionArgs{}
 }
 
-func (p *PublishServicePublishArgs) InitDefault() {
-	*p = PublishServicePublishArgs{}
+func (p *PublishServicePublishActionArgs) InitDefault() {
+	*p = PublishServicePublishActionArgs{}
 }
 
-var PublishServicePublishArgs_Req_DEFAULT *PublishActionRequest
+var PublishServicePublishActionArgs_Req_DEFAULT *PublishActionRequest
 
-func (p *PublishServicePublishArgs) GetReq() (v *PublishActionRequest) {
+func (p *PublishServicePublishActionArgs) GetReq() (v *PublishActionRequest) {
 	if !p.IsSetReq() {
-		return PublishServicePublishArgs_Req_DEFAULT
+		return PublishServicePublishActionArgs_Req_DEFAULT
 	}
 	return p.Req
 }
-func (p *PublishServicePublishArgs) SetReq(val *PublishActionRequest) {
+func (p *PublishServicePublishActionArgs) SetReq(val *PublishActionRequest) {
 	p.Req = val
 }
 
-var fieldIDToName_PublishServicePublishArgs = map[int16]string{
+var fieldIDToName_PublishServicePublishActionArgs = map[int16]string{
 	1: "req",
 }
 
-func (p *PublishServicePublishArgs) IsSetReq() bool {
+func (p *PublishServicePublishActionArgs) IsSetReq() bool {
 	return p.Req != nil
 }
 
-func (p *PublishServicePublishArgs) Read(iprot thrift.TProtocol) (err error) {
+func (p *PublishServicePublishActionArgs) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
@@ -1324,7 +1324,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_PublishServicePublishArgs[fieldId]), err)
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_PublishServicePublishActionArgs[fieldId]), err)
 SkipFieldError:
 	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 
@@ -1334,7 +1334,7 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *PublishServicePublishArgs) ReadField1(iprot thrift.TProtocol) error {
+func (p *PublishServicePublishActionArgs) ReadField1(iprot thrift.TProtocol) error {
 	p.Req = NewPublishActionRequest()
 	if err := p.Req.Read(iprot); err != nil {
 		return err
@@ -1342,9 +1342,9 @@ func (p *PublishServicePublishArgs) ReadField1(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *PublishServicePublishArgs) Write(oprot thrift.TProtocol) (err error) {
+func (p *PublishServicePublishActionArgs) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
-	if err = oprot.WriteStructBegin("Publish_args"); err != nil {
+	if err = oprot.WriteStructBegin("PublishAction_args"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
@@ -1370,7 +1370,7 @@ WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
 }
 
-func (p *PublishServicePublishArgs) writeField1(oprot thrift.TProtocol) (err error) {
+func (p *PublishServicePublishActionArgs) writeField1(oprot thrift.TProtocol) (err error) {
 	if err = oprot.WriteFieldBegin("req", thrift.STRUCT, 1); err != nil {
 		goto WriteFieldBeginError
 	}
@@ -1387,15 +1387,15 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
 }
 
-func (p *PublishServicePublishArgs) String() string {
+func (p *PublishServicePublishActionArgs) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("PublishServicePublishArgs(%+v)", *p)
+	return fmt.Sprintf("PublishServicePublishActionArgs(%+v)", *p)
 
 }
 
-func (p *PublishServicePublishArgs) DeepEqual(ano *PublishServicePublishArgs) bool {
+func (p *PublishServicePublishActionArgs) DeepEqual(ano *PublishServicePublishActionArgs) bool {
 	if p == ano {
 		return true
 	} else if p == nil || ano == nil {
@@ -1407,7 +1407,7 @@ func (p *PublishServicePublishArgs) DeepEqual(ano *PublishServicePublishArgs) bo
 	return true
 }
 
-func (p *PublishServicePublishArgs) Field1DeepEqual(src *PublishActionRequest) bool {
+func (p *PublishServicePublishActionArgs) Field1DeepEqual(src *PublishActionRequest) bool {
 
 	if !p.Req.DeepEqual(src) {
 		return false
@@ -1415,39 +1415,39 @@ func (p *PublishServicePublishArgs) Field1DeepEqual(src *PublishActionRequest) b
 	return true
 }
 
-type PublishServicePublishResult struct {
+type PublishServicePublishActionResult struct {
 	Success *PublishActionResponse `thrift:"success,0,optional" frugal:"0,optional,PublishActionResponse" json:"success,omitempty"`
 }
 
-func NewPublishServicePublishResult() *PublishServicePublishResult {
-	return &PublishServicePublishResult{}
+func NewPublishServicePublishActionResult() *PublishServicePublishActionResult {
+	return &PublishServicePublishActionResult{}
 }
 
-func (p *PublishServicePublishResult) InitDefault() {
-	*p = PublishServicePublishResult{}
+func (p *PublishServicePublishActionResult) InitDefault() {
+	*p = PublishServicePublishActionResult{}
 }
 
-var PublishServicePublishResult_Success_DEFAULT *PublishActionResponse
+var PublishServicePublishActionResult_Success_DEFAULT *PublishActionResponse
 
-func (p *PublishServicePublishResult) GetSuccess() (v *PublishActionResponse) {
+func (p *PublishServicePublishActionResult) GetSuccess() (v *PublishActionResponse) {
 	if !p.IsSetSuccess() {
-		return PublishServicePublishResult_Success_DEFAULT
+		return PublishServicePublishActionResult_Success_DEFAULT
 	}
 	return p.Success
 }
-func (p *PublishServicePublishResult) SetSuccess(x interface{}) {
+func (p *PublishServicePublishActionResult) SetSuccess(x interface{}) {
 	p.Success = x.(*PublishActionResponse)
 }
 
-var fieldIDToName_PublishServicePublishResult = map[int16]string{
+var fieldIDToName_PublishServicePublishActionResult = map[int16]string{
 	0: "success",
 }
 
-func (p *PublishServicePublishResult) IsSetSuccess() bool {
+func (p *PublishServicePublishActionResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *PublishServicePublishResult) Read(iprot thrift.TProtocol) (err error) {
+func (p *PublishServicePublishActionResult) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
@@ -1493,7 +1493,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
-	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_PublishServicePublishResult[fieldId]), err)
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_PublishServicePublishActionResult[fieldId]), err)
 SkipFieldError:
 	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
 
@@ -1503,7 +1503,7 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
-func (p *PublishServicePublishResult) ReadField0(iprot thrift.TProtocol) error {
+func (p *PublishServicePublishActionResult) ReadField0(iprot thrift.TProtocol) error {
 	p.Success = NewPublishActionResponse()
 	if err := p.Success.Read(iprot); err != nil {
 		return err
@@ -1511,9 +1511,9 @@ func (p *PublishServicePublishResult) ReadField0(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *PublishServicePublishResult) Write(oprot thrift.TProtocol) (err error) {
+func (p *PublishServicePublishActionResult) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
-	if err = oprot.WriteStructBegin("Publish_result"); err != nil {
+	if err = oprot.WriteStructBegin("PublishAction_result"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
@@ -1539,7 +1539,7 @@ WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
 }
 
-func (p *PublishServicePublishResult) writeField0(oprot thrift.TProtocol) (err error) {
+func (p *PublishServicePublishActionResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
 		if err = oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
 			goto WriteFieldBeginError
@@ -1558,15 +1558,15 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 0 end error: ", p), err)
 }
 
-func (p *PublishServicePublishResult) String() string {
+func (p *PublishServicePublishActionResult) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("PublishServicePublishResult(%+v)", *p)
+	return fmt.Sprintf("PublishServicePublishActionResult(%+v)", *p)
 
 }
 
-func (p *PublishServicePublishResult) DeepEqual(ano *PublishServicePublishResult) bool {
+func (p *PublishServicePublishActionResult) DeepEqual(ano *PublishServicePublishActionResult) bool {
 	if p == ano {
 		return true
 	} else if p == nil || ano == nil {
@@ -1578,7 +1578,7 @@ func (p *PublishServicePublishResult) DeepEqual(ano *PublishServicePublishResult
 	return true
 }
 
-func (p *PublishServicePublishResult) Field0DeepEqual(src *PublishActionResponse) bool {
+func (p *PublishServicePublishActionResult) Field0DeepEqual(src *PublishActionResponse) bool {
 
 	if !p.Success.DeepEqual(src) {
 		return false

@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"douyin/dal"
+	"douyin/rpc/client"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -49,14 +51,14 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.CommentAction(userID, req.ActionType, req.VideoID, req.CommentID, req.CommentText)
+	resp, err := client.CommentAction(userID, req.ActionType, req.VideoID, req.CommentID, req.CommentText)
 	if err != nil {
-		if errors.Is(err, dao.ErrVideoNotExist) {
+		if errors.Is(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
 			klog.Error("controller.CommentAction: 视频不存在")
 			return
 		}
-		if errors.Is(err, dao.ErrCommentNotExist) {
+		if errors.Is(err, dal.ErrCommentNotExist) {
 			Error(ctx, CodeCommentNotExist)
 			klog.Error("controller.CommentAction: 评论不存在")
 			return
@@ -84,9 +86,9 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.CommentList(userID, req.VideoID)
+	resp, err := client.CommentList(userID, req.VideoID)
 	if err != nil {
-		if errors.Is(err, dao.ErrVideoNotExist) {
+		if errors.Is(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
 			klog.Error("controller.CommentList: 视频不存在")
 			return

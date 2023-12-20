@@ -8,8 +8,8 @@ import (
 // PublishServiceImpl implements the last service interface defined in the IDL.
 type PublishServiceImpl struct{}
 
-// Publish implements the PublishServiceImpl interface.
-func (s *PublishServiceImpl) Publish(ctx context.Context, req *publish.PublishActionRequest) (resp *publish.PublishActionResponse, err error) {
+// PublishAction implements the PublishServiceImpl interface.
+func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.PublishActionRequest) (resp *publish.PublishActionResponse, err error) {
 	// TODO: Your code here...
 	return
 }

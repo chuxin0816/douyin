@@ -64,7 +64,7 @@ type RedisConfig struct {
 }
 
 type ConsulConfig struct {
-	Addr                string `mapstructure:"addr"`
+	ConsulAddr          string `mapstructure:"consul_addr"`
 	FeedAddr            string `mapstructure:"feed_addr"`
 	UserAddr            string `mapstructure:"user_addr"`
 	FavoriteAddr        string `mapstructure:"favorite_addr"`
