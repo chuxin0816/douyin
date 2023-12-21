@@ -26,7 +26,7 @@ func initCommentClient() {
 	}
 }
 
-func CommentAction(userID, videoID, actionType int64, commentID, commentText *string) (*comment.CommentActionResponse, error) {
+func CommentAction(userID, videoID, actionType int64, commentID *int64, commentText *string) (*comment.CommentActionResponse, error) {
 	return commentClient.CommentAction(context.Background(), &comment.CommentActionRequest{
 		UserId:      userID,
 		VideoId:     videoID,

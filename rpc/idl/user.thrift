@@ -29,6 +29,12 @@ struct User_info_request {
   2: optional i64 user_id; // 用户id
 }
 
+struct User_info_response {
+  1: i32 status_code; // 状态码，0-成功，其他值-失败
+  2: optional string status_msg; // 返回状态描述
+  3: optional User user; // 用户信息
+}
+
 struct User {
   1: i64 id; // 用户id
   2: string name; // 用户名称

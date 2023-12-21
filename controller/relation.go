@@ -2,7 +2,8 @@ package controller
 
 import (
 	"context"
-	"douyin/service"
+	"douyin/dal"
+	"douyin/rpc/client"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -47,14 +48,14 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.RelationAction(userID, req.ToUserID, req.ActionType)
+	resp, err := client.RelationAction(userID, req.ToUserID, req.ActionType)
 	if err != nil {
-		if errors.Is(err, dao.ErrAlreadyFollow) {
+		if errors.Is(err, dal.ErrAlreadyFollow) {
 			klog.Error("RelationController.Action: 已经关注过了, err: ", err)
 			Error(ctx, CodeAlreadyFollow)
 			return
 		}
-		if errors.Is(err, dao.ErrNotFollow) {
+		if errors.Is(err, dal.ErrNotFollow) {
 			klog.Error("RelationController.Action: 还没有关注过, err: ", err)
 			Error(ctx, CodeNotFollow)
 			return
@@ -82,7 +83,7 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.FollowList(userID, req.UserID)
+	resp, err := client.FollowList(userID, req.UserID)
 	if err != nil {
 		klog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
@@ -106,7 +107,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.FollowerList(userID, req.UserID)
+	resp, err := client.FollowerList(userID, req.UserID)
 	if err != nil {
 		klog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
@@ -130,7 +131,7 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.FriendList(userID, req.UserID)
+	resp, err := client.FriendList(userID, req.UserID)
 	if err != nil {
 		klog.Error("RelationController.FriendList: 业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)

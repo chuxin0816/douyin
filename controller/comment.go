@@ -51,7 +51,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := client.CommentAction(userID, req.ActionType, req.VideoID, req.CommentID, req.CommentText)
+	resp, err := client.CommentAction(userID, req.ActionType, req.VideoID, &req.CommentID, &req.CommentText)
 	if err != nil {
 		if errors.Is(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)

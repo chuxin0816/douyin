@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"douyin/rpc/client"
+	"io"
 	"mime/multipart"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -52,8 +54,24 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	// 从认证中间件中获取userID
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
+	// 将文件转换为[]byte
+	file, err := req.Data.Open()
+	if err != nil {
+		Error(ctx, CodeServerBusy)
+		klog.Error("PublishController.Action: 文件打开失败, err: ", err)
+		return
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		Error(ctx, CodeServerBusy)
+		klog.Error("PublishController.Action: 文件读取失败, err: ", err)
+		return
+	}
+
 	// 业务逻辑处理
-	resp, err := service.PublishAction(ctx, userID, req.Data, req.Title)
+	resp, err := client.PublishAction(userID, data, req.Title)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		klog.Error("PublishController.Action: 业务处理失败, err: ", err)
@@ -79,7 +97,7 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.PublishList(userID, authorID)
+	resp, err := client.PublishList(userID, authorID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		klog.Error("PublishController.Action: 业务处理失败, err: ", err)

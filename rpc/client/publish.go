@@ -25,17 +25,17 @@ func initPublishClient() {
 	}
 }
 
-func PublishAction(token string, data []byte, title string) (*publish.PublishActionResponse, error) {
+func PublishAction(userID int64, data []byte, title string) (*publish.PublishActionResponse, error) {
 	return publishClient.PublishAction(context.Background(), &publish.PublishActionRequest{
-		Token: token,
-		Data:  data,
-		Title: title,
+		UserId: userID,
+		Data:   data,
+		Title:  title,
 	})
 }
 
-func PublishList(userID int64, token string) (*publish.PublishListResponse, error) {
+func PublishList(userID, toUserID int64) (*publish.PublishListResponse, error) {
 	return publishClient.PublishList(context.Background(), &publish.PublishListRequest{
-		UserId: userID,
-		Token:  token,
+		UserId:   userID,
+		ToUserId: toUserID,
 	})
 }

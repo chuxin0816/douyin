@@ -25,18 +25,18 @@ func initMessageClient() {
 	}
 }
 
-func MessageAction(token string, toUserID int64, actionType string, content string) (*message.MessageActionResponse, error) {
+func MessageAction(userID, toUserID, actionType int64, content string) (*message.MessageActionResponse, error) {
 	return messageClient.MessageAction(context.Background(), &message.MessageActionRequest{
-		Token:      token,
+		UserId:     userID,
 		ToUserId:   toUserID,
 		ActionType: actionType,
 		Content:    content,
 	})
 }
 
-func MessageChat(token string, toUserID int64, lastTime int64) (*message.MessageChatResponse, error) {
+func MessageChat(userID, toUserID, lastTime int64) (*message.MessageChatResponse, error) {
 	return messageClient.MessageChat(context.Background(), &message.MessageChatRequest{
-		Token:    token,
+		UserId:   userID,
 		ToUserId: toUserID,
 		LastTime: lastTime,
 	})
