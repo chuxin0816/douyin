@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"douyin/dal"
+	"douyin/dao"
 	"douyin/rpc/client"
 	"errors"
 
@@ -43,12 +43,12 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	// 业务逻辑处理
 	resp, err := client.CommentAction(userID, req.ActionType, req.VideoID, &req.CommentID, &req.CommentText)
 	if err != nil {
-		if errors.Is(err, dal.ErrVideoNotExist) {
+		if errors.Is(err, dao.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
 			klog.Error("controller.CommentAction: 视频不存在")
 			return
 		}
-		if errors.Is(err, dal.ErrCommentNotExist) {
+		if errors.Is(err, dao.ErrCommentNotExist) {
 			Error(ctx, CodeCommentNotExist)
 			klog.Error("controller.CommentAction: 评论不存在")
 			return
@@ -78,7 +78,7 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	// 业务逻辑处理
 	resp, err := client.CommentList(userID, req.VideoID)
 	if err != nil {
-		if errors.Is(err, dal.ErrVideoNotExist) {
+		if errors.Is(err, dao.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
 			klog.Error("controller.CommentList: 视频不存在")
 			return

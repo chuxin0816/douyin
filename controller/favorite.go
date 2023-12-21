@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"douyin/dal"
+	"douyin/dao"
 	"douyin/rpc/client"
 	"errors"
 
@@ -41,12 +41,12 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	// 业务逻辑处理
 	resp, err := client.FavoriteAction(userID, req.VideoID, req.ActionType)
 	if err != nil {
-		if errors.Is(err, dal.ErrAlreadyFavorite) {
+		if errors.Is(err, dao.ErrAlreadyFavorite) {
 			Error(ctx, CodeAlreadyFavorite)
 			klog.Error("FavoriteController.Action: 已经点赞过了")
 			return
 		}
-		if errors.Is(err, dal.ErrNotFavorite) {
+		if errors.Is(err, dao.ErrNotFavorite) {
 			Error(ctx, CodeNotFavorite)
 			klog.Error("FavoriteController.Action: 还没有点赞过")
 			return
