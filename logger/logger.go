@@ -33,9 +33,9 @@ func Init(conf *config.LogConfig) {
 	// 提供压缩和删除
 	lumberjackLogger := &lumberjack.Logger{
 		Filename:   fileName,
-		MaxSize:    conf.MaxSize,    // 一个文件最大可达 20M。
-		MaxBackups: conf.MaxBackups, // 最多同时保存 5 个文件。
-		MaxAge:     conf.MaxAge,     // 一个文件最多可以保存 10 天。
+		MaxSize:    conf.MaxSize,    // 一个文件最大可达 10M。
+		MaxBackups: conf.MaxBackups, // 最多同时保存 10 个文件。
+		MaxAge:     conf.MaxAge,     // 一个文件最多可以保存 30 天。
 		Compress:   true,            // 用 gzip 压缩。
 	}
 

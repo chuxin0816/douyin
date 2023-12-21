@@ -1,11 +1,11 @@
 package client
 
 func InitRpcClient() {
-	initCommentClient()  //8890
-	initFavoriteClient() //8891
-	initFeedClient()     //8892
-	initMessageClient()  //8893
+	initFeedClient()     //8890
+	initUserClient()     //8891
+	initFavoriteClient() //8892
+	initCommentClient()  //8893
 	initPublishClient()  //8894
 	initRelationClient() //8895
-	initUserClient()     //8896
+	initMessageClient()  //8896
 }
