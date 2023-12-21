@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"douyin/dao"
+	"douyin/dal"
 	"douyin/rpc/client"
 	"errors"
 
@@ -41,12 +41,12 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	// 业务逻辑处理
 	resp, err := client.RelationAction(userID, req.ToUserID, req.ActionType)
 	if err != nil {
-		if errors.Is(err, dao.ErrAlreadyFollow) {
+		if errors.Is(err, dal.ErrAlreadyFollow) {
 			klog.Error("RelationController.Action: 已经关注过了, err: ", err)
 			Error(ctx, CodeAlreadyFollow)
 			return
 		}
-		if errors.Is(err, dao.ErrNotFollow) {
+		if errors.Is(err, dal.ErrNotFollow) {
 			klog.Error("RelationController.Action: 还没有关注过, err: ", err)
 			Error(ctx, CodeNotFollow)
 			return

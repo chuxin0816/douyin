@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"douyin/dao/model"
+	"douyin/dal/model"
 )
 
 func newUser(db *gorm.DB, opts ...gen.DOOption) user {

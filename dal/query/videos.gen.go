@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"douyin/dao/model"
+	"douyin/dal/model"
 )
 
 func newVideo(db *gorm.DB, opts ...gen.DOOption) video {

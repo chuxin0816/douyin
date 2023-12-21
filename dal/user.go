@@ -1,8 +1,8 @@
-package dao
+package dal
 
 import (
 	"context"
-	"douyin/dao/model"
+	"douyin/dal/model"
 	"douyin/rpc/kitex_gen/user"
 	"strconv"
 	"time"

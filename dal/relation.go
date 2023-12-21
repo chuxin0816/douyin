@@ -1,8 +1,8 @@
-package dao
+package dal
 
 import (
 	"context"
-	"douyin/dao/model"
+	"douyin/dal/model"
 
 	"strconv"
 	"time"

@@ -1,4 +1,4 @@
-package dao
+package dal
 
 import (
 	"testing"
@@ -30,7 +30,7 @@ func TestGetUserByName(t *testing.T) {
 }
 
 func TestCreateUser(t *testing.T) {
-	err:=CreateUser("test02","123456",1111)
+	err := CreateUser("test02", "123456", 1111)
 	if err != nil {
 		t.Log(err)
 		t.Fail()

@@ -1,4 +1,4 @@
-package dao
+package dal
 
 const (
 	Prefix                  = "douyin:"               // 项目公共前缀

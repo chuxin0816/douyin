@@ -1,8 +1,8 @@
-package dao
+package dal
 
 import (
 	"context"
-	"douyin/dao/model"
+	"douyin/dal/model"
 	"douyin/pkg/snowflake"
 	"douyin/rpc/kitex_gen/message"
 
