@@ -15,12 +15,6 @@ type FeedRequest struct {
 	Token      string `query:"token"`              // 用户登录状态下设置
 }
 
-type FeedResponse struct {
-	*Response
-	VideoList []*VideoResponse `json:"video_list"` // 视频列表
-	NextTime  *int64           `json:"next_time"`  // 本次返回的视频中，发布最早的时间，作为下次请求时的latest_time
-}
-
 // Feed 不限制登录状态，返回按投稿时间倒序的视频列表，视频数由服务端控制，单次最多30个
 func Feed(c context.Context, ctx *app.RequestContext) {
 	// 获取参数
@@ -51,16 +45,6 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
-	// 转换rpc响应为http响应
-	videoList := make([]*VideoResponse, len(resp.VideoList))
-	for i, v := range resp.VideoList {
-		videoList[i] = rpcVideo2httpVideo(v)
-	}
-
 	// 返回结果
-	Success(ctx, FeedResponse{
-		Response:  &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-		VideoList: videoList,
-		NextTime:  resp.NextTime,
-	})
+	Success(ctx, resp)
 }

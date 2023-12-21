@@ -21,15 +21,6 @@ type MessageChatRequest struct {
 	PreMsgTime int64 `query:"pre_msg_time,string"`          // 上一条消息时间
 }
 
-type MessageActionResponse struct {
-	*Response
-}
-
-type MessageChatResponse struct {
-	*Response
-	MessageList []*MessageResponse `json:"message_list"` // 消息列表
-}
-
 func NewMessageController() *MessageController {
 	return &MessageController{}
 }
@@ -56,9 +47,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 	}
 
 	// 返回响应
-	Success(ctx, &MessageActionResponse{
-		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-	})
+	Success(ctx, resp)
 }
 
 func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
@@ -82,15 +71,6 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
-	// 转换rpc响应为http响应
-	messageList := make([]*MessageResponse, len(resp.MessageList))
-	for i, m := range resp.MessageList {
-		messageList[i] = rpcMessage2httpMessage(m)
-	}
-
 	// 返回响应
-	Success(ctx, &MessageChatResponse{
-		Response:    &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-		MessageList: messageList,
-	})
+	Success(ctx, resp)
 }

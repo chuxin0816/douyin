@@ -21,15 +21,6 @@ type PublishListRequest struct {
 	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
 }
 
-type PublishActionResponse struct {
-	*Response
-}
-
-type PublishListResponse struct {
-	*Response
-	VideoList []*VideoResponse `json:"video_list"` // 视频列表
-}
-
 func NewPublishController() *PublishController {
 	return &PublishController{}
 }
@@ -79,9 +70,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	}
 
 	// 返回响应
-	Success(ctx, &PublishActionResponse{
-		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-	})
+	Success(ctx, resp)
 }
 
 func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
@@ -106,15 +95,6 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
-	// 转换rpc响应为http响应
-	videoList := make([]*VideoResponse, len(resp.VideoList))
-	for i, v := range resp.VideoList {
-		videoList[i] = rpcVideo2httpVideo(v)
-	}
-
 	// 返回响应
-	Success(ctx, &PublishListResponse{
-		Response:  &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-		VideoList: videoList,
-	})
+	Success(ctx, resp)
 }

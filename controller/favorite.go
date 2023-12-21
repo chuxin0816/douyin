@@ -21,15 +21,6 @@ type FavoriteListRequest struct {
 	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
 }
 
-type FavoriteActionResponse struct {
-	*Response
-}
-
-type FavoriteListResponse struct {
-	*Response
-	VideoList []*VideoResponse `json:"video_list"`
-}
-
 func NewFavoriteController() *FavoriteController {
 	return &FavoriteController{}
 }
@@ -66,9 +57,7 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	}
 
 	// 返回响应
-	Success(ctx, &FavoriteActionResponse{
-		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-	})
+	Success(ctx, resp)
 }
 
 func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
@@ -92,15 +81,6 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
-	// 转换rpc响应为http响应
-	videoList := make([]*VideoResponse, len(resp.VideoList))
-	for i, v := range resp.VideoList {
-		videoList[i] = rpcVideo2httpVideo(v)
-	}
-
 	// 返回响应
-	Success(ctx, &FavoriteListResponse{
-		Response:  &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-		VideoList: videoList,
-	})
+	Success(ctx, resp)
 }

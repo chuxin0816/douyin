@@ -21,15 +21,6 @@ type RelationListRequest struct {
 	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
 }
 
-type RelationActionResponse struct {
-	*Response
-}
-
-type RelationListResponse struct {
-	*Response
-	UserList []*UserResponse `json:"user_list"`
-}
-
 func NewRelationController() *RelationController {
 	return &RelationController{}
 }
@@ -66,9 +57,7 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	}
 
 	// 返回响应
-	Success(ctx, &RelationActionResponse{
-		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-	})
+	Success(ctx, resp)
 }
 
 func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestContext) {
@@ -92,17 +81,8 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 		return
 	}
 
-	// 将rpc响应转换为http响应
-	userList := make([]*UserResponse, len(resp.UserList))
-	for i, u := range resp.UserList {
-		userList[i] = rpcUser2httpUser(u)
-	}
-
 	// 返回响应
-	Success(ctx, &RelationListResponse{
-		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-		UserList: userList,
-	})
+	Success(ctx, resp)
 }
 
 func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestContext) {
@@ -125,17 +105,8 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 		return
 	}
 
-	// 将rpc响应转换为http响应
-	userList := make([]*UserResponse, len(resp.UserList))
-	for i, u := range resp.UserList {
-		userList[i] = rpcUser2httpUser(u)
-	}
-
 	// 返回响应
-	Success(ctx, &RelationListResponse{
-		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-		UserList: userList,
-	})
+	Success(ctx, resp)
 }
 
 func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestContext) {
@@ -158,15 +129,6 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 		return
 	}
 
-	// 将rpc响应转换为http响应
-	userList := make([]*UserResponse, len(resp.UserList))
-	for i, u := range resp.UserList {
-		userList[i] = rpcUser2httpUser(u)
-	}
-
 	// 返回响应
-	Success(ctx, &RelationListResponse{
-		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-		UserList: userList,
-	})
+	Success(ctx, resp)
 }

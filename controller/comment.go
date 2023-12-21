@@ -23,16 +23,6 @@ type CommentListRequest struct {
 	VideoID int64 `query:"video_id,string" vd:"$>0"` // 视频id
 }
 
-type CommentActionResponse struct {
-	*Response
-	Comment *CommentResponse `json:"comment,omitempty"`
-}
-
-type CommentListResponse struct {
-	*Response
-	CommentList []*CommentResponse `json:"comment_list"`
-}
-
 func NewCommentController() *CommentController {
 	return &CommentController{}
 }
@@ -69,10 +59,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	}
 
 	// 返回响应
-	Success(ctx, &CommentActionResponse{
-		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-		Comment:  rpcComment2httpComment(resp.Comment),
-	})
+	Success(ctx, resp)
 }
 
 func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
@@ -101,15 +88,6 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
-	// 转换rpc响应为http响应
-	commentList := make([]*CommentResponse, len(resp.CommentList))
-	for i, c := range resp.CommentList {
-		commentList[i] = rpcComment2httpComment(c)
-	}
-
 	// 返回响应
-	Success(ctx, &CommentListResponse{
-		Response:    &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
-		CommentList: commentList,
-	})
+	Success(ctx, resp)
 }
