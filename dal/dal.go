@@ -37,9 +37,9 @@ var (
 	ErrVideoNotExist   = errors.New("video not exist")
 )
 
-func Init(config *config.DatabaseConfig) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		config.MysqlConfig.User, config.MysqlConfig.Password, config.MysqlConfig.Host, config.MysqlConfig.Port, config.MysqlConfig.DBName)
+func Init() {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=loc=Asia%%2FShanghai",
+		config.Conf.DatabaseConfig.MysqlConfig.User, config.Conf.DatabaseConfig.MysqlConfig.Password, config.Conf.DatabaseConfig.MysqlConfig.Host, config.Conf.DatabaseConfig.MysqlConfig.Port, config.Conf.DatabaseConfig.MysqlConfig.DBName)
 
 	DB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -47,9 +47,9 @@ func Init(config *config.DatabaseConfig) {
 	}
 
 	RDB = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", config.RedisConfig.Host, config.RedisConfig.Port),
-		Password: config.RedisConfig.Password,
-		DB:       config.RedisConfig.DB,
+		Addr:     config.Conf.DatabaseConfig.RedisConfig.Addr,
+		Password: config.Conf.DatabaseConfig.RedisConfig.Password,
+		DB:       config.Conf.DatabaseConfig.RedisConfig.DB,
 	})
 	query.SetDefault(DB)
 }

@@ -69,7 +69,10 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 返回响应
-	Success(ctx, resp)
+	Success(ctx, &UserInfoResponse{
+		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
+		User:     rpcUser2httpUser(resp.User),
+	})
 }
 
 func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
@@ -96,7 +99,11 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 返回响应
-	Success(ctx, resp)
+	Success(ctx, &RegisterResponse{
+		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
+		UserID:   resp.UserId,
+		Token:    resp.Token,
+	})
 }
 
 func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
@@ -128,5 +135,9 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 返回响应
-	Success(ctx, resp)
+	Success(ctx, &LoginResponse{
+		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
+		UserID:   resp.UserId,
+		Token:    resp.Token,
+	})
 }

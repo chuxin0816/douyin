@@ -51,7 +51,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
-	// 数据转换
+	// 转换rpc响应为http响应
 	videoList := make([]*VideoResponse, len(resp.VideoList))
 	for i, v := range resp.VideoList {
 		videoList[i] = rpcVideo2httpVideo(v)
@@ -59,7 +59,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 
 	// 返回结果
 	Success(ctx, FeedResponse{
-		Response:  &Response{StatusCode: CodeSuccess},
+		Response:  &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
 		VideoList: videoList,
 		NextTime:  resp.NextTime,
 	})

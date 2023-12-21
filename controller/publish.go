@@ -79,7 +79,9 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	}
 
 	// 返回响应
-	Success(ctx, resp)
+	Success(ctx, &PublishActionResponse{
+		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
+	})
 }
 
 func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
@@ -104,6 +106,15 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
+	// 转换rpc响应为http响应
+	videoList := make([]*VideoResponse, len(resp.VideoList))
+	for i, v := range resp.VideoList {
+		videoList[i] = rpcVideo2httpVideo(v)
+	}
+
 	// 返回响应
-	Success(ctx, resp)
+	Success(ctx, &PublishListResponse{
+		Response:  &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
+		VideoList: videoList,
+	})
 }

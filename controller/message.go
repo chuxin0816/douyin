@@ -56,7 +56,9 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 	}
 
 	// 返回响应
-	Success(ctx, resp)
+	Success(ctx, &MessageActionResponse{
+		Response: &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
+	})
 }
 
 func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
@@ -80,6 +82,15 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
+	// 转换rpc响应为http响应
+	messageList := make([]*MessageResponse, len(resp.MessageList))
+	for i, m := range resp.MessageList {
+		messageList[i] = rpcMessage2httpMessage(m)
+	}
+
 	// 返回响应
-	Success(ctx, resp)
+	Success(ctx, &MessageChatResponse{
+		Response:    &Response{StatusCode: ResCode(resp.StatusCode), StatusMsg: *resp.StatusMsg},
+		MessageList: messageList,
+	})
 }

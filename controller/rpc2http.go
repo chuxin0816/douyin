@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"douyin/rpc/kitex_gen/comment"
 	"douyin/rpc/kitex_gen/feed"
+	"douyin/rpc/kitex_gen/message"
 	"douyin/rpc/kitex_gen/user"
 	"strconv"
 )
@@ -32,5 +34,24 @@ func rpcVideo2httpVideo(rpcVideo *feed.Video) *VideoResponse {
 		CommentCount:  rpcVideo.CommentCount,
 		IsFavorite:    rpcVideo.IsFavorite,
 		Title:         rpcVideo.Title,
+	}
+}
+
+func rpcComment2httpComment(rpcComment *comment.Comment) *CommentResponse {
+	return &CommentResponse{
+		ID:         rpcComment.Id,
+		User:       rpcUser2httpUser(rpcComment.User),
+		Content:    rpcComment.Content,
+		CreateDate: rpcComment.CreateDate,
+	}
+}
+
+func rpcMessage2httpMessage(rpcMessage *message.Message) *MessageResponse {
+	return &MessageResponse{
+		ID:         rpcMessage.Id,
+		ToUserID:   rpcMessage.ToUserId,
+		FromUserID: rpcMessage.FromUserId,
+		Content:    rpcMessage.Content,
+		CreateTime: rpcMessage.CreateTime,
 	}
 }
