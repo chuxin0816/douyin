@@ -7,7 +7,7 @@ struct Comment_action_request {
   2: i64 video_id; // 视频id
   3: i64 action_type; // 1-发布评论，2-删除评论
   4: optional string comment_text; // 用户填写的评论内容，在action_type=1的时候使用
-  5: optional string comment_id; // 要删除的评论id，在action_type=2的时候使用
+  5: optional i64 comment_id; // 要删除的评论id，在action_type=2的时候使用
 }
 
 struct Comment_action_response {
