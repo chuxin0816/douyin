@@ -5,7 +5,7 @@ import (
 	"douyin/rpc/client"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/u2takey/go-utils/klog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type MessageController struct{}

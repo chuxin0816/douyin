@@ -10,8 +10,8 @@ import (
 	"sync"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/cloudwego/kitex/pkg/klog"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
-	"github.com/u2takey/go-utils/klog"
 )
 
 var bucket *oss.Bucket

@@ -6,7 +6,7 @@ import (
 	"douyin/response"
 	"time"
 
-	"github.com/u2takey/go-utils/klog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 func MessageAction(userID, toUserID int64, content string) error {
