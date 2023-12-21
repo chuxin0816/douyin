@@ -122,7 +122,7 @@ func (p *kClient) Login(ctx context.Context, req *user.UserLoginRequest) (r *use
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) UserInfo(ctx context.Context, req *user.UserInfoRequest) (r *user.User, err error) {
+func (p *kClient) UserInfo(ctx context.Context, req *user.UserInfoRequest) (r *user.UserInfoResponse, err error) {
 	var _args user.UserServiceUserInfoArgs
 	_args.Req = req
 	var _result user.UserServiceUserInfoResult

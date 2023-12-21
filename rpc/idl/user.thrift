@@ -52,5 +52,5 @@ struct User {
 service UserService {
     User_register_response Register(1: User_register_request req);
     User_login_response Login(1: User_login_request req);
-    User UserInfo(1: User_info_request req);
+    User_info_response UserInfo(1: User_info_request req);
 }

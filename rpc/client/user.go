@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"douyin/config"
 	"douyin/rpc/kitex_gen/user"
 	"douyin/rpc/kitex_gen/user/userservice"
@@ -24,4 +25,6 @@ func initUserClient() {
 	}
 }
 
-func UserInfo(authorID, userID int64)(*user.userinfo)
+func UserInfo(authorID, userID int64) (*user.UserInfoResponse, error) {
+	return userClient.UserInfo(context.Background(), &user.UserInfoRequest{})
+}

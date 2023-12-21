@@ -2695,7 +2695,7 @@ ReadStructEndError:
 func (p *UserServiceUserInfoResult) FastReadField0(buf []byte) (int, error) {
 	offset := 0
 
-	tmp := NewUser()
+	tmp := NewUserInfoResponse()
 	if l, err := tmp.FastRead(buf[offset:]); err != nil {
 		return offset, err
 	} else {

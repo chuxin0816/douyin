@@ -2546,7 +2546,7 @@ type UserService interface {
 
 	Login(ctx context.Context, req *UserLoginRequest) (r *UserLoginResponse, err error)
 
-	UserInfo(ctx context.Context, req *UserInfoRequest) (r *User, err error)
+	UserInfo(ctx context.Context, req *UserInfoRequest) (r *UserInfoResponse, err error)
 }
 
 type UserServiceClient struct {
@@ -2593,7 +2593,7 @@ func (p *UserServiceClient) Login(ctx context.Context, req *UserLoginRequest) (r
 	}
 	return _result.GetSuccess(), nil
 }
-func (p *UserServiceClient) UserInfo(ctx context.Context, req *UserInfoRequest) (r *User, err error) {
+func (p *UserServiceClient) UserInfo(ctx context.Context, req *UserInfoRequest) (r *UserInfoResponse, err error) {
 	var _args UserServiceUserInfoArgs
 	_args.Req = req
 	var _result UserServiceUserInfoResult
@@ -2761,7 +2761,7 @@ func (p *userServiceProcessorUserInfo) Process(ctx context.Context, seqId int32,
 	iprot.ReadMessageEnd()
 	var err2 error
 	result := UserServiceUserInfoResult{}
-	var retval *User
+	var retval *UserInfoResponse
 	if retval, err2 = p.handler.UserInfo(ctx, args.Req); err2 != nil {
 		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing UserInfo: "+err2.Error())
 		oprot.WriteMessageBegin("UserInfo", thrift.EXCEPTION, seqId)
@@ -3640,7 +3640,7 @@ func (p *UserServiceUserInfoArgs) Field1DeepEqual(src *UserInfoRequest) bool {
 }
 
 type UserServiceUserInfoResult struct {
-	Success *User `thrift:"success,0,optional" frugal:"0,optional,User" json:"success,omitempty"`
+	Success *UserInfoResponse `thrift:"success,0,optional" frugal:"0,optional,UserInfoResponse" json:"success,omitempty"`
 }
 
 func NewUserServiceUserInfoResult() *UserServiceUserInfoResult {
@@ -3651,16 +3651,16 @@ func (p *UserServiceUserInfoResult) InitDefault() {
 	*p = UserServiceUserInfoResult{}
 }
 
-var UserServiceUserInfoResult_Success_DEFAULT *User
+var UserServiceUserInfoResult_Success_DEFAULT *UserInfoResponse
 
-func (p *UserServiceUserInfoResult) GetSuccess() (v *User) {
+func (p *UserServiceUserInfoResult) GetSuccess() (v *UserInfoResponse) {
 	if !p.IsSetSuccess() {
 		return UserServiceUserInfoResult_Success_DEFAULT
 	}
 	return p.Success
 }
 func (p *UserServiceUserInfoResult) SetSuccess(x interface{}) {
-	p.Success = x.(*User)
+	p.Success = x.(*UserInfoResponse)
 }
 
 var fieldIDToName_UserServiceUserInfoResult = map[int16]string{
@@ -3728,7 +3728,7 @@ ReadStructEndError:
 }
 
 func (p *UserServiceUserInfoResult) ReadField0(iprot thrift.TProtocol) error {
-	p.Success = NewUser()
+	p.Success = NewUserInfoResponse()
 	if err := p.Success.Read(iprot); err != nil {
 		return err
 	}
@@ -3802,7 +3802,7 @@ func (p *UserServiceUserInfoResult) DeepEqual(ano *UserServiceUserInfoResult) bo
 	return true
 }
 
-func (p *UserServiceUserInfoResult) Field0DeepEqual(src *User) bool {
+func (p *UserServiceUserInfoResult) Field0DeepEqual(src *UserInfoResponse) bool {
 
 	if !p.Success.DeepEqual(src) {
 		return false
