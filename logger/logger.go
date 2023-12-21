@@ -12,9 +12,9 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func Init(conf *config.LogConfig) {
+func Init() {
 	// 可定制的输出目录。
-	var logFilePath string = conf.Path
+	var logFilePath string = config.Conf.LogConfig.Path
 	if err := os.MkdirAll(logFilePath, 0o777); err != nil {
 		panic(err)
 	}
@@ -33,10 +33,10 @@ func Init(conf *config.LogConfig) {
 	// 提供压缩和删除
 	lumberjackLogger := &lumberjack.Logger{
 		Filename:   fileName,
-		MaxSize:    conf.MaxSize,    // 一个文件最大可达 10M。
-		MaxBackups: conf.MaxBackups, // 最多同时保存 10 个文件。
-		MaxAge:     conf.MaxAge,     // 一个文件最多可以保存 30 天。
-		Compress:   true,            // 用 gzip 压缩。
+		MaxSize:    config.Conf.LogConfig.MaxSize,    // 一个文件最大可达 10M。
+		MaxBackups: config.Conf.LogConfig.MaxBackups, // 最多同时保存 10 个文件。
+		MaxAge:     config.Conf.LogConfig.MaxAge,     // 一个文件最多可以保存 30 天。
+		Compress:   true,                             // 用 gzip 压缩。
 	}
 
 	klog.SetLogger(kitexlogrus.NewLogger())

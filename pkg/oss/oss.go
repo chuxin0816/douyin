@@ -22,12 +22,12 @@ const (
 	imagePath = "image/"
 )
 
-func Init(conf *config.OssConfig) {
-	client, err := oss.New(conf.Endpoint, conf.AccessKeyId, conf.AccessKeySecret)
+func Init() {
+	client, err := oss.New(config.Conf.OssConfig.Endpoint, config.Conf.OssConfig.AccessKeyId, config.Conf.OssConfig.AccessKeySecret)
 	if err != nil {
 		panic(err)
 	}
-	bucket, err = client.Bucket(conf.BucketName)
+	bucket, err = client.Bucket(config.Conf.OssConfig.BucketName)
 }
 
 // UploadFile 上传文件到oss
