@@ -1,22 +1,25 @@
 package dao
 
 import (
-	"douyin/models"
+	"context"
+	"douyin/dao/model"
 	"douyin/pkg/snowflake"
-	"douyin/response"
+	"douyin/rpc/kitex_gen/message"
+
 	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 func MessageAction(userID, toUserID int64, content string) error {
-	if err := db.Create(&models.Message{
+	err := qMessage.WithContext(context.Background()).Create(&model.Message{
 		ID:         snowflake.GenerateID(),
 		FromUserID: userID,
 		ToUserID:   toUserID,
 		Content:    content,
 		CreateTime: time.Now().Unix(),
-	}).Error; err != nil {
+	})
+	if err != nil {
 		klog.Error("mysql.MessageAction: 插入数据库失败, err: ", err)
 		return err
 	}
@@ -24,30 +27,29 @@ func MessageAction(userID, toUserID int64, content string) error {
 	return nil
 }
 
-func MessageList(userID, toUserID, lastTime int64) ([]*response.MessageResponse, error) {
-	var dMessageList []*models.Message
-	err := db.Where("from_user_id = ? and to_user_id = ? and create_time > ?", userID, toUserID, lastTime).
-		Or("from_user_id = ? and to_user_id = ? and create_time > ?", toUserID, userID, lastTime).
-		Order("create_time").Find(&dMessageList).Error
+func MessageList(userID, toUserID, lastTime int64) ([]*message.Message, error) {
+	mMessageList, err := qMessage.WithContext(context.Background()).Where(qMessage.FromUserID.Eq(userID), qMessage.ToUserID.Eq(toUserID), qMessage.CreateTime.Gt(lastTime)).
+		Or(qMessage.FromUserID.Eq(toUserID), qMessage.ToUserID.Eq(userID), qMessage.CreateTime.Gt(lastTime)).
+		Order(qMessage.CreateTime).Find()
 	if err != nil {
 		klog.Error("mysql.MessageList: 查询数据库失败, err: ", err)
 		return nil, err
 	}
 
-	messageList := make([]*response.MessageResponse, 0, len(dMessageList))
-	for _, message := range dMessageList {
-		messageList = append(messageList, ToMessageResponse(message))
+	messageList := make([]*message.Message, len(mMessageList))
+	for i, m := range mMessageList {
+		messageList[i] = ToMessageResponse(m)
 	}
 
 	return messageList, nil
 }
 
-func ToMessageResponse(message *models.Message) *response.MessageResponse {
-	return &response.MessageResponse{
-		ID:         message.ID,
-		ToUserID:   message.ToUserID,
-		FromUserID: message.FromUserID,
-		Content:    message.Content,
-		CreateTime: message.CreateTime,
+func ToMessageResponse(mMessage *model.Message) *message.Message {
+	return &message.Message{
+		Id:         mMessage.ID,
+		ToUserId:   mMessage.ToUserID,
+		FromUserId: mMessage.FromUserID,
+		Content:    mMessage.Content,
+		CreateTime: mMessage.CreateTime,
 	}
 }

@@ -2,7 +2,7 @@ package dao
 
 import (
 	"context"
-	"douyin/models"
+	"douyin/dao/model"
 	"strconv"
 	"time"
 
@@ -33,7 +33,7 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 		}
 		// 缓存未命中，查询mysql中是否有记录
 		var id int64
-		if err := db.Model(&models.Favorite{}).Where("user_id = ? AND video_id = ?", userID, videoID).Select("id").Scan(&id).Error; err != nil {
+		if err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Select(qFavorite.ID).Scan(&id); err != nil {
 			klog.Error("mysql.FavoriteAction: 查询mysql中是否有记录失败, err: ", err)
 			return nil, err
 		}
@@ -64,7 +64,7 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 
 	// 先查询作者的ID
 	var authorID int64
-	if err := db.Model(&models.Video{}).Where("id = ?", videoID).Select("author_id").Find(&authorID).Error; err != nil {
+	if err = qVideo.WithContext(context.Background()).Where(qVideo.ID.Eq(videoID)).Select(qVideo.AuthorID).Scan(&authorID); err != nil {
 		klog.Error("mysql.FavoriteAction: 查询作者的ID失败, err: ", err)
 		return err
 	}
@@ -77,12 +77,12 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 
 	// 更新favorite表
 	if actionType == 1 {
-		if err := db.Create(&models.Favorite{UserID: userID, VideoID: videoID}).Error; err != nil {
+		if err := qFavorite.WithContext(context.Background()).Create(&model.Favorite{UserID: userID, VideoID: videoID}); err != nil {
 			klog.Error("mysql.FavoriteAction: 更新favorite表失败, err: ", err)
 			return err
 		}
 	} else {
-		if err := db.Where("user_id = ? AND video_id = ?", userID, videoID).Delete(&models.Favorite{}).Error; err != nil {
+		if _, err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Delete(); err != nil {
 			klog.Error("mysql.FavoriteAction: 更新favorite表失败, err: ", err)
 			return err
 		}
@@ -143,7 +143,7 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
-		if err := db.Model(&models.Favorite{}).Where("user_id = ?", userID).Select("video_id").Find(&videoIDs).Error; err != nil {
+		if err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID)).Select(qFavorite.VideoID).Scan(&videoIDs); err != nil {
 			klog.Error("mysql.GetFavoriteList: 查询favorite表失败, err: ", err)
 			return nil, err
 		}

@@ -31,7 +31,7 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.Name = field.NewString(tableName, "name")
 	_user.Avatar = field.NewString(tableName, "avatar")
 	_user.BackgroundImage = field.NewString(tableName, "background_image")
-	_user.TotalFavorited = field.NewString(tableName, "total_favorited")
+	_user.TotalFavorited = field.NewInt64(tableName, "total_favorited")
 	_user.FavoriteCount = field.NewInt64(tableName, "favorite_count")
 	_user.FollowCount = field.NewInt64(tableName, "follow_count")
 	_user.FollowerCount = field.NewInt64(tableName, "follower_count")
@@ -52,7 +52,7 @@ type user struct {
 	Name            field.String
 	Avatar          field.String
 	BackgroundImage field.String
-	TotalFavorited  field.String
+	TotalFavorited  field.Int64
 	FavoriteCount   field.Int64
 	FollowCount     field.Int64
 	FollowerCount   field.Int64
@@ -79,7 +79,7 @@ func (u *user) updateTableName(table string) *user {
 	u.Name = field.NewString(table, "name")
 	u.Avatar = field.NewString(table, "avatar")
 	u.BackgroundImage = field.NewString(table, "background_image")
-	u.TotalFavorited = field.NewString(table, "total_favorited")
+	u.TotalFavorited = field.NewInt64(table, "total_favorited")
 	u.FavoriteCount = field.NewInt64(table, "favorite_count")
 	u.FollowCount = field.NewInt64(table, "follow_count")
 	u.FollowerCount = field.NewInt64(table, "follower_count")

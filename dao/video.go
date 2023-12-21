@@ -2,9 +2,9 @@ package dao
 
 import (
 	"context"
-	"douyin/models"
+	"douyin/dao/model"
 	"douyin/pkg/snowflake"
-	"douyin/response"
+	"douyin/rpc/kitex_gen/feed"
 	"strconv"
 	"time"
 
@@ -17,23 +17,23 @@ const (
 )
 
 // GetVideoList 获取视频Feed流
-func GetFeedList(userID int64, latestTime time.Time, count int) (videoList []*response.VideoResponse, nextTime *int64, err error) {
+func GetFeedList(userID int64, latestTime time.Time, count int) (videoList []*feed.Video, nextTime *int64, err error) {
 	// 查询数据库
 	year := latestTime.Year()
 	if year < 1 || year > 9999 {
 		latestTime = time.Now()
 	}
-	var dVideoList []*models.Video
-	err = db.Where("upload_time <= ?", latestTime).Order("upload_time DESC").Limit(count).Find(&dVideoList).Error
+	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.UploadTime.Lte(latestTime)).
+		Order(qVideo.UploadTime.Desc()).Limit(count).Find()
 	if err != nil {
 		klog.Error("mysql.GetVideoList: 查询数据库失败")
 		return nil, nil, err
 	}
 
 	// 通过作者id查询作者信息
-	authorIDs := make([]int64, 0, len(dVideoList))
-	for _, dVideo := range dVideoList {
-		authorIDs = append(authorIDs, dVideo.AuthorID)
+	authorIDs := make([]int64, len(mVideoList))
+	for i, mVideo := range mVideoList {
+		authorIDs[i] = mVideo.AuthorID
 	}
 	authors, err := GetUserByIDs(authorIDs)
 	if err != nil {
@@ -41,22 +41,22 @@ func GetFeedList(userID int64, latestTime time.Time, count int) (videoList []*re
 	}
 
 	// 将models.Video转换为response.VideoResponse
-	videoList = make([]*response.VideoResponse, 0, len(dVideoList))
-	for idx, dVideo := range dVideoList {
-		videoList = append(videoList, ToVideoResponse(userID, dVideo, authors[idx]))
+	videoList = make([]*feed.Video, len(mVideoList))
+	for idx, mVideo := range mVideoList {
+		videoList = append(videoList, ToVideoResponse(userID, mVideo, authors[idx]))
 	}
 
 	// 计算下次请求的时间
-	if len(dVideoList) > 0 {
+	if len(mVideoList) > 0 {
 		nextTime = new(int64)
-		*nextTime = dVideoList[len(dVideoList)-1].UploadTime.Unix()
+		*nextTime = mVideoList[len(mVideoList)-1].UploadTime.Unix()
 	}
 	return
 }
 
 // SaveVideo 保存视频信息到数据库
 func SaveVideo(userID int64, videoName, coverName, title string) error {
-	video := &models.Video{
+	video := &model.Video{
 		ID:         snowflake.GenerateID(),
 		AuthorID:   userID,
 		PlayURL:    videoPrefix + videoName,
@@ -66,7 +66,7 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 	}
 
 	// 保存视频信息到数据库
-	if err := db.Create(video).Error; err != nil {
+	if err := qVideo.WithContext(context.Background()).Create(video); err != nil {
 		klog.Error("mysql.SaveVideo: 保存视频信息到数据库失败")
 		return err
 	}
@@ -90,10 +90,11 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 }
 
 // GetPublishList 获取用户发布的视频列表
-func GetPublishList(userID, authorID int64) ([]*response.VideoResponse, error) {
+func GetPublishList(userID, authorID int64) ([]*feed.Video, error) {
 	// 查询视频信息
-	var dVideoList []*models.Video
-	if err := db.Where("author_id = ?", authorID).Order("upload_time DESC").Find(&dVideoList).Error; err != nil {
+	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.AuthorID.Eq(authorID)).
+		Order(qVideo.UploadTime.Desc()).Find()
+	if err != nil {
 		klog.Error("mysql.GetPublishList: 查询视频信息失败")
 		return nil, err
 	}
@@ -106,52 +107,52 @@ func GetPublishList(userID, authorID int64) ([]*response.VideoResponse, error) {
 	}
 
 	// 将models.Video转换为response.VideoResponse
-	videoList := make([]*response.VideoResponse, 0, len(dVideoList))
-	for _, dVideo := range dVideoList {
-		videoList = append(videoList, ToVideoResponse(userID, dVideo, author))
+	videoList := make([]*feed.Video, 0, len(mVideoList))
+	for _, mVideo := range mVideoList {
+		videoList = append(videoList, ToVideoResponse(userID, mVideo, author))
 	}
 
 	return videoList, nil
 }
 
-func GetVideoList(userID int64, videoIDs []int64) ([]*response.VideoResponse, error) {
+func GetVideoList(userID int64, videoIDs []int64) ([]*feed.Video, error) {
 	// 查询视频信息
-	var dVideoList []*models.Video
-	err := db.Where("id IN ?", videoIDs).Order("upload_time DESC").Find(&dVideoList).Error
+	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.ID.In(videoIDs...)).
+		Order(qVideo.UploadTime.Desc()).Find()
 	if err != nil {
 		klog.Error("mysql.GetVideoList: 查询视频信息失败")
 		return nil, err
 	}
 
 	// 通过作者id查询作者信息
-	authorIDs := make([]int64, 0, len(dVideoList))
-	for _, dVideo := range dVideoList {
-		authorIDs = append(authorIDs, dVideo.AuthorID)
+	authorIDs := make([]int64, len(mVideoList))
+	for i, mVideo := range mVideoList {
+		authorIDs[i] = mVideo.AuthorID
 	}
 	authors, err := GetUserByIDs(authorIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	// 将models.Video转换为response.VideoResponse
-	videoList := make([]*response.VideoResponse, 0, len(dVideoList))
-	for idx, dVideo := range dVideoList {
-		videoList = append(videoList, ToVideoResponse(userID, dVideo, authors[idx]))
+	// 将models.Video转换为feed.Video
+	videoList := make([]*feed.Video, len(mVideoList))
+	for i, mVideo := range mVideoList {
+		videoList[i] = ToVideoResponse(userID, mVideo, authors[i])
 	}
 
 	return videoList, nil
 }
 
-func ToVideoResponse(userID int64, dVideo *models.Video, author *models.User) *response.VideoResponse {
-	video := &response.VideoResponse{
-		ID:            dVideo.ID,
+func ToVideoResponse(userID int64, mVideo *model.Video, author *model.User) *feed.Video {
+	video := &feed.Video{
+		Id:            mVideo.ID,
 		Author:        ToUserResponse(userID, author),
-		CommentCount:  dVideo.CommentCount,
-		PlayURL:       dVideo.PlayURL,
-		CoverURL:      dVideo.CoverURL,
-		FavoriteCount: dVideo.FavoriteCount,
+		CommentCount:  mVideo.CommentCount,
+		PlayUrl:       mVideo.PlayURL,
+		CoverUrl:      mVideo.CoverURL,
+		FavoriteCount: mVideo.FavoriteCount,
 		IsFavorite:    false,
-		Title:         dVideo.Title,
+		Title:         mVideo.Title,
 	}
 	// 未登录直接返回
 	if userID == 0 {
@@ -166,14 +167,15 @@ func ToVideoResponse(userID int64, dVideo *models.Video, author *models.User) *r
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
-		if rdb.SIsMember(context.Background(), key, dVideo.ID).Val() {
+		if rdb.SIsMember(context.Background(), key, mVideo.ID).Val() {
 			video.IsFavorite = true
 			return nil, nil
 		}
 
 		// 缓存未命中, 查询数据库
-		favorite := &models.Favorite{}
-		if err := db.Where("user_id = ? AND video_id = ?", userID, dVideo.ID).Find(favorite).Error; err != nil {
+		favorite, err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(mVideo.ID)).
+			Select(qFavorite.ID).First()
+		if err != nil {
 			klog.Error("mysql.ToVideoResponse: 查询favorite表失败, err: ", err)
 			return nil, err
 		}
@@ -181,7 +183,7 @@ func ToVideoResponse(userID int64, dVideo *models.Video, author *models.User) *r
 			video.IsFavorite = true
 			// 写入缓存
 			go func() {
-				if err := rdb.SAdd(context.Background(), key, dVideo.ID).Err(); err != nil {
+				if err := rdb.SAdd(context.Background(), key, mVideo.ID).Err(); err != nil {
 					klog.Error("redis.ToVideoResponse: 将点赞信息写入缓存失败, err: ", err)
 					return
 				}

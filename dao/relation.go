@@ -2,7 +2,8 @@ package dao
 
 import (
 	"context"
-	"douyin/models"
+	"douyin/dao/model"
+
 	"strconv"
 	"time"
 
@@ -27,8 +28,9 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 			return nil, nil
 		}
 		// 缓存未命中, 查询数据库
-		relation := &models.Relation{}
-		if err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Find(relation).Error; err != nil {
+		relation, err := qRelation.WithContext(context.Background()).Where(qRelation.UserID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).
+			Select(qRelation.ID).First()
+		if err != nil {
 			klog.Error("mysql.RelationAction 查看是否关注失败, err: ", err)
 			return nil, err
 		}
@@ -62,11 +64,11 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 
 	// 更新relation表
 	if actionType == 1 {
-		if err := db.Create(&models.Relation{UserID: toUserID, FollowerID: userID}).Error; err != nil {
+		if err := qRelation.WithContext(context.Background()).Create(&model.Relation{UserID: toUserID, FollowerID: userID}); err != nil {
 			klog.Error("mysql.RelationAction 更新relation表失败, err: ", err)
 		}
 	} else {
-		if err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Delete(&models.Relation{}).Error; err != nil {
+		if _, err := qRelation.WithContext(context.Background()).Where(qRelation.UserID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).Delete(); err != nil {
 			klog.Error("mysql.RelationAction 更新relation表失败, err: ", err)
 		}
 	}
@@ -96,11 +98,10 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 	return nil
 }
 
-func FollowList(toUserID int64) ([]*models.User, error) {
+func FollowList(toUserID int64) ([]*model.User, error) {
 	// 查询用户ID列表
 	var userIDList []int64
-	err := db.Table("relations").Select("user_id").Where("follower_id = ?", toUserID).Find(&userIDList).Error
-	if err != nil {
+	if err := qRelation.WithContext(context.Background()).Where(qRelation.FollowerID.Eq(toUserID)).Select(qRelation.UserID).Scan(&userIDList); err != nil {
 		klog.Error("mysql.FollowList 查询用户ID列表失败, err: ", err)
 		return nil, err
 	}
@@ -115,11 +116,10 @@ func FollowList(toUserID int64) ([]*models.User, error) {
 	return userList, nil
 }
 
-func FollowerList(toUserID int64) ([]*models.User, error) {
+func FollowerList(toUserID int64) ([]*model.User, error) {
 	// 查询粉丝ID列表
 	var followerIDList []int64
-	err := db.Table("relations").Select("follower_id").Where("user_id = ?", toUserID).Find(&followerIDList).Error
-	if err != nil {
+	if err := qRelation.WithContext(context.Background()).Where(qRelation.UserID.Eq(toUserID)).Select(qRelation.FollowerID).Scan(&followerIDList); err != nil {
 		klog.Error("mysql.FollowerList 查询粉丝ID列表失败, err: ", err)
 		return nil, err
 	}

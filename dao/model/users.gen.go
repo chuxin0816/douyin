@@ -12,7 +12,7 @@ type User struct {
 	Name            string `gorm:"column:name" json:"name"`
 	Avatar          string `gorm:"column:avatar" json:"avatar"`
 	BackgroundImage string `gorm:"column:background_image" json:"background_image"`
-	TotalFavorited  string `gorm:"column:total_favorited;default:0" json:"total_favorited"`
+	TotalFavorited  int64  `gorm:"column:total_favorited" json:"total_favorited"`
 	FavoriteCount   int64  `gorm:"column:favorite_count" json:"favorite_count"`
 	FollowCount     int64  `gorm:"column:follow_count" json:"follow_count"`
 	FollowerCount   int64  `gorm:"column:follower_count" json:"follower_count"`

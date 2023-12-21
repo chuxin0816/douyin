@@ -2,8 +2,9 @@ package dao
 
 import (
 	"context"
-	"douyin/models"
-	"douyin/response"
+
+	"douyin/dao/model"
+	"douyin/rpc/kitex_gen/comment"
 	"strconv"
 	"time"
 
@@ -15,8 +16,10 @@ func PublishComment(userID, commentID, videoID int64, commentText string) error 
 	if !bloomFilter.Test([]byte(strconv.FormatInt(videoID, 10))) {
 		return ErrVideoNotExist
 	}
-	video := &models.Video{ID: videoID}
-	if err := db.Find(video).Error; err != nil {
+	video, err := qVideo.WithContext(context.Background()).
+		Where(qVideo.ID.Eq(videoID)).
+		Select(qVideo.AuthorID).First()
+	if err != nil {
 		klog.Error("mysql.PublishComment: 查询视频失败, err: ", err)
 		return err
 	}
@@ -25,14 +28,15 @@ func PublishComment(userID, commentID, videoID int64, commentText string) error 
 	}
 
 	// 创建评论
-	comment := &models.Comment{
+	comment := &model.Comment{
 		ID:         commentID,
 		VideoID:    videoID,
 		UserID:     userID,
 		Content:    commentText,
 		CreateTime: time.Now(),
 	}
-	if err := db.Create(comment).Error; err != nil {
+
+	if err := qComment.WithContext(context.Background()).Create(comment); err != nil {
 		klog.Error("mysql.PublishComment: 创建评论失败, err: ", err)
 		return err
 	}
@@ -51,9 +55,10 @@ func PublishComment(userID, commentID, videoID int64, commentText string) error 
 	return nil
 }
 
-func GetCommentByID(commentID int64) (*models.Comment, error) {
-	comment := &models.Comment{ID: commentID}
-	if err := db.Find(comment).Error; err != nil {
+func GetCommentByID(commentID int64) (*model.Comment, error) {
+	comment, err := qComment.WithContext(context.Background()).
+		Where(qComment.ID.Eq(commentID)).First()
+	if err != nil {
 		klog.Error("mysql.GetCommentUserID: 查询评论失败, err: ", err)
 		return nil, err
 	}
@@ -65,17 +70,19 @@ func GetCommentByID(commentID int64) (*models.Comment, error) {
 
 func DeleteComment(commentID, videoID int64) error {
 	// 判断视频是否存在
-	video := &models.Video{ID: videoID}
-	if err := db.Find(video).Error; err != nil {
+	video, err := qVideo.WithContext(context.Background()).
+		Where(qVideo.ID.Eq(videoID)).
+		Select(qVideo.ID).First()
+	if err != nil {
 		klog.Error("mysql.PublishComment: 查询视频失败, err: ", err)
 		return err
 	}
-	if video.AuthorID == 0 {
+	if video.ID == 0 {
 		return ErrVideoNotExist
 	}
 
 	// 删除评论
-	if err := db.Delete(&models.Comment{}, commentID).Error; err != nil {
+	if _, err := qComment.WithContext(context.Background()).Where(qComment.ID.Eq(commentID)).Delete(); err != nil {
 		klog.Error("mysql.DeleteComment: 删除评论失败, err: ", err)
 		return err
 	}
@@ -88,9 +95,8 @@ func DeleteComment(commentID, videoID int64) error {
 	return nil
 }
 
-func GetCommentList(videoID int64) ([]*models.Comment, error) {
-	var commentList []*models.Comment
-	err := db.Where("video_id = ?", videoID).Find(&commentList).Error
+func GetCommentList(videoID int64) ([]*model.Comment, error) {
+	commentList, err := qComment.WithContext(context.Background()).Where(qComment.VideoID.Eq(videoID)).Find()
 	if err != nil {
 		klog.Error("mysql.GetCommentList: 查询评论列表失败, err: ", err)
 		return nil, err
@@ -98,11 +104,11 @@ func GetCommentList(videoID int64) ([]*models.Comment, error) {
 	return commentList, nil
 }
 
-func ToCommentResponse(userID int64, comment *models.Comment, user *models.User) *response.CommentResponse {
-	return &response.CommentResponse{
-		ID:         comment.ID,
+func ToCommentResponse(userID int64, mComment *model.Comment, user *model.User) *comment.Comment {
+	return &comment.Comment{
+		Id:         mComment.ID,
 		User:       ToUserResponse(userID, user),
-		Content:    comment.Content,
-		CreateDate: comment.CreateTime.Format("01-02"),
+		Content:    mComment.Content,
+		CreateDate: mComment.CreateTime.Format("01-02"),
 	}
 }
