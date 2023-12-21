@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/bits-and-blooms/bloom/v3"
-	"github.com/u2takey/go-utils/klog"
+	"github.com/cloudwego/kitex/pkg/klog"
 
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/singleflight"

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 func RelationAction(userID, toUserID int64, actionType int64) error {
@@ -21,7 +21,7 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 		exist := rdb.SIsMember(context.Background(), key, userID).Val()
 		if exist {
 			if actionType == 1 {
-				hlog.Error("mysql.RelationAction 已经关注过了")
+				klog.Error("mysql.RelationAction 已经关注过了")
 				return nil, ErrAlreadyFollow
 			}
 			return nil, nil
@@ -29,18 +29,18 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 		// 缓存未命中, 查询数据库
 		relation := &models.Relation{}
 		if err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Find(relation).Error; err != nil {
-			hlog.Error("mysql.RelationAction 查看是否关注失败, err: ", err)
+			klog.Error("mysql.RelationAction 查看是否关注失败, err: ", err)
 			return nil, err
 		}
 		if relation.ID != 0 && actionType == 1 {
 			// 写入redis缓存
 			go func() {
 				if err := rdb.SAdd(context.Background(), key, userID).Err(); err != nil {
-					hlog.Error("redis.RelationAction 写入redis缓存失败, err: ", err)
+					klog.Error("redis.RelationAction 写入redis缓存失败, err: ", err)
 					return
 				}
 				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
-					hlog.Error("redis.RelationAction 设置redis缓存过期时间失败, err: ", err)
+					klog.Error("redis.RelationAction 设置redis缓存过期时间失败, err: ", err)
 					return
 				}
 			}()
@@ -57,17 +57,17 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 
 	// 使用延迟双删策略
 	if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
-		hlog.Error("redis.RelationAction 延迟双删策略失败, err: ", err)
+		klog.Error("redis.RelationAction 延迟双删策略失败, err: ", err)
 	}
 
 	// 更新relation表
 	if actionType == 1 {
 		if err := db.Create(&models.Relation{UserID: toUserID, FollowerID: userID}).Error; err != nil {
-			hlog.Error("mysql.RelationAction 更新relation表失败, err: ", err)
+			klog.Error("mysql.RelationAction 更新relation表失败, err: ", err)
 		}
 	} else {
 		if err := db.Where("user_id = ? AND follower_id = ?", toUserID, userID).Delete(&models.Relation{}).Error; err != nil {
-			hlog.Error("mysql.RelationAction 更新relation表失败, err: ", err)
+			klog.Error("mysql.RelationAction 更新relation表失败, err: ", err)
 		}
 	}
 
@@ -75,17 +75,17 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 	go func() {
 		time.Sleep(delayTime)
 		if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
-			hlog.Error("redis.RelationAction: 删除redis缓存失败, err: ", err)
+			klog.Error("redis.RelationAction: 删除redis缓存失败, err: ", err)
 		}
 	}()
 
 	// 更新user的follow_count和follower_count字段
 	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserFollowCountPF+strconv.FormatInt(userID, 10)), actionType).Err(); err != nil {
-		hlog.Error("redis.RelationAction 更新user的follow_count字段失败, err: ", err)
+		klog.Error("redis.RelationAction 更新user的follow_count字段失败, err: ", err)
 		return err
 	}
 	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserFollowerCountPF+strconv.FormatInt(toUserID, 10)), actionType).Err(); err != nil {
-		hlog.Error("redis.RelationAction 更新user的follower_count字段失败, err: ", err)
+		klog.Error("redis.RelationAction 更新user的follower_count字段失败, err: ", err)
 	}
 
 	// 写入待同步切片
@@ -101,14 +101,14 @@ func FollowList(toUserID int64) ([]*models.User, error) {
 	var userIDList []int64
 	err := db.Table("relations").Select("user_id").Where("follower_id = ?", toUserID).Find(&userIDList).Error
 	if err != nil {
-		hlog.Error("mysql.FollowList 查询用户ID列表失败, err: ", err)
+		klog.Error("mysql.FollowList 查询用户ID列表失败, err: ", err)
 		return nil, err
 	}
 
 	// 查询用户列表
 	userList, err := GetUserByIDs(userIDList)
 	if err != nil {
-		hlog.Error("mysql.FollowList 查询用户列表失败, err: ", err)
+		klog.Error("mysql.FollowList 查询用户列表失败, err: ", err)
 		return nil, err
 	}
 
@@ -120,14 +120,14 @@ func FollowerList(toUserID int64) ([]*models.User, error) {
 	var followerIDList []int64
 	err := db.Table("relations").Select("follower_id").Where("user_id = ?", toUserID).Find(&followerIDList).Error
 	if err != nil {
-		hlog.Error("mysql.FollowerList 查询粉丝ID列表失败, err: ", err)
+		klog.Error("mysql.FollowerList 查询粉丝ID列表失败, err: ", err)
 		return nil, err
 	}
 
 	// 查询粉丝列表
 	followerList, err := GetUserByIDs(followerIDList)
 	if err != nil {
-		hlog.Error("mysql.FollowerList 查询粉丝列表失败, err: ", err)
+		klog.Error("mysql.FollowerList 查询粉丝列表失败, err: ", err)
 		return nil, err
 	}
 

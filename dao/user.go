@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 // GetUserByID 用户通过作者id查询作者信息
@@ -33,14 +33,14 @@ func GetUserByIDs(authorIDs []int64) ([]*models.User, error) {
 	// 先判断布隆过滤器中是否存在
 	for _, id := range authorIDs {
 		if !bloomFilter.Test([]byte(strconv.FormatInt(id, 10))) {
-			hlog.Error("mysql.GetUserByIDs: 用户不存在,id: ", id)
+			klog.Error("mysql.GetUserByIDs: 用户不存在,id: ", id)
 			return nil, ErrUserNotExist
 		}
 	}
 	// 查询数据库
 	var users []*models.User
 	if err := db.Where("id IN (?)", authorIDs).Find(&users).Error; err != nil {
-		hlog.Error("mysql.GetUserByIDs: 查询数据库失败")
+		klog.Error("mysql.GetUserByIDs: 查询数据库失败")
 		return nil, err
 	}
 
@@ -69,7 +69,7 @@ func GetUserByName(username string) *models.User {
 
 	user := &models.User{}
 	if err := db.Where("name = ?", username).Find(user).Error; err != nil {
-		hlog.Error("mysql.GetUserByName: 查询数据库失败")
+		klog.Error("mysql.GetUserByName: 查询数据库失败")
 		return nil
 	}
 	if user.ID == 0 {
@@ -89,7 +89,7 @@ func CreateUser(username, password string, userID int64) error {
 		Password: password,
 	}
 	if err := db.Create(user).Error; err != nil {
-		hlog.Error("mysql.CreateUser: 保存用户信息失败")
+		klog.Error("mysql.CreateUser: 保存用户信息失败")
 		return err
 	}
 	return nil
@@ -126,7 +126,7 @@ func ToUserResponse(followerID int64, user *models.User) *response.UserResponse 
 
 		relation := &models.Relation{}
 		if err := db.Where("user_id = ? AND follower_id = ?", user.ID, followerID).Find(relation).Error; err != nil {
-			hlog.Error("mysql.ToUserResponse: 查询数据库失败")
+			klog.Error("mysql.ToUserResponse: 查询数据库失败")
 			return nil, err
 		}
 		if relation.ID != 0 {
@@ -134,10 +134,10 @@ func ToUserResponse(followerID int64, user *models.User) *response.UserResponse 
 			// 写入缓存
 			go func() {
 				if err := rdb.SAdd(context.Background(), key, followerID).Err(); err != nil {
-					hlog.Error("redis.ToUserResponse: 写入缓存失败, err: ", err)
+					klog.Error("redis.ToUserResponse: 写入缓存失败, err: ", err)
 				}
 				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
-					hlog.Error("redis.ToUserResponse: 设置缓存过期时间失败, err: ", err)
+					klog.Error("redis.ToUserResponse: 设置缓存过期时间失败, err: ", err)
 				}
 			}()
 		}

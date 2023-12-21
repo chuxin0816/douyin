@@ -6,7 +6,7 @@ import (
 	"douyin/response"
 	"time"
 
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/u2takey/go-utils/klog"
 )
 
 func MessageAction(userID, toUserID int64, content string) error {
@@ -17,7 +17,7 @@ func MessageAction(userID, toUserID int64, content string) error {
 		Content:    content,
 		CreateTime: time.Now().Unix(),
 	}).Error; err != nil {
-		hlog.Error("mysql.MessageAction: 插入数据库失败, err: ", err)
+		klog.Error("mysql.MessageAction: 插入数据库失败, err: ", err)
 		return err
 	}
 
@@ -30,7 +30,7 @@ func MessageList(userID, toUserID, lastTime int64) ([]*response.MessageResponse,
 		Or("from_user_id = ? and to_user_id = ? and create_time > ?", toUserID, userID, lastTime).
 		Order("create_time").Find(&dMessageList).Error
 	if err != nil {
-		hlog.Error("mysql.MessageList: 查询数据库失败, err: ", err)
+		klog.Error("mysql.MessageList: 查询数据库失败, err: ", err)
 		return nil, err
 	}
 

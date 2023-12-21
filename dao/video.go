@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 const (
@@ -26,7 +26,7 @@ func GetFeedList(userID int64, latestTime time.Time, count int) (videoList []*re
 	var dVideoList []*models.Video
 	err = db.Where("upload_time <= ?", latestTime).Order("upload_time DESC").Limit(count).Find(&dVideoList).Error
 	if err != nil {
-		hlog.Error("mysql.GetVideoList: 查询数据库失败")
+		klog.Error("mysql.GetVideoList: 查询数据库失败")
 		return nil, nil, err
 	}
 
@@ -67,14 +67,14 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 
 	// 保存视频信息到数据库
 	if err := db.Create(video).Error; err != nil {
-		hlog.Error("mysql.SaveVideo: 保存视频信息到数据库失败")
+		klog.Error("mysql.SaveVideo: 保存视频信息到数据库失败")
 		return err
 	}
 
 	// 修改用户发布视频数
 	key := getRedisKey(KeyUserWorkCountPF + strconv.FormatInt(userID, 10))
 	if err := rdb.Incr(context.Background(), key).Err(); err != nil {
-		hlog.Error("redis.SaveVideo: 修改用户发布视频数失败")
+		klog.Error("redis.SaveVideo: 修改用户发布视频数失败")
 		return err
 	}
 
@@ -94,14 +94,14 @@ func GetPublishList(userID, authorID int64) ([]*response.VideoResponse, error) {
 	// 查询视频信息
 	var dVideoList []*models.Video
 	if err := db.Where("author_id = ?", authorID).Order("upload_time DESC").Find(&dVideoList).Error; err != nil {
-		hlog.Error("mysql.GetPublishList: 查询视频信息失败")
+		klog.Error("mysql.GetPublishList: 查询视频信息失败")
 		return nil, err
 	}
 
 	// 查询作者信息
 	author, err := GetUserByID(authorID)
 	if err != nil {
-		hlog.Error("mysql.GetPublishList: 查询作者信息失败")
+		klog.Error("mysql.GetPublishList: 查询作者信息失败")
 		return nil, err
 	}
 
@@ -119,7 +119,7 @@ func GetVideoList(userID int64, videoIDs []int64) ([]*response.VideoResponse, er
 	var dVideoList []*models.Video
 	err := db.Where("id IN ?", videoIDs).Order("upload_time DESC").Find(&dVideoList).Error
 	if err != nil {
-		hlog.Error("mysql.GetVideoList: 查询视频信息失败")
+		klog.Error("mysql.GetVideoList: 查询视频信息失败")
 		return nil, err
 	}
 
@@ -174,7 +174,7 @@ func ToVideoResponse(userID int64, dVideo *models.Video, author *models.User) *r
 		// 缓存未命中, 查询数据库
 		favorite := &models.Favorite{}
 		if err := db.Where("user_id = ? AND video_id = ?", userID, dVideo.ID).Find(favorite).Error; err != nil {
-			hlog.Error("mysql.ToVideoResponse: 查询favorite表失败, err: ", err)
+			klog.Error("mysql.ToVideoResponse: 查询favorite表失败, err: ", err)
 			return nil, err
 		}
 		if favorite.ID != 0 {
@@ -182,11 +182,11 @@ func ToVideoResponse(userID int64, dVideo *models.Video, author *models.User) *r
 			// 写入缓存
 			go func() {
 				if err := rdb.SAdd(context.Background(), key, dVideo.ID).Err(); err != nil {
-					hlog.Error("redis.ToVideoResponse: 将点赞信息写入缓存失败, err: ", err)
+					klog.Error("redis.ToVideoResponse: 将点赞信息写入缓存失败, err: ", err)
 					return
 				}
 				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
-					hlog.Error("redis.ToVideoResponse: 设置缓存过期时间失败, err: ", err)
+					klog.Error("redis.ToVideoResponse: 设置缓存过期时间失败, err: ", err)
 					return
 				}
 			}()
