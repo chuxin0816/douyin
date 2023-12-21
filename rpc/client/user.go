@@ -25,6 +25,23 @@ func initUserClient() {
 	}
 }
 
-func UserInfo(authorID, userID int64) (*user.UserInfoResponse, error) {
-	return userClient.UserInfo(context.Background(), &user.UserInfoRequest{})
+func UserInfo(toUserID, userID int64) (*user.UserInfoResponse, error) {
+	return userClient.UserInfo(context.Background(), &user.UserInfoRequest{
+		ToUserId: toUserID,
+		UserId:   &userID,
+	})
+}
+
+func Register(username, password string) (*user.UserRegisterResponse, error) {
+	return userClient.Register(context.Background(), &user.UserRegisterRequest{
+		Username: username,
+		Password: password,
+	})
+}
+
+func Login(username, password string) (*user.UserLoginResponse, error) {
+	return userClient.Login(context.Background(), &user.UserLoginRequest{
+		Username: username,
+		Password: password,
+	})
 }

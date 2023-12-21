@@ -21,7 +21,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 }
 
 // UserInfo implements the UserServiceImpl interface.
-func (s *UserServiceImpl) UserInfo(ctx context.Context, req *user.UserInfoRequest) (resp *user.User, err error) {
+func (s *UserServiceImpl) UserInfo(ctx context.Context, req *user.UserInfoRequest) (resp *user.UserInfoResponse, err error) {
 	// TODO: Your code here...
 	return
 }

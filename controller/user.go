@@ -2,8 +2,8 @@ package controller
 
 import (
 	"context"
-	"douyin/dao"
-	"douyin/service"
+	"douyin/dal"
+	"douyin/rpc/client"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -56,9 +56,9 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := service.UserInfo(req.UserID, userID)
+	resp, err := client.UserInfo(req.UserID, userID)
 	if err != nil {
-		if errors.Is(err, dao.ErrUserNotExist) {
+		if errors.Is(err, dal.ErrUserNotExist) {
 			Error(ctx, CodeUserNotExist)
 			klog.Error("controller.UserInfo: 用户不存在")
 			return
@@ -83,9 +83,9 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := service.Register(req.Username, req.Password)
+	resp, err := client.Register(req.Username, req.Password)
 	if err != nil {
-		if errors.Is(err, dao.ErrUserExist) {
+		if errors.Is(err, dal.ErrUserExist) {
 			Error(ctx, CodeUserExist)
 			klog.Error("controller.Register: 用户已存在")
 			return
@@ -110,14 +110,14 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := service.Login(req.Username, req.Password)
+	resp, err := client.Login(req.Username, req.Password)
 	if err != nil {
-		if errors.Is(err, dao.ErrUserNotExist) {
+		if errors.Is(err, dal.ErrUserNotExist) {
 			Error(ctx, CodeUserNotExist)
 			klog.Error("controller.Login: 用户不存在")
 			return
 		}
-		if errors.Is(err, dao.ErrPassword) {
+		if errors.Is(err, dal.ErrPassword) {
 			Error(ctx, CodeInvalidPassword)
 			klog.Error("controller.Login: 密码错误")
 			return
