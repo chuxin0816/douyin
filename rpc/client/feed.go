@@ -25,9 +25,9 @@ func initFeedClient() {
 	}
 }
 
-func Feed(latestTime *int64, token *string) (*feed.FeedResponse, error) {
+func Feed(latestTime *int64, userID int64) (*feed.FeedResponse, error) {
 	return feedClient.Feed(context.Background(), &feed.FeedRequest{
 		LatestTime: latestTime,
-		Token:      token,
+		UserId:     userID,
 	})
 }

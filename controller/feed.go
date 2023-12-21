@@ -44,7 +44,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := client.Feed(req.LatestTime, userID)
+	resp, err := client.Feed(&req.LatestTime, userID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		klog.Error("controller.Feed: 业务逻辑处理失败, err: ", err)
