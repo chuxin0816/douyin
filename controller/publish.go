@@ -33,14 +33,14 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("PublishController.Action: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
 	// 验证大小
 	if req.Data.Size > 1024*1024*100 {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("PublishController.Action: 文件太大")
+		klog.Error("文件太大")
 		return
 	}
 
@@ -51,7 +51,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	file, err := req.Data.Open()
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		klog.Error("PublishController.Action: 文件打开失败, err: ", err)
+		klog.Error("文件打开失败, err: ", err)
 		return
 	}
 	defer file.Close()
@@ -59,7 +59,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	data, err := io.ReadAll(file)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		klog.Error("PublishController.Action: 文件读取失败, err: ", err)
+		klog.Error("文件读取失败, err: ", err)
 		return
 	}
 
@@ -67,7 +67,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	resp, err := client.PublishAction(userID, data, req.Title)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		klog.Error("PublishController.Action: 业务处理失败, err: ", err)
+		klog.Error("业务处理失败, err: ", err)
 		return
 	}
 
@@ -81,7 +81,7 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("PublishController.List: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 	authorID := req.UserID
@@ -101,7 +101,7 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	resp, err := client.PublishList(userID, authorID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		klog.Error("PublishController.Action: 业务处理失败, err: ", err)
+		klog.Error("业务处理失败, err: ", err)
 		return
 	}
 

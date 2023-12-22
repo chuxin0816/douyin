@@ -33,7 +33,7 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("FavoriteController: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -45,16 +45,16 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	if err != nil {
 		if errors.Is(err, dal.ErrAlreadyFavorite) {
 			Error(ctx, CodeAlreadyFavorite)
-			klog.Error("FavoriteController.Action: 已经点赞过了")
+			klog.Error("已经点赞过了")
 			return
 		}
 		if errors.Is(err, dal.ErrNotFavorite) {
 			Error(ctx, CodeNotFavorite)
-			klog.Error("FavoriteController.Action: 还没有点赞过")
+			klog.Error("还没有点赞过")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		klog.Error("FavoriteController.Action: 业务处理失败, err: ", err)
+		klog.Error("业务处理失败, err: ", err)
 		return
 	}
 
@@ -68,7 +68,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("FavoriteController: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -87,7 +87,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	resp, err := client.FavoriteList(userID, req.UserID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		klog.Error("FavoriteController.List: 业务处理失败, err: ", err)
+		klog.Error("业务处理失败, err: ", err)
 		return
 	}
 

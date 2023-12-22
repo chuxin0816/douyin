@@ -90,11 +90,11 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	if err != nil {
 		if errors.Is(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
-			klog.Error("controller.CommentList: 视频不存在")
+			klog.Error("视频不存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		klog.Error("CommentController.List: 业务逻辑处理失败, err: ", err)
+		klog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
 

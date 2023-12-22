@@ -12,7 +12,7 @@ import (
 func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	// 先判断布隆过滤器中是否存在
 	if !bloomFilter.Test([]byte(strconv.FormatInt(videoID, 10))) {
-		klog.Error("mysql.FavoriteAction: 视频不存在, videoID: ", videoID)
+		klog.Error("视频不存在, videoID: ", videoID)
 		return ErrVideoNotExist
 	}
 
@@ -34,7 +34,7 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 		// 缓存未命中，查询mysql中是否有记录
 		var id int64
 		if err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Select(qFavorite.ID).Scan(&id); err != nil {
-			klog.Error("mysql.FavoriteAction: 查询mysql中是否有记录失败, err: ", err)
+			klog.Error("查询mysql中是否有记录失败, err: ", err)
 			return nil, err
 		}
 		// mysql中有记录
@@ -42,11 +42,11 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 			// 写入redis缓存
 			go func() {
 				if err := rdb.SAdd(context.Background(), key, videoID).Err(); err != nil {
-					klog.Error("redis.FavoriteAction: 写入redis缓存失败, err: ", err)
+					klog.Error("写入redis缓存失败, err: ", err)
 					return
 				}
 				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
-					klog.Error("redis.FavoriteAction: 设置redis缓存过期时间失败, err: ", err)
+					klog.Error("设置redis缓存过期时间失败, err: ", err)
 					return
 				}
 			}()
@@ -65,25 +65,25 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	// 先查询作者的ID
 	var authorID int64
 	if err = qVideo.WithContext(context.Background()).Where(qVideo.ID.Eq(videoID)).Select(qVideo.AuthorID).Scan(&authorID); err != nil {
-		klog.Error("mysql.FavoriteAction: 查询作者的ID失败, err: ", err)
+		klog.Error("查询作者的ID失败, err: ", err)
 		return err
 	}
 
 	// 保存用户点赞视频的记录, 采用延迟双删策略
 	// 删除redis缓存
 	if err := rdb.SRem(context.Background(), key, videoID).Err(); err != nil {
-		klog.Error("redis.FavoriteAction: 删除redis缓存失败, err: ", err)
+		klog.Error("删除redis缓存失败, err: ", err)
 	}
 
 	// 更新favorite表
 	if actionType == 1 {
 		if err := qFavorite.WithContext(context.Background()).Create(&model.Favorite{UserID: userID, VideoID: videoID}); err != nil {
-			klog.Error("mysql.FavoriteAction: 更新favorite表失败, err: ", err)
+			klog.Error("更新favorite表失败, err: ", err)
 			return err
 		}
 	} else {
 		if _, err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Delete(); err != nil {
-			klog.Error("mysql.FavoriteAction: 更新favorite表失败, err: ", err)
+			klog.Error("更新favorite表失败, err: ", err)
 			return err
 		}
 	}
@@ -92,25 +92,25 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 	go func() {
 		time.Sleep(delayTime)
 		if err := rdb.SRem(context.Background(), key, videoID).Err(); err != nil {
-			klog.Error("redis.FavoriteAction: 删除redis缓存失败, err: ", err)
+			klog.Error("删除redis缓存失败, err: ", err)
 		}
 	}()
 
 	// 更新video的favorite_count字段
 	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyVideoFavoriteCountPF+strconv.FormatInt(videoID, 10)), actionType).Err(); err != nil {
-		klog.Error("redis.FavoriteAction: 更新video的favorite_count字段失败, err: ", err)
+		klog.Error("更新video的favorite_count字段失败, err: ", err)
 		return err
 	}
 
 	// 更新user当前用户的favorite_count字段
 	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserFavoriteCountPF+strconv.FormatInt(userID, 10)), actionType).Err(); err != nil {
-		klog.Error("redis.FavoriteAction: 更新user当前用户的favorite_count字段失败, err: ", err)
+		klog.Error("更新user当前用户的favorite_count字段失败, err: ", err)
 		return err
 	}
 
 	// 更新user作者的total_favorited字段
 	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserTotalFavoritedPF+strconv.FormatInt(authorID, 10)), actionType).Err(); err != nil {
-		klog.Error("redis.FavoriteAction: 更新user作者的total_favorited字段失败, err: ", err)
+		klog.Error("更新user作者的total_favorited字段失败, err: ", err)
 		return err
 	}
 
@@ -144,7 +144,7 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 			g.Forget(key)
 		}()
 		if err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID)).Select(qFavorite.VideoID).Scan(&videoIDs); err != nil {
-			klog.Error("mysql.GetFavoriteList: 查询favorite表失败, err: ", err)
+			klog.Error("查询favorite表失败, err: ", err)
 			return nil, err
 		}
 
@@ -157,7 +157,7 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 				}
 				pipeline.Expire(context.Background(), key, expireTime+getRandomTime())
 				if _, err := pipeline.Exec(context.Background()); err != nil {
-					klog.Error("redis.GetFavoriteList: 写入redis缓存失败, err: ", err)
+					klog.Error("写入redis缓存失败, err: ", err)
 				}
 			}()
 		}

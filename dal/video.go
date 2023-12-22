@@ -26,7 +26,7 @@ func GetFeedList(userID *int64, latestTime time.Time, count int) (videoList []*f
 	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.UploadTime.Lte(latestTime)).
 		Order(qVideo.UploadTime.Desc()).Limit(count).Find()
 	if err != nil {
-		klog.Error("mysql.GetVideoList: 查询数据库失败")
+		klog.Error("查询数据库失败")
 		return nil, nil, err
 	}
 
@@ -67,14 +67,14 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 
 	// 保存视频信息到数据库
 	if err := qVideo.WithContext(context.Background()).Create(video); err != nil {
-		klog.Error("mysql.SaveVideo: 保存视频信息到数据库失败")
+		klog.Error("保存视频信息到数据库失败")
 		return err
 	}
 
 	// 修改用户发布视频数
 	key := getRedisKey(KeyUserWorkCountPF + strconv.FormatInt(userID, 10))
 	if err := rdb.Incr(context.Background(), key).Err(); err != nil {
-		klog.Error("redis.SaveVideo: 修改用户发布视频数失败")
+		klog.Error("修改用户发布视频数失败")
 		return err
 	}
 
@@ -95,14 +95,14 @@ func GetPublishList(userID *int64, authorID int64) ([]*feed.Video, error) {
 	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.AuthorID.Eq(authorID)).
 		Order(qVideo.UploadTime.Desc()).Find()
 	if err != nil {
-		klog.Error("mysql.GetPublishList: 查询视频信息失败")
+		klog.Error("查询视频信息失败")
 		return nil, err
 	}
 
 	// 查询作者信息
 	author, err := GetUserByID(authorID)
 	if err != nil {
-		klog.Error("mysql.GetPublishList: 查询作者信息失败")
+		klog.Error("查询作者信息失败")
 		return nil, err
 	}
 
@@ -120,7 +120,7 @@ func GetVideoList(userID *int64, videoIDs []int64) ([]*feed.Video, error) {
 	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.ID.In(videoIDs...)).
 		Order(qVideo.UploadTime.Desc()).Find()
 	if err != nil {
-		klog.Error("mysql.GetVideoList: 查询视频信息失败")
+		klog.Error("查询视频信息失败")
 		return nil, err
 	}
 
@@ -176,7 +176,7 @@ func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *fe
 		favorite, err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(*userID), qFavorite.VideoID.Eq(mVideo.ID)).
 			Select(qFavorite.ID).First()
 		if err != nil {
-			klog.Error("mysql.ToVideoResponse: 查询favorite表失败, err: ", err)
+			klog.Error("查询favorite表失败, err: ", err)
 			return nil, err
 		}
 		if favorite.ID != 0 {
@@ -184,11 +184,11 @@ func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *fe
 			// 写入缓存
 			go func() {
 				if err := rdb.SAdd(context.Background(), key, mVideo.ID).Err(); err != nil {
-					klog.Error("redis.ToVideoResponse: 将点赞信息写入缓存失败, err: ", err)
+					klog.Error("将点赞信息写入缓存失败, err: ", err)
 					return
 				}
 				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
-					klog.Error("redis.ToVideoResponse: 设置缓存过期时间失败, err: ", err)
+					klog.Error("设置缓存过期时间失败, err: ", err)
 					return
 				}
 			}()

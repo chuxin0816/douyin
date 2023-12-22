@@ -20,7 +20,7 @@ func MessageAction(userID, toUserID int64, content string) error {
 		CreateTime: time.Now().Unix(),
 	})
 	if err != nil {
-		klog.Error("mysql.MessageAction: 插入数据库失败, err: ", err)
+		klog.Error("插入数据库失败, err: ", err)
 		return err
 	}
 
@@ -32,7 +32,7 @@ func MessageList(userID, toUserID, lastTime int64) ([]*message.Message, error) {
 		Or(qMessage.FromUserID.Eq(toUserID), qMessage.ToUserID.Eq(userID), qMessage.CreateTime.Gt(lastTime)).
 		Order(qMessage.CreateTime).Find()
 	if err != nil {
-		klog.Error("mysql.MessageList: 查询数据库失败, err: ", err)
+		klog.Error("查询数据库失败, err: ", err)
 		return nil, err
 	}
 

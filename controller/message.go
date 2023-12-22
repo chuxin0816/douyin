@@ -31,7 +31,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("MessageController.Action: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -42,7 +42,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 	resp, err := client.MessageAction(userID, req.ToUserID, req.ActionType, req.Content)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		klog.Error("MessageController.Action: 业务处理失败, err: ", err)
+		klog.Error("业务处理失败, err: ", err)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("MessageController.Chat: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -67,7 +67,7 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 	resp, err := client.MessageChat(userID, req.ToUserID, req.PreMsgTime)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		klog.Error("MessageController.Chat: 业务处理失败, err: ", err)
+		klog.Error("业务处理失败, err: ", err)
 		return
 	}
 

@@ -138,7 +138,7 @@ func syncRedisToMySQL() {
 				"work_count":      workCount,
 			})
 			if err != nil {
-				klog.Error("dal.syncRedisToMySQL: 同步redis用户缓存到mysql失败")
+				klog.Error("同步redis用户缓存到mysql失败")
 				continue
 			}
 		}
@@ -154,7 +154,7 @@ func syncRedisToMySQL() {
 				"comment_count":  videoCommentCount,
 			})
 			if err != nil {
-				klog.Error("dal.syncRedisToMySQL: 同步redis视频缓存到mysql失败")
+				klog.Error("同步redis视频缓存到mysql失败")
 				continue
 			}
 		}
@@ -172,7 +172,7 @@ func loadDataToBloom() error {
 	PageCnt := 0
 	cnt, err := qUser.WithContext(context.Background()).Count()
 	if err != nil {
-		klog.Error("dal.loadDataToBloom: 查询用户数量失败")
+		klog.Error("查询用户数量失败")
 		return err
 	}
 	count := int(cnt)
@@ -187,7 +187,7 @@ func loadDataToBloom() error {
 			Offset(PageSize*page).Limit(PageSize).
 			Select(qUser.ID, qUser.Name).Find()
 		if err != nil {
-			klog.Error("dal.loadDataToBloom: 查询用户名和id失败")
+			klog.Error("查询用户名和id失败")
 			return err
 		}
 
@@ -200,7 +200,7 @@ func loadDataToBloom() error {
 	// 填入视频ID
 	cnt, err = qVideo.WithContext(context.Background()).Count()
 	if err != nil {
-		klog.Error("dal.loadDataToBloom: 查询视频数量失败")
+		klog.Error("查询视频数量失败")
 		return err
 	}
 	count = int(cnt)
@@ -215,7 +215,7 @@ func loadDataToBloom() error {
 			Offset(PageSize * page).Limit(PageSize).
 			Select(qVideo.ID).Find()
 		if err != nil {
-			klog.Error("dal.loadDataToBloom: 查询视频id失败")
+			klog.Error("查询视频id失败")
 			return err
 		}
 

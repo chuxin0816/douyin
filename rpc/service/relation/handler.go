@@ -22,7 +22,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 
 	// 操作数据库
 	if err := dal.RelationAction(req.UserId, req.ToUserId, req.ActionType); err != nil {
-		klog.Error("service.RelationAction: 操作数据库失败, err: ", err)
+		klog.Error("操作数据库失败, err: ", err)
 		return nil, err
 	}
 
@@ -37,7 +37,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 	// 操作数据库
 	mUserList, err := dal.FollowList(req.ToUserId)
 	if err != nil {
-		klog.Error("service.FollowList: 操作数据库失败, err: ", err)
+		klog.Error("操作数据库失败, err: ", err)
 		return nil, err
 	}
 
@@ -58,7 +58,7 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 	// 操作数据库
 	mUserList, err := dal.FollowerList(req.ToUserId)
 	if err != nil {
-		klog.Error("service.FollowerList: 操作数据库失败, err: ", err)
+		klog.Error("操作数据库失败, err: ", err)
 		return nil, err
 	}
 

@@ -47,7 +47,7 @@ func UploadFile(data []byte, uuidName string) error {
 		defer wg.Done()
 		// 上传视频
 		if err := bucket.PutObject(path.Join(videoPath, videoName), bytes.NewReader(data)); err != nil {
-			klog.Error("oss.UploadFile: 上传视频失败", err)
+			klog.Error("上传视频失败", err)
 			uploadErr = err
 		}
 	}()
@@ -57,12 +57,12 @@ func UploadFile(data []byte, uuidName string) error {
 		// 获取视频封面
 		imageData, err := getCoverImage(videoName)
 		if err != nil {
-			klog.Error("oss.UploadFile: 获取封面失败, err: ", err)
+			klog.Error("获取封面失败, err: ", err)
 			uploadErr = err
 			return
 		}
 		if err := bucket.PutObject(path.Join(imagePath, coverName), imageData); err != nil {
-			klog.Error("oss.UploadFile: 上传封面失败", err)
+			klog.Error("上传封面失败", err)
 			uploadErr = err
 		}
 	}()
@@ -72,7 +72,7 @@ func UploadFile(data []byte, uuidName string) error {
 	// 删除本地视频
 	go func() {
 		if err := os.Remove(videoName); err != nil {
-			klog.Error("service.PublishAction: 删除视频失败, err: ", err)
+			klog.Error("删除视频失败, err: ", err)
 		}
 	}()
 

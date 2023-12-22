@@ -30,7 +30,7 @@ func AuthMiddleware() app.HandlerFunc {
 		userID := jwt.ParseToken(token)
 		if userID == nil {
 			controller.Error(ctx, controller.CodeNoAuthority)
-			klog.Error("AuthMiddleware: token解析失败")
+			klog.Error("token解析失败")
 			ctx.Abort()
 			return
 		}

@@ -33,14 +33,14 @@ func GetUserByIDs(authorIDs []int64) ([]*model.User, error) {
 	// 先判断布隆过滤器中是否存在
 	for _, id := range authorIDs {
 		if !bloomFilter.Test([]byte(strconv.FormatInt(id, 10))) {
-			klog.Error("mysql.GetUserByIDs: 用户不存在,id: ", id)
+			klog.Error("用户不存在,id: ", id)
 			return nil, ErrUserNotExist
 		}
 	}
 	// 查询数据库
 	users, err := qUser.WithContext(context.Background()).Where(qUser.ID.In(authorIDs...)).Find()
 	if err != nil {
-		klog.Error("mysql.GetUserByIDs: 查询数据库失败")
+		klog.Error("查询数据库失败")
 		return nil, err
 	}
 
@@ -69,7 +69,7 @@ func GetUserByName(username string) *model.User {
 
 	user, err := qUser.WithContext(context.Background()).Where(qUser.Name.Eq(username)).First()
 	if err != nil {
-		klog.Error("mysql.GetUserByName: 查询数据库失败")
+		klog.Error("查询数据库失败")
 		return nil
 	}
 	if user.ID == 0 {
@@ -89,7 +89,7 @@ func CreateUser(username, password string, userID int64) error {
 		Password: password,
 	}
 	if err := qUser.WithContext(context.Background()).Create(user); err != nil {
-		klog.Error("mysql.CreateUser: 保存用户信息失败")
+		klog.Error("保存用户信息失败")
 		return err
 	}
 	return nil
@@ -132,7 +132,7 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 			Where(qRelation.UserID.Eq(mUser.ID), qRelation.FollowerID.Eq(*followerID)).
 			Select(qRelation.ID).First()
 		if err != nil {
-			klog.Error("mysql.ToUserResponse: 查询数据库失败")
+			klog.Error("查询数据库失败")
 			return nil, err
 		}
 		if relation.ID != 0 {
@@ -140,10 +140,10 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 			// 写入缓存
 			go func() {
 				if err := rdb.SAdd(context.Background(), key, followerID).Err(); err != nil {
-					klog.Error("redis.ToUserResponse: 写入缓存失败, err: ", err)
+					klog.Error("写入缓存失败, err: ", err)
 				}
 				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
-					klog.Error("redis.ToUserResponse: 设置缓存过期时间失败, err: ", err)
+					klog.Error("设置缓存过期时间失败, err: ", err)
 				}
 			}()
 		}
