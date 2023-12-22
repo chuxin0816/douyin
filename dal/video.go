@@ -90,7 +90,7 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 }
 
 // GetPublishList 获取用户发布的视频列表
-func GetPublishList(userID, authorID int64) ([]*feed.Video, error) {
+func GetPublishList(userID *int64, authorID int64) ([]*feed.Video, error) {
 	// 查询视频信息
 	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.AuthorID.Eq(authorID)).
 		Order(qVideo.UploadTime.Desc()).Find()
@@ -115,7 +115,7 @@ func GetPublishList(userID, authorID int64) ([]*feed.Video, error) {
 	return videoList, nil
 }
 
-func GetVideoList(userID int64, videoIDs []int64) ([]*feed.Video, error) {
+func GetVideoList(userID *int64, videoIDs []int64) ([]*feed.Video, error) {
 	// 查询视频信息
 	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.ID.In(videoIDs...)).
 		Order(qVideo.UploadTime.Desc()).Find()
@@ -143,7 +143,7 @@ func GetVideoList(userID int64, videoIDs []int64) ([]*feed.Video, error) {
 	return videoList, nil
 }
 
-func ToVideoResponse(userID int64, mVideo *model.Video, author *model.User) *feed.Video {
+func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *feed.Video {
 	video := &feed.Video{
 		Id:            mVideo.ID,
 		Author:        ToUserResponse(userID, author),
@@ -155,13 +155,13 @@ func ToVideoResponse(userID int64, mVideo *model.Video, author *model.User) *fee
 		Title:         mVideo.Title,
 	}
 	// 未登录直接返回
-	if userID == 0 {
+	if userID == nil {
 		return video
 	}
 
 	// 使用singleflight避免缓存击穿和减少缓存压力
 	// 查询缓存判断是否点赞
-	key := getRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
+	key := getRedisKey(KeyUserFavoritePF + strconv.FormatInt(*userID, 10))
 	g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
@@ -173,7 +173,7 @@ func ToVideoResponse(userID int64, mVideo *model.Video, author *model.User) *fee
 		}
 
 		// 缓存未命中, 查询数据库
-		favorite, err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(mVideo.ID)).
+		favorite, err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(*userID), qFavorite.VideoID.Eq(mVideo.ID)).
 			Select(qFavorite.ID).First()
 		if err != nil {
 			klog.Error("mysql.ToVideoResponse: 查询favorite表失败, err: ", err)

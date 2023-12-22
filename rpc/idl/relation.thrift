@@ -15,7 +15,7 @@ struct Relation_action_response {
 
 struct Relation_follow_list_request {
   1: i64 to_user_id; // 对方用户id
-  2: i64 user_id; // 用户id
+  2: optional i64 user_id; // 用户id
 }
 
 struct Relation_follow_list_response {
@@ -26,7 +26,7 @@ struct Relation_follow_list_response {
 
 struct Relation_follower_list_request {
   1: i64 to_user_id; // 对方用户id
-  2: i64 user_id; // 用户id
+  2: optional i64 user_id; // 用户id
 }
 
 struct Relation_follower_list_response {
@@ -37,7 +37,7 @@ struct Relation_follower_list_response {
 
 struct Relation_friend_list_request {
   1: i64 to_user_id; // 对方用户id
-  2: i64 user_id; // 用户id
+  2: optional i64 user_id; // 用户id
 }
 
 struct Relation_friend_list_response {

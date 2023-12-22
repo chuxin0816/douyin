@@ -34,38 +34,38 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	userRouter := apiRouter.Group("/user")
 	{
 		userController := controller.NewUserController()
-		userRouter.GET("/", middleware.AuthMiddleware(), userController.Info)
+		userRouter.GET("/", userController.Info)
 		userRouter.POST("/register/", userController.Register)
 		userRouter.POST("/login/", userController.Login)
 	}
 
-	publishRouter := apiRouter.Group("/publish", middleware.AuthMiddleware())
+	publishRouter := apiRouter.Group("/publish")
 	{
 		publishController := controller.NewPublishController()
-		publishRouter.POST("/action/", publishController.Action)
+		publishRouter.POST("/action/", publishController.Action, middleware.AuthMiddleware())
 		publishRouter.GET("/list/", publishController.List)
 	}
 
 	// interaction apis
-	favoriteRouter := apiRouter.Group("/favorite",middleware.AuthMiddleware())
+	favoriteRouter := apiRouter.Group("/favorite")
 	{
 		favoriteController := controller.NewFavoriteController()
-		favoriteRouter.POST("/action/", favoriteController.Action)
+		favoriteRouter.POST("/action/", favoriteController.Action,middleware.AuthMiddleware())
 		favoriteRouter.GET("/list/", favoriteController.List)
 	}
 
-	commentRouter := apiRouter.Group("/comment", middleware.AuthMiddleware())
+	commentRouter := apiRouter.Group("/comment")
 	{
 		commentController := controller.NewCommentController()
-		commentRouter.POST("/action/", commentController.Action)
+		commentRouter.POST("/action/", commentController.Action, middleware.AuthMiddleware())
 		commentRouter.GET("/list/", commentController.List)
 	}
 
 	// social apis
-	relationRouter := apiRouter.Group("/relation", middleware.AuthMiddleware())
+	relationRouter := apiRouter.Group("/relation")
 	{
 		relationController := controller.NewRelationController()
-		relationRouter.POST("/action/", relationController.Action)
+		relationRouter.POST("/action/", relationController.Action, middleware.AuthMiddleware())
 		relationRouter.GET("/follow/list/", relationController.FollowList)
 		relationRouter.GET("/follower/list/", relationController.FollowerList)
 		relationRouter.GET("/friend/list/", relationController.FriendList)

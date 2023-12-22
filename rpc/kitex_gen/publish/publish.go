@@ -523,8 +523,8 @@ func (p *PublishActionResponse) Field2DeepEqual(src *string) bool {
 }
 
 type PublishListRequest struct {
-	UserId   int64 `thrift:"user_id,1" frugal:"1,default,i64" json:"user_id"`
-	ToUserId int64 `thrift:"to_user_id,2" frugal:"2,default,i64" json:"to_user_id"`
+	UserId   *int64 `thrift:"user_id,1,optional" frugal:"1,optional,i64" json:"user_id,omitempty"`
+	ToUserId int64  `thrift:"to_user_id,2" frugal:"2,default,i64" json:"to_user_id"`
 }
 
 func NewPublishListRequest() *PublishListRequest {
@@ -535,14 +535,19 @@ func (p *PublishListRequest) InitDefault() {
 	*p = PublishListRequest{}
 }
 
+var PublishListRequest_UserId_DEFAULT int64
+
 func (p *PublishListRequest) GetUserId() (v int64) {
-	return p.UserId
+	if !p.IsSetUserId() {
+		return PublishListRequest_UserId_DEFAULT
+	}
+	return *p.UserId
 }
 
 func (p *PublishListRequest) GetToUserId() (v int64) {
 	return p.ToUserId
 }
-func (p *PublishListRequest) SetUserId(val int64) {
+func (p *PublishListRequest) SetUserId(val *int64) {
 	p.UserId = val
 }
 func (p *PublishListRequest) SetToUserId(val int64) {
@@ -552,6 +557,10 @@ func (p *PublishListRequest) SetToUserId(val int64) {
 var fieldIDToName_PublishListRequest = map[int16]string{
 	1: "user_id",
 	2: "to_user_id",
+}
+
+func (p *PublishListRequest) IsSetUserId() bool {
+	return p.UserId != nil
 }
 
 func (p *PublishListRequest) Read(iprot thrift.TProtocol) (err error) {
@@ -623,7 +632,7 @@ func (p *PublishListRequest) ReadField1(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadI64(); err != nil {
 		return err
 	} else {
-		p.UserId = v
+		p.UserId = &v
 	}
 	return nil
 }
@@ -670,14 +679,16 @@ WriteStructEndError:
 }
 
 func (p *PublishListRequest) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("user_id", thrift.I64, 1); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI64(p.UserId); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
+	if p.IsSetUserId() {
+		if err = oprot.WriteFieldBegin("user_id", thrift.I64, 1); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteI64(*p.UserId); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
 	}
 	return nil
 WriteFieldBeginError:
@@ -726,9 +737,14 @@ func (p *PublishListRequest) DeepEqual(ano *PublishListRequest) bool {
 	return true
 }
 
-func (p *PublishListRequest) Field1DeepEqual(src int64) bool {
+func (p *PublishListRequest) Field1DeepEqual(src *int64) bool {
 
-	if p.UserId != src {
+	if p.UserId == src {
+		return true
+	} else if p.UserId == nil || src == nil {
+		return false
+	}
+	if *p.UserId != *src {
 		return false
 	}
 	return true

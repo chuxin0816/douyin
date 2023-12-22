@@ -14,7 +14,7 @@ struct Publish_action_response {
 }
 
 struct Publish_list_request {
-  1: i64 user_id; // 用户id
+  1: optional i64 user_id; // 用户id
   2: i64 to_user_id; // 对方用户id
 }
 

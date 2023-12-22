@@ -734,8 +734,8 @@ func (p *CommentActionResponse) Field3DeepEqual(src *Comment) bool {
 }
 
 type CommentListRequest struct {
-	UserId  int64 `thrift:"user_id,1" frugal:"1,default,i64" json:"user_id"`
-	VideoId int64 `thrift:"video_id,2" frugal:"2,default,i64" json:"video_id"`
+	UserId  *int64 `thrift:"user_id,1,optional" frugal:"1,optional,i64" json:"user_id,omitempty"`
+	VideoId int64  `thrift:"video_id,2" frugal:"2,default,i64" json:"video_id"`
 }
 
 func NewCommentListRequest() *CommentListRequest {
@@ -746,14 +746,19 @@ func (p *CommentListRequest) InitDefault() {
 	*p = CommentListRequest{}
 }
 
+var CommentListRequest_UserId_DEFAULT int64
+
 func (p *CommentListRequest) GetUserId() (v int64) {
-	return p.UserId
+	if !p.IsSetUserId() {
+		return CommentListRequest_UserId_DEFAULT
+	}
+	return *p.UserId
 }
 
 func (p *CommentListRequest) GetVideoId() (v int64) {
 	return p.VideoId
 }
-func (p *CommentListRequest) SetUserId(val int64) {
+func (p *CommentListRequest) SetUserId(val *int64) {
 	p.UserId = val
 }
 func (p *CommentListRequest) SetVideoId(val int64) {
@@ -763,6 +768,10 @@ func (p *CommentListRequest) SetVideoId(val int64) {
 var fieldIDToName_CommentListRequest = map[int16]string{
 	1: "user_id",
 	2: "video_id",
+}
+
+func (p *CommentListRequest) IsSetUserId() bool {
+	return p.UserId != nil
 }
 
 func (p *CommentListRequest) Read(iprot thrift.TProtocol) (err error) {
@@ -834,7 +843,7 @@ func (p *CommentListRequest) ReadField1(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadI64(); err != nil {
 		return err
 	} else {
-		p.UserId = v
+		p.UserId = &v
 	}
 	return nil
 }
@@ -881,14 +890,16 @@ WriteStructEndError:
 }
 
 func (p *CommentListRequest) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("user_id", thrift.I64, 1); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI64(p.UserId); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
+	if p.IsSetUserId() {
+		if err = oprot.WriteFieldBegin("user_id", thrift.I64, 1); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteI64(*p.UserId); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
 	}
 	return nil
 WriteFieldBeginError:
@@ -937,9 +948,14 @@ func (p *CommentListRequest) DeepEqual(ano *CommentListRequest) bool {
 	return true
 }
 
-func (p *CommentListRequest) Field1DeepEqual(src int64) bool {
+func (p *CommentListRequest) Field1DeepEqual(src *int64) bool {
 
-	if p.UserId != src {
+	if p.UserId == src {
+		return true
+	} else if p.UserId == nil || src == nil {
+		return false
+	}
+	if *p.UserId != *src {
 		return false
 	}
 	return true

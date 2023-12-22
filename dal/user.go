@@ -95,7 +95,7 @@ func CreateUser(username, password string, userID int64) error {
 	return nil
 }
 
-func ToUserResponse(followerID int64, mUser *model.User) *user.User {
+func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 	userResponse := &user.User{
 		Id:              mUser.ID,
 		Name:            mUser.Name,
@@ -108,6 +108,10 @@ func ToUserResponse(followerID int64, mUser *model.User) *user.User {
 		IsFollow:        false,
 		Signature:       &mUser.Signature,
 		TotalFavorited:  &mUser.TotalFavorited,
+	}
+	
+	if followerID == nil {
+		return userResponse
 	}
 
 	// 判断是否关注
