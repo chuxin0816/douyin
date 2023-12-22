@@ -33,7 +33,7 @@ func FavoriteAction(userID, videoID int64, actionType int64) (*favorite.Favorite
 	})
 }
 
-func FavoriteList(userID, toUserID int64) (*favorite.FavoriteListResponse, error) {
+func FavoriteList(userID *int64, toUserID int64) (*favorite.FavoriteListResponse, error) {
 	return favoriteClient.FavoriteList(context.Background(), &favorite.FavoriteListRequest{
 		UserId:   userID,
 		ToUserId: toUserID,

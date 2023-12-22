@@ -33,7 +33,7 @@ func PublishAction(userID int64, data []byte, title string) (*publish.PublishAct
 	})
 }
 
-func PublishList(userID, toUserID int64) (*publish.PublishListResponse, error) {
+func PublishList(userID *int64, toUserID int64) (*publish.PublishListResponse, error) {
 	return publishClient.PublishList(context.Background(), &publish.PublishListRequest{
 		UserId:   userID,
 		ToUserId: toUserID,

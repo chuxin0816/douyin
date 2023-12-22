@@ -12,7 +12,7 @@ import (
 
 type FeedRequest struct {
 	LatestTime *int64 `thrift:"latest_time,1,optional" frugal:"1,optional,i64" json:"latest_time,omitempty"`
-	UserId     int64  `thrift:"user_id,2" frugal:"2,default,i64" json:"user_id"`
+	UserId     *int64 `thrift:"user_id,2,optional" frugal:"2,optional,i64" json:"user_id,omitempty"`
 }
 
 func NewFeedRequest() *FeedRequest {
@@ -32,13 +32,18 @@ func (p *FeedRequest) GetLatestTime() (v int64) {
 	return *p.LatestTime
 }
 
+var FeedRequest_UserId_DEFAULT int64
+
 func (p *FeedRequest) GetUserId() (v int64) {
-	return p.UserId
+	if !p.IsSetUserId() {
+		return FeedRequest_UserId_DEFAULT
+	}
+	return *p.UserId
 }
 func (p *FeedRequest) SetLatestTime(val *int64) {
 	p.LatestTime = val
 }
-func (p *FeedRequest) SetUserId(val int64) {
+func (p *FeedRequest) SetUserId(val *int64) {
 	p.UserId = val
 }
 
@@ -49,6 +54,10 @@ var fieldIDToName_FeedRequest = map[int16]string{
 
 func (p *FeedRequest) IsSetLatestTime() bool {
 	return p.LatestTime != nil
+}
+
+func (p *FeedRequest) IsSetUserId() bool {
+	return p.UserId != nil
 }
 
 func (p *FeedRequest) Read(iprot thrift.TProtocol) (err error) {
@@ -129,7 +138,7 @@ func (p *FeedRequest) ReadField2(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadI64(); err != nil {
 		return err
 	} else {
-		p.UserId = v
+		p.UserId = &v
 	}
 	return nil
 }
@@ -186,14 +195,16 @@ WriteFieldEndError:
 }
 
 func (p *FeedRequest) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("user_id", thrift.I64, 2); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteI64(p.UserId); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
+	if p.IsSetUserId() {
+		if err = oprot.WriteFieldBegin("user_id", thrift.I64, 2); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := oprot.WriteI64(*p.UserId); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
 	}
 	return nil
 WriteFieldBeginError:
@@ -237,9 +248,14 @@ func (p *FeedRequest) Field1DeepEqual(src *int64) bool {
 	}
 	return true
 }
-func (p *FeedRequest) Field2DeepEqual(src int64) bool {
+func (p *FeedRequest) Field2DeepEqual(src *int64) bool {
 
-	if p.UserId != src {
+	if p.UserId == src {
+		return true
+	} else if p.UserId == nil || src == nil {
+		return false
+	}
+	if *p.UserId != *src {
 		return false
 	}
 	return true

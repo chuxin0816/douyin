@@ -36,7 +36,7 @@ func CommentAction(userID, videoID, actionType int64, commentID *int64, commentT
 	})
 }
 
-func CommentList(userID, videoID int64) (*comment.CommentListResponse, error) {
+func CommentList(userID *int64, videoID int64) (*comment.CommentListResponse, error) {
 	return commentClient.CommentList(context.Background(), &comment.CommentListRequest{
 		UserId:  userID,
 		VideoId: videoID,

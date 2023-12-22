@@ -98,7 +98,7 @@ func (s *UserServiceImpl) UserInfo(ctx context.Context, req *user.UserInfoReques
 	}
 	
 	// 返回响应
-	resp = &user.UserInfoResponse{User: dal.ToUserResponse(*req.UserId, mUser)}
-	
+	resp = &user.UserInfoResponse{User: dal.ToUserResponse(req.UserId, mUser)}
+
 	return
 }

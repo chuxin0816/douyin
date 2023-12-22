@@ -4,7 +4,7 @@ namespace go feed
 
 struct Feed_request {
   1: optional i64 latest_time; // 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
-  2: i64 user_id; // 用户id
+  2: optional i64 user_id; // 用户id
 }
 
 struct Feed_response {

@@ -5,8 +5,10 @@ import (
 	"time"
 )
 
+var id int64 = 12182603931062272
+
 func TestGetFeedList(t *testing.T) {
-	_, _, err := GetFeedList(12182603931062272, time.Now(), 10)
+	_, _, err := GetFeedList(&id, time.Now(), 10)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -14,7 +16,7 @@ func TestGetFeedList(t *testing.T) {
 }
 
 func TestSaveVideo(t *testing.T) {
-	err := SaveVideo(12182603931062272, "test.mp4", "test.jpg", "test")
+	err := SaveVideo(id, "test.mp4", "test.jpg", "test")
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -22,7 +24,7 @@ func TestSaveVideo(t *testing.T) {
 }
 
 func TestGetPublishList(t *testing.T) {
-	_, err := GetPublishList(12182603931062272, 12182603931062272)
+	_, err := GetPublishList(&id, 12182603931062272)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -30,7 +32,7 @@ func TestGetPublishList(t *testing.T) {
 }
 
 func TestGetVideoList(t *testing.T) {
-	_, err := GetVideoList(12182603931062272, []int64{10760595804524544, 12795765776715776})
+	_, err := GetVideoList(&id, []int64{10760595804524544, 12795765776715776})
 	if err != nil {
 		t.Log(err)
 		t.Fail()

@@ -27,16 +27,16 @@ func AuthMiddleware() app.HandlerFunc {
 			controller.Error(ctx, controller.CodeInvalidParam)
 			ctx.Abort()
 		}
-		userID, err := jwt.ParseToken(token)
-		if err != nil {
+		userID := jwt.ParseToken(token)
+		if userID == nil {
 			controller.Error(ctx, controller.CodeNoAuthority)
-			klog.Error("AuthMiddleware: token无效, err: ", err)
+			klog.Error("AuthMiddleware: token解析失败")
 			ctx.Abort()
 			return
 		}
 
 		// 设置userID到上下文
-		ctx.Set(controller.CtxUserIDKey, userID)
+		ctx.Set(controller.CtxUserIDKey, *userID)
 		ctx.Next(c)
 	}
 }

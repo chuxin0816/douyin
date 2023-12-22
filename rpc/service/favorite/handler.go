@@ -33,7 +33,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 // FavoriteList implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.FavoriteListRequest) (resp *favorite.FavoriteListResponse, err error) {
 	// 获取喜欢的视频ID列表
-	videoIDs, err := dal.GetFavoriteList(req.UserId)
+	videoIDs, err := dal.GetFavoriteList(req.ToUserId)
 	if err != nil {
 		klog.Error("获取喜欢的视频ID列表失败, err: ", err)
 		return nil, err

@@ -22,17 +22,17 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	err := ctx.Bind(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("controller.Feed: 参数解析失败, err: ", err)
+		klog.Error("参数解析失败, err: ", err)
 		return
 	}
 
 	// 验证token
-	var userID int64
+	var userID *int64
 	if len(req.Token) > 0 {
-		userID, err = jwt.ParseToken(req.Token)
-		if err != nil {
+		userID := jwt.ParseToken(req.Token)
+		if userID == nil {
 			Error(ctx, CodeNoAuthority)
-			klog.Error("controller.Action: token无效, err: ", err)
+			klog.Error("token无效")
 			return
 		}
 	}
@@ -41,7 +41,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	resp, err := client.Feed(&req.LatestTime, userID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
-		klog.Error("controller.Feed: 业务逻辑处理失败, err: ", err)
+		klog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
 

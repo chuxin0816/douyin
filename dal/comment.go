@@ -104,7 +104,7 @@ func GetCommentList(videoID int64) ([]*model.Comment, error) {
 	return commentList, nil
 }
 
-func ToCommentResponse(userID int64, mComment *model.Comment, user *model.User) *comment.Comment {
+func ToCommentResponse(userID *int64, mComment *model.Comment, user *model.User) *comment.Comment {
 	return &comment.Comment{
 		Id:         mComment.ID,
 		User:       ToUserResponse(userID, user),

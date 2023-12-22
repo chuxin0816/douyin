@@ -109,8 +109,8 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 		Signature:       &mUser.Signature,
 		TotalFavorited:  &mUser.TotalFavorited,
 	}
-	
-	if followerID == nil {
+
+	if followerID == nil || *followerID == 0 {
 		return userResponse
 	}
 
@@ -129,7 +129,7 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 		}
 
 		relation, err := qRelation.WithContext(context.Background()).
-			Where(qRelation.UserID.Eq(mUser.ID), qRelation.FollowerID.Eq(followerID)).
+			Where(qRelation.UserID.Eq(mUser.ID), qRelation.FollowerID.Eq(*followerID)).
 			Select(qRelation.ID).First()
 		if err != nil {
 			klog.Error("mysql.ToUserResponse: 查询数据库失败")

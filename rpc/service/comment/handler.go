@@ -54,7 +54,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 
 	// 返回响应
 	resp = &comment.CommentActionResponse{
-		Comment: dal.ToCommentResponse(mComment.UserID, mComment, mUser),
+		Comment: dal.ToCommentResponse(&mComment.UserID, mComment, mUser),
 	}
 
 	return

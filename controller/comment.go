@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"douyin/dal"
+	"douyin/pkg/jwt"
 	"douyin/rpc/client"
 	"errors"
 
@@ -20,7 +21,8 @@ type CommentActionRequest struct {
 }
 
 type CommentListRequest struct {
-	VideoID int64 `query:"video_id,string" vd:"$>0"` // 视频id
+	VideoID int64  `query:"video_id,string" vd:"$>0"` // 视频id
+	Token   string `query:"token"`                    // 用户登录状态下设置
 }
 
 func NewCommentController() *CommentController {
@@ -33,7 +35,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("CommentController.Action: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -45,16 +47,16 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	if err != nil {
 		if errors.Is(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
-			klog.Error("controller.CommentAction: 视频不存在")
+			klog.Error("视频不存在")
 			return
 		}
 		if errors.Is(err, dal.ErrCommentNotExist) {
 			Error(ctx, CodeCommentNotExist)
-			klog.Error("controller.CommentAction: 评论不存在")
+			klog.Error("评论不存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		klog.Error("CommentController.Action: 业务逻辑处理失败, err: ", err)
+		klog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
 
@@ -68,12 +70,20 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("CommentController.List: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
-	// 从认证中间件中获取userID
-	userID := ctx.MustGet(CtxUserIDKey).(int64)
+	// 验证token
+	var userID *int64
+	if len(req.Token) > 0 {
+		userID = jwt.ParseToken(req.Token)
+		if userID == nil {
+			Error(ctx, CodeNoAuthority)
+			klog.Error("token解析失败")
+			return
+		}
+	}
 
 	// 业务逻辑处理
 	resp, err := client.CommentList(userID, req.VideoID)

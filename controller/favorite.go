@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"douyin/dal"
+	"douyin/pkg/jwt"
 	"douyin/rpc/client"
 	"errors"
 
@@ -18,7 +19,8 @@ type FavoriteActionRequest struct {
 }
 
 type FavoriteListRequest struct {
-	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
+	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
+	Token  string `query:"token"`                   // 用户登录状态下设置
 }
 
 func NewFavoriteController() *FavoriteController {
@@ -70,11 +72,19 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 		return
 	}
 
-	// 从认证中间件中获取userID
-	userID := ctx.MustGet(CtxUserIDKey).(int64)
+	// 验证token
+	var userID *int64
+	if len(req.Token) > 0 {
+		userID = jwt.ParseToken(req.Token)
+		if userID == nil {
+			Error(ctx, CodeNoAuthority)
+			klog.Error("token解析失败")
+			return
+		}
+	}
 
 	// 业务逻辑处理
-	resp, err := client.FavoriteList(req.UserID, userID)
+	resp, err := client.FavoriteList(userID, req.UserID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		klog.Error("FavoriteController.List: 业务处理失败, err: ", err)

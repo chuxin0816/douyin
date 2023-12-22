@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"douyin/pkg/jwt"
 	"douyin/rpc/client"
 	"io"
 	"mime/multipart"
@@ -18,7 +19,8 @@ type PublishActionRequest struct {
 }
 
 type PublishListRequest struct {
-	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
+	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
+	Token  string `query:"token"`                   // 用户登录状态下设置
 }
 
 func NewPublishController() *PublishController {
@@ -84,8 +86,16 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	}
 	authorID := req.UserID
 
-	// 从认证中间件中获取userID
-	userID := ctx.MustGet(CtxUserIDKey).(int64)
+	// 验证token
+	var userID *int64
+	if len(req.Token) > 0 {
+		userID = jwt.ParseToken(req.Token)
+		if userID == nil {
+			Error(ctx, CodeNoAuthority)
+			klog.Error("token解析失败")
+			return
+		}
+	}
 
 	// 业务逻辑处理
 	resp, err := client.PublishList(userID, authorID)

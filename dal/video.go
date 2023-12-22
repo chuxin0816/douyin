@@ -17,7 +17,7 @@ const (
 )
 
 // GetVideoList 获取视频Feed流
-func GetFeedList(userID int64, latestTime time.Time, count int) (videoList []*feed.Video, nextTime *int64, err error) {
+func GetFeedList(userID *int64, latestTime time.Time, count int) (videoList []*feed.Video, nextTime *int64, err error) {
 	// 查询数据库
 	year := latestTime.Year()
 	if year < 1 || year > 9999 {
@@ -155,7 +155,7 @@ func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *fe
 		Title:         mVideo.Title,
 	}
 	// 未登录直接返回
-	if userID == nil {
+	if userID == nil || *userID == 0 {
 		return video
 	}
 

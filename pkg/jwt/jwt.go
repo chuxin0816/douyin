@@ -2,15 +2,13 @@ package jwt
 
 import (
 	"douyin/config"
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 )
 
 var (
-	jwtKey          = []byte(config.Conf.JwtKey)
-	ErrInvalidToken = errors.New("invalid token")
+	jwtKey = []byte(config.Conf.JwtKey)
 )
 
 const (
@@ -35,16 +33,16 @@ func GenerateToken(userID int64) (string, error) {
 	return token.SignedString(jwtKey)
 }
 
-func ParseToken(tokenStr string) (userID int64, err error) {
+func ParseToken(tokenStr string) (userID *int64) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 	if err != nil {
-		return 0, err
+		return nil
 	}
 	if !token.Valid {
-		return 0, ErrInvalidToken
+		return nil
 	}
-	return claims.UserID, nil
+	return &claims.UserID
 }

@@ -25,10 +25,10 @@ func initUserClient() {
 	}
 }
 
-func UserInfo(toUserID, userID int64) (*user.UserInfoResponse, error) {
+func UserInfo(toUserID int64, userID *int64) (*user.UserInfoResponse, error) {
 	return userClient.UserInfo(context.Background(), &user.UserInfoRequest{
 		ToUserId: toUserID,
-		UserId:   &userID,
+		UserId:   userID,
 	})
 }
 

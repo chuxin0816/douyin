@@ -33,21 +33,21 @@ func RelationAction(userID, toUserID int64, actionType int64) (*relation.Relatio
 	})
 }
 
-func FollowList(userID, toUserID int64) (*relation.RelationFollowListResponse, error) {
+func FollowList(userID *int64, toUserID int64) (*relation.RelationFollowListResponse, error) {
 	return relationClient.RelationFollowList(context.Background(), &relation.RelationFollowListRequest{
 		UserId:   userID,
 		ToUserId: toUserID,
 	})
 }
 
-func FollowerList(userID, toUserID int64) (*relation.RelationFollowerListResponse, error) {
+func FollowerList(userID *int64, toUserID int64) (*relation.RelationFollowerListResponse, error) {
 	return relationClient.RelationFollowerList(context.Background(), &relation.RelationFollowerListRequest{
 		UserId:   userID,
 		ToUserId: toUserID,
 	})
 }
 
-func FriendList(userID, toUserID int64) (*relation.RelationFriendListResponse, error) {
+func FriendList(userID *int64, toUserID int64) (*relation.RelationFriendListResponse, error) {
 	return relationClient.RelationFriendList(context.Background(), &relation.RelationFriendListRequest{
 		UserId:   userID,
 		ToUserId: toUserID,

@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"douyin/dal"
+	"douyin/pkg/jwt"
 	"douyin/rpc/client"
 	"errors"
 
@@ -13,7 +14,8 @@ import (
 type UserController struct{}
 
 type UserInfoRequest struct {
-	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
+	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
+	Token  string `query:"token"`                   // 用户登录状态下设置
 }
 
 type UserRequest struct {
@@ -31,23 +33,31 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("controller.UserInfo: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
-	// 从认证中间件中获取userID
-	userID := ctx.MustGet(CtxUserIDKey).(int64)
+	// 验证token
+	var userID *int64
+	if len(req.Token) > 0 {
+		userID = jwt.ParseToken(req.Token)
+		if userID == nil {
+			Error(ctx, CodeNoAuthority)
+			klog.Error("token解析失败")
+			return
+		}
+	}
 
 	// 业务逻辑处理
 	resp, err := client.UserInfo(req.UserID, userID)
 	if err != nil {
 		if errors.Is(err, dal.ErrUserNotExist) {
 			Error(ctx, CodeUserNotExist)
-			klog.Error("controller.UserInfo: 用户不存在")
+			klog.Error("用户不存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		klog.Error("controller.UserInfo: 业务处理失败, err: ", err)
+		klog.Error("业务处理失败, err: ", err)
 		return
 	}
 
@@ -61,7 +71,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("controller.Register: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -70,11 +80,11 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	if err != nil {
 		if errors.Is(err, dal.ErrUserExist) {
 			Error(ctx, CodeUserExist)
-			klog.Error("controller.Register: 用户已存在")
+			klog.Error("用户已存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		klog.Error("controller.Register: 业务处理失败, err: ", err)
+		klog.Error("业务处理失败, err: ", err)
 		return
 	}
 
@@ -88,7 +98,7 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
-		klog.Error("controller.Login: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -97,16 +107,16 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	if err != nil {
 		if errors.Is(err, dal.ErrUserNotExist) {
 			Error(ctx, CodeUserNotExist)
-			klog.Error("controller.Login: 用户不存在")
+			klog.Error("用户不存在")
 			return
 		}
 		if errors.Is(err, dal.ErrPassword) {
 			Error(ctx, CodeInvalidPassword)
-			klog.Error("controller.Login: 密码错误")
+			klog.Error("密码错误")
 			return
 		}
 		Error(ctx, CodeServerBusy)
-		klog.Error("controller.Login: 业务处理失败, err: ", err)
+		klog.Error("业务处理失败, err: ", err)
 		return
 	}
 

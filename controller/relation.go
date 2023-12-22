@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"douyin/dal"
+	"douyin/pkg/jwt"
 	"douyin/rpc/client"
 	"errors"
 
@@ -18,7 +19,8 @@ type RelationActionRequest struct {
 }
 
 type RelationListRequest struct {
-	UserID int64 `query:"user_id,string" vd:"$>0"` // 用户id
+	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
+	Token  string `query:"token"`                   // 用户登录状态下设置
 }
 
 func NewRelationController() *RelationController {
@@ -30,7 +32,7 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	req := &RelationActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		klog.Error("RelationController Action: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		Error(ctx, CodeInvalidParam)
 		return
 	}
@@ -42,16 +44,16 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	resp, err := client.RelationAction(userID, req.ToUserID, req.ActionType)
 	if err != nil {
 		if errors.Is(err, dal.ErrAlreadyFollow) {
-			klog.Error("RelationController.Action: 已经关注过了, err: ", err)
+			klog.Error("已经关注过了, err: ", err)
 			Error(ctx, CodeAlreadyFollow)
 			return
 		}
 		if errors.Is(err, dal.ErrNotFollow) {
-			klog.Error("RelationController.Action: 还没有关注过, err: ", err)
+			klog.Error("还没有关注过, err: ", err)
 			Error(ctx, CodeNotFollow)
 			return
 		}
-		klog.Error("RelationController.Action: 业务逻辑处理失败, err: ", err)
+		klog.Error("业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
 		return
 	}
@@ -65,18 +67,26 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		klog.Error("RelationController.FollowList: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		Error(ctx, CodeInvalidParam)
 		return
 	}
 
-	// 从认证中间件中获取userID
-	userID := ctx.MustGet(CtxUserIDKey).(int64)
+	// 验证token
+	var userID *int64
+	if len(req.Token) > 0 {
+		userID = jwt.ParseToken(req.Token)
+		if userID == nil {
+			Error(ctx, CodeNoAuthority)
+			klog.Error("token解析失败")
+			return
+		}
+	}
 
 	// 业务逻辑处理
 	resp, err := client.FollowList(userID, req.UserID)
 	if err != nil {
-		klog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
+		klog.Error("业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
 		return
 	}
@@ -90,17 +100,25 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		klog.Error("RelationController.FollowerList: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
-	// 从认证中间件中获取userID
-	userID := ctx.MustGet(CtxUserIDKey).(int64)
+	// 验证token
+	var userID *int64
+	if len(req.Token) > 0 {
+		userID = jwt.ParseToken(req.Token)
+		if userID == nil {
+			Error(ctx, CodeNoAuthority)
+			klog.Error("token解析失败")
+			return
+		}
+	}
 
 	// 业务逻辑处理
 	resp, err := client.FollowerList(userID, req.UserID)
 	if err != nil {
-		klog.Error("RelationController.FollowList: 业务逻辑处理失败, err: ", err)
+		klog.Error("业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
 		return
 	}
@@ -114,17 +132,25 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		klog.Error("RelationController.FriendList: 参数校验失败, err: ", err)
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
-	// 从认证中间件中获取userID
-	userID := ctx.MustGet(CtxUserIDKey).(int64)
+	// 验证token
+	var userID *int64
+	if len(req.Token) > 0 {
+		userID = jwt.ParseToken(req.Token)
+		if userID == nil {
+			Error(ctx, CodeNoAuthority)
+			klog.Error("token解析失败")
+			return
+		}
+	}
 
 	// 业务逻辑处理
 	resp, err := client.FriendList(userID, req.UserID)
 	if err != nil {
-		klog.Error("RelationController.FriendList: 业务逻辑处理失败, err: ", err)
+		klog.Error("业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
 		return
 	}
