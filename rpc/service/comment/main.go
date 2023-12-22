@@ -4,6 +4,7 @@ import (
 	"douyin/config"
 	"douyin/dal"
 	"douyin/logger"
+	"douyin/pkg/snowflake"
 	comment "douyin/rpc/kitex_gen/comment/commentservice"
 	"net"
 
@@ -16,6 +17,7 @@ import (
 func main() {
 	config.Init()
 	logger.Init()
+	snowflake.Init()
 	dal.Init()
 
 	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.CommentAddr)
