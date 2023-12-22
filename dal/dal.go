@@ -116,10 +116,14 @@ func syncRedisToMySQL() {
 
 		// 备份缓存中的用户ID和视频ID并清空
 		lock.Lock()
-		backupUserIDs := cacheUserID
-		backupVideoIDs := cacheVideoIDs
-		cacheUserID = cacheUserID[:0]
-		cacheVideoIDs = cacheVideoIDs[:0]
+		
+		backupUserIDs := make([]int64, len(cacheUserID))
+		backupVideoIDs := make([]int64, len(cacheVideoIDs))
+		copy(backupUserIDs, cacheUserID)
+		copy(backupVideoIDs, cacheVideoIDs)
+		cacheUserID = make([]int64, 0)
+		cacheVideoIDs = make([]int64, 0)
+		
 		lock.Unlock()
 
 		// 同步redis的用户缓存到Mysql
