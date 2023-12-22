@@ -19,6 +19,7 @@ func main() {
 	logger.Init()
 	snowflake.Init()
 	dal.Init()
+	defer dal.Close()
 
 	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.CommentAddr)
 	if err != nil {

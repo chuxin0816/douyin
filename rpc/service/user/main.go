@@ -17,6 +17,7 @@ func main() {
 	config.Init()
 	logger.Init()
 	dal.Init()
+	defer dal.Close()
 
 	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.UserAddr)
 	if err != nil {
