@@ -25,6 +25,8 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	}
 
 	// 返回响应
+	resp = &favorite.FavoriteActionResponse{}
+
 	return
 }
 
@@ -45,9 +47,7 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 	}
 
 	// 返回响应
-	resp = &favorite.FavoriteListResponse{
-		VideoList: videoList,
-	}
+	resp = &favorite.FavoriteListResponse{VideoList: videoList}
 
 	return
 }

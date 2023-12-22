@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"douyin/config"
 	"io"
-	"mime/multipart"
 	"os"
 	"path"
 	"sync"
@@ -28,10 +27,13 @@ func Init() {
 		panic(err)
 	}
 	bucket, err = client.Bucket(config.Conf.OssConfig.BucketName)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // UploadFile 上传文件到oss
-func UploadFile(file *multipart.FileHeader, uuidName string) error {
+func UploadFile(data []byte, uuidName string) error {
 	videoName := uuidName + ".mp4"
 	coverName := uuidName + ".jpeg"
 
@@ -43,16 +45,8 @@ func UploadFile(file *multipart.FileHeader, uuidName string) error {
 
 	go func() {
 		defer wg.Done()
-		// 打开视频获取视频流
-		videoStream, err := file.Open()
-		if err != nil {
-			klog.Error("oss.UploadFile: 打开视频失败, err: ", err)
-			uploadErr = err
-			return
-		}
-
 		// 上传视频
-		if err := bucket.PutObject(path.Join(videoPath, videoName), videoStream); err != nil {
+		if err := bucket.PutObject(path.Join(videoPath, videoName), bytes.NewReader(data)); err != nil {
 			klog.Error("oss.UploadFile: 上传视频失败", err)
 			uploadErr = err
 		}
@@ -61,7 +55,7 @@ func UploadFile(file *multipart.FileHeader, uuidName string) error {
 	go func() {
 		defer wg.Done()
 		// 获取视频封面
-		imageData, err := GetCoverImage(videoName)
+		imageData, err := getCoverImage(videoName)
 		if err != nil {
 			klog.Error("oss.UploadFile: 获取封面失败, err: ", err)
 			uploadErr = err
@@ -85,8 +79,8 @@ func UploadFile(file *multipart.FileHeader, uuidName string) error {
 	return uploadErr
 }
 
-// GetCoverImage 获取视频第15帧作为封面
-func GetCoverImage(videoName string) (io.Reader, error) {
+// getCoverImage 获取视频第15帧作为封面
+func getCoverImage(videoName string) (io.Reader, error) {
 	buf := bytes.NewBuffer(nil)
 	err := ffmpeg.Input(videoName).Filter("select", ffmpeg.Args{"gte(n,15)"}).
 		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).

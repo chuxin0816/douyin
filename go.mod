@@ -11,6 +11,7 @@ require (
 	github.com/cloudwego/kitex v0.8.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/google/uuid v1.3.0
 	github.com/juju/ratelimit v1.0.2
 	github.com/kitex-contrib/obs-opentelemetry/logging/logrus v0.0.0-20231211030816-1f9e0f7bcee3
 	github.com/kitex-contrib/registry-consul v0.0.0-20230406075225-7d341f036654
@@ -19,6 +20,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/u2takey/ffmpeg-go v0.5.0
 	github.com/u2takey/go-utils v0.3.1
+	golang.org/x/crypto v0.14.0
 	golang.org/x/sync v0.5.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.2

@@ -87,9 +87,7 @@ func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.Comme
 	}
 
 	// 返回响应
-	resp = &comment.CommentListResponse{
-		CommentList: commentList,
-	}
-	
+	resp = &comment.CommentListResponse{CommentList: commentList}
+
 	return
 }
