@@ -3,7 +3,7 @@ package main
 import (
 	"douyin/config"
 	"douyin/logger"
-	"douyin/router"
+	"douyin/api/router"
 	"douyin/rpc/client"
 )
 

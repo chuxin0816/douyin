@@ -2,9 +2,9 @@ package router
 
 import (
 	"context"
+	"douyin/api/controller"
+	"douyin/api/middleware"
 	"douyin/config"
-	"douyin/controller"
-	"douyin/middleware"
 	"fmt"
 	"time"
 
@@ -50,7 +50,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	favoriteRouter := apiRouter.Group("/favorite")
 	{
 		favoriteController := controller.NewFavoriteController()
-		favoriteRouter.POST("/action/", favoriteController.Action,middleware.AuthMiddleware())
+		favoriteRouter.POST("/action/", favoriteController.Action, middleware.AuthMiddleware())
 		favoriteRouter.GET("/list/", favoriteController.List)
 	}
 

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"douyin/controller"
+	"douyin/api/controller"
 	"douyin/pkg/jwt"
 
 	"github.com/cloudwego/hertz/pkg/app"
