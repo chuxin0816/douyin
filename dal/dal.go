@@ -23,7 +23,7 @@ import (
 const (
 	expireTime = time.Hour * 72
 	timeout    = time.Second * 5
-	delayTime  = 100 * time.Millisecond
+	delayTime  = 100 * time.Second
 	randFactor = 30
 	tickerTime = time.Second * 10
 )
