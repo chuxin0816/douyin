@@ -13,13 +13,13 @@ const TableNameVideo = "videos"
 // Video mapped from table <videos>
 type Video struct {
 	ID            int64     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	AuthorID      int64     `gorm:"column:author_id" json:"author_id"`
-	PlayURL       string    `gorm:"column:play_url" json:"play_url"`
-	CoverURL      string    `gorm:"column:cover_url" json:"cover_url"`
-	UploadTime    time.Time `gorm:"column:upload_time" json:"upload_time"`
-	FavoriteCount int64     `gorm:"column:favorite_count" json:"favorite_count"`
-	Title         string    `gorm:"column:title" json:"title"`
-	CommentCount  int64     `gorm:"column:comment_count" json:"comment_count"`
+	AuthorID      int64     `gorm:"column:author_id;not null" json:"author_id"`
+	PlayURL       string    `gorm:"column:play_url;not null" json:"play_url"`
+	CoverURL      string    `gorm:"column:cover_url;not null" json:"cover_url"`
+	UploadTime    time.Time `gorm:"column:upload_time;not null;default:CURRENT_TIMESTAMP" json:"upload_time"`
+	FavoriteCount int64     `gorm:"column:favorite_count;not null" json:"favorite_count"`
+	Title         string    `gorm:"column:title;not null" json:"title"`
+	CommentCount  int64     `gorm:"column:comment_count;not null" json:"comment_count"`
 }
 
 // TableName Video's table name

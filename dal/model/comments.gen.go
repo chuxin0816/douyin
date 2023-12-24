@@ -16,7 +16,7 @@ type Comment struct {
 	VideoID    int64     `gorm:"column:video_id;not null" json:"video_id"`
 	UserID     int64     `gorm:"column:user_id;not null" json:"user_id"`
 	Content    string    `gorm:"column:content;not null" json:"content"`
-	CreateTime time.Time `gorm:"column:create_time;not null;default:CURRENT_TIMESTAMP(3)" json:"create_time"`
+	CreateTime time.Time `gorm:"column:create_time;not null;default:CURRENT_TIMESTAMP" json:"create_time"`
 }
 
 // TableName Comment's table name
