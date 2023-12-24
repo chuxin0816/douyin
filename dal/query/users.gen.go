@@ -38,6 +38,8 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.WorkCount = field.NewInt64(tableName, "work_count")
 	_user.Password = field.NewString(tableName, "password")
 	_user.Signature = field.NewString(tableName, "signature")
+	_user.CreateTime = field.NewTime(tableName, "create_time")
+	_user.UpdateTime = field.NewTime(tableName, "update_time")
 
 	_user.fillFieldMap()
 
@@ -59,6 +61,8 @@ type user struct {
 	WorkCount       field.Int64
 	Password        field.String
 	Signature       field.String
+	CreateTime      field.Time
+	UpdateTime      field.Time
 
 	fieldMap map[string]field.Expr
 }
@@ -86,6 +90,8 @@ func (u *user) updateTableName(table string) *user {
 	u.WorkCount = field.NewInt64(table, "work_count")
 	u.Password = field.NewString(table, "password")
 	u.Signature = field.NewString(table, "signature")
+	u.CreateTime = field.NewTime(table, "create_time")
+	u.UpdateTime = field.NewTime(table, "update_time")
 
 	u.fillFieldMap()
 
@@ -110,7 +116,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 11)
+	u.fieldMap = make(map[string]field.Expr, 13)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["name"] = u.Name
 	u.fieldMap["avatar"] = u.Avatar
@@ -122,6 +128,8 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["work_count"] = u.WorkCount
 	u.fieldMap["password"] = u.Password
 	u.fieldMap["signature"] = u.Signature
+	u.fieldMap["create_time"] = u.CreateTime
+	u.fieldMap["update_time"] = u.UpdateTime
 }
 
 func (u user) clone(db *gorm.DB) user {

@@ -4,21 +4,27 @@
 
 package model
 
+import (
+	"time"
+)
+
 const TableNameUser = "users"
 
 // User mapped from table <users>
 type User struct {
-	ID              int64  `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	Name            string `gorm:"column:name;not null" json:"name"`
-	Avatar          string `gorm:"column:avatar;not null" json:"avatar"`
-	BackgroundImage string `gorm:"column:background_image;not null" json:"background_image"`
-	TotalFavorited  int64  `gorm:"column:total_favorited;not null" json:"total_favorited"`
-	FavoriteCount   int64  `gorm:"column:favorite_count;not null" json:"favorite_count"`
-	FollowCount     int64  `gorm:"column:follow_count;not null" json:"follow_count"`
-	FollowerCount   int64  `gorm:"column:follower_count;not null" json:"follower_count"`
-	WorkCount       int64  `gorm:"column:work_count;not null" json:"work_count"`
-	Password        string `gorm:"column:password;not null" json:"password"`
-	Signature       string `gorm:"column:signature;not null" json:"signature"`
+	ID              int64     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
+	Name            string    `gorm:"column:name;not null" json:"name"`
+	Avatar          string    `gorm:"column:avatar;not null" json:"avatar"`
+	BackgroundImage string    `gorm:"column:background_image;not null" json:"background_image"`
+	TotalFavorited  int64     `gorm:"column:total_favorited;not null" json:"total_favorited"`
+	FavoriteCount   int64     `gorm:"column:favorite_count;not null" json:"favorite_count"`
+	FollowCount     int64     `gorm:"column:follow_count;not null" json:"follow_count"`
+	FollowerCount   int64     `gorm:"column:follower_count;not null" json:"follower_count"`
+	WorkCount       int64     `gorm:"column:work_count;not null" json:"work_count"`
+	Password        string    `gorm:"column:password;not null" json:"password"`
+	Signature       string    `gorm:"column:signature;not null" json:"signature"`
+	CreateTime      time.Time `gorm:"column:create_time;not null;default:CURRENT_TIMESTAMP" json:"create_time"`
+	UpdateTime      time.Time `gorm:"column:update_time;not null;default:CURRENT_TIMESTAMP" json:"update_time"`
 }
 
 // TableName User's table name
