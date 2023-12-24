@@ -48,9 +48,7 @@ func PublishComment(userID, commentID, videoID int64, commentText string) error 
 	}
 
 	// 写入待同步切片
-	lock.Lock()
-	cacheVideoIDs = append(cacheVideoIDs, videoID)
-	lock.Unlock()
+	cacheVideoID.Store(videoID, struct{}{})
 
 	return nil
 }

@@ -21,11 +21,11 @@ import (
 )
 
 const (
-	expireTime = time.Hour * 72
-	timeout    = time.Second * 5
-	delayTime  = 100 * time.Second
-	randFactor = 30
-	tickerTime = time.Second * 10
+	expireTime        = time.Hour * 72
+	timeout           = time.Second * 5
+	delayTime         = 100 * time.Second
+	randFactor        = 30
+	aggregateInterval = time.Second * 10
 )
 
 var (
@@ -41,21 +41,14 @@ var (
 )
 
 var (
-	db            *gorm.DB
-	rdb           *redis.Client
-	g             *singleflight.Group
-	bloomFilter   *bloom.BloomFilter
-	cacheUserID   []int64
-	cacheVideoIDs []int64
-	lock          sync.Mutex
+	db           *gorm.DB
+	rdb          *redis.Client
+	g            *singleflight.Group
+	bloomFilter  *bloom.BloomFilter
+	cacheUserID  sync.Map
+	cacheVideoID sync.Map
 )
 
-// Comment  *comment
-// Favorite *favorite
-// Message  *message
-// Relation *relation
-// User     *user
-// Video    *video
 var (
 	qComment  = query.Comment
 	qFavorite = query.Favorite
@@ -109,25 +102,28 @@ func Close() {
 }
 
 func syncRedisToMySQL() {
-	ticker := time.NewTicker(tickerTime)
+	ticker := time.NewTicker(aggregateInterval)
 	defer ticker.Stop()
 	for {
 		<-ticker.C
 
 		// 备份缓存中的用户ID和视频ID并清空
-		lock.Lock()
-		
-		backupUserIDs := make([]int64, len(cacheUserID))
-		backupVideoIDs := make([]int64, len(cacheVideoIDs))
-		copy(backupUserIDs, cacheUserID)
-		copy(backupVideoIDs, cacheVideoIDs)
-		cacheUserID = make([]int64, 0)
-		cacheVideoIDs = make([]int64, 0)
-		
-		lock.Unlock()
+		backupUserID := make(map[int64]struct{})
+		backupVideoID := make(map[int64]struct{})
+
+		cacheUserID.Range(func(key, value any) bool {
+			backupUserID[key.(int64)] = struct{}{}
+			cacheUserID.Delete(key)
+			return true
+		})
+		cacheVideoID.Range(func(key, value any) bool {
+			backupVideoID[key.(int64)] = struct{}{}
+			cacheVideoID.Delete(key)
+			return true
+		})
 
 		// 同步redis的用户缓存到Mysql
-		for _, userID := range backupUserIDs {
+		for userID := range backupUserID {
 			userIDStr := strconv.FormatInt(userID, 10)
 			totalFavorited, _ := strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyUserTotalFavoritedPF+userIDStr)).Val(), 10, 64)
 			favoriteCount, _ := strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyUserFavoriteCountPF+userIDStr)).Val(), 10, 64)
@@ -149,7 +145,7 @@ func syncRedisToMySQL() {
 
 		// 同步redis中的视频缓存到Mysql
 		var videoFavoriteCount, videoCommentCount int64
-		for _, videoID := range backupVideoIDs {
+		for videoID := range backupVideoID {
 			videoIDStr := strconv.FormatInt(videoID, 10)
 			videoFavoriteCount, _ = strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyVideoFavoriteCountPF+videoIDStr)).Val(), 10, 64)
 			videoCommentCount, _ = strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyVideoCommentCountPF+videoIDStr)).Val(), 10, 64)

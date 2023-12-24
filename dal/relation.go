@@ -91,9 +91,8 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 	}
 
 	// 写入待同步切片
-	lock.Lock()
-	cacheUserID = append(cacheUserID, userID, toUserID)
-	lock.Unlock()
+	cacheUserID.Store(userID, struct{}{})
+	cacheUserID.Store(toUserID, struct{}{})
 
 	return nil
 }

@@ -82,9 +82,7 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 	bloomFilter.Add([]byte(strconv.FormatInt(video.ID, 10)))
 
 	// 写入待同步切片
-	lock.Lock()
-	cacheUserID = append(cacheUserID, userID)
-	lock.Unlock()
+	cacheUserID.Store(userID, struct{}{})
 
 	return nil
 }
