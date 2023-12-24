@@ -1,9 +1,9 @@
 package main
 
 import (
+	"douyin/api/router"
 	"douyin/config"
 	"douyin/logger"
-	"douyin/api/router"
 	"douyin/rpc/client"
 )
 

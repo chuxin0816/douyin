@@ -6,8 +6,8 @@ all: gotool	build
 
 gotool:
 	go mod tidy
-	go fmt ./
-	go vet ./
+	go fmt ./*
+	go vet ./*
 
 build:
 	go build -o $(BINARY)
