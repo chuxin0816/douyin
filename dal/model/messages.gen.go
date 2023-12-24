@@ -9,10 +9,10 @@ const TableNameMessage = "messages"
 // Message mapped from table <messages>
 type Message struct {
 	ID         int64  `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	ToUserID   int64  `gorm:"column:to_user_id" json:"to_user_id"`
-	FromUserID int64  `gorm:"column:from_user_id" json:"from_user_id"`
-	Content    string `gorm:"column:content" json:"content"`
-	CreateTime int64  `gorm:"column:create_time" json:"create_time"`
+	ToUserID   int64  `gorm:"column:to_user_id;not null" json:"to_user_id"`
+	FromUserID int64  `gorm:"column:from_user_id;not null" json:"from_user_id"`
+	Content    string `gorm:"column:content;not null" json:"content"`
+	CreateTime int64  `gorm:"column:create_time;not null" json:"create_time"`
 }
 
 // TableName Message's table name
