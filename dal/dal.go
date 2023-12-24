@@ -106,57 +106,91 @@ func syncRedisToMySQL() {
 	defer ticker.Stop()
 	for {
 		<-ticker.C
+		go syncUser()
+		go syncVideo()
+	}
+}
 
-		// 备份缓存中的用户ID和视频ID并清空
-		backupUserID := make(map[int64]struct{})
-		backupVideoID := make(map[int64]struct{})
+func syncUser() {
+	// 备份缓存中的用户ID并清空
+	backupUserID := make([]int64, 0, 100000)
 
-		cacheUserID.Range(func(key, value any) bool {
-			backupUserID[key.(int64)] = struct{}{}
-			cacheUserID.Delete(key)
-			return true
+	cacheUserID.Range(func(key, value any) bool {
+		backupUserID = append(backupUserID, key.(int64))
+		cacheUserID.Delete(key)
+		return true
+	})
+
+	// 同步redis的用户缓存到Mysql
+	pipe := rdb.Pipeline()
+
+	for _, userID := range backupUserID {
+		userIDStr := strconv.FormatInt(userID, 10)
+		pipe.Get(context.Background(), getRedisKey(KeyUserTotalFavoritedPF+userIDStr))
+		pipe.Get(context.Background(), getRedisKey(KeyUserFavoriteCountPF+userIDStr))
+		pipe.Get(context.Background(), getRedisKey(KeyUserFollowCountPF+userIDStr))
+		pipe.Get(context.Background(), getRedisKey(KeyUserFollowerCountPF+userIDStr))
+		pipe.Get(context.Background(), getRedisKey(KeyUserWorkCountPF+userIDStr))
+	}
+
+	cmds, err := pipe.Exec(context.Background())
+	if err != nil && err != redis.Nil {
+		klog.Error("同步redis用户缓存到mysql失败,err: ", err)
+		return
+	}
+	for i, userID := range backupUserID {
+		totalFavorited, _ := strconv.ParseInt(cmds[i*5].(*redis.StringCmd).Val(), 10, 64)
+		favoriteCount, _ := strconv.ParseInt(cmds[i*5+1].(*redis.StringCmd).Val(), 10, 64)
+		followCount, _ := strconv.ParseInt(cmds[i*5+2].(*redis.StringCmd).Val(), 10, 64)
+		followerCount, _ := strconv.ParseInt(cmds[i*5+3].(*redis.StringCmd).Val(), 10, 64)
+		workCount, _ := strconv.ParseInt(cmds[i*5+4].(*redis.StringCmd).Val(), 10, 64)
+		_, err = qUser.WithContext(context.Background()).Where(qUser.ID.Eq(userID)).Updates(map[string]interface{}{
+			"total_favorited": totalFavorited,
+			"favorite_count":  favoriteCount,
+			"follow_count":    followCount,
+			"follower_count":  followerCount,
+			"work_count":      workCount,
 		})
-		cacheVideoID.Range(func(key, value any) bool {
-			backupVideoID[key.(int64)] = struct{}{}
-			cacheVideoID.Delete(key)
-			return true
-		})
-
-		// 同步redis的用户缓存到Mysql
-		for userID := range backupUserID {
-			userIDStr := strconv.FormatInt(userID, 10)
-			totalFavorited, _ := strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyUserTotalFavoritedPF+userIDStr)).Val(), 10, 64)
-			favoriteCount, _ := strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyUserFavoriteCountPF+userIDStr)).Val(), 10, 64)
-			followCount, _ := strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyUserFollowCountPF+userIDStr)).Val(), 10, 64)
-			followerCount, _ := strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyUserFollowerCountPF+userIDStr)).Val(), 10, 64)
-			workCount, _ := strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyUserWorkCountPF+userIDStr)).Val(), 10, 64)
-			_, err := qUser.WithContext(context.Background()).Where(qUser.ID.Eq(userID)).Updates(map[string]interface{}{
-				"total_favorited": totalFavorited,
-				"favorite_count":  favoriteCount,
-				"follow_count":    followCount,
-				"follower_count":  followerCount,
-				"work_count":      workCount,
-			})
-			if err != nil {
-				klog.Error("同步redis用户缓存到mysql失败")
-				continue
-			}
+		if err != nil {
+			klog.Error("同步redis用户缓存到mysql失败")
+			return
 		}
+	}
+}
+func syncVideo() {
+	// 备份缓存中的视频ID并清空
+	backupVideoID := make([]int64, 0, 100000)
 
-		// 同步redis中的视频缓存到Mysql
-		var videoFavoriteCount, videoCommentCount int64
-		for videoID := range backupVideoID {
-			videoIDStr := strconv.FormatInt(videoID, 10)
-			videoFavoriteCount, _ = strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyVideoFavoriteCountPF+videoIDStr)).Val(), 10, 64)
-			videoCommentCount, _ = strconv.ParseInt(rdb.Get(context.Background(), getRedisKey(KeyVideoCommentCountPF+videoIDStr)).Val(), 10, 64)
-			_, err := qVideo.WithContext(context.Background()).Where(qVideo.ID.Eq(videoID)).Updates(map[string]interface{}{
-				"favorite_count": videoFavoriteCount,
-				"comment_count":  videoCommentCount,
-			})
-			if err != nil {
-				klog.Error("同步redis视频缓存到mysql失败")
+	cacheVideoID.Range(func(key, value any) bool {
+		backupVideoID = append(backupVideoID, key.(int64))
+		cacheVideoID.Delete(key)
+		return true
+	})
+
+	// 同步redis中的视频缓存到Mysql
+	pipe := rdb.Pipeline()
+	for i, videoID := range backupVideoID {
+		videoIDStr := strconv.FormatInt(videoID, 10)
+		pipe.Get(context.Background(), getRedisKey(KeyVideoFavoriteCountPF+videoIDStr))
+		pipe.Get(context.Background(), getRedisKey(KeyVideoCommentCountPF+videoIDStr))
+		cmds, err := pipe.Exec(context.Background())
+		if err != nil {
+			if err == redis.Nil {
+				klog.Warnf("redis中不存在视频ID为%d的缓存", videoID)
 				continue
 			}
+			klog.Errorf("同步redis视频缓存到mysql失败,err: ", err)
+			continue
+		}
+		videoFavoriteCount, _ := strconv.ParseInt(cmds[i*2].(*redis.StringCmd).Val(), 10, 64)
+		videoCommentCount, _ := strconv.ParseInt(cmds[i*2+1].(*redis.StringCmd).Val(), 10, 64)
+		_, err = qVideo.WithContext(context.Background()).Where(qVideo.ID.Eq(videoID)).Updates(map[string]interface{}{
+			"favorite_count": videoFavoriteCount,
+			"comment_count":  videoCommentCount,
+		})
+		if err != nil {
+			klog.Error("同步redis视频缓存到mysql失败")
+			continue
 		}
 	}
 }
