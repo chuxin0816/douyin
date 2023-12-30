@@ -42,7 +42,7 @@ type comment struct {
 	commentDo commentDo
 
 	ALL        field.Asterisk
-	ID         field.Int64
+	ID         field.Int64 // 主键
 	VideoID    field.Int64
 	UserID     field.Int64
 	Content    field.String

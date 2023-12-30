@@ -12,7 +12,7 @@ const TableNameComment = "comments"
 
 // Comment mapped from table <comments>
 type Comment struct {
-	ID         int64     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
+	ID         int64     `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键" json:"id"` // 主键
 	VideoID    int64     `gorm:"column:video_id;not null" json:"video_id"`
 	UserID     int64     `gorm:"column:user_id;not null" json:"user_id"`
 	Content    string    `gorm:"column:content;not null" json:"content"`
