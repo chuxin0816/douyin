@@ -57,6 +57,10 @@ func (mq *commentMQ) consumeComment(ctx context.Context) {
 
 		klog.Error("failed to unmarshal message: ", err)
 	}
+	// 程序退出前关闭Reader
+	if err := mq.Reader.Close(); err != nil {
+		klog.Fatal("failed to close reader:", err)
+	}
 }
 
 func CreateComment(ctx context.Context, comment *model.Comment) error {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"douyin/dal"
 	"encoding/json"
-	"log"
 
 	"github.com/u2takey/go-utils/klog"
 )
@@ -37,8 +36,8 @@ func (mq *cacheMQ) removeCache(ctx context.Context) {
 			klog.Error("failed to read message: ", err)
 			break
 		}
-		msg := dbMessage{}
-		if err := json.Unmarshal(m.Value, &msg); err != nil {
+		msg := &dbMessage{}
+		if err := json.Unmarshal(m.Value, msg); err != nil {
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
@@ -52,6 +51,6 @@ func (mq *cacheMQ) removeCache(ctx context.Context) {
 
 	// 程序退出前关闭Reader
 	if err := mq.Reader.Close(); err != nil {
-		log.Fatal("failed to close reader:", err)
+		klog.Fatal("failed to close reader:", err)
 	}
 }

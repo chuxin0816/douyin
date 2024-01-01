@@ -204,3 +204,11 @@ func GetAuthorID(videoID int64) (int64, error) {
 
 	return authorID, err
 }
+
+func UpdateVideo(video *model.Video) error {
+	_, err := qVideo.WithContext(context.Background()).Where(qVideo.ID.Eq(video.ID)).Updates(map[string]any{
+		"favorite_count": video.FavoriteCount,
+		"comment_count":  video.CommentCount,
+	})
+	return err
+}

@@ -152,3 +152,14 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 
 	return userResponse
 }
+
+func UpdateUser(user *model.User) error {
+	_, err := qUser.WithContext(context.Background()).Where(qUser.ID.Eq(user.ID)).Updates(map[string]any{
+		"total_favorited": user.TotalFavorited,
+		"favorite_count":  user.FavoriteCount,
+		"follow_count":    user.FollowCount,
+		"follower_count":  user.FollowerCount,
+		"work_count":      user.WorkCount,
+	})
+	return err
+}

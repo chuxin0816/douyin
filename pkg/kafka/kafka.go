@@ -10,6 +10,8 @@ const (
 	topicCache    = "cache"
 	topicComment  = "comment"
 	topicFavorite = "favorite"
+	topicVideo    = "video"
+	topicUser     = "user"
 	groupID       = "backend"
 )
 
@@ -29,6 +31,9 @@ func Init() {
 	initCacheMQ()
 	initCommentMQ()
 	initFavoriteMQ()
+	initUserMQ()
+	initVideoMQ()
+	go syncRedisToMySQL()
 }
 
 func NewWriter(topic string) *kafka.Writer {
