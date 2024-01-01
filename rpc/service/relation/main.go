@@ -4,6 +4,7 @@ import (
 	"douyin/config"
 	"douyin/dal"
 	"douyin/logger"
+	"douyin/pkg/kafka"
 	relation "douyin/rpc/kitex_gen/relation/relationservice"
 	"net"
 
@@ -16,6 +17,7 @@ import (
 func main() {
 	config.Init()
 	logger.Init()
+	kafka.Init()
 	dal.Init()
 	defer dal.Close()
 

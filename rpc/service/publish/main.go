@@ -4,6 +4,7 @@ import (
 	"douyin/config"
 	"douyin/dal"
 	"douyin/logger"
+	"douyin/pkg/kafka"
 	"douyin/pkg/oss"
 	publish "douyin/rpc/kitex_gen/publish/publishservice"
 	"net"
@@ -18,6 +19,7 @@ func main() {
 	config.Init()
 	logger.Init()
 	oss.Init()
+	kafka.Init()
 	dal.Init()
 	defer dal.Close()
 

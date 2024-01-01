@@ -4,6 +4,7 @@ import (
 	"douyin/config"
 	"douyin/dal"
 	"douyin/logger"
+	"douyin/pkg/kafka"
 	"douyin/pkg/snowflake"
 	user "douyin/rpc/kitex_gen/user/userservice"
 	"net"
@@ -18,6 +19,7 @@ func main() {
 	config.Init()
 	logger.Init()
 	snowflake.Init()
+	kafka.Init()
 	dal.Init()
 	defer dal.Close()
 

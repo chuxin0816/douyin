@@ -18,9 +18,9 @@ var cacheMQInstance *cacheMQ
 func initCacheMQ() {
 	cacheMQInstance = &cacheMQ{
 		mq: &mq{
-			Topic:   topicCache,
-			Writer:  NewWriter(topicCache),
-			Reader:  NewReader(topicCache),
+			Topic:  topicCache,
+			Writer: NewWriter(topicCache),
+			Reader: NewReader(topicCache),
 		},
 	}
 
