@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-const TableNameUser = "users"
+const TableNameUser = "user"
 
-// User mapped from table <users>
+// User mapped from table <user>
 type User struct {
 	ID              int64     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	Name            string    `gorm:"column:name;not null" json:"name"`

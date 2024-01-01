@@ -72,8 +72,7 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 			klog.Error("更新relation表失败, err: ", err)
 		}
 	}
-
-	// 延迟后删除redis缓存
+	// 延迟后删除redis缓存, 由kafka任务处理
 	go func() {
 		time.Sleep(delayTime)
 		if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {

@@ -101,6 +101,20 @@ func Close() {
 	rdb.Close()
 }
 
+func RemoveFavoriteCache(ctx context.Context, userID, videoID string) {
+	key := getRedisKey(KeyUserFavoritePF + userID)
+	if err := rdb.SRem(ctx, key, videoID).Err(); err != nil {
+		klog.Error("删除redis缓存失败, err: ", err)
+	}
+}
+
+func RemoveRelationCache(ctx context.Context, userID, toUserID string) {
+	key := getRedisKey(KeyUserFollowerPF + toUserID)
+	if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
+		klog.Error("删除redis缓存失败, err: ", err)
+	}
+}
+
 func syncRedisToMySQL() {
 	ticker := time.NewTicker(aggregateInterval)
 	defer ticker.Stop()

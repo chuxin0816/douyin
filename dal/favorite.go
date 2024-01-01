@@ -87,14 +87,7 @@ func FavoriteAction(userID int64, videoID int64, actionType int64) error {
 			return err
 		}
 	}
-
-	// 延迟后删除redis缓存
-	go func() {
-		time.Sleep(delayTime)
-		if err := rdb.SRem(context.Background(), key, videoID).Err(); err != nil {
-			klog.Error("删除redis缓存失败, err: ", err)
-		}
-	}()
+	// 延迟后删除redis缓存, 由kafka任务处理
 
 	// 更新video的favorite_count字段
 	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyVideoFavoriteCountPF+strconv.FormatInt(videoID, 10)), actionType).Err(); err != nil {

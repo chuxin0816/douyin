@@ -16,6 +16,7 @@ require (
 	github.com/kitex-contrib/obs-opentelemetry/logging/logrus v0.0.0-20231211030816-1f9e0f7bcee3
 	github.com/kitex-contrib/registry-consul v0.0.0-20230406075225-7d341f036654
 	github.com/redis/go-redis/v9 v9.3.1
+	github.com/segmentio/kafka-go v0.4.47
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.8.4
 	github.com/u2takey/ffmpeg-go v0.5.0
@@ -71,6 +72,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -83,6 +85,7 @@ require (
 	github.com/nyaruka/phonenumbers v1.0.55 // indirect
 	github.com/oleiade/lane v1.0.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
+	github.com/pierrec/lz4/v4 v4.1.17 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect

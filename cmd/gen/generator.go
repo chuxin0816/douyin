@@ -3,7 +3,6 @@ package main
 // gorm gen configure
 
 import (
-	"douyin/config"
 	"fmt"
 
 	"gorm.io/driver/mysql"
@@ -21,15 +20,8 @@ func connectDB(dsn string) *gorm.DB {
 }
 
 func main() {
-	config.Init()
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai",
-		config.Conf.DatabaseConfig.MysqlConfig.User,
-		config.Conf.DatabaseConfig.MysqlConfig.Password,
-		config.Conf.DatabaseConfig.MysqlConfig.Host,
-		config.Conf.DatabaseConfig.MysqlConfig.Port,
-		config.Conf.DatabaseConfig.MysqlConfig.DBName,
-	)
+	dsn := "root:123456@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
 
 	// 指定生成代码的具体相对目录(相对当前文件)，默认为：./query
 	// 默认生成需要使用WithContext之后才可以查询的代码，但可以通过设置gen.WithoutContext禁用该模式

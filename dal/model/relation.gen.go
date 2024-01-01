@@ -4,9 +4,9 @@
 
 package model
 
-const TableNameRelation = "relations"
+const TableNameRelation = "relation"
 
-// Relation mapped from table <relations>
+// Relation mapped from table <relation>
 type Relation struct {
 	ID         int64 `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	UserID     int64 `gorm:"column:user_id;not null" json:"user_id"`

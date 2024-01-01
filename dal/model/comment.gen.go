@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-const TableNameComment = "comments"
+const TableNameComment = "comment"
 
-// Comment mapped from table <comments>
+// Comment mapped from table <comment>
 type Comment struct {
 	ID         int64     `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键" json:"id"` // 主键
 	VideoID    int64     `gorm:"column:video_id;not null" json:"video_id"`

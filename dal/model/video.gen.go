@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-const TableNameVideo = "videos"
+const TableNameVideo = "video"
 
-// Video mapped from table <videos>
+// Video mapped from table <video>
 type Video struct {
 	ID            int64     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	AuthorID      int64     `gorm:"column:author_id;not null" json:"author_id"`

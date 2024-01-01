@@ -4,9 +4,9 @@
 
 package model
 
-const TableNameMessage = "messages"
+const TableNameMessage = "message"
 
-// Message mapped from table <messages>
+// Message mapped from table <message>
 type Message struct {
 	ID         int64  `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	ToUserID   int64  `gorm:"column:to_user_id;not null" json:"to_user_id"`
