@@ -13,6 +13,6 @@ const (
 	KeyUserWorkCountPF      = "user:work_count:"      // 用户作品数
 )
 
-func getRedisKey(key string) string {
+func GetRedisKey(key string) string {
 	return Prefix + key
 }

@@ -6,51 +6,17 @@ import (
 	"douyin/dal/model"
 	"douyin/rpc/kitex_gen/comment"
 	"strconv"
-	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
-func PublishComment(userID, commentID, videoID int64, commentText string) error {
-	// 判断视频是否存在
-	if !bloomFilter.Test([]byte(strconv.FormatInt(videoID, 10))) {
-		return ErrVideoNotExist
-	}
-	video, err := qVideo.WithContext(context.Background()).
-		Where(qVideo.ID.Eq(videoID)).
-		Select(qVideo.AuthorID).First()
-	if err != nil {
-		klog.Error("查询视频失败, err: ", err)
-		return err
-	}
-	if video.AuthorID == 0 {
-		return ErrVideoNotExist
-	}
+func CreateComment(ctx context.Context, comment *model.Comment) error {
+	return qComment.WithContext(context.Background()).Create(comment)
+}
 
-	// 创建评论
-	comment := &model.Comment{
-		ID:         commentID,
-		VideoID:    videoID,
-		UserID:     userID,
-		Content:    commentText,
-		CreateTime: time.Now(),
-	}
-
-	if err := qComment.WithContext(context.Background()).Create(comment); err != nil {
-		klog.Error("创建评论失败, err: ", err)
-		return err
-	}
-
-	// 更新video的comment_count字段
-	if err := rdb.Incr(context.Background(), getRedisKey(KeyVideoCommentCountPF+strconv.FormatInt(videoID, 10))).Err(); err != nil {
-		klog.Error("更新video的comment_count字段失败, err: ", err)
-		return err
-	}
-
-	// 写入待同步切片
-	cacheVideoID.Store(videoID, struct{}{})
-
-	return nil
+func DeleteComment(ctx context.Context, commentID int64) (err error) {
+	_, err = qComment.WithContext(ctx).Where(qComment.ID.Eq(commentID)).Delete()
+	return
 }
 
 func GetCommentByID(commentID int64) (*model.Comment, error) {
@@ -64,33 +30,6 @@ func GetCommentByID(commentID int64) (*model.Comment, error) {
 		return nil, ErrCommentNotExist
 	}
 	return comment, nil
-}
-
-func DeleteComment(commentID, videoID int64) error {
-	// 判断视频是否存在
-	video, err := qVideo.WithContext(context.Background()).
-		Where(qVideo.ID.Eq(videoID)).
-		Select(qVideo.ID).First()
-	if err != nil {
-		klog.Error("查询视频失败, err: ", err)
-		return err
-	}
-	if video.ID == 0 {
-		return ErrVideoNotExist
-	}
-
-	// 删除评论
-	if _, err := qComment.WithContext(context.Background()).Where(qComment.ID.Eq(commentID)).Delete(); err != nil {
-		klog.Error("删除评论失败, err: ", err)
-		return err
-	}
-
-	// 更新视频评论数
-	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyVideoCommentCountPF+strconv.FormatInt(videoID, 10)), -1).Err(); err != nil {
-		klog.Error("更新视频评论数失败, err: ", err)
-		return err
-	}
-	return nil
 }
 
 func GetCommentList(videoID int64) ([]*model.Comment, error) {
@@ -109,4 +48,25 @@ func ToCommentResponse(userID *int64, mComment *model.Comment, user *model.User)
 		Content:    mComment.Content,
 		CreateDate: mComment.CreateTime.Format("01-02"),
 	}
+}
+
+func CheckVideoExist(videoID int64) error {
+	// 判断视频是否存在
+	if !bloomFilter.Test([]byte(strconv.FormatInt(videoID, 10))) {
+		return ErrVideoNotExist
+	}
+
+	video, err := qVideo.WithContext(context.Background()).
+		Where(qVideo.ID.Eq(videoID)).
+		Select(qVideo.ID).First()
+	if err != nil {
+		klog.Error("查询视频失败, err: ", err)
+		return err
+	}
+
+	if video.ID == 0 {
+		return ErrVideoNotExist
+	}
+
+	return nil
 }

@@ -1,7 +1,9 @@
 package dal
 
 import (
+	"context"
 	"douyin/config"
+	"douyin/dal/model"
 	"douyin/pkg/snowflake"
 	"testing"
 
@@ -14,12 +16,17 @@ func init() {
 	snowflake.Init()
 }
 func TestCommentAction(t *testing.T) {
-	err := PublishComment(12182603931062272, 1111111111, 10760595804524544, "test comment")
+	err := CreateComment(context.Background(), &model.Comment{
+		ID:      1111111111,
+		VideoID: 10760595804524544,
+		UserID:  10760595804524544,
+		Content: "test",
+	})
 	if err != nil {
 		t.Log(err)
 		t.Fail()
 	}
-	err = DeleteComment(1111111111, 10760595804524544)
+	err = DeleteComment(context.Background(), 1111111111)
 	if err != nil {
 		t.Log(err)
 		t.Fail()

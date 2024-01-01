@@ -72,8 +72,8 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 	}
 
 	// 修改用户发布视频数
-	key := getRedisKey(KeyUserWorkCountPF + strconv.FormatInt(userID, 10))
-	if err := rdb.Incr(context.Background(), key).Err(); err != nil {
+	key := GetRedisKey(KeyUserWorkCountPF + strconv.FormatInt(userID, 10))
+	if err := RDB.Incr(context.Background(), key).Err(); err != nil {
 		klog.Error("修改用户发布视频数失败")
 		return err
 	}
@@ -82,7 +82,7 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 	bloomFilter.Add([]byte(strconv.FormatInt(video.ID, 10)))
 
 	// 写入待同步切片
-	cacheUserID.Store(userID, struct{}{})
+	CacheUserID.Store(userID, struct{}{})
 
 	return nil
 }
@@ -159,13 +159,13 @@ func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *fe
 
 	// 使用singleflight避免缓存击穿和减少缓存压力
 	// 查询缓存判断是否点赞
-	key := getRedisKey(KeyUserFavoritePF + strconv.FormatInt(*userID, 10))
+	key := GetRedisKey(KeyUserFavoritePF + strconv.FormatInt(*userID, 10))
 	g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
-		if rdb.SIsMember(context.Background(), key, mVideo.ID).Val() {
+		if RDB.SIsMember(context.Background(), key, mVideo.ID).Val() {
 			video.IsFavorite = true
 			return nil, nil
 		}
@@ -181,11 +181,11 @@ func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *fe
 			video.IsFavorite = true
 			// 写入缓存
 			go func() {
-				if err := rdb.SAdd(context.Background(), key, mVideo.ID).Err(); err != nil {
+				if err := RDB.SAdd(context.Background(), key, mVideo.ID).Err(); err != nil {
 					klog.Error("将点赞信息写入缓存失败, err: ", err)
 					return
 				}
-				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
+				if err := RDB.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
 					klog.Error("设置缓存过期时间失败, err: ", err)
 					return
 				}

@@ -4,8 +4,11 @@ import (
 	"context"
 	"douyin/dal"
 	"douyin/dal/model"
+	"douyin/pkg/kafka"
 	"douyin/pkg/snowflake"
 	comment "douyin/rpc/kitex_gen/comment"
+	"errors"
+	"strconv"
 	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -16,16 +19,33 @@ type CommentServiceImpl struct{}
 
 // CommentAction implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.CommentActionRequest) (resp *comment.CommentActionResponse, err error) {
+	// 判断视频是否存在
+	if err := dal.CheckVideoExist(req.VideoId); err != nil {
+		if errors.Is(err, dal.ErrVideoNotExist) {
+			klog.Error("视频不存在, err: ", err)
+			return nil, err
+		}
+		klog.Error("查询视频失败, err: ", err)
+		return nil, err
+	}
+
 	mComment := &model.Comment{ID: *req.CommentId, VideoID: req.VideoId, UserID: req.UserId, Content: *req.CommentText}
 	// 判断actionType
 	if req.ActionType == 1 {
 		// 发布评论
 		mComment.ID = snowflake.GenerateID()
 		mComment.CreateTime = time.Now()
-		if err := dal.PublishComment(req.UserId, mComment.ID, req.VideoId, *req.CommentText); err != nil {
-			klog.Error("发布评论失败, err: ", err)
-			return nil, err
+
+		// 通过kafka异步写入数据库
+		kafka.CreateComment(ctx, mComment)
+
+		// 更新video的comment_count字段
+		if err := dal.RDB.Incr(context.Background(), dal.GetRedisKey(dal.KeyVideoCommentCountPF+strconv.FormatInt(req.VideoId, 10))).Err(); err != nil {
+			klog.Error("更新video的comment_count字段失败, err: ", err)
 		}
+
+		// 写入待同步切片
+		dal.CacheVideoID.Store(req.VideoId, struct{}{})
 	} else {
 		// 删除评论
 		mComment, err = dal.GetCommentByID(*req.CommentId)
@@ -39,8 +59,12 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 			return nil, err
 		}
 
-		if err := dal.DeleteComment(*req.CommentId, req.VideoId); err != nil {
-			klog.Error("删除评论失败", err)
+		// 通过kafka异步删除数据
+		kafka.DeleteComment(ctx, *req.CommentId)
+
+		// 更新视频评论数
+		if err := dal.RDB.IncrBy(context.Background(), dal.GetRedisKey(dal.KeyVideoCommentCountPF+strconv.FormatInt(req.VideoId, 10)), -1).Err(); err != nil {
+			klog.Error("更新视频评论数失败, err: ", err)
 			return nil, err
 		}
 	}

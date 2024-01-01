@@ -116,14 +116,14 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 
 	// 判断是否关注
 	// 从缓存中查询是否关注
-	key := getRedisKey(KeyUserFollowerPF + strconv.FormatInt(mUser.ID, 10))
+	key := GetRedisKey(KeyUserFollowerPF + strconv.FormatInt(mUser.ID, 10))
 	// 使用singleflight避免缓存击穿和减少缓存压力
 	g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
-		if rdb.SIsMember(context.Background(), key, followerID).Val() {
+		if RDB.SIsMember(context.Background(), key, followerID).Val() {
 			userResponse.IsFollow = true
 			return nil, nil
 		}
@@ -139,10 +139,10 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 			userResponse.IsFollow = true
 			// 写入缓存
 			go func() {
-				if err := rdb.SAdd(context.Background(), key, followerID).Err(); err != nil {
+				if err := RDB.SAdd(context.Background(), key, followerID).Err(); err != nil {
 					klog.Error("写入缓存失败, err: ", err)
 				}
-				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
+				if err := RDB.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
 					klog.Error("设置缓存过期时间失败, err: ", err)
 				}
 			}()

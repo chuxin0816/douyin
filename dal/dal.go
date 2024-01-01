@@ -42,11 +42,11 @@ var (
 
 var (
 	db           *gorm.DB
-	rdb          *redis.Client
+	RDB          *redis.Client
 	g            *singleflight.Group
 	bloomFilter  *bloom.BloomFilter
-	cacheUserID  sync.Map
-	cacheVideoID sync.Map
+	CacheUserID  sync.Map
+	CacheVideoID sync.Map
 )
 
 var (
@@ -74,12 +74,12 @@ func Init() {
 	}
 	query.SetDefault(db)
 
-	rdb = redis.NewClient(&redis.Options{
+	RDB = redis.NewClient(&redis.Options{
 		Addr:     config.Conf.DatabaseConfig.RedisConfig.Addr,
 		Password: config.Conf.DatabaseConfig.RedisConfig.Password,
 		DB:       config.Conf.DatabaseConfig.RedisConfig.DB,
 	})
-	err = rdb.Ping(context.Background()).Err()
+	err = RDB.Ping(context.Background()).Err()
 	if err != nil {
 		panic(err)
 	}
@@ -98,19 +98,19 @@ func Init() {
 }
 
 func Close() {
-	rdb.Close()
+	RDB.Close()
 }
 
 func RemoveFavoriteCache(ctx context.Context, userID, videoID string) {
-	key := getRedisKey(KeyUserFavoritePF + userID)
-	if err := rdb.SRem(ctx, key, videoID).Err(); err != nil {
+	key := GetRedisKey(KeyUserFavoritePF + userID)
+	if err := RDB.SRem(ctx, key, videoID).Err(); err != nil {
 		klog.Error("删除redis缓存失败, err: ", err)
 	}
 }
 
 func RemoveRelationCache(ctx context.Context, userID, toUserID string) {
-	key := getRedisKey(KeyUserFollowerPF + toUserID)
-	if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
+	key := GetRedisKey(KeyUserFollowerPF + toUserID)
+	if err := RDB.SRem(ctx, key, userID).Err(); err != nil {
 		klog.Error("删除redis缓存失败, err: ", err)
 	}
 }
@@ -129,22 +129,22 @@ func syncUser() {
 	// 备份缓存中的用户ID并清空
 	backupUserID := make([]int64, 0, 100000)
 
-	cacheUserID.Range(func(key, value any) bool {
+	CacheUserID.Range(func(key, value any) bool {
 		backupUserID = append(backupUserID, key.(int64))
-		cacheUserID.Delete(key)
+		CacheUserID.Delete(key)
 		return true
 	})
 
 	// 同步redis的用户缓存到Mysql
-	pipe := rdb.Pipeline()
+	pipe := RDB.Pipeline()
 
 	for _, userID := range backupUserID {
 		userIDStr := strconv.FormatInt(userID, 10)
-		pipe.Get(context.Background(), getRedisKey(KeyUserTotalFavoritedPF+userIDStr))
-		pipe.Get(context.Background(), getRedisKey(KeyUserFavoriteCountPF+userIDStr))
-		pipe.Get(context.Background(), getRedisKey(KeyUserFollowCountPF+userIDStr))
-		pipe.Get(context.Background(), getRedisKey(KeyUserFollowerCountPF+userIDStr))
-		pipe.Get(context.Background(), getRedisKey(KeyUserWorkCountPF+userIDStr))
+		pipe.Get(context.Background(), GetRedisKey(KeyUserTotalFavoritedPF+userIDStr))
+		pipe.Get(context.Background(), GetRedisKey(KeyUserFavoriteCountPF+userIDStr))
+		pipe.Get(context.Background(), GetRedisKey(KeyUserFollowCountPF+userIDStr))
+		pipe.Get(context.Background(), GetRedisKey(KeyUserFollowerCountPF+userIDStr))
+		pipe.Get(context.Background(), GetRedisKey(KeyUserWorkCountPF+userIDStr))
 	}
 
 	cmds, err := pipe.Exec(context.Background())
@@ -175,18 +175,18 @@ func syncVideo() {
 	// 备份缓存中的视频ID并清空
 	backupVideoID := make([]int64, 0, 100000)
 
-	cacheVideoID.Range(func(key, value any) bool {
+	CacheVideoID.Range(func(key, value any) bool {
 		backupVideoID = append(backupVideoID, key.(int64))
-		cacheVideoID.Delete(key)
+		CacheVideoID.Delete(key)
 		return true
 	})
 
 	// 同步redis中的视频缓存到Mysql
-	pipe := rdb.Pipeline()
+	pipe := RDB.Pipeline()
 	for i, videoID := range backupVideoID {
 		videoIDStr := strconv.FormatInt(videoID, 10)
-		pipe.Get(context.Background(), getRedisKey(KeyVideoFavoriteCountPF+videoIDStr))
-		pipe.Get(context.Background(), getRedisKey(KeyVideoCommentCountPF+videoIDStr))
+		pipe.Get(context.Background(), GetRedisKey(KeyVideoFavoriteCountPF+videoIDStr))
+		pipe.Get(context.Background(), GetRedisKey(KeyVideoCommentCountPF+videoIDStr))
 		cmds, err := pipe.Exec(context.Background())
 		if err != nil {
 			if err == redis.Nil {

@@ -12,14 +12,14 @@ import (
 
 func RelationAction(userID, toUserID int64, actionType int64) error {
 	// 查看是否关注
-	key := getRedisKey(KeyUserFollowerPF + strconv.FormatInt(toUserID, 10))
+	key := GetRedisKey(KeyUserFollowerPF + strconv.FormatInt(toUserID, 10))
 	// 使用singleflight避免缓存击穿和减少缓存压力
 	_, err, _ := g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
-		exist := rdb.SIsMember(context.Background(), key, userID).Val()
+		exist := RDB.SIsMember(context.Background(), key, userID).Val()
 		if exist {
 			if actionType == 1 {
 				klog.Error("已经关注过了")
@@ -37,11 +37,11 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 		if relation.ID != 0 && actionType == 1 {
 			// 写入redis缓存
 			go func() {
-				if err := rdb.SAdd(context.Background(), key, userID).Err(); err != nil {
+				if err := RDB.SAdd(context.Background(), key, userID).Err(); err != nil {
 					klog.Error("写入redis缓存失败, err: ", err)
 					return
 				}
-				if err := rdb.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
+				if err := RDB.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
 					klog.Error("设置redis缓存过期时间失败, err: ", err)
 					return
 				}
@@ -58,7 +58,7 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 	}
 
 	// 使用延迟双删策略
-	if err := rdb.SRem(context.Background(), key, userID).Err(); err != nil {
+	if err := RDB.SRem(context.Background(), key, userID).Err(); err != nil {
 		klog.Error("延迟双删策略失败, err: ", err)
 	}
 
@@ -75,17 +75,17 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 	// 延迟后删除redis缓存, 由kafka任务处理
 
 	// 更新user的follow_count和follower_count字段
-	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserFollowCountPF+strconv.FormatInt(userID, 10)), actionType).Err(); err != nil {
+	if err := RDB.IncrBy(context.Background(), GetRedisKey(KeyUserFollowCountPF+strconv.FormatInt(userID, 10)), actionType).Err(); err != nil {
 		klog.Error("更新user的follow_count字段失败, err: ", err)
 		return err
 	}
-	if err := rdb.IncrBy(context.Background(), getRedisKey(KeyUserFollowerCountPF+strconv.FormatInt(toUserID, 10)), actionType).Err(); err != nil {
+	if err := RDB.IncrBy(context.Background(), GetRedisKey(KeyUserFollowerCountPF+strconv.FormatInt(toUserID, 10)), actionType).Err(); err != nil {
 		klog.Error("更新user的follower_count字段失败, err: ", err)
 	}
 
 	// 写入待同步切片
-	cacheUserID.Store(userID, struct{}{})
-	cacheUserID.Store(toUserID, struct{}{})
+	CacheUserID.Store(userID, struct{}{})
+	CacheUserID.Store(toUserID, struct{}{})
 
 	return nil
 }
