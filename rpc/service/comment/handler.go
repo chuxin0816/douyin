@@ -37,7 +37,11 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 		mComment.CreateTime = time.Now()
 
 		// 通过kafka异步写入数据库
-		kafka.CreateComment(ctx, mComment)
+		err := kafka.CreateComment(ctx, mComment)
+		if err != nil {
+			klog.Error("通过kafka异步写入数据库失败, err: ", err)
+			return nil, err
+		}
 
 		// 更新video的comment_count字段
 		if err := dal.RDB.Incr(context.Background(), dal.GetRedisKey(dal.KeyVideoCommentCountPF+strconv.FormatInt(req.VideoId, 10))).Err(); err != nil {
@@ -60,7 +64,11 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 		}
 
 		// 通过kafka异步删除数据
-		kafka.DeleteComment(ctx, *req.CommentId)
+		err := kafka.DeleteComment(ctx, *req.CommentId)
+		if err != nil {
+			klog.Error("通过kafka异步删除数据失败, err: ", err)
+			return nil, err
+		}
 
 		// 更新视频评论数
 		if err := dal.RDB.IncrBy(context.Background(), dal.GetRedisKey(dal.KeyVideoCommentCountPF+strconv.FormatInt(req.VideoId, 10)), -1).Err(); err != nil {

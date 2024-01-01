@@ -142,7 +142,7 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 				if err := RDB.SAdd(context.Background(), key, followerID).Err(); err != nil {
 					klog.Error("写入缓存失败, err: ", err)
 				}
-				if err := RDB.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
+				if err := RDB.Expire(context.Background(), key, ExpireTime+GetRandomTime()).Err(); err != nil {
 					klog.Error("设置缓存过期时间失败, err: ", err)
 				}
 			}()

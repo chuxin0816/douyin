@@ -7,15 +7,16 @@ import (
 )
 
 const (
-	topicCache   = "cache"
-	topicComment = "comment"
-	groupID      = "backend"
+	topicCache    = "cache"
+	topicComment  = "comment"
+	topicFavorite = "favorite"
+	groupID       = "backend"
 )
 
 type mq struct {
-	Topic   string
-	Writer  *kafka.Writer
-	Reader  *kafka.Reader
+	Topic  string
+	Writer *kafka.Writer
+	Reader *kafka.Reader
 }
 
 type dbMessage struct {
@@ -27,6 +28,7 @@ type dbMessage struct {
 func Init() {
 	initCacheMQ()
 	initCommentMQ()
+	initFavoriteMQ()
 }
 
 func NewWriter(topic string) *kafka.Writer {

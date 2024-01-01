@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	expireTime        = time.Hour * 72
+	ExpireTime        = time.Hour * 72
 	timeout           = time.Second * 5
 	delayTime         = 100 * time.Second
 	randFactor        = 30
@@ -209,7 +209,7 @@ func syncVideo() {
 	}
 }
 
-func getRandomTime() time.Duration {
+func GetRandomTime() time.Duration {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return time.Duration(r.Intn(randFactor)) * time.Minute
 }

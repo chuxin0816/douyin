@@ -185,7 +185,7 @@ func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *fe
 					klog.Error("将点赞信息写入缓存失败, err: ", err)
 					return
 				}
-				if err := RDB.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
+				if err := RDB.Expire(context.Background(), key, ExpireTime+GetRandomTime()).Err(); err != nil {
 					klog.Error("设置缓存过期时间失败, err: ", err)
 					return
 				}
@@ -195,4 +195,12 @@ func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *fe
 	})
 
 	return video
+}
+
+func GetAuthorID(videoID int64) (int64, error) {
+	// 先查询作者的ID
+	var authorID int64
+	err := qVideo.WithContext(context.Background()).Where(qVideo.ID.Eq(videoID)).Select(qVideo.AuthorID).Scan(&authorID)
+
+	return authorID, err
 }

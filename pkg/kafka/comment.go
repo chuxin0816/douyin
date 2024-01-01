@@ -59,24 +59,24 @@ func (mq *commentMQ) consumeComment(ctx context.Context) {
 	}
 }
 
-func CreateComment(ctx context.Context, comment *model.Comment) {
+func CreateComment(ctx context.Context, comment *model.Comment) error {
 	value, err := json.Marshal(comment)
 	if err != nil {
 		klog.Error("failed to marshal message: ", err)
-		return
+		return err
 	}
-	commentMQInstance.Writer.WriteMessages(ctx, kafka.Message{
+	return commentMQInstance.Writer.WriteMessages(ctx, kafka.Message{
 		Value: value,
 	})
 }
 
-func DeleteComment(ctx context.Context, commentID int64) {
+func DeleteComment(ctx context.Context, commentID int64) error {
 	value, err := json.Marshal(commentID)
 	if err != nil {
 		klog.Error("failed to marshal message: ", err)
-		return
+		return err
 	}
-	commentMQInstance.Writer.WriteMessages(ctx, kafka.Message{
+	return commentMQInstance.Writer.WriteMessages(ctx, kafka.Message{
 		Value: value,
 	})
 }

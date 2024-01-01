@@ -41,7 +41,7 @@ func RelationAction(userID, toUserID int64, actionType int64) error {
 					klog.Error("写入redis缓存失败, err: ", err)
 					return
 				}
-				if err := RDB.Expire(context.Background(), key, expireTime+getRandomTime()).Err(); err != nil {
+				if err := RDB.Expire(context.Background(), key, ExpireTime+GetRandomTime()).Err(); err != nil {
 					klog.Error("设置redis缓存过期时间失败, err: ", err)
 					return
 				}
