@@ -29,7 +29,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	// 验证token
 	var userID *int64
 	if len(req.Token) > 0 {
-		userID := jwt.ParseToken(req.Token)
+		userID = jwt.ParseToken(req.Token)
 		if userID == nil {
 			Error(ctx, CodeNoAuthority)
 			klog.Error("token无效")
@@ -38,7 +38,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := client.Feed(&req.LatestTime, userID)
+	resp, err := client.Feed(req.LatestTime, userID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		klog.Error("业务逻辑处理失败, err: ", err)
