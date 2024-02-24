@@ -67,7 +67,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 		return nil, dal.ErrNotFavorite
 	}
 
-	// 删除redis缓存
+	// 删除redis关系缓存，采用延迟双删
 	if err := dal.RDB.SRem(context.Background(), key, req.VideoId).Err(); err != nil {
 		klog.Error("删除redis缓存失败, err: ", err)
 	}

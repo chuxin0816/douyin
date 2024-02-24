@@ -7,8 +7,11 @@
 ******
 ## 技术选型：
 * 使用Hertz作为http微服务框架，具有高性能，高可用，高扩展性的特点
-* 使用GORM操作Mysql，具有简单易用，防SQL注入等优点
-* 使用Redis作为缓存数据库，提高访问速度，使用延时双删保证数据一致性
+* 使用Kitex作为rpc微服务框架，具有高性能、强可扩展的特点
+* 使用GORM GEN操作Mysql，具有简单易用，防SQL注入等优点
+* 使用Redis作为缓存，提高访问速度，使用缓存双删和定时同步缓存保证数据一致性
+* 使用canal订阅Mysql的binlog，发送到kafka异步删除点赞和关注关系缓存
+* 使用kafka作为消息队列，对于高频的点赞和评论异步写入数据库，对于点赞数，粉丝数等数量缓存定时同步到数据库
 * 使用布隆过滤器防止缓存穿透，使用随机延迟防止缓存雪崩
 * 使用SingleFlight防止缓存击穿
 * 使用hertz集成的zap日志库记录日志
@@ -20,6 +23,7 @@
 * 使用令牌桶作为限流中间件
 * 使用viper读取配置文件并用air进行热更新
 * 使用docker-compose部署项目
-## 未来更新：
-1. 使用微服务架构重构代码
-2. 使用消息队列进行解耦，异步削峰
+## 代码生成:
+```shell
+cd rpc/service/feed
+kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
