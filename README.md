@@ -2,9 +2,11 @@
 > 字节跳动青训营项目，简易版抖音，实现了抖音的基本功能
 ## 接口文档：https://apifox.com/apidoc/shared-119368ca-740a-467c-99f3-f7ca31df29c2
 ## 项目演示地址：http://chuxin0816.com:8888/ (已关闭)
-### 项目部署
+### 项目部署(todo)
 项目使用docker-compose部署，在配置好config/config.yaml后运行docker-compose up即可启动项目
 ******
+## 项目结构：
+http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ## 技术选型：
 * 使用Hertz作为http微服务框架，具有高性能，高可用，高扩展性的特点
 * 使用Kitex作为rpc微服务框架，具有高性能、强可扩展的特点
