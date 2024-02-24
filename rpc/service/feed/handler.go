@@ -16,8 +16,15 @@ type FeedServiceImpl struct{}
 
 // Feed implements the FeedServiceImpl interface.
 func (s *FeedServiceImpl) Feed(ctx context.Context, req *feed.FeedRequest) (resp *feed.FeedResponse, err error) {
+	// 参数解析
+	latestTime := time.Unix(req.LatestTime, 0)
+	year := latestTime.Year()
+	if year < 1 || year > 9999 {
+		latestTime = time.Now()
+	}
+
 	// 查询视频列表
-	videoList, nextTime, err := dal.GetFeedList(req.UserId, time.Unix(req.LatestTime, 0), count)
+	videoList, nextTime, err := dal.GetFeedList(req.UserId, latestTime, count)
 	if err != nil {
 		hlog.Error("service.Feed: 查询视频列表失败")
 		return nil, err

@@ -19,10 +19,6 @@ const (
 // GetVideoList 获取视频Feed流
 func GetFeedList(userID *int64, latestTime time.Time, count int) (videoList []*feed.Video, nextTime *int64, err error) {
 	// 查询数据库
-	year := latestTime.Year()
-	if year < 1 || year > 9999 {
-		latestTime = time.Now()
-	}
 	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.UploadTime.Lte(latestTime)).
 		Order(qVideo.UploadTime.Desc()).Limit(count).Find()
 	if err != nil {
