@@ -30,11 +30,6 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	var userID *int64
 	if len(req.Token) > 0 {
 		userID = jwt.ParseToken(req.Token)
-		if userID == nil {
-			Error(ctx, CodeNoAuthority)
-			klog.Error("token无效")
-			return
-		}
 	}
 
 	// 业务逻辑处理

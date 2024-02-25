@@ -27,7 +27,7 @@ func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.Pub
 		return nil, err
 	}
 
-	// 保存视频到本地
+	// 上传视频到oss
 	go func() {
 		if err := oss.UploadFile(req.Data, uuidName); err != nil {
 			klog.Error("保存视频到oss失败, err: ", err)

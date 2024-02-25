@@ -6,7 +6,6 @@ import (
 	"douyin/pkg/jwt"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 func AuthMiddleware() app.HandlerFunc {
@@ -30,7 +29,6 @@ func AuthMiddleware() app.HandlerFunc {
 		userID := jwt.ParseToken(token)
 		if userID == nil {
 			controller.Error(ctx, controller.CodeNoAuthority)
-			klog.Error("token解析失败")
 			ctx.Abort()
 			return
 		}

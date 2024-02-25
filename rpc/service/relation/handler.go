@@ -41,7 +41,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 		return nil, err
 	}
 
-	//将models.User转换为user.User
+	//将model.User转换为user.User
 	userList := make([]*user.User, len(mUserList))
 	for i, u := range mUserList {
 		userList[i] = dal.ToUserResponse(req.UserId, u)
@@ -62,7 +62,7 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 		return nil, err
 	}
 
-	// 将models.User转换为user.User
+	// 将model.User转换为user.User
 	userList := make([]*user.User, len(mUserList))
 	for i, u := range mUserList {
 		userList[i] = dal.ToUserResponse(req.UserId, u)
@@ -104,7 +104,7 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 		}
 	}
 
-	// 将models.User转换为user.User
+	// 将model.User转换为user.User
 	friendList := make([]*user.User, len(dFriendList))
 	for i, u := range dFriendList {
 		friendList[i] = dal.ToUserResponse(req.UserId, u)

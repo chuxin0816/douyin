@@ -36,7 +36,7 @@ func GetFeedList(userID *int64, latestTime time.Time, count int) (videoList []*f
 		return nil, nil, err
 	}
 
-	// 将models.Video转换为response.VideoResponse
+	// 将model.Video转换为response.VideoResponse
 	videoList = make([]*feed.Video, len(mVideoList))
 	for idx, mVideo := range mVideoList {
 		videoList = append(videoList, ToVideoResponse(userID, mVideo, authors[idx]))
@@ -77,7 +77,7 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 	// 添加到布隆过滤器
 	bloomFilter.Add([]byte(strconv.FormatInt(video.ID, 10)))
 
-	// 写入待同步切片
+	// 写入待同步队列
 	CacheUserID.Store(userID, struct{}{})
 
 	return nil
@@ -100,7 +100,7 @@ func GetPublishList(userID *int64, authorID int64) ([]*feed.Video, error) {
 		return nil, err
 	}
 
-	// 将models.Video转换为response.VideoResponse
+	// 将model.Video转换为response.VideoResponse
 	videoList := make([]*feed.Video, 0, len(mVideoList))
 	for _, mVideo := range mVideoList {
 		videoList = append(videoList, ToVideoResponse(userID, mVideo, author))
@@ -128,7 +128,7 @@ func GetVideoList(userID *int64, videoIDs []int64) ([]*feed.Video, error) {
 		return nil, err
 	}
 
-	// 将models.Video转换为feed.Video
+	// 将model.Video转换为feed.Video
 	videoList := make([]*feed.Video, len(mVideoList))
 	for i, mVideo := range mVideoList {
 		videoList[i] = ToVideoResponse(userID, mVideo, authors[i])

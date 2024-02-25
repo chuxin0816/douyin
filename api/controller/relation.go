@@ -76,11 +76,6 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	var userID *int64
 	if len(req.Token) > 0 {
 		userID = jwt.ParseToken(req.Token)
-		if userID == nil {
-			Error(ctx, CodeNoAuthority)
-			klog.Error("token解析失败")
-			return
-		}
 	}
 
 	// 业务逻辑处理
@@ -108,11 +103,6 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	var userID *int64
 	if len(req.Token) > 0 {
 		userID = jwt.ParseToken(req.Token)
-		if userID == nil {
-			Error(ctx, CodeNoAuthority)
-			klog.Error("token解析失败")
-			return
-		}
 	}
 
 	// 业务逻辑处理
@@ -140,11 +130,6 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	var userID *int64
 	if len(req.Token) > 0 {
 		userID = jwt.ParseToken(req.Token)
-		if userID == nil {
-			Error(ctx, CodeNoAuthority)
-			klog.Error("token解析失败")
-			return
-		}
 	}
 
 	// 业务逻辑处理

@@ -39,7 +39,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 
 	// 验证大小
 	if req.Data.Size > 1024*1024*100 {
-		Error(ctx, CodeInvalidParam)
+		Error(ctx, CodeFileTooLarge)
 		klog.Error("文件太大")
 		return
 	}
@@ -90,11 +90,6 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	var userID *int64
 	if len(req.Token) > 0 {
 		userID = jwt.ParseToken(req.Token)
-		if userID == nil {
-			Error(ctx, CodeNoAuthority)
-			klog.Error("token解析失败")
-			return
-		}
 	}
 
 	// 业务逻辑处理
