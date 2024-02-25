@@ -42,7 +42,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	publishRouter := apiRouter.Group("/publish")
 	{
 		publishController := controller.NewPublishController()
-		publishRouter.POST("/action/", publishController.Action, middleware.AuthMiddleware())
+		publishRouter.POST("/action/", middleware.AuthMiddleware(), publishController.Action)
 		publishRouter.GET("/list/", publishController.List)
 	}
 
@@ -50,14 +50,14 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	favoriteRouter := apiRouter.Group("/favorite")
 	{
 		favoriteController := controller.NewFavoriteController()
-		favoriteRouter.POST("/action/", favoriteController.Action, middleware.AuthMiddleware())
+		favoriteRouter.POST("/action/", middleware.AuthMiddleware(), favoriteController.Action)
 		favoriteRouter.GET("/list/", favoriteController.List)
 	}
 
 	commentRouter := apiRouter.Group("/comment")
 	{
 		commentController := controller.NewCommentController()
-		commentRouter.POST("/action/", commentController.Action, middleware.AuthMiddleware())
+		commentRouter.POST("/action/", middleware.AuthMiddleware(), commentController.Action)
 		commentRouter.GET("/list/", commentController.List)
 	}
 
@@ -65,16 +65,16 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	relationRouter := apiRouter.Group("/relation")
 	{
 		relationController := controller.NewRelationController()
-		relationRouter.POST("/action/", relationController.Action, middleware.AuthMiddleware())
+		relationRouter.POST("/action/", middleware.AuthMiddleware(), relationController.Action)
 		relationRouter.GET("/follow/list/", relationController.FollowList)
 		relationRouter.GET("/follower/list/", relationController.FollowerList)
 		relationRouter.GET("/friend/list/", relationController.FriendList)
 	}
 
-	messageRouter := apiRouter.Group("/message", middleware.AuthMiddleware())
+	messageRouter := apiRouter.Group("/message")
 	{
 		messageController := controller.NewMessageController()
-		messageRouter.POST("/action/", messageController.Action)
+		messageRouter.POST("/action/", middleware.AuthMiddleware(), messageController.Action)
 		messageRouter.GET("/chat/", messageController.Chat)
 	}
 
