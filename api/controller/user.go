@@ -18,6 +18,7 @@ type UserInfoRequest struct {
 	Token  string `query:"token"`                   // 用户登录状态下设置
 }
 
+// 用户注册/登陆请求
 type UserRequest struct {
 	Username string `query:"username" vd:"0<len($)&&len($)<33"` // 注册用户名，最长32个字符
 	Password string `query:"password" vd:"5<len($)&&len($)<33"` // 密码，最长32个字符

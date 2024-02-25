@@ -111,6 +111,7 @@ func RemoveRelationCache(ctx context.Context, userID, toUserID string) {
 	}
 }
 
+// GetRandomTime 获取0-30min随机时间
 func GetRandomTime() time.Duration {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return time.Duration(r.Intn(randFactor)) * time.Minute
