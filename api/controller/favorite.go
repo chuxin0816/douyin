@@ -37,6 +37,11 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 		return
 	}
 
+	// 解析视频点赞类型
+	if req.ActionType == 2 {
+		req.ActionType = -1
+	}
+
 	// 从认证中间件中获取userID
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 

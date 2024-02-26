@@ -27,11 +27,6 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 		return nil, err
 	}
 
-	// 解析视频点赞类型
-	if req.ActionType == 2 {
-		req.ActionType = -1
-	}
-
 	// 获取作者ID
 	authorID, err := dal.GetAuthorID(req.VideoId)
 	if err != nil {

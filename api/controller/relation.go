@@ -37,6 +37,11 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 		return
 	}
 
+	// 解析关注类型
+	if req.ActionType == 2 {
+		req.ActionType = -1
+	}
+
 	// 从认证中间件中获取userID
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 

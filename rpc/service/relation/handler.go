@@ -15,11 +15,6 @@ type RelationServiceImpl struct{}
 
 // RelationAction implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.RelationActionRequest) (resp *relation.RelationActionResponse, err error) {
-	// 解析关注类型
-	if req.ActionType == 2 {
-		req.ActionType = -1
-	}
-
 	// 操作数据库
 	if err := dal.RelationAction(req.UserId, req.ToUserId, req.ActionType); err != nil {
 		klog.Error("操作数据库失败, err: ", err)
