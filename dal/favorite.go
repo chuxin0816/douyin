@@ -26,13 +26,17 @@ func CheckFavoriteExist(userID int64, videoID int64) (bool, error) {
 		var id int64
 		if err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Select(qFavorite.ID).Scan(&id); err != nil {
 			klog.Error("查询mysql中是否有记录失败, err: ", err)
-			return nil, err
+			return false, err
 		}
 		if id != 0 {
+			// 写入redis缓存
+			go func() {
+				RDB.SAdd(context.Background(), key, videoID)
+			}()
 			return true, nil
 		}
 
-		return nil, nil
+		return false, nil
 	})
 
 	return exist.(bool), err
