@@ -57,9 +57,9 @@ func RelationAction(ctx context.Context, userID, toUserID int64, actionType int6
 		return err
 	}
 
-	// 使用延迟双删策略
+	// 使用延时双删策略
 	if err := RDB.SRem(ctx, key, userID).Err(); err != nil {
-		klog.Error("延迟双删策略失败, err: ", err)
+		klog.Error("延时双删策略失败, err: ", err)
 	}
 
 	// 更新relation表
@@ -72,7 +72,7 @@ func RelationAction(ctx context.Context, userID, toUserID int64, actionType int6
 			klog.Error("更新relation表失败, err: ", err)
 		}
 	}
-	// 延迟后删除redis缓存, 由kafka任务处理
+	// 延时后删除redis缓存, 由kafka任务处理
 
 	// 更新user的follow_count和follower_count字段
 	if err := RDB.IncrBy(ctx, GetRedisKey(KeyUserFollowCountPF+strconv.FormatInt(userID, 10)), actionType).Err(); err != nil {

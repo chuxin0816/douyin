@@ -15,7 +15,7 @@ http请求->api/router->api/controller->rpc/client->rpc/service->dal
 * 使用Redis作为缓存，提高访问速度，使用缓存双删和定时同步缓存保证数据一致性
 * 使用canal订阅Mysql的binlog，发送到kafka异步删除点赞和关注关系缓存
 * 使用kafka作为消息队列，对于高频的点赞和评论异步写入数据库，对于点赞数，粉丝数等数量缓存定时同步到数据库
-* 使用布隆过滤器防止缓存穿透，使用随机延迟防止缓存雪崩
+* 使用布隆过滤器防止缓存穿透，使用随机延时防止缓存雪崩
 * 使用SingleFlight防止缓存击穿
 * 使用Kitex集成的zap日志库记录日志
 * 使用JWT作为用户认证，使用中间件进行认证
