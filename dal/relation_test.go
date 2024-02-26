@@ -1,6 +1,7 @@
 package dal
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -8,12 +9,12 @@ import (
 )
 
 func TestRelationAction(t *testing.T) {
-	err := RelationAction(12182603931062272, 10760536648060928, 1)
+	err := RelationAction(context.Background(),12182603931062272, 10760536648060928, 1)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
 	}
-	err = RelationAction(12182603931062272, 10760536648060928, -1)
+	err = RelationAction(context.Background(),12182603931062272, 10760536648060928, -1)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -21,19 +22,19 @@ func TestRelationAction(t *testing.T) {
 }
 
 func TestRelationActionErr(t *testing.T) {
-	err := RelationAction(12182603931062272, 10760536648060928, 1)
+	err := RelationAction(context.Background(),12182603931062272, 10760536648060928, 1)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
 	}
-	err = RelationAction(12182603931062272, 10760536648060928, 1)
+	err = RelationAction(context.Background(),12182603931062272, 10760536648060928, 1)
 	assert.Equal(t, ErrAlreadyFollow, err)
-	err = RelationAction(12182603931062272, 10760536648060928, -1)
+	err = RelationAction(context.Background(),12182603931062272, 10760536648060928, -1)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
 	}
 	time.Sleep(delayTime)
-	err = RelationAction(12182603931062272, 10760536648060928, -1)
+	err = RelationAction(context.Background(),12182603931062272, 10760536648060928, -1)
 	assert.Equal(t, ErrNotFollow, err)
 }

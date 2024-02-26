@@ -17,9 +17,9 @@ const (
 )
 
 // GetVideoList 获取视频Feed流
-func GetFeedList(userID *int64, latestTime time.Time, count int) (videoList []*feed.Video, nextTime *int64, err error) {
+func GetFeedList(ctx context.Context, userID *int64, latestTime time.Time, count int) (videoList []*feed.Video, nextTime *int64, err error) {
 	// 查询数据库
-	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.UploadTime.Lte(latestTime)).
+	mVideoList, err := qVideo.WithContext(ctx).Where(qVideo.UploadTime.Lte(latestTime)).
 		Order(qVideo.UploadTime.Desc()).Limit(count).Find()
 	if err != nil {
 		klog.Error("查询数据库失败")
@@ -31,7 +31,7 @@ func GetFeedList(userID *int64, latestTime time.Time, count int) (videoList []*f
 	for i, mVideo := range mVideoList {
 		authorIDs[i] = mVideo.AuthorID
 	}
-	authors, err := GetUserByIDs(authorIDs)
+	authors, err := GetUserByIDs(ctx, authorIDs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -39,7 +39,7 @@ func GetFeedList(userID *int64, latestTime time.Time, count int) (videoList []*f
 	// 将model.Video转换为response.VideoResponse
 	videoList = make([]*feed.Video, len(mVideoList))
 	for idx, mVideo := range mVideoList {
-		videoList = append(videoList, ToVideoResponse(userID, mVideo, authors[idx]))
+		videoList = append(videoList, ToVideoResponse(ctx, userID, mVideo, authors[idx]))
 	}
 
 	// 计算下次请求的时间
@@ -51,7 +51,7 @@ func GetFeedList(userID *int64, latestTime time.Time, count int) (videoList []*f
 }
 
 // SaveVideo 保存视频信息到数据库
-func SaveVideo(userID int64, videoName, coverName, title string) error {
+func SaveVideo(ctx context.Context, userID int64, videoName, coverName, title string) error {
 	video := &model.Video{
 		ID:         snowflake.GenerateID(),
 		AuthorID:   userID,
@@ -62,14 +62,14 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 	}
 
 	// 保存视频信息到数据库
-	if err := qVideo.WithContext(context.Background()).Create(video); err != nil {
+	if err := qVideo.WithContext(ctx).Create(video); err != nil {
 		klog.Error("保存视频信息到数据库失败")
 		return err
 	}
 
 	// 修改用户发布视频数
 	key := GetRedisKey(KeyUserWorkCountPF + strconv.FormatInt(userID, 10))
-	if err := RDB.Incr(context.Background(), key).Err(); err != nil {
+	if err := RDB.Incr(ctx, key).Err(); err != nil {
 		klog.Error("修改用户发布视频数失败")
 		return err
 	}
@@ -84,9 +84,9 @@ func SaveVideo(userID int64, videoName, coverName, title string) error {
 }
 
 // GetPublishList 获取用户发布的视频列表
-func GetPublishList(userID *int64, authorID int64) ([]*feed.Video, error) {
+func GetPublishList(ctx context.Context, userID *int64, authorID int64) ([]*feed.Video, error) {
 	// 查询视频信息
-	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.AuthorID.Eq(authorID)).
+	mVideoList, err := qVideo.WithContext(ctx).Where(qVideo.AuthorID.Eq(authorID)).
 		Order(qVideo.UploadTime.Desc()).Find()
 	if err != nil {
 		klog.Error("查询视频信息失败")
@@ -94,7 +94,7 @@ func GetPublishList(userID *int64, authorID int64) ([]*feed.Video, error) {
 	}
 
 	// 查询作者信息
-	author, err := GetUserByID(authorID)
+	author, err := GetUserByID(ctx, authorID)
 	if err != nil {
 		klog.Error("查询作者信息失败")
 		return nil, err
@@ -103,15 +103,15 @@ func GetPublishList(userID *int64, authorID int64) ([]*feed.Video, error) {
 	// 将model.Video转换为response.VideoResponse
 	videoList := make([]*feed.Video, 0, len(mVideoList))
 	for _, mVideo := range mVideoList {
-		videoList = append(videoList, ToVideoResponse(userID, mVideo, author))
+		videoList = append(videoList, ToVideoResponse(ctx, userID, mVideo, author))
 	}
 
 	return videoList, nil
 }
 
-func GetVideoList(userID *int64, videoIDs []int64) ([]*feed.Video, error) {
+func GetVideoList(ctx context.Context, userID *int64, videoIDs []int64) ([]*feed.Video, error) {
 	// 查询视频信息
-	mVideoList, err := qVideo.WithContext(context.Background()).Where(qVideo.ID.In(videoIDs...)).
+	mVideoList, err := qVideo.WithContext(ctx).Where(qVideo.ID.In(videoIDs...)).
 		Order(qVideo.UploadTime.Desc()).Find()
 	if err != nil {
 		klog.Error("查询视频信息失败")
@@ -123,7 +123,7 @@ func GetVideoList(userID *int64, videoIDs []int64) ([]*feed.Video, error) {
 	for i, mVideo := range mVideoList {
 		authorIDs[i] = mVideo.AuthorID
 	}
-	authors, err := GetUserByIDs(authorIDs)
+	authors, err := GetUserByIDs(ctx, authorIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -131,16 +131,16 @@ func GetVideoList(userID *int64, videoIDs []int64) ([]*feed.Video, error) {
 	// 将model.Video转换为feed.Video
 	videoList := make([]*feed.Video, len(mVideoList))
 	for i, mVideo := range mVideoList {
-		videoList[i] = ToVideoResponse(userID, mVideo, authors[i])
+		videoList[i] = ToVideoResponse(ctx, userID, mVideo, authors[i])
 	}
 
 	return videoList, nil
 }
 
-func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *feed.Video {
+func ToVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video, author *model.User) *feed.Video {
 	video := &feed.Video{
 		Id:            mVideo.ID,
-		Author:        ToUserResponse(userID, author),
+		Author:        ToUserResponse(ctx, userID, author),
 		CommentCount:  mVideo.CommentCount,
 		PlayUrl:       mVideo.PlayURL,
 		CoverUrl:      mVideo.CoverURL,
@@ -161,13 +161,13 @@ func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *fe
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
-		if RDB.SIsMember(context.Background(), key, mVideo.ID).Val() {
+		if RDB.SIsMember(ctx, key, mVideo.ID).Val() {
 			video.IsFavorite = true
 			return nil, nil
 		}
 
 		// 缓存未命中, 查询数据库
-		favorite, err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(*userID), qFavorite.VideoID.Eq(mVideo.ID)).
+		favorite, err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(*userID), qFavorite.VideoID.Eq(mVideo.ID)).
 			Select(qFavorite.ID).First()
 		if err != nil {
 			klog.Error("查询favorite表失败, err: ", err)
@@ -177,11 +177,11 @@ func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *fe
 			video.IsFavorite = true
 			// 写入缓存
 			go func() {
-				if err := RDB.SAdd(context.Background(), key, mVideo.ID).Err(); err != nil {
+				if err := RDB.SAdd(ctx, key, mVideo.ID).Err(); err != nil {
 					klog.Error("将点赞信息写入缓存失败, err: ", err)
 					return
 				}
-				if err := RDB.Expire(context.Background(), key, ExpireTime+GetRandomTime()).Err(); err != nil {
+				if err := RDB.Expire(ctx, key, ExpireTime+GetRandomTime()).Err(); err != nil {
 					klog.Error("设置缓存过期时间失败, err: ", err)
 					return
 				}
@@ -193,16 +193,16 @@ func ToVideoResponse(userID *int64, mVideo *model.Video, author *model.User) *fe
 	return video
 }
 
-func GetAuthorID(videoID int64) (int64, error) {
+func GetAuthorID(ctx context.Context, videoID int64) (int64, error) {
 	// 先查询作者的ID
 	var authorID int64
-	err := qVideo.WithContext(context.Background()).Where(qVideo.ID.Eq(videoID)).Select(qVideo.AuthorID).Scan(&authorID)
+	err := qVideo.WithContext(ctx).Where(qVideo.ID.Eq(videoID)).Select(qVideo.AuthorID).Scan(&authorID)
 
 	return authorID, err
 }
 
-func UpdateVideo(video *model.Video) error {
-	_, err := qVideo.WithContext(context.Background()).Where(qVideo.ID.Eq(video.ID)).Updates(map[string]any{
+func UpdateVideo(ctx context.Context, video *model.Video) error {
+	_, err := qVideo.WithContext(ctx).Where(qVideo.ID.Eq(video.ID)).Updates(map[string]any{
 		"favorite_count": video.FavoriteCount,
 		"comment_count":  video.CommentCount,
 	})

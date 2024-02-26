@@ -20,7 +20,7 @@ type UserServiceImpl struct{}
 // Register implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRequest) (resp *user.UserRegisterResponse, err error) {
 	// 查询用户是否已存在
-	mUser := dal.GetUserByName(req.Username)
+	mUser := dal.GetUserByName(ctx, req.Username)
 	if mUser != nil {
 		klog.Error("用户已存在")
 		return nil, dal.ErrUserExist
@@ -38,7 +38,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 	req.Password = string(bPassword)
 
 	// 保存用户信息
-	dal.CreateUser(req.Username, req.Password, userID)
+	dal.CreateUser(ctx, req.Username, req.Password, userID)
 	if err != nil {
 		klog.Error("保存用户信息失败")
 		return nil, err
@@ -59,14 +59,14 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 // Login implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest) (resp *user.UserLoginResponse, err error) {
 	// 查询用户是否存在
-	mUser := dal.GetUserByName(req.Username)
+	mUser := dal.GetUserByName(ctx, req.Username)
 	if mUser == nil {
 		klog.Error("用户不存在")
 		return nil, dal.ErrUserNotExist
 	}
 
 	// 校验密码
-	if err := bcrypt.CompareHashAndPassword([]byte(mUser.Password), []byte(req.Password));err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(mUser.Password), []byte(req.Password)); err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
 			klog.Info("密码错误, username: ", req.Username)
 			return nil, dal.ErrPassword
@@ -91,14 +91,14 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 // UserInfo implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserInfo(ctx context.Context, req *user.UserInfoRequest) (resp *user.UserInfoResponse, err error) {
 	// 查询用户信息
-	mUser, err := dal.GetUserByID(req.ToUserId)
+	mUser, err := dal.GetUserByID(ctx, req.ToUserId)
 	if err != nil {
 		klog.Error("查询用户信息失败")
 		return nil, err
 	}
-	
+
 	// 返回响应
-	resp = &user.UserInfoResponse{User: dal.ToUserResponse(req.UserId, mUser)}
+	resp = &user.UserInfoResponse{User: dal.ToUserResponse(ctx, req.UserId, mUser)}
 
 	return
 }

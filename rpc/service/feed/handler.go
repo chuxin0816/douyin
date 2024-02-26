@@ -24,7 +24,7 @@ func (s *FeedServiceImpl) Feed(ctx context.Context, req *feed.FeedRequest) (resp
 	}
 
 	// 查询视频列表
-	videoList, nextTime, err := dal.GetFeedList(req.UserId, latestTime, count)
+	videoList, nextTime, err := dal.GetFeedList(ctx, req.UserId, latestTime, count)
 	if err != nil {
 		hlog.Error("service.Feed: 查询视频列表失败")
 		return nil, err

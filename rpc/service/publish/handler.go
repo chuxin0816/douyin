@@ -35,7 +35,7 @@ func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.Pub
 	}()
 
 	// 操作数据库
-	if err := dal.SaveVideo(req.UserId, videoName, coverName, req.Title); err != nil {
+	if err := dal.SaveVideo(ctx, req.UserId, videoName, coverName, req.Title); err != nil {
 		klog.Error("操作数据库失败, err: ", err)
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.Pub
 // PublishList implements the PublishServiceImpl interface.
 func (s *PublishServiceImpl) PublishList(ctx context.Context, req *publish.PublishListRequest) (resp *publish.PublishListResponse, err error) {
 	// 查询视频列表
-	videoList, err := dal.GetPublishList(req.UserId, req.ToUserId)
+	videoList, err := dal.GetPublishList(ctx, req.UserId, req.ToUserId)
 	if err != nil {
 		klog.Error("查询视频列表失败, err: ", err)
 		return nil, err

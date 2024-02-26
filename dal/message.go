@@ -11,8 +11,8 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
-func MessageAction(userID, toUserID int64, content string) error {
-	err := qMessage.WithContext(context.Background()).Create(&model.Message{
+func MessageAction(ctx context.Context, userID, toUserID int64, content string) error {
+	err := qMessage.WithContext(ctx).Create(&model.Message{
 		ID:         snowflake.GenerateID(),
 		FromUserID: userID,
 		ToUserID:   toUserID,
@@ -27,8 +27,8 @@ func MessageAction(userID, toUserID int64, content string) error {
 	return nil
 }
 
-func MessageList(userID, toUserID, lastTime int64) ([]*message.Message, error) {
-	mMessageList, err := qMessage.WithContext(context.Background()).Where(qMessage.FromUserID.Eq(userID), qMessage.ToUserID.Eq(toUserID), qMessage.CreateTime.Gt(lastTime)).
+func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*message.Message, error) {
+	mMessageList, err := qMessage.WithContext(ctx).Where(qMessage.FromUserID.Eq(userID), qMessage.ToUserID.Eq(toUserID), qMessage.CreateTime.Gt(lastTime)).
 		Or(qMessage.FromUserID.Eq(toUserID), qMessage.ToUserID.Eq(userID), qMessage.CreateTime.Gt(lastTime)).
 		Order(qMessage.CreateTime).Find()
 	if err != nil {

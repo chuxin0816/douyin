@@ -18,7 +18,7 @@ type FavoriteServiceImpl struct{}
 // FavoriteAction implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.FavoriteActionRequest) (resp *favorite.FavoriteActionResponse, err error) {
 	// 判断视频是否存在
-	if err := dal.CheckVideoExist(req.VideoId); err != nil {
+	if err := dal.CheckVideoExist(ctx, req.VideoId); err != nil {
 		if errors.Is(err, dal.ErrVideoNotExist) {
 			klog.Error("视频不存在, videoID: ", req.VideoId)
 			return nil, err
@@ -28,14 +28,14 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	}
 
 	// 获取作者ID
-	authorID, err := dal.GetAuthorID(req.VideoId)
+	authorID, err := dal.GetAuthorID(ctx, req.VideoId)
 	if err != nil {
 		klog.Error("获取作者ID失败, err: ", err)
 		return nil, err
 	}
 
 	// 检查是否已经点赞
-	exist, err := dal.CheckFavoriteExist(req.UserId, req.VideoId)
+	exist, err := dal.CheckFavoriteExist(ctx, req.UserId, req.VideoId)
 	if err != nil {
 		klog.Error("检查是否已经点赞失败, err: ", err)
 		return nil, err
@@ -46,11 +46,11 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	if exist && req.ActionType == 1 {
 		// 写入redis缓存
 		go func() {
-			if err := dal.RDB.SAdd(context.Background(), key, req.VideoId).Err(); err != nil {
+			if err := dal.RDB.SAdd(ctx, key, req.VideoId).Err(); err != nil {
 				klog.Error("写入redis缓存失败, err: ", err)
 				return
 			}
-			if err := dal.RDB.Expire(context.Background(), key, dal.ExpireTime+dal.GetRandomTime()).Err(); err != nil {
+			if err := dal.RDB.Expire(ctx, key, dal.ExpireTime+dal.GetRandomTime()).Err(); err != nil {
 				klog.Error("设置redis缓存过期时间失败, err: ", err)
 				return
 			}
@@ -63,7 +63,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	}
 
 	// 删除redis关系缓存，采用延迟双删
-	if err := dal.RDB.SRem(context.Background(), key, req.VideoId).Err(); err != nil {
+	if err := dal.RDB.SRem(ctx, key, req.VideoId).Err(); err != nil {
 		klog.Error("删除redis缓存失败, err: ", err)
 	}
 
@@ -80,19 +80,19 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	// 更新缓存相关字段
 	go func() {
 		// 更新video的favorite_count字段
-		if err := dal.RDB.IncrBy(context.Background(), dal.GetRedisKey(dal.KeyVideoFavoriteCountPF+strconv.FormatInt(req.VideoId, 10)), req.ActionType).Err(); err != nil {
+		if err := dal.RDB.IncrBy(ctx, dal.GetRedisKey(dal.KeyVideoFavoriteCountPF+strconv.FormatInt(req.VideoId, 10)), req.ActionType).Err(); err != nil {
 			klog.Error("更新video的favorite_count字段失败, err: ", err)
 			return
 		}
 
 		// 更新user当前用户的favorite_count字段
-		if err := dal.RDB.IncrBy(context.Background(), dal.GetRedisKey(dal.KeyUserFavoriteCountPF+strconv.FormatInt(req.UserId, 10)), req.ActionType).Err(); err != nil {
+		if err := dal.RDB.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFavoriteCountPF+strconv.FormatInt(req.UserId, 10)), req.ActionType).Err(); err != nil {
 			klog.Error("更新user当前用户的favorite_count字段失败, err: ", err)
 			return
 		}
 
 		// 更新user作者的total_favorited字段
-		if err := dal.RDB.IncrBy(context.Background(), dal.GetRedisKey(dal.KeyUserTotalFavoritedPF+strconv.FormatInt(authorID, 10)), req.ActionType).Err(); err != nil {
+		if err := dal.RDB.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserTotalFavoritedPF+strconv.FormatInt(authorID, 10)), req.ActionType).Err(); err != nil {
 			klog.Error("更新user作者的total_favorited字段失败, err: ", err)
 			return
 		}
@@ -112,14 +112,14 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 // FavoriteList implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.FavoriteListRequest) (resp *favorite.FavoriteListResponse, err error) {
 	// 获取喜欢的视频ID列表
-	videoIDs, err := dal.GetFavoriteList(req.ToUserId)
+	videoIDs, err := dal.GetFavoriteList(ctx, req.ToUserId)
 	if err != nil {
 		klog.Error("获取喜欢的视频ID列表失败, err: ", err)
 		return nil, err
 	}
 
 	// 获取视频列表
-	videoList, err := dal.GetVideoList(req.UserId, videoIDs)
+	videoList, err := dal.GetVideoList(ctx, req.UserId, videoIDs)
 	if err != nil {
 		klog.Error("获取视频列表失败, err: ", err)
 		return nil, err

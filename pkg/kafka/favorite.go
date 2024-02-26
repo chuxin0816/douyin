@@ -44,7 +44,7 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 		}
 
 		// 检查记录是否存在
-		exist, err := dal.CheckFavoriteExist(favorite.UserID, favorite.VideoID)
+		exist, err := dal.CheckFavoriteExist(ctx, favorite.UserID, favorite.VideoID)
 		if err != nil {
 			klog.Error("检查记录是否存在失败, err: ", err)
 			continue
@@ -52,13 +52,13 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 
 		if exist {
 			// 存在则删除
-			if err := dal.DeleteFavorite(favorite.UserID, favorite.VideoID); err != nil {
+			if err := dal.DeleteFavorite(ctx, favorite.UserID, favorite.VideoID); err != nil {
 				klog.Error("删除记录失败, err: ", err)
 				continue
 			}
 		} else {
 			// 不存在则添加
-			if err := dal.CreateFavorite(favorite.UserID, favorite.VideoID); err != nil {
+			if err := dal.CreateFavorite(ctx, favorite.UserID, favorite.VideoID); err != nil {
 				klog.Error("添加记录失败, err: ", err)
 				continue
 			}

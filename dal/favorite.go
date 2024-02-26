@@ -9,7 +9,7 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
-func CheckFavoriteExist(userID int64, videoID int64) (bool, error) {
+func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool, error) {
 	// 查看是否已经点赞
 	key := GetRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
 	// 使用singleflight避免缓存击穿和减少缓存压力
@@ -18,20 +18,20 @@ func CheckFavoriteExist(userID int64, videoID int64) (bool, error) {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
-		exist := RDB.SIsMember(context.Background(), key, videoID).Val()
+		exist := RDB.SIsMember(ctx, key, videoID).Val()
 		if exist {
 			return true, nil
 		}
 		// 缓存未命中，查询mysql中是否有记录
 		var id int64
-		if err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Select(qFavorite.ID).Scan(&id); err != nil {
+		if err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Select(qFavorite.ID).Scan(&id); err != nil {
 			klog.Error("查询mysql中是否有记录失败, err: ", err)
 			return false, err
 		}
 		if id != 0 {
 			// 写入redis缓存
 			go func() {
-				RDB.SAdd(context.Background(), key, videoID)
+				RDB.SAdd(ctx, key, videoID)
 			}()
 			return true, nil
 		}
@@ -42,23 +42,23 @@ func CheckFavoriteExist(userID int64, videoID int64) (bool, error) {
 	return exist.(bool), err
 }
 
-func CreateFavorite(userID, videoID int64) error {
+func CreateFavorite(ctx context.Context, userID, videoID int64) error {
 	mFavorite := &model.Favorite{
 		UserID:  userID,
 		VideoID: videoID,
 	}
-	return qFavorite.WithContext(context.Background()).Create(mFavorite)
+	return qFavorite.WithContext(ctx).Create(mFavorite)
 }
 
-func DeleteFavorite(userID, videoID int64) error {
-	_, err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Delete()
+func DeleteFavorite(ctx context.Context, userID, videoID int64) error {
+	_, err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Delete()
 	return err
 }
 
-func GetFavoriteList(userID int64) ([]int64, error) {
+func GetFavoriteList(ctx context.Context, userID int64) ([]int64, error) {
 	// 先查询redis缓存
 	key := GetRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
-	videoIDStrs := RDB.SMembers(context.Background(), key).Val()
+	videoIDStrs := RDB.SMembers(ctx, key).Val()
 	if len(videoIDStrs) != 0 {
 		videoIDs := make([]int64, 0, len(videoIDStrs))
 		for _, videoIDStr := range videoIDStrs {
@@ -75,7 +75,7 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
-		if err := qFavorite.WithContext(context.Background()).Where(qFavorite.UserID.Eq(userID)).Select(qFavorite.VideoID).Scan(&videoIDs); err != nil {
+		if err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID)).Select(qFavorite.VideoID).Scan(&videoIDs); err != nil {
 			klog.Error("查询favorite表失败, err: ", err)
 			return nil, err
 		}
@@ -85,10 +85,10 @@ func GetFavoriteList(userID int64) ([]int64, error) {
 			go func() {
 				pipeline := RDB.Pipeline()
 				for _, videoID := range videoIDs {
-					pipeline.SAdd(context.Background(), key, videoID)
+					pipeline.SAdd(ctx, key, videoID)
 				}
-				pipeline.Expire(context.Background(), key, ExpireTime+GetRandomTime())
-				if _, err := pipeline.Exec(context.Background()); err != nil {
+				pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
+				if _, err := pipeline.Exec(ctx); err != nil {
 					klog.Error("写入redis缓存失败, err: ", err)
 				}
 			}()

@@ -11,13 +11,13 @@ import (
 )
 
 // GetUserByID 用户通过作者id查询作者信息
-func GetUserByID(authorID int64) (*model.User, error) {
+func GetUserByID(ctx context.Context, authorID int64) (*model.User, error) {
 	// 先判断布隆过滤器中是否存在
 	if !bloomFilter.Test([]byte(strconv.FormatInt(authorID, 10))) {
 		return nil, ErrUserNotExist
 	}
 
-	user, err := qUser.WithContext(context.Background()).Where(qUser.ID.Eq(authorID)).First()
+	user, err := qUser.WithContext(ctx).Where(qUser.ID.Eq(authorID)).First()
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func GetUserByID(authorID int64) (*model.User, error) {
 }
 
 // GetUserByIDs 根据用户id列表查询用户信息
-func GetUserByIDs(authorIDs []int64) ([]*model.User, error) {
+func GetUserByIDs(ctx context.Context, authorIDs []int64) ([]*model.User, error) {
 	// 先判断布隆过滤器中是否存在
 	for _, id := range authorIDs {
 		if !bloomFilter.Test([]byte(strconv.FormatInt(id, 10))) {
@@ -38,7 +38,7 @@ func GetUserByIDs(authorIDs []int64) ([]*model.User, error) {
 		}
 	}
 	// 查询数据库
-	users, err := qUser.WithContext(context.Background()).Where(qUser.ID.In(authorIDs...)).Find()
+	users, err := qUser.WithContext(ctx).Where(qUser.ID.In(authorIDs...)).Find()
 	if err != nil {
 		klog.Error("查询数据库失败")
 		return nil, err
@@ -61,13 +61,13 @@ func GetUserByIDs(authorIDs []int64) ([]*model.User, error) {
 }
 
 // GetUserByName 根据用户名查询用户信息, 如果用户不存在则返回nil
-func GetUserByName(username string) *model.User {
+func GetUserByName(ctx context.Context, username string) *model.User {
 	// 先判断布隆过滤器中是否存在
 	if !bloomFilter.Test([]byte(username)) {
 		return nil
 	}
 
-	user, err := qUser.WithContext(context.Background()).Where(qUser.Name.Eq(username)).First()
+	user, err := qUser.WithContext(ctx).Where(qUser.Name.Eq(username)).First()
 	if err != nil {
 		klog.Error("查询数据库失败")
 		return nil
@@ -78,7 +78,7 @@ func GetUserByName(username string) *model.User {
 	return user
 }
 
-func CreateUser(username, password string, userID int64) error {
+func CreateUser(ctx context.Context, username, password string, userID int64) error {
 	// 写入布隆过滤器
 	bloomFilter.Add([]byte(strconv.FormatInt(userID, 10)))
 	bloomFilter.Add([]byte(username))
@@ -88,14 +88,14 @@ func CreateUser(username, password string, userID int64) error {
 		Name:     username,
 		Password: password,
 	}
-	if err := qUser.WithContext(context.Background()).Create(user); err != nil {
+	if err := qUser.WithContext(ctx).Create(user); err != nil {
 		klog.Error("保存用户信息失败")
 		return err
 	}
 	return nil
 }
 
-func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
+func ToUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *user.User {
 	userResponse := &user.User{
 		Id:              mUser.ID,
 		Name:            mUser.Name,
@@ -123,12 +123,12 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
-		if RDB.SIsMember(context.Background(), key, followerID).Val() {
+		if RDB.SIsMember(ctx, key, followerID).Val() {
 			userResponse.IsFollow = true
 			return nil, nil
 		}
 
-		relation, err := qRelation.WithContext(context.Background()).
+		relation, err := qRelation.WithContext(ctx).
 			Where(qRelation.UserID.Eq(mUser.ID), qRelation.FollowerID.Eq(*followerID)).
 			Select(qRelation.ID).First()
 		if err != nil {
@@ -139,10 +139,10 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 			userResponse.IsFollow = true
 			// 写入缓存
 			go func() {
-				if err := RDB.SAdd(context.Background(), key, followerID).Err(); err != nil {
+				if err := RDB.SAdd(ctx, key, followerID).Err(); err != nil {
 					klog.Error("写入缓存失败, err: ", err)
 				}
-				if err := RDB.Expire(context.Background(), key, ExpireTime+GetRandomTime()).Err(); err != nil {
+				if err := RDB.Expire(ctx, key, ExpireTime+GetRandomTime()).Err(); err != nil {
 					klog.Error("设置缓存过期时间失败, err: ", err)
 				}
 			}()
@@ -153,8 +153,8 @@ func ToUserResponse(followerID *int64, mUser *model.User) *user.User {
 	return userResponse
 }
 
-func UpdateUser(user *model.User) error {
-	_, err := qUser.WithContext(context.Background()).Where(qUser.ID.Eq(user.ID)).Updates(map[string]any{
+func UpdateUser(ctx context.Context, user *model.User) error {
+	_, err := qUser.WithContext(ctx).Where(qUser.ID.Eq(user.ID)).Updates(map[string]any{
 		"total_favorited": user.TotalFavorited,
 		"favorite_count":  user.FavoriteCount,
 		"follow_count":    user.FollowCount,

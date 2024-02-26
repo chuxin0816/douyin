@@ -39,7 +39,7 @@ func (mq *userMQ) consumeUser(ctx context.Context) {
 			continue
 		}
 		// 更新数据
-		if err := dal.UpdateUser(user); err != nil {
+		if err := dal.UpdateUser(ctx, user); err != nil {
 			klog.Error("failed to update user: ", err)
 			continue
 		}

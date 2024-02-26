@@ -1,13 +1,14 @@
 package dal
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetUserByID(t *testing.T) {
-	user, err := GetUserByID(12182603931062272)
+	user, err := GetUserByID(context.Background(), 12182603931062272)
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -16,7 +17,7 @@ func TestGetUserByID(t *testing.T) {
 }
 
 func TestGetUserByIDs(t *testing.T) {
-	users, err := GetUserByIDs([]int64{12182603931062272, 10760536648060928})
+	users, err := GetUserByIDs(context.Background(), []int64{12182603931062272, 10760536648060928})
 	if err != nil {
 		t.Log(err)
 		t.Fail()
@@ -25,12 +26,12 @@ func TestGetUserByIDs(t *testing.T) {
 }
 
 func TestGetUserByName(t *testing.T) {
-	user := GetUserByName("test01")
+	user := GetUserByName(context.Background(), "test01")
 	assert.NotNil(t, user)
 }
 
 func TestCreateUser(t *testing.T) {
-	err := CreateUser("test02", "123456", 1111)
+	err := CreateUser(context.Background(), "test02", "123456", 1111)
 	if err != nil {
 		t.Log(err)
 		t.Fail()

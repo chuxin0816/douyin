@@ -16,7 +16,7 @@ type RelationServiceImpl struct{}
 // RelationAction implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.RelationActionRequest) (resp *relation.RelationActionResponse, err error) {
 	// 操作数据库
-	if err := dal.RelationAction(req.UserId, req.ToUserId, req.ActionType); err != nil {
+	if err := dal.RelationAction(ctx, req.UserId, req.ToUserId, req.ActionType); err != nil {
 		klog.Error("操作数据库失败, err: ", err)
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 // RelationFollowList implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relation.RelationFollowListRequest) (resp *relation.RelationFollowListResponse, err error) {
 	// 操作数据库
-	mUserList, err := dal.FollowList(req.ToUserId)
+	mUserList, err := dal.FollowList(ctx, req.ToUserId)
 	if err != nil {
 		klog.Error("操作数据库失败, err: ", err)
 		return nil, err
@@ -39,7 +39,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 	//将model.User转换为user.User
 	userList := make([]*user.User, len(mUserList))
 	for i, u := range mUserList {
-		userList[i] = dal.ToUserResponse(req.UserId, u)
+		userList[i] = dal.ToUserResponse(ctx, req.UserId, u)
 	}
 
 	// 返回响应
@@ -51,7 +51,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 // RelationFollowerList implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *relation.RelationFollowerListRequest) (resp *relation.RelationFollowerListResponse, err error) {
 	// 操作数据库
-	mUserList, err := dal.FollowerList(req.ToUserId)
+	mUserList, err := dal.FollowerList(ctx, req.ToUserId)
 	if err != nil {
 		klog.Error("操作数据库失败, err: ", err)
 		return nil, err
@@ -60,7 +60,7 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 	// 将model.User转换为user.User
 	userList := make([]*user.User, len(mUserList))
 	for i, u := range mUserList {
-		userList[i] = dal.ToUserResponse(req.UserId, u)
+		userList[i] = dal.ToUserResponse(ctx, req.UserId, u)
 	}
 
 	// 返回响应
@@ -72,14 +72,14 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 // RelationFriendList implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relation.RelationFriendListRequest) (resp *relation.RelationFriendListResponse, err error) {
 	// 获取关注列表
-	mFollowList, err := dal.FollowList(req.ToUserId)
+	mFollowList, err := dal.FollowList(ctx, req.ToUserId)
 	if err != nil {
 		klog.Error("获取关注列表失败, err: ", err)
 		return nil, err
 	}
 
 	// 获取粉丝列表
-	mFollowerList, err := dal.FollowerList(req.ToUserId)
+	mFollowerList, err := dal.FollowerList(ctx, req.ToUserId)
 	if err != nil {
 		klog.Error("获取粉丝列表失败, err: ", err)
 		return nil, err
@@ -102,7 +102,7 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 	// 将model.User转换为user.User
 	friendList := make([]*user.User, len(dFriendList))
 	for i, u := range dFriendList {
-		friendList[i] = dal.ToUserResponse(req.UserId, u)
+		friendList[i] = dal.ToUserResponse(ctx, req.UserId, u)
 	}
 
 	// 返回响应

@@ -11,7 +11,7 @@ import (
 )
 
 func CreateComment(ctx context.Context, comment *model.Comment) error {
-	return qComment.WithContext(context.Background()).Create(comment)
+	return qComment.WithContext(ctx).Create(comment)
 }
 
 func DeleteComment(ctx context.Context, commentID int64) (err error) {
@@ -19,8 +19,8 @@ func DeleteComment(ctx context.Context, commentID int64) (err error) {
 	return
 }
 
-func GetCommentByID(commentID int64) (*model.Comment, error) {
-	comment, err := qComment.WithContext(context.Background()).
+func GetCommentByID(ctx context.Context, commentID int64) (*model.Comment, error) {
+	comment, err := qComment.WithContext(ctx).
 		Where(qComment.ID.Eq(commentID)).First()
 	if err != nil {
 		klog.Error("查询评论失败, err: ", err)
@@ -32,8 +32,8 @@ func GetCommentByID(commentID int64) (*model.Comment, error) {
 	return comment, nil
 }
 
-func GetCommentList(videoID int64) ([]*model.Comment, error) {
-	commentList, err := qComment.WithContext(context.Background()).Where(qComment.VideoID.Eq(videoID)).Find()
+func GetCommentList(ctx context.Context, videoID int64) ([]*model.Comment, error) {
+	commentList, err := qComment.WithContext(ctx).Where(qComment.VideoID.Eq(videoID)).Find()
 	if err != nil {
 		klog.Error("查询评论列表失败, err: ", err)
 		return nil, err
@@ -41,22 +41,22 @@ func GetCommentList(videoID int64) ([]*model.Comment, error) {
 	return commentList, nil
 }
 
-func ToCommentResponse(userID *int64, mComment *model.Comment, user *model.User) *comment.Comment {
+func ToCommentResponse(ctx context.Context, userID *int64, mComment *model.Comment, user *model.User) *comment.Comment {
 	return &comment.Comment{
 		Id:         mComment.ID,
-		User:       ToUserResponse(userID, user),
+		User:       ToUserResponse(ctx, userID, user),
 		Content:    mComment.Content,
 		CreateDate: mComment.CreateTime.Format("01-02"),
 	}
 }
 
-func CheckVideoExist(videoID int64) error {
+func CheckVideoExist(ctx context.Context, videoID int64) error {
 	// 判断视频是否存在
 	if !bloomFilter.Test([]byte(strconv.FormatInt(videoID, 10))) {
 		return ErrVideoNotExist
 	}
 
-	video, err := qVideo.WithContext(context.Background()).
+	video, err := qVideo.WithContext(ctx).
 		Where(qVideo.ID.Eq(videoID)).
 		Select(qVideo.ID).First()
 	if err != nil {

@@ -38,7 +38,7 @@ func (mq *videoMQ) consumeVideo(ctx context.Context) {
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
-		if err := dal.UpdateVideo(video); err != nil {
+		if err := dal.UpdateVideo(ctx, video); err != nil {
 			klog.Error("failed to update video: ", err)
 			continue
 		}
