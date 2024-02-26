@@ -46,19 +46,18 @@ func syncUser() {
 		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyUserFollowCountPF+userIDStr))
 		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyUserFollowerCountPF+userIDStr))
 		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyUserWorkCountPF+userIDStr))
-	}
 
-	cmds, err := pipe.Exec(context.Background())
-	if err != nil && err != redis.Nil {
-		klog.Error("同步redis用户缓存到mysql失败,err: ", err)
-		return
-	}
-	for i, userID := range backupUserID {
-		totalFavorited, _ := strconv.ParseInt(cmds[i*5].(*redis.StringCmd).Val(), 10, 64)
-		favoriteCount, _ := strconv.ParseInt(cmds[i*5+1].(*redis.StringCmd).Val(), 10, 64)
-		followCount, _ := strconv.ParseInt(cmds[i*5+2].(*redis.StringCmd).Val(), 10, 64)
-		followerCount, _ := strconv.ParseInt(cmds[i*5+3].(*redis.StringCmd).Val(), 10, 64)
-		workCount, _ := strconv.ParseInt(cmds[i*5+4].(*redis.StringCmd).Val(), 10, 64)
+		cmds, err := pipe.Exec(context.Background())
+		if err != nil && err != redis.Nil {
+			klog.Error("同步redis用户缓存到mysql失败,err: ", err)
+			return
+		}
+
+		totalFavorited, _ := strconv.ParseInt(cmds[0].(*redis.StringCmd).Val(), 10, 64)
+		favoriteCount, _ := strconv.ParseInt(cmds[1].(*redis.StringCmd).Val(), 10, 64)
+		followCount, _ := strconv.ParseInt(cmds[2].(*redis.StringCmd).Val(), 10, 64)
+		followerCount, _ := strconv.ParseInt(cmds[3].(*redis.StringCmd).Val(), 10, 64)
+		workCount, _ := strconv.ParseInt(cmds[4].(*redis.StringCmd).Val(), 10, 64)
 		mUser := &model.User{
 			ID:             userID,
 			TotalFavorited: totalFavorited,
@@ -85,10 +84,11 @@ func syncVideo() {
 
 	// 同步redis中的视频缓存到Mysql
 	pipe := dal.RDB.Pipeline()
-	for i, videoID := range backupVideoID {
+	for _, videoID := range backupVideoID {
 		videoIDStr := strconv.FormatInt(videoID, 10)
 		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyVideoFavoriteCountPF+videoIDStr))
 		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyVideoCommentCountPF+videoIDStr))
+
 		cmds, err := pipe.Exec(context.Background())
 		if err != nil {
 			if err == redis.Nil {
@@ -98,8 +98,9 @@ func syncVideo() {
 			klog.Errorf("同步redis视频缓存到mysql失败,err: ", err)
 			continue
 		}
-		videoFavoriteCount, _ := strconv.ParseInt(cmds[i*2].(*redis.StringCmd).Val(), 10, 64)
-		videoCommentCount, _ := strconv.ParseInt(cmds[i*2+1].(*redis.StringCmd).Val(), 10, 64)
+
+		videoFavoriteCount, _ := strconv.ParseInt(cmds[0].(*redis.StringCmd).Val(), 10, 64)
+		videoCommentCount, _ := strconv.ParseInt(cmds[1].(*redis.StringCmd).Val(), 10, 64)
 		mVideo := &model.Video{
 			ID:            videoID,
 			FavoriteCount: videoFavoriteCount,
