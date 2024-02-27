@@ -75,10 +75,7 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 验证token
-	var userID *int64
-	if len(req.Token) > 0 {
-		userID = jwt.ParseToken(req.Token)
-	}
+	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
 	resp, err := client.CommentList(userID, req.VideoID)

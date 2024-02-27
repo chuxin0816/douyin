@@ -34,6 +34,9 @@ func GenerateToken(userID int64) (string, error) {
 }
 
 func ParseToken(tokenStr string) (userID *int64) {
+	if tokenStr == "" {
+		return nil
+	}
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
