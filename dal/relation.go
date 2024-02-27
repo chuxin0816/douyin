@@ -10,31 +10,27 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
-func RelationAction(ctx context.Context, userID, toUserID int64, actionType int64) error {
-	// 查看是否关注
+func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, error) {
 	key := GetRedisKey(KeyUserFollowerPF + strconv.FormatInt(toUserID, 10))
 	// 使用singleflight避免缓存击穿和减少缓存压力
-	_, err, _ := g.Do(key, func() (interface{}, error) {
+	exist, err, _ := g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
-		exist := RDB.SIsMember(ctx, key, userID).Val()
-		if exist {
-			if actionType == 1 {
-				klog.Error("已经关注过了")
-				return nil, ErrAlreadyFollow
-			}
-			return nil, nil
+		if RDB.SIsMember(ctx, key, userID).Val() {
+			return true, nil
 		}
+
 		// 缓存未命中, 查询数据库
 		relation, err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).
 			Select(qRelation.ID).First()
 		if err != nil {
 			klog.Error("查看是否关注失败, err: ", err)
-			return nil, err
+			return false, err
 		}
-		if relation.ID != 0 && actionType == 1 {
+
+		if relation.ID != 0 {
 			// 写入redis缓存
 			go func() {
 				if err := RDB.SAdd(ctx, key, userID).Err(); err != nil {
@@ -46,50 +42,26 @@ func RelationAction(ctx context.Context, userID, toUserID int64, actionType int6
 					return
 				}
 			}()
-			return nil, ErrAlreadyFollow
+			return true, nil
 		}
-		if relation.ID == 0 && actionType == -1 {
-			return nil, ErrNotFollow
-		}
-		return nil, nil
+
+		return false, nil
 	})
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	// 使用延时双删策略
-	if err := RDB.SRem(ctx, key, userID).Err(); err != nil {
-		klog.Error("延时双删策略失败, err: ", err)
-	}
-
-	// 更新relation表
-	if actionType == 1 {
-		if err := qRelation.WithContext(ctx).Create(&model.Relation{UserID: toUserID, FollowerID: userID}); err != nil {
-			klog.Error("更新relation表失败, err: ", err)
-		}
-	} else {
-		if _, err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).Delete(); err != nil {
-			klog.Error("更新relation表失败, err: ", err)
-		}
-	}
-	// 延时后删除redis缓存, 由kafka任务处理
-
-	// 更新user的follow_count和follower_count字段
-	if err := RDB.IncrBy(ctx, GetRedisKey(KeyUserFollowCountPF+strconv.FormatInt(userID, 10)), actionType).Err(); err != nil {
-		klog.Error("更新user的follow_count字段失败, err: ", err)
-		return err
-	}
-	if err := RDB.IncrBy(ctx, GetRedisKey(KeyUserFollowerCountPF+strconv.FormatInt(toUserID, 10)), actionType).Err(); err != nil {
-		klog.Error("更新user的follower_count字段失败, err: ", err)
-	}
-
-	// 写入待同步切片
-	CacheUserID.Store(userID, struct{}{})
-	CacheUserID.Store(toUserID, struct{}{})
-
-	return nil
+	return exist.(bool), nil
 }
 
+func Follow(ctx context.Context, userID, toUserID int64) error {
+	return qRelation.WithContext(ctx).Create(&model.Relation{UserID: toUserID, FollowerID: userID})
+}
+
+func UnFollow(ctx context.Context, userID, toUserID int64) error {
+	_, err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).Delete()
+	return err
+}
 func FollowList(ctx context.Context, toUserID int64) ([]*model.User, error) {
 	// 查询用户ID列表
 	var userIDList []int64

@@ -6,6 +6,7 @@ import (
 	"douyin/dal/model"
 	relation "douyin/rpc/kitex_gen/relation"
 	"douyin/rpc/kitex_gen/user"
+	"strconv"
 
 	"github.com/u2takey/go-utils/klog"
 )
@@ -15,11 +16,53 @@ type RelationServiceImpl struct{}
 
 // RelationAction implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.RelationActionRequest) (resp *relation.RelationActionResponse, err error) {
-	// 操作数据库
-	if err := dal.RelationAction(ctx, req.UserId, req.ToUserId, req.ActionType); err != nil {
-		klog.Error("操作数据库失败, err: ", err)
+	// 检查是否关注
+	exist, err := dal.CheckRelationExist(ctx, req.UserId, req.ToUserId)
+	if err != nil {
+		klog.Error("检查是否关注失败, err: ", err)
 		return nil, err
 	}
+
+	if exist && req.ActionType == 1 {
+		return nil, dal.ErrAlreadyFollow
+	}
+	if !exist && req.ActionType == -1 {
+		return nil, dal.ErrNotFollow
+	}
+
+	// 删除redis关系缓存，采用延时双删(kafka订阅canal消息删除)
+	key := dal.GetRedisKey(dal.KeyUserFollowerPF + strconv.FormatInt(req.ToUserId, 10))
+	if err := dal.RDB.SRem(ctx, key, req.UserId).Err(); err != nil {
+		klog.Error("延时双删策略失败, err: ", err)
+	}
+
+	// 操作数据库
+	if req.ActionType == 1 {
+		if err := dal.Follow(ctx, req.UserId, req.ToUserId); err != nil {
+			klog.Error("关注失败, err: ", err)
+			return nil, err
+		}
+	} else {
+		if err := dal.UnFollow(ctx, req.UserId, req.ToUserId); err != nil {
+			klog.Error("取消关注失败, err: ", err)
+			return nil, err
+		}
+	}
+
+	// 更新缓存相关字段
+	go func() {
+		if err := dal.RDB.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF+strconv.FormatInt(req.UserId, 10)), req.ActionType).Err(); err != nil {
+			klog.Error("更新user的follow_count字段失败, err: ", err)
+			return
+		}
+		if err := dal.RDB.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF+strconv.FormatInt(req.ToUserId, 10)), req.ActionType).Err(); err != nil {
+			klog.Error("更新user的follower_count字段失败, err: ", err)
+			return
+		}
+		// 写入待同步切片
+		dal.CacheUserID.Store(req.UserId, struct{}{})
+		dal.CacheUserID.Store(req.ToUserId, struct{}{})
+	}()
 
 	// 返回响应
 	resp = &relation.RelationActionResponse{}

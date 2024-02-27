@@ -31,7 +31,14 @@ func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool,
 		if id != 0 {
 			// 写入redis缓存
 			go func() {
-				RDB.SAdd(ctx, key, videoID)
+				if err := RDB.SAdd(ctx, key, videoID).Err(); err != nil {
+					klog.Error("写入redis缓存失败, err: ", err)
+					return
+				}
+				if err := RDB.Expire(ctx, key, ExpireTime+GetRandomTime()).Err(); err != nil {
+					klog.Error("设置redis缓存过期时间失败, err: ", err)
+					return
+				}
 			}()
 			return true, nil
 		}

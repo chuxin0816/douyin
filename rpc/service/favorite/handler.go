@@ -44,17 +44,6 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	key := dal.GetRedisKey(dal.KeyUserFavoritePF + strconv.FormatInt(req.UserId, 10))
 	// 已经点赞
 	if exist && req.ActionType == 1 {
-		// 写入redis缓存
-		go func() {
-			if err := dal.RDB.SAdd(ctx, key, req.VideoId).Err(); err != nil {
-				klog.Error("写入redis缓存失败, err: ", err)
-				return
-			}
-			if err := dal.RDB.Expire(ctx, key, dal.ExpireTime+dal.GetRandomTime()).Err(); err != nil {
-				klog.Error("设置redis缓存过期时间失败, err: ", err)
-				return
-			}
-		}()
 		return nil, dal.ErrAlreadyFavorite
 	}
 	// 未点赞
