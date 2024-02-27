@@ -55,26 +55,27 @@ func DeleteFavorite(ctx context.Context, userID, videoID int64) error {
 	return err
 }
 
-func GetFavoriteList(ctx context.Context, userID int64) ([]int64, error) {
-	// 先查询redis缓存
+func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err error) {
+	// 使用singleflight防止缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
-	videoIDStrs := RDB.SMembers(ctx, key).Val()
-	if len(videoIDStrs) != 0 {
-		videoIDs := make([]int64, 0, len(videoIDStrs))
-		for _, videoIDStr := range videoIDStrs {
-			videoID, _ := strconv.ParseInt(videoIDStr, 10, 64)
-			videoIDs = append(videoIDs, videoID)
-		}
-		return videoIDs, nil
-	}
-
-	// 缓存未命中 ,查询mysql, 使用singleflight防止缓存击穿
-	var videoIDs []int64
-	_, err, _ := g.Do(key, func() (interface{}, error) {
+	_, err, _ = g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
+
+		// 先查询redis缓存
+		videoIDStrs := RDB.SMembers(ctx, key).Val()
+		if len(videoIDStrs) != 0 {
+			videoIDs = make([]int64, len(videoIDStrs))
+			for i, videoIDStr := range videoIDStrs {
+				videoID, _ := strconv.ParseInt(videoIDStr, 10, 64)
+				videoIDs[i] = videoID
+			}
+			return nil, nil
+		}
+
+		// 缓存未命中，查询mysql
 		if err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID)).Select(qFavorite.VideoID).Scan(&videoIDs); err != nil {
 			klog.Error("查询favorite表失败, err: ", err)
 			return nil, err
@@ -93,10 +94,11 @@ func GetFavoriteList(ctx context.Context, userID int64) ([]int64, error) {
 				}
 			}()
 		}
-		return videoIDs, nil
+		return nil, nil
 	})
 	if err != nil {
 		return nil, err
 	}
+
 	return videoIDs, nil
 }
