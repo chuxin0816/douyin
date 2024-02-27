@@ -75,7 +75,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	{
 		messageController := controller.NewMessageController()
 		messageRouter.POST("/action/", middleware.AuthMiddleware(), messageController.Action)
-		messageRouter.GET("/chat/", messageController.Chat)
+		messageRouter.GET("/chat/", middleware.AuthMiddleware(), messageController.Chat)
 	}
 
 	return h
