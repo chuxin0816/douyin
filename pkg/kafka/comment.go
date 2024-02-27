@@ -48,7 +48,7 @@ func (mq *commentMQ) consumeComment(ctx context.Context) {
 
 		// 解析为CommentID，成功则删除评论
 		var commentID int64
-		if err := json.Unmarshal(m.Value, commentID); err == nil {
+		if err := json.Unmarshal(m.Value, &commentID); err == nil {
 			if err := dal.DeleteComment(ctx, commentID); err != nil {
 				klog.Error("failed to delete comment: ", err)
 			}
