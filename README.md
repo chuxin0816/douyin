@@ -30,3 +30,7 @@ http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ```shell
 cd rpc/service/feed
 kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
+## 未来更新:
+* 使用ElasticSearch对用户消息和系统日志进行索引存储
+* 使用Kong作为网关
+* 分布式链路追踪，使用Prometheus和Grafana监控服务
