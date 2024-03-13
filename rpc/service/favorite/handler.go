@@ -41,7 +41,6 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 		return nil, err
 	}
 
-	key := dal.GetRedisKey(dal.KeyUserFavoritePF + strconv.FormatInt(req.UserId, 10))
 	// 已经点赞
 	if exist && req.ActionType == 1 {
 		return nil, dal.ErrAlreadyFavorite
@@ -49,11 +48,6 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	// 未点赞
 	if !exist && req.ActionType == -1 {
 		return nil, dal.ErrNotFavorite
-	}
-
-	// 删除redis关系缓存，采用延时双删(kafka订阅canal消息删除)
-	if err := dal.RDB.SRem(ctx, key, req.VideoId).Err(); err != nil {
-		klog.Error("删除redis缓存失败, err: ", err)
 	}
 
 	// 通过kafka更新favorite表

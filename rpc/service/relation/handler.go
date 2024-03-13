@@ -30,12 +30,6 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 		return nil, dal.ErrNotFollow
 	}
 
-	// 删除redis关系缓存，采用延时双删(kafka订阅canal消息删除)
-	key := dal.GetRedisKey(dal.KeyUserFollowerPF + strconv.FormatInt(req.ToUserId, 10))
-	if err := dal.RDB.SRem(ctx, key, req.UserId).Err(); err != nil {
-		klog.Error("延时双删策略失败, err: ", err)
-	}
-
 	// 操作数据库
 	if req.ActionType == 1 {
 		if err := dal.Follow(ctx, req.UserId, req.ToUserId); err != nil {
