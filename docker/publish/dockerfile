@@ -1,12 +1,11 @@
-FROM golang:latest AS builder
+FROM golang:1.22.1-bookworm AS builder
 
 ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64 \
     GOPROXY=https://goproxy.cn,direct
 
-WORKDIR /build
+WORKDIR /douyin
 
 COPY go.mod .
 COPY go.sum .
@@ -14,14 +13,13 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o douyin
+RUN cd rpc/service/publish && sh build.sh
 
 FROM ubuntu:lunar
 
-COPY ./wait-for.sh /
 COPY ./config/config.yaml /config/config.yaml
 
-COPY --from=builder /build/douyin /
+COPY --from=builder /douyin/rpc/service/publish/output/bin/publish /
 
 # x86架构
 # RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ lunar main restricted universe multiverse" > /etc/apt/sources.list && \
@@ -38,6 +36,4 @@ RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ lunar main restr
 RUN set -eux; \
     apt-get update; \
     apt-get install -y \
-    ffmpeg \
-    netcat-traditional; \
-    chmod 755 wait-for.sh
+    ffmpeg 
