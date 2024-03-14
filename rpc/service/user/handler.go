@@ -8,7 +8,7 @@ import (
 	user "douyin/rpc/kitex_gen/user"
 	"errors"
 
-	"github.com/u2takey/go-utils/klog"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"golang.org/x/crypto/bcrypt"
 )
 

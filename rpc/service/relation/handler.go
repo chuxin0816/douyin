@@ -8,7 +8,7 @@ import (
 	"douyin/rpc/kitex_gen/user"
 	"strconv"
 
-	"github.com/u2takey/go-utils/klog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 // RelationServiceImpl implements the last service interface defined in the IDL.

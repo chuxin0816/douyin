@@ -5,7 +5,7 @@ import (
 	"douyin/dal"
 	message "douyin/rpc/kitex_gen/message"
 
-	"github.com/u2takey/go-utils/klog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 // MessageServiceImpl implements the last service interface defined in the IDL.

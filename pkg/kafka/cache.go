@@ -5,7 +5,7 @@ import (
 	"douyin/dal"
 	"encoding/json"
 
-	"github.com/u2takey/go-utils/klog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type cacheMQ struct {

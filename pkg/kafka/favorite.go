@@ -6,8 +6,8 @@ import (
 	"douyin/dal/model"
 	"encoding/json"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
-	"github.com/u2takey/go-utils/klog"
 )
 
 type favoriteMQ struct {
