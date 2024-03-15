@@ -1,6 +1,7 @@
-FROM golang:1.22.1-bookworm AS builder
+FROM golang:alpine AS builder
 
 ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64 \
     GOPROXY=https://goproxy.cn,direct
@@ -17,23 +18,12 @@ RUN cd rpc/service/publish && sh build.sh
 
 FROM ubuntu:lunar
 
-COPY ./config/config.yaml /config/config.yaml
-
-COPY --from=builder /douyin/rpc/service/publish/output/bin/publish /
-
-# x86架构
-# RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ lunar main restricted universe multiverse" > /etc/apt/sources.list && \
-#     echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ lunar-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
-#     echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ lunar-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
-#     echo "http://security.ubuntu.com/ubuntu/ lunar-security main restricted universe multiverse" >> /etc/apt/sources.list 
-
-# arm架构
-RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ lunar main restricted universe multiverse" > /etc/apt/sources.list && \
-    echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ lunar-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
-    echo "deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ lunar-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
-    echo "deb http://ports.ubuntu.com/ubuntu-ports/ lunar-security main restricted universe multiverse" >> /etc/apt/sources.list
-
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
     ffmpeg 
+
+COPY ./config/config.yaml /config/config.yaml
+COPY --from=builder /douyin/rpc/service/publish/output/bin/publish /
+
+ENTRYPOINT ["/publish"]

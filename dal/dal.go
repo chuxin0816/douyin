@@ -48,6 +48,7 @@ var (
 	CacheVideoID sync.Map
 )
 
+// nil值，用于占位，于Init函数中初始化	
 var (
 	qComment  = query.Comment
 	qFavorite = query.Favorite
@@ -58,7 +59,7 @@ var (
 )
 
 func Init() {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.Conf.DatabaseConfig.MysqlConfig.User,
 		config.Conf.DatabaseConfig.MysqlConfig.Password,
 		config.Conf.DatabaseConfig.MysqlConfig.Host,
@@ -72,6 +73,12 @@ func Init() {
 		panic(err)
 	}
 	query.SetDefault(db)
+	qComment  = query.Comment
+	qFavorite = query.Favorite
+	qMessage  = query.Message
+	qRelation = query.Relation
+	qUser     = query.User
+	qVideo    = query.Video
 
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     config.Conf.DatabaseConfig.RedisConfig.Addr,
