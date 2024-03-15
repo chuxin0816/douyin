@@ -113,8 +113,8 @@ services:
   
   api:
     build:
-      context: .
-      dockerfile: docker/api/dockerfile
+      context: ..
+      dockerfile: cmd/docker/api/dockerfile
     depends_on:
       - mysql
       - redis
@@ -128,8 +128,8 @@ services:
 
   feed:
     build: 
-      context: .
-      dockerfile: docker/feed/dockerfile
+      context: ..
+      dockerfile: cmd/docker/feed/dockerfile
     depends_on:
       - api
     ports:
@@ -138,8 +138,8 @@ services:
 
   user:
     build:
-      context: .
-      dockerfile: docker/user/dockerfile
+      context: ..
+      dockerfile: cmd/docker/user/dockerfile
     depends_on:
       - api
     ports:
@@ -148,8 +148,8 @@ services:
 
   favorite:
     build:
-      context: .
-      dockerfile: docker/favorite/dockerfile
+      context: ..
+      dockerfile: cmd/docker/favorite/dockerfile
     depends_on:
       - api
     ports:
@@ -158,8 +158,8 @@ services:
 
   comment:
     build:
-      context: .
-      dockerfile: docker/comment/dockerfile
+      context: ..
+      dockerfile: cmd/docker/comment/dockerfile
     depends_on:
       - api
     ports:
@@ -168,8 +168,8 @@ services:
 
   publish:
     build:
-      context: .
-      dockerfile: docker/publish/dockerfile
+      context: ..
+      dockerfile: cmd/docker/publish/dockerfile
     depends_on:
       - api
     ports:
@@ -178,8 +178,8 @@ services:
 
   relation:
     build:
-      context: .
-      dockerfile: docker/relation/dockerfile
+      context: ..
+      dockerfile: cmd/docker/relation/dockerfile
     depends_on:
       - api
     ports:
@@ -188,8 +188,8 @@ services:
 
   message:
     build:
-      context: .
-      dockerfile: docker/message/dockerfile
+      context: ..
+      dockerfile: cmd/docker/message/dockerfile
     depends_on:
       - api
     ports:
