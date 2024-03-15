@@ -22,7 +22,6 @@ func DeleteComment(ctx context.Context, commentID int64) (err error) {
 func GetCommentCount(ctx context.Context, videoID int64) (int64, error) {
 	count, err := qComment.WithContext(ctx).Where(qComment.VideoID.Eq(videoID)).Count()
 	if err != nil {
-		klog.Error("查询评论数量失败, err: ", err)
 		return 0, err
 	}
 	return count, nil
@@ -32,7 +31,6 @@ func GetCommentByID(ctx context.Context, commentID int64) (*model.Comment, error
 	comment, err := qComment.WithContext(ctx).
 		Where(qComment.ID.Eq(commentID)).First()
 	if err != nil {
-		klog.Error("查询评论失败, err: ", err)
 		return nil, err
 	}
 	if comment.UserID == 0 {
@@ -44,7 +42,6 @@ func GetCommentByID(ctx context.Context, commentID int64) (*model.Comment, error
 func GetCommentList(ctx context.Context, videoID int64) ([]*model.Comment, error) {
 	commentList, err := qComment.WithContext(ctx).Where(qComment.VideoID.Eq(videoID)).Find()
 	if err != nil {
-		klog.Error("查询评论列表失败, err: ", err)
 		return nil, err
 	}
 	return commentList, nil

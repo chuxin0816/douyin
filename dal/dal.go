@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/bits-and-blooms/bloom/v3"
-	"github.com/cloudwego/kitex/pkg/klog"
 
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/singleflight"
@@ -21,10 +20,10 @@ import (
 )
 
 const (
-	ExpireTime        = time.Hour * 72
-	timeout           = time.Second * 5
-	delayTime         = 100 * time.Second
-	randFactor        = 30
+	ExpireTime = time.Hour * 72
+	timeout    = time.Second * 5
+	delayTime  = 100 * time.Second
+	randFactor = 30
 )
 
 var (
@@ -48,7 +47,7 @@ var (
 	CacheVideoID sync.Map
 )
 
-// nil值，用于占位，于Init函数中初始化	
+// nil值，用于占位，于Init函数中初始化
 var (
 	qComment  = query.Comment
 	qFavorite = query.Favorite
@@ -73,12 +72,12 @@ func Init() {
 		panic(err)
 	}
 	query.SetDefault(db)
-	qComment  = query.Comment
+	qComment = query.Comment
 	qFavorite = query.Favorite
-	qMessage  = query.Message
+	qMessage = query.Message
 	qRelation = query.Relation
-	qUser     = query.User
-	qVideo    = query.Video
+	qUser = query.User
+	qVideo = query.Video
 
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     config.Conf.DatabaseConfig.RedisConfig.Addr,
@@ -104,18 +103,14 @@ func Close() {
 	RDB.Close()
 }
 
-func RemoveFavoriteCache(ctx context.Context, userID, videoID string) {
+func RemoveFavoriteCache(ctx context.Context, userID, videoID string) error {
 	key := GetRedisKey(KeyUserFavoritePF + userID)
-	if err := RDB.SRem(ctx, key, videoID).Err(); err != nil {
-		klog.Error("删除redis缓存失败, err: ", err)
-	}
+	return RDB.SRem(ctx, key, videoID).Err()
 }
 
-func RemoveRelationCache(ctx context.Context, userID, toUserID string) {
+func RemoveRelationCache(ctx context.Context, userID, toUserID string) error {
 	key := GetRedisKey(KeyUserFollowerPF + toUserID)
-	if err := RDB.SRem(ctx, key, userID).Err(); err != nil {
-		klog.Error("删除redis缓存失败, err: ", err)
-	}
+	return RDB.SRem(ctx, key, userID).Err()
 }
 
 // GetRandomTime 获取0-30min随机时间
@@ -130,7 +125,6 @@ func loadDataToBloom() error {
 	PageCnt := 0
 	cnt, err := qUser.WithContext(context.Background()).Count()
 	if err != nil {
-		klog.Error("查询用户数量失败")
 		return err
 	}
 	count := int(cnt)
@@ -145,7 +139,6 @@ func loadDataToBloom() error {
 			Offset(PageSize*page).Limit(PageSize).
 			Select(qUser.ID, qUser.Name).Find()
 		if err != nil {
-			klog.Error("查询用户名和id失败")
 			return err
 		}
 
@@ -158,7 +151,6 @@ func loadDataToBloom() error {
 	// 填入视频ID
 	cnt, err = qVideo.WithContext(context.Background()).Count()
 	if err != nil {
-		klog.Error("查询视频数量失败")
 		return err
 	}
 	count = int(cnt)
@@ -173,7 +165,6 @@ func loadDataToBloom() error {
 			Offset(PageSize * page).Limit(PageSize).
 			Select(qVideo.ID).Find()
 		if err != nil {
-			klog.Error("查询视频id失败")
 			return err
 		}
 

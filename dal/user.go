@@ -6,8 +6,6 @@ import (
 	"douyin/rpc/kitex_gen/user"
 	"strconv"
 	"time"
-
-	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 // GetUserByID 用户通过作者id查询作者信息
@@ -33,14 +31,12 @@ func GetUserByIDs(ctx context.Context, authorIDs []int64) ([]*model.User, error)
 	// 先判断布隆过滤器中是否存在
 	for _, id := range authorIDs {
 		if !bloomFilter.Test([]byte(strconv.FormatInt(id, 10))) {
-			klog.Error("用户不存在,id: ", id)
 			return nil, ErrUserNotExist
 		}
 	}
 	// 查询数据库
 	users, err := qUser.WithContext(ctx).Where(qUser.ID.In(authorIDs...)).Find()
 	if err != nil {
-		klog.Error("查询数据库失败")
 		return nil, err
 	}
 
@@ -69,7 +65,6 @@ func GetUserByName(ctx context.Context, username string) *model.User {
 
 	user, err := qUser.WithContext(ctx).Where(qUser.Name.Eq(username)).First()
 	if err != nil {
-		klog.Error("查询数据库失败")
 		return nil
 	}
 	if user.ID == 0 {
@@ -89,7 +84,6 @@ func CreateUser(ctx context.Context, username, password string, userID int64) er
 		Password: password,
 	}
 	if err := qUser.WithContext(ctx).Create(user); err != nil {
-		klog.Error("保存用户信息失败")
 		return err
 	}
 	return nil
@@ -132,19 +126,14 @@ func ToUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *
 			Where(qRelation.UserID.Eq(mUser.ID), qRelation.FollowerID.Eq(*followerID)).
 			Select(qRelation.ID).First()
 		if err != nil {
-			klog.Error("查询数据库失败")
 			return nil, err
 		}
 		if relation.ID != 0 {
 			userResponse.IsFollow = true
 			// 写入缓存
 			go func() {
-				if err := RDB.SAdd(ctx, key, followerID).Err(); err != nil {
-					klog.Error("写入缓存失败, err: ", err)
-				}
-				if err := RDB.Expire(ctx, key, ExpireTime+GetRandomTime()).Err(); err != nil {
-					klog.Error("设置缓存过期时间失败, err: ", err)
-				}
+				RDB.SAdd(ctx, key, followerID)
+				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
 			}()
 		}
 		return nil, nil

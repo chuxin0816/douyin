@@ -7,8 +7,6 @@ import (
 	"douyin/rpc/kitex_gen/feed"
 	"strconv"
 	"time"
-
-	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 const (
@@ -22,7 +20,6 @@ func GetFeedList(ctx context.Context, userID *int64, latestTime time.Time, count
 	mVideoList, err := qVideo.WithContext(ctx).Where(qVideo.UploadTime.Lte(latestTime)).
 		Order(qVideo.UploadTime.Desc()).Limit(count).Find()
 	if err != nil {
-		klog.Error("查询数据库失败")
 		return nil, nil, err
 	}
 
@@ -63,14 +60,12 @@ func SaveVideo(ctx context.Context, userID int64, videoName, coverName, title st
 
 	// 保存视频信息到数据库
 	if err := qVideo.WithContext(ctx).Create(video); err != nil {
-		klog.Error("保存视频信息到数据库失败")
 		return err
 	}
 
 	// 修改用户发布视频数
 	key := GetRedisKey(KeyUserWorkCountPF + strconv.FormatInt(userID, 10))
 	if err := RDB.Incr(ctx, key).Err(); err != nil {
-		klog.Error("修改用户发布视频数失败")
 		return err
 	}
 
@@ -89,14 +84,12 @@ func GetPublishList(ctx context.Context, userID *int64, authorID int64) ([]*feed
 	mVideoList, err := qVideo.WithContext(ctx).Where(qVideo.AuthorID.Eq(authorID)).
 		Order(qVideo.UploadTime.Desc()).Find()
 	if err != nil {
-		klog.Error("查询视频信息失败")
 		return nil, err
 	}
 
 	// 查询作者信息
 	author, err := GetUserByID(ctx, authorID)
 	if err != nil {
-		klog.Error("查询作者信息失败")
 		return nil, err
 	}
 
@@ -114,7 +107,6 @@ func GetVideoList(ctx context.Context, userID *int64, videoIDs []int64) ([]*feed
 	mVideoList, err := qVideo.WithContext(ctx).Where(qVideo.ID.In(videoIDs...)).
 		Order(qVideo.UploadTime.Desc()).Find()
 	if err != nil {
-		klog.Error("查询视频信息失败")
 		return nil, err
 	}
 
@@ -135,6 +127,12 @@ func GetVideoList(ctx context.Context, userID *int64, videoIDs []int64) ([]*feed
 	}
 
 	return videoList, nil
+}
+
+func GetVideoFavoriteCount(ctx context.Context, videoID int64) (int64, error) {
+	var cnt int64
+	err := qVideo.WithContext(ctx).Where(qVideo.ID.Eq(videoID)).Select(qVideo.FavoriteCount).Scan(&cnt)
+	return cnt, err
 }
 
 func ToVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video, author *model.User) *feed.Video {
@@ -170,21 +168,14 @@ func ToVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video, au
 		favorite, err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(*userID), qFavorite.VideoID.Eq(mVideo.ID)).
 			Select(qFavorite.ID).First()
 		if err != nil {
-			klog.Error("查询favorite表失败, err: ", err)
 			return nil, err
 		}
 		if favorite.ID != 0 {
 			video.IsFavorite = true
 			// 写入缓存
 			go func() {
-				if err := RDB.SAdd(ctx, key, mVideo.ID).Err(); err != nil {
-					klog.Error("将点赞信息写入缓存失败, err: ", err)
-					return
-				}
-				if err := RDB.Expire(ctx, key, ExpireTime+GetRandomTime()).Err(); err != nil {
-					klog.Error("设置缓存过期时间失败, err: ", err)
-					return
-				}
+				RDB.SAdd(ctx, key, mVideo.ID)
+				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
 			}()
 		}
 		return nil, nil

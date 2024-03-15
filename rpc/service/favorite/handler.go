@@ -62,15 +62,21 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 
 	// 更新缓存相关字段
 	go func() {
+		// 检查key是否存在
+		keyVideoFavoriteCnt := dal.GetRedisKey(dal.KeyVideoFavoriteCountPF + strconv.FormatInt(req.VideoId, 10))
+		keyUserFavoriteCnt := dal.GetRedisKey(dal.KeyUserFavoriteCountPF + strconv.FormatInt(req.UserId, 10))
+		keyUserTotalFavorited := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF + strconv.FormatInt(authorID, 10))
+		
+
 		pipe := dal.RDB.Pipeline()
 		// 更新video的favorite_count字段
-		pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyVideoFavoriteCountPF+strconv.FormatInt(req.VideoId, 10)), req.ActionType)
+		pipe.IncrBy(ctx, keyVideoFavoriteCnt, req.ActionType)
 
 		// 更新user当前用户的favorite_count字段
-		pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFavoriteCountPF+strconv.FormatInt(req.UserId, 10)), req.ActionType)
+		pipe.IncrBy(ctx, keyUserFavoriteCnt, req.ActionType)
 
 		// 更新user作者的total_favorited字段
-		pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserTotalFavoritedPF+strconv.FormatInt(authorID, 10)), req.ActionType)
+		pipe.IncrBy(ctx, keyUserTotalFavorited, req.ActionType)
 
 		if _, err := pipe.Exec(ctx); err != nil {
 			klog.Error("更新缓存相关字段失败, err: ", err)

@@ -7,8 +7,6 @@ import (
 	"douyin/rpc/kitex_gen/message"
 
 	"time"
-
-	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 func MessageAction(ctx context.Context, userID, toUserID int64, content string) error {
@@ -20,7 +18,6 @@ func MessageAction(ctx context.Context, userID, toUserID int64, content string) 
 		CreateTime: time.Now().Unix(),
 	})
 	if err != nil {
-		klog.Error("插入数据库失败, err: ", err)
 		return err
 	}
 
@@ -32,7 +29,6 @@ func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*mess
 		Or(qMessage.FromUserID.Eq(toUserID), qMessage.ToUserID.Eq(userID), qMessage.CreateTime.Gt(lastTime)).
 		Order(qMessage.CreateTime).Find()
 	if err != nil {
-		klog.Error("查询数据库失败, err: ", err)
 		return nil, err
 	}
 
