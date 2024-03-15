@@ -62,12 +62,44 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 
 	// 更新缓存相关字段
 	go func() {
-		// 检查key是否存在
 		keyVideoFavoriteCnt := dal.GetRedisKey(dal.KeyVideoFavoriteCountPF + strconv.FormatInt(req.VideoId, 10))
 		keyUserFavoriteCnt := dal.GetRedisKey(dal.KeyUserFavoriteCountPF + strconv.FormatInt(req.UserId, 10))
 		keyUserTotalFavorited := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF + strconv.FormatInt(authorID, 10))
+		// 检查key是否存在
+		if exist, err := dal.RDB.Exists(ctx, keyVideoFavoriteCnt,keyUserFavoriteCnt,keyUserTotalFavorited).Result(); err != nil {
+			klog.Error("检查key是否存在失败, err: ", err)
+			return
+		} else if exist != 3{
+			// 缓存不存在，查询数据库写入缓存
+			cnt, err := dal.GetVideoFavoriteCount(ctx, req.VideoId)
+			if err != nil {
+				klog.Error("查询数据库失败, err: ", err)
+				return
+			}
+			if err := dal.RDB.Set(ctx, keyVideoFavoriteCnt, cnt, 0).Err(); err != nil {
+				klog.Error("写入缓存失败, err: ", err)
+				return
+			}
+			cnt, err = dal.GetUserFavoriteCount(ctx, req.UserId)
+			if err != nil {
+				klog.Error("查询数据库失败, err: ", err)
+				return
+			}
+			if err := dal.RDB.Set(ctx, keyUserFavoriteCnt, cnt, 0).Err(); err != nil {
+				klog.Error("写入缓存失败, err: ", err)
+				return
+			}
+			cnt, err = dal.GetUserTotalFavorited(ctx, authorID)
+			if err != nil {
+				klog.Error("查询数据库失败, err: ", err)
+				return
+			}
+			if err := dal.RDB.Set(ctx, keyUserTotalFavorited, cnt, 0).Err(); err != nil {
+				klog.Error("写入缓存失败, err: ", err)
+				return
+			}
+		}
 		
-
 		pipe := dal.RDB.Pipeline()
 		// 更新video的favorite_count字段
 		pipe.IncrBy(ctx, keyVideoFavoriteCnt, req.ActionType)

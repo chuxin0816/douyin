@@ -89,6 +89,30 @@ func CreateUser(ctx context.Context, username, password string, userID int64) er
 	return nil
 }
 
+func GetUserFavoriteCount(ctx context.Context, userID int64) (int64, error) {
+	var cnt int64
+	err := qUser.WithContext(ctx).Where(qUser.ID.Eq(userID)).Select(qUser.FavoriteCount).Scan(&cnt)
+	return cnt, err
+}
+
+func GetUserTotalFavorited(ctx context.Context, userID int64) (int64, error) {
+	var cnt int64
+	err := qUser.WithContext(ctx).Where(qUser.ID.Eq(userID)).Select(qUser.TotalFavorited).Scan(&cnt)
+	return cnt, err
+}
+
+func GetUserFollowCount(ctx context.Context, userID int64) (int64, error) {
+	var cnt int64
+	err := qUser.WithContext(ctx).Where(qUser.ID.Eq(userID)).Select(qUser.FollowCount).Scan(&cnt)
+	return cnt, err
+}
+
+func GetUserFollowerCount(ctx context.Context, userID int64) (int64, error) {
+	var cnt int64
+	err := qUser.WithContext(ctx).Where(qUser.ID.Eq(userID)).Select(qUser.FollowerCount).Scan(&cnt)
+	return cnt, err
+}
+
 func ToUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *user.User {
 	userResponse := &user.User{
 		Id:              mUser.ID,

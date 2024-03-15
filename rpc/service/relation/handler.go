@@ -45,11 +45,39 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 
 	// 更新缓存相关字段
 	go func() {
-		if err := dal.RDB.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF+strconv.FormatInt(req.UserId, 10)), req.ActionType).Err(); err != nil {
+		keyUserFollowCnt := dal.KeyUserFollowCountPF + strconv.FormatInt(req.UserId, 10)
+		keyUserFollowerCnt := dal.KeyUserFollowerCountPF + strconv.FormatInt(req.ToUserId, 10)
+		// 检查key是否存在
+		if exist, err := dal.RDB.Exists(ctx, keyUserFollowCnt, keyUserFollowerCnt).Result(); err != nil {
+			klog.Error("检查key是否存在失败, err: ", err)
+			return
+		} else if exist != 2 {
+			// 缓存不存在，查询数据库写入缓存
+			cnt, err := dal.GetUserFollowCount(ctx, req.UserId)
+			if err != nil {
+				klog.Error("查询数据库失败, err: ", err)
+				return
+			}
+			if err = dal.RDB.Set(ctx, keyUserFollowCnt, cnt, 0).Err(); err != nil {
+				klog.Error("写入缓存失败, err: ", err)
+				return
+			}
+			cnt, err = dal.GetUserFollowerCount(ctx, req.ToUserId)
+			if err != nil {
+				klog.Error("查询数据库失败, err: ", err)
+				return
+			}
+			if err = dal.RDB.Set(ctx, keyUserFollowerCnt, cnt, 0).Err(); err != nil {
+				klog.Error("写入缓存失败, err: ", err)
+				return
+			}
+		}
+
+		if err := dal.RDB.IncrBy(ctx, keyUserFollowCnt, req.ActionType).Err(); err != nil {
 			klog.Error("更新user的follow_count字段失败, err: ", err)
 			return
 		}
-		if err := dal.RDB.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF+strconv.FormatInt(req.ToUserId, 10)), req.ActionType).Err(); err != nil {
+		if err := dal.RDB.IncrBy(ctx, keyUserFollowerCnt, req.ActionType).Err(); err != nil {
 			klog.Error("更新user的follower_count字段失败, err: ", err)
 			return
 		}
