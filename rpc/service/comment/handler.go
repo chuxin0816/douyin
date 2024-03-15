@@ -44,12 +44,32 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 		}
 
 		// 更新video的comment_count字段
-		if err := dal.RDB.Incr(ctx, dal.GetRedisKey(dal.KeyVideoCommentCountPF+strconv.FormatInt(req.VideoId, 10))).Err(); err != nil {
-			klog.Error("更新video的comment_count字段失败, err: ", err)
-		}
+		go func() {
+			key := dal.GetRedisKey(dal.KeyVideoCommentCountPF + strconv.FormatInt(req.VideoId, 10))
+			// 检查缓存是否存在
+			if exist, err := dal.RDB.Exists(ctx, key).Result(); err != nil {
+				klog.Error("查询缓存失败, err: ", err)
+				return
+			} else if exist == 0 {
+				// 缓存不存在，查询数据库写入缓存
+				cnt, err := dal.GetCommentCount(ctx, req.VideoId)
+				if err != nil {
+					klog.Error("查询评论数量失败, err: ", err)
+					return
+				}
+				if err := dal.RDB.Set(ctx, key, cnt, 0).Err(); err != nil {
+					klog.Error("写入缓存失败, err: ", err)
+					return
+				}
+			}
+			if err := dal.RDB.Incr(ctx, key).Err(); err != nil {
+				klog.Error("更新video的comment_count字段失败, err: ", err)
+				return
+			}
 
-		// 写入待同步切片
-		dal.CacheVideoID.Store(req.VideoId, struct{}{})
+			// 写入待同步切片
+			dal.CacheVideoID.Store(req.VideoId, struct{}{})
+		}()
 	} else {
 		// 删除评论
 		mComment, err = dal.GetCommentByID(ctx, *req.CommentId)
@@ -71,10 +91,28 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 		}
 
 		// 更新视频评论数
-		if err := dal.RDB.IncrBy(ctx, dal.GetRedisKey(dal.KeyVideoCommentCountPF+strconv.FormatInt(req.VideoId, 10)), -1).Err(); err != nil {
-			klog.Error("更新视频评论数失败, err: ", err)
-			return nil, err
-		}
+		go func() {
+			key := dal.GetRedisKey(dal.KeyVideoCommentCountPF + strconv.FormatInt(req.VideoId, 10))
+			// 检查缓存是否存在
+			if exist, err := dal.RDB.Exists(ctx, key).Result(); err != nil {
+				klog.Error("查询缓存失败, err: ", err)
+				return
+			} else if exist == 0 {
+				// 缓存不存在，查询数据库写入缓存
+				cnt, err := dal.GetCommentCount(ctx, req.VideoId)
+				if err != nil {
+					klog.Error("查询评论数量失败, err: ", err)
+					return
+				}
+				if err := dal.RDB.Set(ctx, key, cnt, 0).Err(); err != nil {
+					klog.Error("写入缓存失败, err: ", err)
+					return
+				}
+			}
+			if err := dal.RDB.IncrBy(ctx, key, -1).Err(); err != nil {
+				klog.Error("更新视频评论数失败, err: ", err)
+			}
+		}()
 	}
 
 	// 获取用户信息
