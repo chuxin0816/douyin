@@ -3,7 +3,7 @@
 ## 接口文档：https://apifox.com/apidoc/shared-0c80e0c6-daca-4b12-96a4-01ca8c2b6cd1
 ## 项目演示地址：http://chuxin0816.com:8888/ (已关闭)
 ### 项目部署
-项目使用docker-compose部署，在配置好config/config.yaml并通过douyin.sql建表后运行`docker-compose up`即可启动项目
+项目使用docker-compose部署，在配置好config/config.yaml并通过douyin.sql建表后运行`cd && docker-compose up -d`即可启动项目
 > 如果内存不足可以分批构建后启动:
 ```shell
 cd cmd && docker-compose build api feed user favorite comment publish relation message && docker-compose up -d
