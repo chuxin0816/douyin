@@ -1,6 +1,6 @@
 # 抖音
 > 字节跳动青训营项目，简易版抖音，实现了抖音的基本功能
-## 接口文档：https://apifox.com/apidoc/shared-119368ca-740a-467c-99f3-f7ca31df29c2
+## 接口文档：https://apifox.com/apidoc/shared-0c80e0c6-daca-4b12-96a4-01ca8c2b6cd1
 ## 项目演示地址：http://chuxin0816.com:8888/ (已关闭)
 ### 项目部署
 项目使用docker-compose部署，在配置好config/config.yaml并通过douyin.sql建表后运行`docker-compose up`即可启动项目
