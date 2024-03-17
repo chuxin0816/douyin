@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cloudwego/kitex/pkg/klog"
+	"gorm.io/gorm"
 )
 
 func CreateComment(ctx context.Context, comment *model.Comment) error {
@@ -31,10 +32,10 @@ func GetCommentByID(ctx context.Context, commentID int64) (*model.Comment, error
 	comment, err := qComment.WithContext(ctx).
 		Where(qComment.ID.Eq(commentID)).First()
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, ErrCommentNotExist
+		}
 		return nil, err
-	}
-	if comment.UserID == 0 {
-		return nil, ErrCommentNotExist
 	}
 	return comment, nil
 }
@@ -62,16 +63,15 @@ func CheckVideoExist(ctx context.Context, videoID int64) error {
 		return ErrVideoNotExist
 	}
 
-	video, err := qVideo.WithContext(ctx).
+	_, err := qVideo.WithContext(ctx).
 		Where(qVideo.ID.Eq(videoID)).
 		Select(qVideo.ID).First()
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return ErrVideoNotExist
+		}
 		klog.Error("查询视频失败, err: ", err)
 		return err
-	}
-
-	if video.ID == 0 {
-		return ErrVideoNotExist
 	}
 
 	return nil

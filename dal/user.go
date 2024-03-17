@@ -6,6 +6,8 @@ import (
 	"douyin/rpc/kitex_gen/user"
 	"strconv"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // GetUserByID 用户通过作者id查询作者信息
@@ -17,10 +19,10 @@ func GetUserByID(ctx context.Context, authorID int64) (*model.User, error) {
 
 	user, err := qUser.WithContext(ctx).Where(qUser.ID.Eq(authorID)).First()
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, ErrUserNotExist
+		}
 		return nil, err
-	}
-	if user.ID == 0 {
-		return nil, ErrUserNotExist
 	}
 
 	return user, nil
@@ -65,11 +67,12 @@ func GetUserByName(ctx context.Context, username string) *model.User {
 
 	user, err := qUser.WithContext(ctx).Where(qUser.Name.Eq(username)).First()
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil
+		}
 		return nil
 	}
-	if user.ID == 0 {
-		return nil
-	}
+
 	return user
 }
 
