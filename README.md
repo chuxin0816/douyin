@@ -6,7 +6,15 @@
 项目使用docker-compose部署，在配置好config/config.yaml并通过douyin.sql建表后运行`cd && docker-compose up -d`即可启动项目
 > 如果内存不足可以分批构建后启动:
 ```shell
-cd cmd && docker-compose build api feed user favorite comment publish relation message && docker-compose up -d
+cd cmd/docker && 
+docker-compose build api &&
+docker-compose build user &&
+docker-compose build favorite &&
+docker-compose build comment &&
+docker-compose build publish &&
+docker-compose build relation &&
+docker-compose build message &&
+docker-compose up -d
 ```
 ******
 ## 项目结构：
