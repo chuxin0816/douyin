@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"douyin/config"
 	"douyin/dal"
 	"douyin/pkg/jwt"
 	"douyin/rpc/client"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type CommentController struct{}
@@ -30,11 +33,15 @@ func NewCommentController() *CommentController {
 }
 
 func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) {
+	_ ,span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c,"controller.CommentAction")
+	defer span.End()
 	// 获取参数
 	req := &CommentActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数校验失败")
 		klog.Error("参数校验失败, err: ", err)
 		return
 	}
@@ -45,17 +52,22 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	// 业务逻辑处理
 	resp, err := client.CommentAction(userID, req.ActionType, req.VideoID, &req.CommentID, &req.CommentText)
 	if err != nil {
+		span.RecordError(err)
+		
 		if errors.Is(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
+			span.SetStatus(codes.Error, "视频不存在")
 			klog.Error("视频不存在")
 			return
 		}
 		if errors.Is(err, dal.ErrCommentNotExist) {
 			Error(ctx, CodeCommentNotExist)
+			span.SetStatus(codes.Error, "评论不存在")
 			klog.Error("评论不存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
+		span.SetStatus(codes.Error, "业务逻辑处理失败")
 		klog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
@@ -65,11 +77,16 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
+	_ ,span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c,"controller.CommentList")
+	defer span.End()
+
 	// 获取参数
 	req := &CommentListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数校验失败")
 		klog.Error("参数校验失败, err: ", err)
 		return
 	}
@@ -80,12 +97,15 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	// 业务逻辑处理
 	resp, err := client.CommentList(userID, req.VideoID)
 	if err != nil {
+		span.RecordError(err)
 		if errors.Is(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
+			span.SetStatus(codes.Error, "视频不存在")
 			klog.Error("视频不存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
+		span.SetStatus(codes.Error, "业务逻辑处理失败")
 		klog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"douyin/config"
 	"douyin/pkg/jwt"
 	"douyin/rpc/client"
 	"io"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type PublishController struct{}
@@ -28,11 +31,16 @@ func NewPublishController() *PublishController {
 }
 
 func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.PublishAction")
+	defer span.End()
+
 	// 获取参数
 	req := &PublishActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数校验失败")
 		klog.Error("参数校验失败, err: ", err)
 		return
 	}
@@ -40,6 +48,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	// 验证大小
 	if req.Data.Size > 1024*1024*100 {
 		Error(ctx, CodeFileTooLarge)
+		span.SetStatus(codes.Error, "文件太大")
 		klog.Error("文件太大")
 		return
 	}
@@ -51,6 +60,8 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	file, err := req.Data.Open()
 	if err != nil {
 		Error(ctx, CodeServerBusy)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "文件打开失败")
 		klog.Error("文件打开失败, err: ", err)
 		return
 	}
@@ -59,6 +70,8 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	data, err := io.ReadAll(file)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "文件读取失败")
 		klog.Error("文件读取失败, err: ", err)
 		return
 	}
@@ -67,6 +80,8 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	resp, err := client.PublishAction(userID, data, req.Title)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "业务处理失败")
 		klog.Error("业务处理失败, err: ", err)
 		return
 	}
@@ -76,11 +91,16 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.PublishList")
+	defer span.End()
+
 	// 获取参数
 	req := &PublishListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数校验失败")
 		klog.Error("参数校验失败, err: ", err)
 		return
 	}
@@ -93,6 +113,8 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	resp, err := client.PublishList(userID, authorID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "业务处理失败")
 		klog.Error("业务处理失败, err: ", err)
 		return
 	}

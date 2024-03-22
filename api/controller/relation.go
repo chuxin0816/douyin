@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"douyin/config"
 	"douyin/dal"
 	"douyin/pkg/jwt"
 	"douyin/rpc/client"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type RelationController struct{}
@@ -28,12 +31,17 @@ func NewRelationController() *RelationController {
 }
 
 func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.RelationAction")
+	defer span.End()
+
 	// 获取参数
 	req := &RelationActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		klog.Error("参数校验失败, err: ", err)
 		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数校验失败")
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -48,18 +56,22 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	// 业务逻辑处理
 	resp, err := client.RelationAction(userID, req.ToUserID, req.ActionType)
 	if err != nil {
+		span.RecordError(err)
 		if errors.Is(err, dal.ErrAlreadyFollow) {
-			klog.Error("已经关注过了, err: ", err)
 			Error(ctx, CodeAlreadyFollow)
+			span.SetStatus(codes.Error, "已经关注过了")
+			klog.Error("已经关注过了, err: ", err)
 			return
 		}
 		if errors.Is(err, dal.ErrNotFollow) {
-			klog.Error("还没有关注过, err: ", err)
 			Error(ctx, CodeNotFollow)
+			span.SetStatus(codes.Error, "还没有关注过")
+			klog.Error("还没有关注过, err: ", err)
 			return
 		}
-		klog.Error("业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
+		span.SetStatus(codes.Error, "业务逻辑处理失败")
+		klog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
 
@@ -68,12 +80,17 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 }
 
 func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestContext) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.RelationFollowList")
+	defer span.End()
+
 	// 获取参数
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
-		klog.Error("参数校验失败, err: ", err)
 		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数校验失败")
+		klog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -83,8 +100,10 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	// 业务逻辑处理
 	resp, err := client.FollowList(userID, req.UserID)
 	if err != nil {
-		klog.Error("业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "业务逻辑处理失败")
+		klog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
 
@@ -93,10 +112,16 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 }
 
 func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestContext) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.RelationFollowerList")
+	defer span.End()
+	
 	// 获取参数
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
+		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数校验失败")
 		klog.Error("参数校验失败, err: ", err)
 		return
 	}
@@ -107,8 +132,10 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	// 业务逻辑处理
 	resp, err := client.FollowerList(userID, req.UserID)
 	if err != nil {
-		klog.Error("业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "业务逻辑处理失败")
+		klog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
 
@@ -117,10 +144,16 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 }
 
 func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestContext) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.RelationFriendList")
+	defer span.End()
+
 	// 获取参数
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
+		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数校验失败")
 		klog.Error("参数校验失败, err: ", err)
 		return
 	}
@@ -131,8 +164,10 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	// 业务逻辑处理
 	resp, err := client.FriendList(userID, req.UserID)
 	if err != nil {
-		klog.Error("业务逻辑处理失败, err: ", err)
 		Error(ctx, CodeServerBusy)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "业务逻辑处理失败")
+		klog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
 

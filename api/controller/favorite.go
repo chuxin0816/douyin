@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"douyin/config"
 	"douyin/dal"
 	"douyin/pkg/jwt"
 	"douyin/rpc/client"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type FavoriteController struct{}
@@ -28,11 +31,16 @@ func NewFavoriteController() *FavoriteController {
 }
 
 func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.FavoriteAction")
+	defer span.End()
+
 	// 获取参数
 	req := &FavoriteActionRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数校验失败")
 		klog.Error("参数校验失败, err: ", err)
 		return
 	}
@@ -48,17 +56,22 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	// 业务逻辑处理
 	resp, err := client.FavoriteAction(userID, req.VideoID, req.ActionType)
 	if err != nil {
+		span.RecordError(err)
+
 		if errors.Is(err, dal.ErrAlreadyFavorite) {
 			Error(ctx, CodeAlreadyFavorite)
+			span.SetStatus(codes.Error, "已经点赞过了")
 			klog.Error("已经点赞过了")
 			return
 		}
 		if errors.Is(err, dal.ErrNotFavorite) {
 			Error(ctx, CodeNotFavorite)
+			span.SetStatus(codes.Error, "还没有点赞过")
 			klog.Error("还没有点赞过")
 			return
 		}
 		Error(ctx, CodeServerBusy)
+		span.SetStatus(codes.Error, "业务处理失败")
 		klog.Error("业务处理失败, err: ", err)
 		return
 	}
@@ -68,11 +81,16 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 }
 
 func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.FavoriteList")
+	defer span.End()
+
 	// 获取参数
 	req := &FavoriteListRequest{}
 	err := ctx.BindAndValidate(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数校验失败")
 		klog.Error("参数校验失败, err: ", err)
 		return
 	}
@@ -84,6 +102,8 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	resp, err := client.FavoriteList(userID, req.UserID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "业务处理失败")
 		klog.Error("业务处理失败, err: ", err)
 		return
 	}

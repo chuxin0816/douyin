@@ -2,12 +2,15 @@ package controller
 
 import (
 	"context"
+	"douyin/config"
 	"douyin/pkg/jwt"
 	"douyin/rpc/client"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type FeedRequest struct {
@@ -17,11 +20,16 @@ type FeedRequest struct {
 
 // Feed 不限制登录状态，返回按投稿时间倒序的视频列表，视频数由服务端控制，单次最多30个
 func Feed(c context.Context, ctx *app.RequestContext) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.Feed")
+	defer span.End()
+
 	// 获取参数
 	req := &FeedRequest{LatestTime: time.Now().Unix()}
 	err := ctx.Bind(req)
 	if err != nil {
 		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数解析失败")
 		klog.Error("参数解析失败, err: ", err)
 		return
 	}
@@ -33,6 +41,8 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	resp, err := client.Feed(req.LatestTime, userID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "业务逻辑处理失败")
 		klog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
