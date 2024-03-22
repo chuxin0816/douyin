@@ -17,6 +17,7 @@ type Config struct {
 	*DatabaseConfig  `mapstructure:"database"`
 	*ConsulConfig    `mapstructure:"consul"`
 	*KafkaConfig     `mapstructure:"kafka"`
+	*OpenTelemetryConfig    `mapstructure:"open_telemetry"`
 }
 
 type SnowflakeConfig struct {
@@ -82,6 +83,18 @@ type ConsulConfig struct {
 
 type KafkaConfig struct {
 	Brokers []string `mapstructure:"brokers"`
+}
+
+type OpenTelemetryConfig struct {
+	ApiName string `mapstructure:"api_name"`
+	FeedName string `mapstructure:"feed_name"`
+	UserName string `mapstructure:"user_name"`
+	FavoriteName string `mapstructure:"favorite_name"`
+	CommentName string `mapstructure:"comment_name"`
+	PublishName string `mapstructure:"publish_name"`
+	RelationName string `mapstructure:"relation_name"`
+	MessageName string `mapstructure:"message_name"`
+	JaegerAddr string `mapstructure:"jaeger_addr"`
 }
 
 func Init() {

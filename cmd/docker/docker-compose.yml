@@ -1,5 +1,90 @@
 version: '3.7'
 services:
+  api:
+    build:
+      context: ../..
+      dockerfile: cmd/docker/api/dockerfile
+    depends_on:
+      - mysql
+      - redis
+      - kafka-0
+      - kafka-1
+      - kafka-2
+      - canal
+    ports:
+      - "8888:8888"
+    container_name: Api-douyin
+
+  feed:
+    build: 
+      context: ../..
+      dockerfile: cmd/docker/feed/dockerfile
+    depends_on:
+      - api
+    ports:
+      - "8890:8890"
+    container_name: Feed-douyin
+
+  user:
+    build:
+      context: ../..
+      dockerfile: cmd/docker/user/dockerfile
+    depends_on:
+      - api
+    ports:
+      - "8891:8891"
+    container_name: User-douyin
+
+  favorite:
+    build:
+      context: ../..
+      dockerfile: cmd/docker/favorite/dockerfile
+    depends_on:
+      - api
+    ports:
+      - "8892:8892"
+    container_name: Favorite-douyin
+
+  comment:
+    build:
+      context: ../..
+      dockerfile: cmd/docker/comment/dockerfile
+    depends_on:
+      - api
+    ports:
+      - "8893:8893"
+    container_name: Comment-douyin
+
+  publish:
+    build:
+      context: ../..
+      dockerfile: cmd/docker/publish/dockerfile
+    depends_on:
+      - api
+    ports:
+      - "8894:8894"
+    container_name: Publish-douyin
+
+  relation:
+    build:
+      context: ../..
+      dockerfile: cmd/docker/relation/dockerfile
+    depends_on:
+      - api
+    ports:
+      - "8895:8895"
+    container_name: Relation-douyin
+
+  message:
+    build:
+      context: ../..
+      dockerfile: cmd/docker/message/dockerfile
+    depends_on:
+      - api
+    ports:
+      - "8896:8896"
+    container_name: Message-douyin
+
   mysql:
     image: mysql:latest
     ports:
@@ -111,87 +196,9 @@ services:
       - "8500:8500"
     container_name: Consul-douyin
   
-  api:
-    build:
-      context: ../..
-      dockerfile: cmd/docker/api/dockerfile
-    depends_on:
-      - mysql
-      - redis
-      - kafka-0
-      - kafka-1
-      - kafka-2
-      - canal
+  jaeger:
+    image: jaegertracing/all-in-one:latest
     ports:
-      - "8888:8888"
-    container_name: Api-douyin
-
-  feed:
-    build: 
-      context: ../..
-      dockerfile: cmd/docker/feed/dockerfile
-    depends_on:
-      - api
-    ports:
-      - "8890:8890"
-    container_name: Feed-douyin
-
-  user:
-    build:
-      context: ../..
-      dockerfile: cmd/docker/user/dockerfile
-    depends_on:
-      - api
-    ports:
-      - "8891:8891"
-    container_name: User-douyin
-
-  favorite:
-    build:
-      context: ../..
-      dockerfile: cmd/docker/favorite/dockerfile
-    depends_on:
-      - api
-    ports:
-      - "8892:8892"
-    container_name: Favorite-douyin
-
-  comment:
-    build:
-      context: ../..
-      dockerfile: cmd/docker/comment/dockerfile
-    depends_on:
-      - api
-    ports:
-      - "8893:8893"
-    container_name: Comment-douyin
-
-  publish:
-    build:
-      context: ../..
-      dockerfile: cmd/docker/publish/dockerfile
-    depends_on:
-      - api
-    ports:
-      - "8894:8894"
-    container_name: Publish-douyin
-
-  relation:
-    build:
-      context: ../..
-      dockerfile: cmd/docker/relation/dockerfile
-    depends_on:
-      - api
-    ports:
-      - "8895:8895"
-    container_name: Relation-douyin
-
-  message:
-    build:
-      context: ../..
-      dockerfile: cmd/docker/message/dockerfile
-    depends_on:
-      - api
-    ports:
-      - "8896:8896"
-    container_name: Message-douyin
+      - "16686:16686"
+      - "4318:4318"
+    container_name: Jaeger-douyin
