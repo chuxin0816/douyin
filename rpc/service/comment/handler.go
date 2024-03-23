@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"douyin/config"
 	"douyin/dal"
 	"douyin/dal/model"
 	"douyin/pkg/kafka"
@@ -12,6 +13,8 @@ import (
 	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // CommentServiceImpl implements the last service interface defined in the IDL.
@@ -19,12 +22,19 @@ type CommentServiceImpl struct{}
 
 // CommentAction implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.CommentActionRequest) (resp *comment.CommentActionResponse, err error) {
+	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.CommentName).Start(ctx, "rpc.CommentAction")
+	defer span.End()
+
 	// 判断视频是否存在
 	if err := dal.CheckVideoExist(ctx, req.VideoId); err != nil {
+		span.RecordError(err)
+		
 		if errors.Is(err, dal.ErrVideoNotExist) {
+			span.SetStatus(codes.Error, "视频不存在")
 			klog.Error("视频不存在, err: ", err)
 			return nil, err
 		}
+		span.SetStatus(codes.Error, "查询视频失败")
 		klog.Error("查询视频失败, err: ", err)
 		return nil, err
 	}
@@ -39,6 +49,8 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 		// 通过kafka异步写入数据库
 		err := kafka.CreateComment(ctx, mComment)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "通过kafka异步写入数据库失败")
 			klog.Error("通过kafka异步写入数据库失败, err: ", err)
 			return nil, err
 		}
@@ -48,21 +60,29 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 			key := dal.GetRedisKey(dal.KeyVideoCommentCountPF + strconv.FormatInt(req.VideoId, 10))
 			// 检查缓存是否存在
 			if exist, err := dal.RDB.Exists(ctx, key).Result(); err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, "查询缓存失败")
 				klog.Error("查询缓存失败, err: ", err)
 				return
 			} else if exist == 0 {
 				// 缓存不存在，查询数据库写入缓存
 				cnt, err := dal.GetCommentCount(ctx, req.VideoId)
 				if err != nil {
+					span.RecordError(err)
+					span.SetStatus(codes.Error, "查询评论数量失败")
 					klog.Error("查询评论数量失败, err: ", err)
 					return
 				}
 				if err := dal.RDB.Set(ctx, key, cnt, 0).Err(); err != nil {
+					span.RecordError(err)
+					span.SetStatus(codes.Error, "写入缓存失败")
 					klog.Error("写入缓存失败, err: ", err)
 					return
 				}
 			}
 			if err := dal.RDB.Incr(ctx, key).Err(); err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, "更新video的comment_count字段失败")
 				klog.Error("更新video的comment_count字段失败, err: ", err)
 				return
 			}
@@ -74,11 +94,15 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 		// 删除评论
 		mComment, err = dal.GetCommentByID(ctx, *req.CommentId)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "获取评论失败")
 			klog.Error("获取评论失败", err)
 			return nil, err
 		}
 
 		if mComment.UserID != req.UserId {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "评论作者id与当前用户id不一致")
 			klog.Error("评论作者id与当前用户id不一致: ", err)
 			return nil, err
 		}
@@ -86,6 +110,8 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 		// 通过kafka异步删除数据
 		err := kafka.DeleteComment(ctx, *req.CommentId)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "通过kafka异步删除数据失败")
 			klog.Error("通过kafka异步删除数据失败, err: ", err)
 			return nil, err
 		}
@@ -95,21 +121,29 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 			key := dal.GetRedisKey(dal.KeyVideoCommentCountPF + strconv.FormatInt(req.VideoId, 10))
 			// 检查缓存是否存在
 			if exist, err := dal.RDB.Exists(ctx, key).Result(); err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, "查询缓存失败")
 				klog.Error("查询缓存失败, err: ", err)
 				return
 			} else if exist == 0 {
 				// 缓存不存在，查询数据库写入缓存
 				cnt, err := dal.GetCommentCount(ctx, req.VideoId)
 				if err != nil {
+					span.RecordError(err)
+					span.SetStatus(codes.Error, "查询评论数量失败")
 					klog.Error("查询评论数量失败, err: ", err)
 					return
 				}
 				if err := dal.RDB.Set(ctx, key, cnt, 0).Err(); err != nil {
+					span.RecordError(err)
+					span.SetStatus(codes.Error, "写入缓存失败")
 					klog.Error("写入缓存失败, err: ", err)
 					return
 				}
 			}
 			if err := dal.RDB.IncrBy(ctx, key, -1).Err(); err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, "更新视频评论数失败")
 				klog.Error("更新视频评论数失败, err: ", err)
 			}
 		}()
@@ -118,6 +152,8 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 	// 获取用户信息
 	mUser, err := dal.GetUserByID(ctx, req.UserId)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "获取用户信息失败")
 		klog.Error("获取用户信息失败, err: ", err)
 		return nil, err
 	}
@@ -132,9 +168,14 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 
 // CommentList implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.CommentListRequest) (resp *comment.CommentListResponse, err error) {
+	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.CommentName).Start(ctx, "rpc.CommentList")
+	defer span.End()
+
 	// 获取评论列表
 	mCommentList, err := dal.GetCommentList(ctx, req.VideoId)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "获取评论列表失败")
 		klog.Error("获取评论列表失败, err: ", err)
 		return nil, err
 	}
@@ -146,6 +187,8 @@ func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.Comme
 	}
 	mUsers, err := dal.GetUserByIDs(ctx, userIDs)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "获取用户信息失败")
 		klog.Error("获取用户信息失败, err: ", err)
 		return nil, err
 	}

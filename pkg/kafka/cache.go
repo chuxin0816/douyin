@@ -2,10 +2,13 @@ package kafka
 
 import (
 	"context"
+	"douyin/config"
 	"douyin/dal"
 	"encoding/json"
 
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type cacheMQ struct {
@@ -29,15 +32,22 @@ func initCacheMQ() {
 
 // removeCache 删除redis缓存
 func (mq *cacheMQ) removeCache(ctx context.Context) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(ctx, "kafka.removeCache")
+	defer span.End()
+
 	// 接收消息
 	for {
 		m, err := mq.Reader.ReadMessage(ctx)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "failed to read message")
 			klog.Error("failed to read message: ", err)
 			break
 		}
 		msg := &dbMessage{}
 		if err := json.Unmarshal(m.Value, msg); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "failed to unmarshal message")
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
@@ -51,6 +61,8 @@ func (mq *cacheMQ) removeCache(ctx context.Context) {
 
 	// 程序退出前关闭Reader
 	if err := mq.Reader.Close(); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to close reader")
 		klog.Fatal("failed to close reader:", err)
 	}
 }

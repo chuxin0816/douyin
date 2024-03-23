@@ -2,12 +2,15 @@ package kafka
 
 import (
 	"context"
+	"douyin/config"
 	"douyin/dal"
 	"douyin/dal/model"
 	"encoding/json"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type videoMQ struct {
@@ -24,21 +27,32 @@ func initVideoMQ() {
 			Reader: NewReader(topicVideo),
 		},
 	}
+
+	go videoMQInstance.consumeVideo(context.Background())
 }
 
 func (mq *videoMQ) consumeVideo(ctx context.Context) {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(ctx, "kafka.consumeVideo")
+	defer span.End()
+
 	for {
 		m, err := mq.Reader.ReadMessage(ctx)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "failed to read message")
 			klog.Error("failed to read message: ", err)
 			break
 		}
 		video := &model.Video{}
 		if err := json.Unmarshal(m.Value, video); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "failed to unmarshal message")
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
 		if err := dal.UpdateVideo(ctx, video); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "failed to update video")
 			klog.Error("failed to update video: ", err)
 			continue
 		}
@@ -47,8 +61,13 @@ func (mq *videoMQ) consumeVideo(ctx context.Context) {
 }
 
 func UpdateVideo(video *model.Video) error {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(context.Background(), "kafka.UpdateVideo")
+	defer span.End()
+
 	value, err := json.Marshal(video)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to marshal message")
 		klog.Error("failed to marshal message:", err)
 		return err
 	}

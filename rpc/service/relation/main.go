@@ -1,21 +1,25 @@
 package main
 
 import (
+	"context"
 	"douyin/config"
 	"douyin/dal"
 	"douyin/logger"
 	"douyin/pkg/kafka"
+	"douyin/pkg/trace"
 	relation "douyin/rpc/kitex_gen/relation/relationservice"
 	"net"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	consul "github.com/kitex-contrib/registry-consul"
-	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 func main() {
 	config.Init()
+	trace.Init(context.Background(), config.Conf.OpenTelemetryConfig.RelationName)
+	defer trace.Close()
 	logger.Init()
 	kafka.Init()
 	dal.Init()

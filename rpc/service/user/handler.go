@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"douyin/config"
 	"douyin/dal"
 	"douyin/pkg/jwt"
 	"douyin/pkg/snowflake"
@@ -9,6 +10,8 @@ import (
 	"errors"
 
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,9 +22,14 @@ type UserServiceImpl struct{}
 
 // Register implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRequest) (resp *user.UserRegisterResponse, err error) {
+	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.UserName).Start(ctx, "rpc.Register")
+	defer span.End()
+
 	// 查询用户是否已存在
 	mUser := dal.GetUserByName(ctx, req.Username)
 	if mUser != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "用户已存在")
 		klog.Error("用户已存在")
 		return nil, dal.ErrUserExist
 	}
@@ -32,6 +40,8 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 	// 加密密码
 	bPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "加密密码失败")
 		klog.Error("加密密码失败")
 		return nil, ErrBcrypt
 	}
@@ -40,6 +50,8 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 	// 保存用户信息
 	dal.CreateUser(ctx, req.Username, req.Password, userID)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "保存用户信息失败")
 		klog.Error("保存用户信息失败")
 		return nil, err
 	}
@@ -47,6 +59,8 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 	// 生成用户token
 	token, err := jwt.GenerateToken(userID)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "生成用户token失败")
 		klog.Error("生成用户token失败")
 		return nil, err
 	}
@@ -58,9 +72,14 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 
 // Login implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest) (resp *user.UserLoginResponse, err error) {
+	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.UserName).Start(ctx, "rpc.Login")
+	defer span.End()
+
 	// 查询用户是否存在
 	mUser := dal.GetUserByName(ctx, req.Username)
 	if mUser == nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "用户不存在")
 		klog.Error("用户不存在")
 		return nil, dal.ErrUserNotExist
 	}
@@ -71,6 +90,8 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 			klog.Info("密码错误, username: ", req.Username)
 			return nil, dal.ErrPassword
 		}
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "校验密码失败")
 		klog.Error("校验密码失败")
 		return nil, err
 	}
@@ -78,6 +99,8 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 	// 生成用户token
 	token, err := jwt.GenerateToken(mUser.ID)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "生成用户token失败")
 		klog.Error("生成用户token失败")
 		return nil, err
 	}
@@ -90,9 +113,14 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 
 // UserInfo implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserInfo(ctx context.Context, req *user.UserInfoRequest) (resp *user.UserInfoResponse, err error) {
+	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.UserName).Start(ctx, "rpc.UserInfo")
+	defer span.End()
+
 	// 查询用户信息
 	mUser, err := dal.GetUserByID(ctx, req.ToUserId)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "查询用户信息失败")
 		klog.Error("查询用户信息失败")
 		return nil, err
 	}

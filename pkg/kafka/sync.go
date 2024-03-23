@@ -2,12 +2,15 @@ package kafka
 
 import (
 	"context"
+	"douyin/config"
 	"douyin/dal"
 	"douyin/dal/model"
 	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -27,6 +30,9 @@ func syncRedisToMySQL() {
 }
 
 func syncUser() {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(context.Background(), "kafka.syncUser")
+	defer span.End()
+
 	// 备份缓存中的用户ID并清空
 	backupUserID := make([]int64, 0, 100000)
 
@@ -49,6 +55,8 @@ func syncUser() {
 
 		cmds, err := pipe.Exec(context.Background())
 		if err != nil && err != redis.Nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "failed to exec pipeline")
 			klog.Error("同步redis用户缓存到mysql失败,err: ", err)
 			return
 		}
@@ -67,12 +75,17 @@ func syncUser() {
 			WorkCount:      workCount,
 		}
 		if err := UpdateUser(mUser); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "同步redis用户缓存到mysql失败")
 			klog.Error("同步redis用户缓存到mysql失败,err: ", err)
 			continue
 		}
 	}
 }
 func syncVideo() {
+	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(context.Background(), "kafka.syncVideo")
+	defer span.End()
+
 	// 备份缓存中的视频ID并清空
 	backupVideoID := make([]int64, 0, 100000)
 
@@ -91,10 +104,14 @@ func syncVideo() {
 
 		cmds, err := pipe.Exec(context.Background())
 		if err != nil {
+			span.RecordError(err)
+
 			if err == redis.Nil {
+				span.SetStatus(codes.Error, "redis中不存在该视频缓存")
 				klog.Warnf("redis中不存在视频ID为%d的缓存", videoID)
 				continue
 			}
+			span.SetStatus(codes.Error, "同步redis视频缓存到mysql失败")
 			klog.Errorf("同步redis视频缓存到mysql失败,err: ", err)
 			continue
 		}
@@ -107,6 +124,8 @@ func syncVideo() {
 			CommentCount:  videoCommentCount,
 		}
 		if err := UpdateVideo(mVideo); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "同步redis视频缓存到mysql失败")
 			klog.Errorf("同步redis视频缓存到mysql失败,err: ", err)
 			continue
 		}

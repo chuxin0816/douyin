@@ -1,7 +1,9 @@
 package kafka
 
 import (
+	"context"
 	"douyin/config"
+	"douyin/pkg/trace"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -28,6 +30,9 @@ type dbMessage struct {
 }
 
 func Init() {
+	trace.Init(context.Background(), config.Conf.OpenTelemetryConfig.KafkaName)
+	defer trace.Close()
+	
 	initCacheMQ()
 	initCommentMQ()
 	initFavoriteMQ()

@@ -1,21 +1,25 @@
 package main
 
 import (
+	"context"
 	"douyin/config"
 	"douyin/dal"
 	"douyin/logger"
 	"douyin/pkg/kafka"
+	"douyin/pkg/trace"
 	feed "douyin/rpc/kitex_gen/feed/feedservice"
 	"net"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	consul "github.com/kitex-contrib/registry-consul"
-	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 func main() {
 	config.Init()
+	trace.Init(context.Background(), config.Conf.OpenTelemetryConfig.FeedName)
+	defer trace.Close()
 	logger.Init()
 	kafka.Init()
 	dal.Init()
