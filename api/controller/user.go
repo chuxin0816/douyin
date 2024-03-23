@@ -2,15 +2,14 @@ package controller
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
 	"douyin/pkg/jwt"
+	"douyin/pkg/tracing"
 	"douyin/rpc/client"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -32,7 +31,7 @@ func NewUserController() *UserController {
 }
 
 func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.UserInfo")
+	_, span := tracing.Tracer.Start(c, "controller.UserInfo")
 	defer span.End()
 
 	// 获取参数
@@ -71,7 +70,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 }
 
 func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.Register")
+	_, span := tracing.Tracer.Start(c, "controller.Register")
 	defer span.End()
 
 	// 获取参数
@@ -107,7 +106,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 }
 
 func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.Login")
+	_, span := tracing.Tracer.Start(c, "controller.Login")
 	defer span.End()
 
 	// 获取参数

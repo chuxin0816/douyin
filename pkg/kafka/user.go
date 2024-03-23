@@ -2,14 +2,13 @@ package kafka
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
 	"douyin/dal/model"
+	"douyin/pkg/tracing"
 	"encoding/json"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -32,7 +31,7 @@ func initUserMQ() {
 }
 
 func (mq *userMQ) consumeUser(ctx context.Context) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(ctx, "kafka.consumeUser")
+	_, span := tracing.Tracer.Start(ctx, "kafka.consumeUser")
 	defer span.End()
 
 	// 接收消息
@@ -68,7 +67,7 @@ func (mq *userMQ) consumeUser(ctx context.Context) {
 }
 
 func UpdateUser(user *model.User) error {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(context.Background(), "kafka.UpdateUser")
+	_, span := tracing.Tracer.Start(context.Background(), "kafka.UpdateUser")
 	defer span.End()
 
 	value, err := json.Marshal(user)

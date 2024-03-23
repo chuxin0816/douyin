@@ -7,7 +7,7 @@ import (
 	"douyin/logger"
 	"douyin/pkg/kafka"
 	"douyin/pkg/oss"
-	"douyin/pkg/trace"
+	"douyin/pkg/tracing"
 	publish "douyin/rpc/kitex_gen/publish/publishservice"
 	"net"
 
@@ -19,8 +19,8 @@ import (
 
 func main() {
 	config.Init()
-	trace.Init(context.Background(), config.Conf.OpenTelemetryConfig.PublishName)
-	defer trace.Close()
+	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.PublishName)
+	defer tracing.Close()
 	logger.Init()
 	oss.Init()
 	kafka.Init()

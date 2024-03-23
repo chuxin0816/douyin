@@ -2,14 +2,13 @@ package controller
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/pkg/jwt"
+	"douyin/pkg/tracing"
 	"douyin/rpc/client"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -20,7 +19,7 @@ type FeedRequest struct {
 
 // Feed 不限制登录状态，返回按投稿时间倒序的视频列表，视频数由服务端控制，单次最多30个
 func Feed(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.Feed")
+	_, span := tracing.Tracer.Start(c, "controller.Feed")
 	defer span.End()
 
 	// 获取参数

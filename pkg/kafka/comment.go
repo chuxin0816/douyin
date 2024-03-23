@@ -2,14 +2,13 @@ package kafka
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
 	"douyin/dal/model"
+	"douyin/pkg/tracing"
 	"encoding/json"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -32,7 +31,7 @@ func initCommentMQ() {
 }
 
 func (mq *commentMQ) consumeComment(ctx context.Context) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(ctx, "kafka.consumeComment")
+	_, span := tracing.Tracer.Start(ctx, "kafka.consumeComment")
 	defer span.End()
 
 	// 接收消息
@@ -80,7 +79,7 @@ func (mq *commentMQ) consumeComment(ctx context.Context) {
 }
 
 func CreateComment(ctx context.Context, comment *model.Comment) error {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(ctx, "kafka.CreateComment")
+	_, span := tracing.Tracer.Start(ctx, "kafka.CreateComment")
 	defer span.End()
 
 	value, err := json.Marshal(comment)
@@ -96,7 +95,7 @@ func CreateComment(ctx context.Context, comment *model.Comment) error {
 }
 
 func DeleteComment(ctx context.Context, commentID int64) error {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(ctx, "kafka.DeleteComment")
+	_, span := tracing.Tracer.Start(ctx, "kafka.DeleteComment")
 	defer span.End()
 
 	value, err := json.Marshal(commentID)

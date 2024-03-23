@@ -2,18 +2,17 @@ package main
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
 	"douyin/dal/model"
 	"douyin/pkg/kafka"
 	"douyin/pkg/snowflake"
+	"douyin/pkg/tracing"
 	comment "douyin/rpc/kitex_gen/comment"
 	"errors"
 	"strconv"
 	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -22,7 +21,7 @@ type CommentServiceImpl struct{}
 
 // CommentAction implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.CommentActionRequest) (resp *comment.CommentActionResponse, err error) {
-	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.CommentName).Start(ctx, "rpc.CommentAction")
+	ctx, span := tracing.Tracer.Start(ctx, "rpc.CommentAction")
 	defer span.End()
 
 	// 判断视频是否存在
@@ -168,7 +167,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 
 // CommentList implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.CommentListRequest) (resp *comment.CommentListResponse, err error) {
-	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.CommentName).Start(ctx, "rpc.CommentList")
+	ctx, span := tracing.Tracer.Start(ctx, "rpc.CommentList")
 	defer span.End()
 
 	// 获取评论列表

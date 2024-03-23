@@ -7,7 +7,7 @@ import (
 	"douyin/logger"
 	"douyin/pkg/kafka"
 	"douyin/pkg/snowflake"
-	"douyin/pkg/trace"
+	"douyin/pkg/tracing"
 	comment "douyin/rpc/kitex_gen/comment/commentservice"
 	"net"
 
@@ -19,8 +19,8 @@ import (
 
 func main() {
 	config.Init()
-	trace.Init(context.Background(), config.Conf.OpenTelemetryConfig.CommentName)
-	defer trace.Close()
+	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.CommentName)
+	defer tracing.Close()
 	logger.Init()
 	snowflake.Init()
 	kafka.Init()

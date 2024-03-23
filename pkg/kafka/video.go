@@ -2,14 +2,13 @@ package kafka
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
 	"douyin/dal/model"
+	"douyin/pkg/tracing"
 	"encoding/json"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -32,7 +31,7 @@ func initVideoMQ() {
 }
 
 func (mq *videoMQ) consumeVideo(ctx context.Context) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(ctx, "kafka.consumeVideo")
+	_, span := tracing.Tracer.Start(ctx, "kafka.consumeVideo")
 	defer span.End()
 
 	for {
@@ -61,7 +60,7 @@ func (mq *videoMQ) consumeVideo(ctx context.Context) {
 }
 
 func UpdateVideo(video *model.Video) error {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(context.Background(), "kafka.UpdateVideo")
+	_, span := tracing.Tracer.Start(context.Background(), "kafka.UpdateVideo")
 	defer span.End()
 
 	value, err := json.Marshal(video)

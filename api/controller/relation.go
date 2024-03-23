@@ -2,15 +2,14 @@ package controller
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
 	"douyin/pkg/jwt"
+	"douyin/pkg/tracing"
 	"douyin/rpc/client"
 	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -31,7 +30,7 @@ func NewRelationController() *RelationController {
 }
 
 func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.RelationAction")
+	_, span := tracing.Tracer.Start(c, "controller.RelationAction")
 	defer span.End()
 
 	// 获取参数
@@ -80,7 +79,7 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 }
 
 func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.RelationFollowList")
+	_, span := tracing.Tracer.Start(c, "controller.RelationFollowList")
 	defer span.End()
 
 	// 获取参数
@@ -112,9 +111,9 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 }
 
 func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.RelationFollowerList")
+	_, span := tracing.Tracer.Start(c, "controller.RelationFollowerList")
 	defer span.End()
-	
+
 	// 获取参数
 	req := &RelationListRequest{}
 	err := ctx.BindAndValidate(req)
@@ -144,7 +143,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 }
 
 func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.RelationFriendList")
+	_, span := tracing.Tracer.Start(c, "controller.RelationFriendList")
 	defer span.End()
 
 	// 获取参数

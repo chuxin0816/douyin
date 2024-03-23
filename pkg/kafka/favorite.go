@@ -2,14 +2,13 @@ package kafka
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
 	"douyin/dal/model"
+	"douyin/pkg/tracing"
 	"encoding/json"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -32,7 +31,7 @@ func initFavoriteMQ() {
 }
 
 func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(ctx, "kafka.consumeFavorite")
+	_, span := tracing.Tracer.Start(ctx, "kafka.consumeFavorite")
 	defer span.End()
 
 	// 接收消息
@@ -89,7 +88,7 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 }
 
 func Favorite(favorite *model.Favorite) error {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(context.Background(), "kafka.Favorite")
+	_, span := tracing.Tracer.Start(context.Background(), "kafka.Favorite")
 	defer span.End()
 
 	data, err := json.Marshal(favorite)

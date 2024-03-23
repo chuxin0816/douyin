@@ -6,7 +6,7 @@ import (
 	"douyin/dal"
 	"douyin/logger"
 	"douyin/pkg/kafka"
-	"douyin/pkg/trace"
+	"douyin/pkg/tracing"
 	favorite "douyin/rpc/kitex_gen/favorite/favoriteservice"
 	"log"
 	"net"
@@ -19,8 +19,8 @@ import (
 
 func main() {
 	config.Init()
-	trace.Init(context.Background(), config.Conf.OpenTelemetryConfig.FavoriteName)
-	defer trace.Close()
+	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.FavoriteName)
+	defer tracing.Close()
 	logger.Init()
 	kafka.Init()
 	dal.Init()

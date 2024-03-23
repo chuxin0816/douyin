@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
 	"douyin/pkg/oss"
+	"douyin/pkg/tracing"
 	publish "douyin/rpc/kitex_gen/publish"
 	"os"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -19,7 +18,7 @@ type PublishServiceImpl struct{}
 
 // PublishAction implements the PublishServiceImpl interface.
 func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.PublishActionRequest) (resp *publish.PublishActionResponse, err error) {
-	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.PublishName).Start(ctx, "rpc.PublishAction")
+	ctx, span := tracing.Tracer.Start(ctx, "rpc.PublishAction")
 	defer span.End()
 
 	// 生成uuid作为文件名
@@ -60,7 +59,7 @@ func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.Pub
 
 // PublishList implements the PublishServiceImpl interface.
 func (s *PublishServiceImpl) PublishList(ctx context.Context, req *publish.PublishListRequest) (resp *publish.PublishListResponse, err error) {
-	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.PublishName).Start(ctx, "rpc.PublishList")
+	ctx, span := tracing.Tracer.Start(ctx, "rpc.PublishList")
 	defer span.End()
 
 	// 查询视频列表

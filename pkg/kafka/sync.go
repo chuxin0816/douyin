@@ -2,14 +2,13 @@ package kafka
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
 	"douyin/dal/model"
+	"douyin/pkg/tracing"
 	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -30,7 +29,7 @@ func syncRedisToMySQL() {
 }
 
 func syncUser() {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(context.Background(), "kafka.syncUser")
+	_, span := tracing.Tracer.Start(context.Background(), "kafka.syncUser")
 	defer span.End()
 
 	// 备份缓存中的用户ID并清空
@@ -83,7 +82,7 @@ func syncUser() {
 	}
 }
 func syncVideo() {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(context.Background(), "kafka.syncVideo")
+	_, span := tracing.Tracer.Start(context.Background(), "kafka.syncVideo")
 	defer span.End()
 
 	// 备份缓存中的视频ID并清空

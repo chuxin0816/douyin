@@ -2,16 +2,15 @@ package main
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
 	"douyin/dal/model"
 	"douyin/pkg/kafka"
+	"douyin/pkg/tracing"
 	favorite "douyin/rpc/kitex_gen/favorite"
 	"errors"
 	"strconv"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -20,13 +19,13 @@ type FavoriteServiceImpl struct{}
 
 // FavoriteAction implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.FavoriteActionRequest) (resp *favorite.FavoriteActionResponse, err error) {
-	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.FavoriteName).Start(ctx, "rpc.FavoriteAction")
+	ctx, span := tracing.Tracer.Start(ctx, "rpc.FavoriteAction")
 	defer span.End()
 
 	// 判断视频是否存在
 	if err := dal.CheckVideoExist(ctx, req.VideoId); err != nil {
 		span.RecordError(err)
-		
+
 		if errors.Is(err, dal.ErrVideoNotExist) {
 			span.SetStatus(codes.Error, "视频不存在")
 			klog.Error("视频不存在, videoID: ", req.VideoId)
@@ -161,9 +160,9 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 
 // FavoriteList implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.FavoriteListRequest) (resp *favorite.FavoriteListResponse, err error) {
-	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.FavoriteName).Start(ctx, "rpc.FavoriteList")
+	ctx, span := tracing.Tracer.Start(ctx, "rpc.FavoriteList")
 	defer span.End()
-	
+
 	// 获取喜欢的视频ID列表
 	videoIDs, err := dal.GetFavoriteList(ctx, req.ToUserId)
 	if err != nil {

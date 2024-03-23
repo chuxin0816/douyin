@@ -6,7 +6,7 @@ import (
 	"douyin/dal"
 	"douyin/logger"
 	"douyin/pkg/kafka"
-	"douyin/pkg/trace"
+	"douyin/pkg/tracing"
 	relation "douyin/rpc/kitex_gen/relation/relationservice"
 	"net"
 
@@ -18,8 +18,8 @@ import (
 
 func main() {
 	config.Init()
-	trace.Init(context.Background(), config.Conf.OpenTelemetryConfig.RelationName)
-	defer trace.Close()
+	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.RelationName)
+	defer tracing.Close()
 	logger.Init()
 	kafka.Init()
 	dal.Init()

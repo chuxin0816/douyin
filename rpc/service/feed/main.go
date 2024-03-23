@@ -6,7 +6,7 @@ import (
 	"douyin/dal"
 	"douyin/logger"
 	"douyin/pkg/kafka"
-	"douyin/pkg/trace"
+	"douyin/pkg/tracing"
 	feed "douyin/rpc/kitex_gen/feed/feedservice"
 	"net"
 
@@ -18,8 +18,8 @@ import (
 
 func main() {
 	config.Init()
-	trace.Init(context.Background(), config.Conf.OpenTelemetryConfig.FeedName)
-	defer trace.Close()
+	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.FeedName)
+	defer tracing.Close()
 	logger.Init()
 	kafka.Init()
 	dal.Init()

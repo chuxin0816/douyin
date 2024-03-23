@@ -7,7 +7,7 @@ import (
 	"douyin/logger"
 	"douyin/pkg/kafka"
 	"douyin/pkg/snowflake"
-	"douyin/pkg/trace"
+	"douyin/pkg/tracing"
 	user "douyin/rpc/kitex_gen/user/userservice"
 	"net"
 
@@ -19,8 +19,8 @@ import (
 
 func main() {
 	config.Init()
-	trace.Init(context.Background(), config.Conf.OpenTelemetryConfig.UserName)
-	defer trace.Close()
+	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.UserName)
+	defer tracing.Close()
 	logger.Init()
 	snowflake.Init()
 	kafka.Init()

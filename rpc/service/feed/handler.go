@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
+	"douyin/pkg/tracing"
 	feed "douyin/rpc/kitex_gen/feed"
 	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -19,7 +18,7 @@ type FeedServiceImpl struct{}
 
 // Feed implements the FeedServiceImpl interface.
 func (s *FeedServiceImpl) Feed(ctx context.Context, req *feed.FeedRequest) (resp *feed.FeedResponse, err error) {
-	ctx, span := otel.Tracer(config.Conf.OpenTelemetryConfig.FeedName).Start(ctx, "rpc.Feed")
+	ctx, span := tracing.Tracer.Start(ctx, "rpc.Feed")
 	defer span.End()
 
 	// 参数解析

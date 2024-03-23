@@ -2,12 +2,11 @@ package kafka
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/dal"
+	"douyin/pkg/tracing"
 	"encoding/json"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -32,7 +31,7 @@ func initCacheMQ() {
 
 // removeCache 删除redis缓存
 func (mq *cacheMQ) removeCache(ctx context.Context) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.KafkaName).Start(ctx, "kafka.removeCache")
+	_, span := tracing.Tracer.Start(ctx, "kafka.removeCache")
 	defer span.End()
 
 	// 接收消息

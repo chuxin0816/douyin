@@ -2,12 +2,11 @@ package controller
 
 import (
 	"context"
-	"douyin/config"
+	"douyin/pkg/tracing"
 	"douyin/rpc/client"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -29,7 +28,7 @@ func NewMessageController() *MessageController {
 }
 
 func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.MessageAction")
+	_, span := tracing.Tracer.Start(c, "controller.MessageAction")
 	defer span.End()
 
 	// 获取参数
@@ -61,7 +60,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.MessageChat")
+	_, span := tracing.Tracer.Start(c, "controller.MessageChat")
 	defer span.End()
 
 	// 获取参数

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"douyin/config"
-	"douyin/pkg/trace"
+	"douyin/pkg/tracing"
 	"io"
 	"os"
 	"path"
@@ -13,7 +13,6 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/cloudwego/kitex/pkg/klog"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -26,8 +25,8 @@ const (
 )
 
 func Init() {
-	trace.Init(context.Background(), config.Conf.OpenTelemetryConfig.OssName)
-	defer trace.Close()
+	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.OssName)
+	defer tracing.Close()
 
 	client, err := oss.New(config.Conf.OssConfig.Endpoint, config.Conf.OssConfig.AccessKeyId, config.Conf.OssConfig.AccessKeySecret)
 	if err != nil {
@@ -41,7 +40,7 @@ func Init() {
 
 // UploadFile 上传文件到oss
 func UploadFile(data []byte, uuidName string) error {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.OssName).Start(context.Background(), "oss.UploadFile")
+	_, span := tracing.Tracer.Start(context.Background(), "oss.UploadFile")
 	defer span.End()
 
 	videoName := uuidName + ".mp4"
@@ -99,7 +98,7 @@ func UploadFile(data []byte, uuidName string) error {
 
 // getCoverImage 获取视频第15帧作为封面
 func getCoverImage(videoName string) (io.Reader, error) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.OssName).Start(context.Background(), "oss.GetCoverImage")
+	_, span := tracing.Tracer.Start(context.Background(), "oss.GetCoverImage")
 	defer span.End()
 
 	buf := bytes.NewBuffer(nil)

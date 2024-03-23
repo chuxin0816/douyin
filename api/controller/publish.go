@@ -2,15 +2,14 @@ package controller
 
 import (
 	"context"
-	"douyin/config"
 	"douyin/pkg/jwt"
+	"douyin/pkg/tracing"
 	"douyin/rpc/client"
 	"io"
 	"mime/multipart"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -31,7 +30,7 @@ func NewPublishController() *PublishController {
 }
 
 func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.PublishAction")
+	_, span := tracing.Tracer.Start(c, "controller.PublishAction")
 	defer span.End()
 
 	// 获取参数
@@ -91,7 +90,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
-	_, span := otel.Tracer(config.Conf.OpenTelemetryConfig.ApiName).Start(c, "controller.PublishList")
+	_, span := tracing.Tracer.Start(c, "controller.PublishList")
 	defer span.End()
 
 	// 获取参数
