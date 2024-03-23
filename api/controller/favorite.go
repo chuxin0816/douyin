@@ -6,7 +6,6 @@ import (
 	"douyin/pkg/jwt"
 	"douyin/pkg/tracing"
 	"douyin/rpc/client"
-	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -57,13 +56,13 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	if err != nil {
 		span.RecordError(err)
 
-		if errors.Is(err, dal.ErrAlreadyFavorite) {
+		if errorIs(err, dal.ErrAlreadyFavorite) {
 			Error(ctx, CodeAlreadyFavorite)
 			span.SetStatus(codes.Error, "已经点赞过了")
 			klog.Error("已经点赞过了")
 			return
 		}
-		if errors.Is(err, dal.ErrNotFavorite) {
+		if errorIs(err, dal.ErrNotFavorite) {
 			Error(ctx, CodeNotFavorite)
 			span.SetStatus(codes.Error, "还没有点赞过")
 			klog.Error("还没有点赞过")

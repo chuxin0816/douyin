@@ -6,7 +6,6 @@ import (
 	"douyin/pkg/jwt"
 	"douyin/pkg/tracing"
 	"douyin/rpc/client"
-	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -54,13 +53,13 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	if err != nil {
 		span.RecordError(err)
 
-		if errors.Is(err, dal.ErrVideoNotExist) {
+		if errorIs(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
 			span.SetStatus(codes.Error, "视频不存在")
 			klog.Error("视频不存在")
 			return
 		}
-		if errors.Is(err, dal.ErrCommentNotExist) {
+		if errorIs(err, dal.ErrCommentNotExist) {
 			Error(ctx, CodeCommentNotExist)
 			span.SetStatus(codes.Error, "评论不存在")
 			klog.Error("评论不存在")
@@ -98,7 +97,7 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	resp, err := client.CommentList(userID, req.VideoID)
 	if err != nil {
 		span.RecordError(err)
-		if errors.Is(err, dal.ErrVideoNotExist) {
+		if errorIs(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
 			span.SetStatus(codes.Error, "视频不存在")
 			klog.Error("视频不存在")

@@ -6,7 +6,6 @@ import (
 	"douyin/pkg/jwt"
 	"douyin/pkg/tracing"
 	"douyin/rpc/client"
-	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -53,7 +52,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	if err != nil {
 		span.RecordError(err)
 
-		if errors.Is(err, dal.ErrUserNotExist) {
+		if errorIs(err, dal.ErrUserNotExist) {
 			Error(ctx, CodeUserNotExist)
 			span.SetStatus(codes.Error, "用户不存在")
 			klog.Error("用户不存在")
@@ -89,7 +88,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	if err != nil {
 		span.RecordError(err)
 
-		if errors.Is(err, dal.ErrUserExist) {
+		if errorIs(err, dal.ErrUserExist) {
 			Error(ctx, CodeUserExist)
 			span.SetStatus(codes.Error, "用户已存在")
 			klog.Error("用户已存在")
@@ -125,13 +124,13 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	if err != nil {
 		span.RecordError(err)
 
-		if errors.Is(err, dal.ErrUserNotExist) {
+		if errorIs(err, dal.ErrUserNotExist) {
 			Error(ctx, CodeUserNotExist)
 			span.SetStatus(codes.Error, "用户不存在")
 			klog.Error("用户不存在")
 			return
 		}
-		if errors.Is(err, dal.ErrPassword) {
+		if errorIs(err, dal.ErrPassword) {
 			Error(ctx, CodeInvalidPassword)
 			span.SetStatus(codes.Error, "密码错误")
 			klog.Error("密码错误")

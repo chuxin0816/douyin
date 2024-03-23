@@ -6,7 +6,6 @@ import (
 	"douyin/pkg/jwt"
 	"douyin/pkg/tracing"
 	"douyin/rpc/client"
-	"errors"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -56,13 +55,13 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	resp, err := client.RelationAction(userID, req.ToUserID, req.ActionType)
 	if err != nil {
 		span.RecordError(err)
-		if errors.Is(err, dal.ErrAlreadyFollow) {
+		if errorIs(err, dal.ErrAlreadyFollow) {
 			Error(ctx, CodeAlreadyFollow)
 			span.SetStatus(codes.Error, "已经关注过了")
 			klog.Error("已经关注过了, err: ", err)
 			return
 		}
-		if errors.Is(err, dal.ErrNotFollow) {
+		if errorIs(err, dal.ErrNotFollow) {
 			Error(ctx, CodeNotFollow)
 			span.SetStatus(codes.Error, "还没有关注过")
 			klog.Error("还没有关注过, err: ", err)

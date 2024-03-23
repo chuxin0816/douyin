@@ -5,7 +5,10 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
-const CtxUserIDKey = "userID"
+const (
+	CtxUserIDKey = "userID"
+	rpcErrPrefix = "remote or network error[remote]: biz error: "
+)
 
 const (
 	CodeSuccess     int32 = 0
@@ -60,4 +63,8 @@ func StatusMsg(code int32) string {
 		msg = codeMsgMap[CodeServerBusy]
 	}
 	return msg
+}
+
+func errorIs(err error, target error) bool {
+	return err.Error() == rpcErrPrefix+target.Error()
 }
