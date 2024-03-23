@@ -33,7 +33,7 @@ func NewCommentController() *CommentController {
 }
 
 func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.CommentAction")
+	_, span := tracing.Tracer.Start(c, "CommentAction")
 	defer span.End()
 	// 获取参数
 	req := &CommentActionRequest{}
@@ -77,7 +77,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.CommentList")
+	_, span := tracing.Tracer.Start(c, "CommentList")
 	defer span.End()
 
 	// 获取参数

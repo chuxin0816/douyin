@@ -31,7 +31,7 @@ func initCacheMQ() {
 
 // removeCache 删除redis缓存
 func (mq *cacheMQ) removeCache(ctx context.Context) {
-	_, span := tracing.Tracer.Start(ctx, "kafka.removeCache")
+	_, span := tracing.Tracer.Start(ctx, "removeCache")
 	defer span.End()
 
 	// 接收消息

@@ -18,7 +18,7 @@ type FeedServiceImpl struct{}
 
 // Feed implements the FeedServiceImpl interface.
 func (s *FeedServiceImpl) Feed(ctx context.Context, req *feed.FeedRequest) (resp *feed.FeedResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.Feed")
+	ctx, span := tracing.Tracer.Start(ctx, "Feed")
 	defer span.End()
 
 	// 参数解析

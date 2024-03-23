@@ -30,7 +30,7 @@ func NewPublishController() *PublishController {
 }
 
 func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.PublishAction")
+	_, span := tracing.Tracer.Start(c, "PublishAction")
 	defer span.End()
 
 	// 获取参数
@@ -90,7 +90,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.PublishList")
+	_, span := tracing.Tracer.Start(c, "PublishList")
 	defer span.End()
 
 	// 获取参数

@@ -21,7 +21,7 @@ type UserServiceImpl struct{}
 
 // Register implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRequest) (resp *user.UserRegisterResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.Register")
+	ctx, span := tracing.Tracer.Start(ctx, "Register")
 	defer span.End()
 
 	// 查询用户是否已存在
@@ -71,7 +71,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 
 // Login implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest) (resp *user.UserLoginResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.Login")
+	ctx, span := tracing.Tracer.Start(ctx, "Login")
 	defer span.End()
 
 	// 查询用户是否存在
@@ -112,7 +112,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 
 // UserInfo implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserInfo(ctx context.Context, req *user.UserInfoRequest) (resp *user.UserInfoResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.UserInfo")
+	ctx, span := tracing.Tracer.Start(ctx, "UserInfo")
 	defer span.End()
 
 	// 查询用户信息

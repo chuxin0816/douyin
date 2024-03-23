@@ -31,7 +31,7 @@ func NewUserController() *UserController {
 }
 
 func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.UserInfo")
+	_, span := tracing.Tracer.Start(c, "UserInfo")
 	defer span.End()
 
 	// 获取参数
@@ -70,7 +70,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 }
 
 func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.Register")
+	_, span := tracing.Tracer.Start(c, "Register")
 	defer span.End()
 
 	// 获取参数
@@ -106,7 +106,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 }
 
 func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.Login")
+	_, span := tracing.Tracer.Start(c, "Login")
 	defer span.End()
 
 	// 获取参数

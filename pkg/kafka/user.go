@@ -31,7 +31,7 @@ func initUserMQ() {
 }
 
 func (mq *userMQ) consumeUser(ctx context.Context) {
-	_, span := tracing.Tracer.Start(ctx, "kafka.consumeUser")
+	_, span := tracing.Tracer.Start(ctx, "consumeUser")
 	defer span.End()
 
 	// 接收消息
@@ -67,7 +67,7 @@ func (mq *userMQ) consumeUser(ctx context.Context) {
 }
 
 func UpdateUser(user *model.User) error {
-	_, span := tracing.Tracer.Start(context.Background(), "kafka.UpdateUser")
+	_, span := tracing.Tracer.Start(context.Background(), "UpdateUser")
 	defer span.End()
 
 	value, err := json.Marshal(user)

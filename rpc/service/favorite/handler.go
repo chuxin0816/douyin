@@ -19,7 +19,7 @@ type FavoriteServiceImpl struct{}
 
 // FavoriteAction implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.FavoriteActionRequest) (resp *favorite.FavoriteActionResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.FavoriteAction")
+	ctx, span := tracing.Tracer.Start(ctx, "FavoriteAction")
 	defer span.End()
 
 	// 判断视频是否存在
@@ -160,7 +160,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 
 // FavoriteList implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.FavoriteListRequest) (resp *favorite.FavoriteListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.FavoriteList")
+	ctx, span := tracing.Tracer.Start(ctx, "FavoriteList")
 	defer span.End()
 
 	// 获取喜欢的视频ID列表

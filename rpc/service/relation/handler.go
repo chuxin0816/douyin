@@ -18,7 +18,7 @@ type RelationServiceImpl struct{}
 
 // RelationAction implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.RelationActionRequest) (resp *relation.RelationActionResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.RelationAction")
+	ctx, span := tracing.Tracer.Start(ctx, "RelationAction")
 	defer span.End()
 
 	// 检查是否关注
@@ -119,7 +119,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 
 // RelationFollowList implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relation.RelationFollowListRequest) (resp *relation.RelationFollowListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.RelationFollowList")
+	ctx, span := tracing.Tracer.Start(ctx, "RelationFollowList")
 	defer span.End()
 
 	// 操作数据库
@@ -145,7 +145,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 
 // RelationFollowerList implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *relation.RelationFollowerListRequest) (resp *relation.RelationFollowerListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.RelationFollowerList")
+	ctx, span := tracing.Tracer.Start(ctx, "RelationFollowerList")
 	defer span.End()
 
 	// 操作数据库
@@ -171,7 +171,7 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 
 // RelationFriendList implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relation.RelationFriendListRequest) (resp *relation.RelationFriendListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.RelationFriendList")
+	ctx, span := tracing.Tracer.Start(ctx, "RelationFriendList")
 	defer span.End()
 
 	// 获取关注列表

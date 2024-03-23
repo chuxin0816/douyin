@@ -30,7 +30,7 @@ func NewFavoriteController() *FavoriteController {
 }
 
 func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.FavoriteAction")
+	_, span := tracing.Tracer.Start(c, "FavoriteAction")
 	defer span.End()
 
 	// 获取参数
@@ -80,7 +80,7 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 }
 
 func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.FavoriteList")
+	_, span := tracing.Tracer.Start(c, "FavoriteList")
 	defer span.End()
 
 	// 获取参数

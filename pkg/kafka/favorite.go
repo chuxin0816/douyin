@@ -31,7 +31,7 @@ func initFavoriteMQ() {
 }
 
 func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
-	_, span := tracing.Tracer.Start(ctx, "kafka.consumeFavorite")
+	_, span := tracing.Tracer.Start(ctx, "consumeFavorite")
 	defer span.End()
 
 	// 接收消息
@@ -88,7 +88,7 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 }
 
 func Favorite(favorite *model.Favorite) error {
-	_, span := tracing.Tracer.Start(context.Background(), "kafka.Favorite")
+	_, span := tracing.Tracer.Start(context.Background(), "Favorite")
 	defer span.End()
 
 	data, err := json.Marshal(favorite)

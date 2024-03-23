@@ -30,7 +30,7 @@ func NewRelationController() *RelationController {
 }
 
 func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.RelationAction")
+	_, span := tracing.Tracer.Start(c, "RelationAction")
 	defer span.End()
 
 	// 获取参数
@@ -79,7 +79,7 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 }
 
 func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.RelationFollowList")
+	_, span := tracing.Tracer.Start(c, "RelationFollowList")
 	defer span.End()
 
 	// 获取参数
@@ -111,7 +111,7 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 }
 
 func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.RelationFollowerList")
+	_, span := tracing.Tracer.Start(c, "RelationFollowerList")
 	defer span.End()
 
 	// 获取参数
@@ -143,7 +143,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 }
 
 func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.RelationFriendList")
+	_, span := tracing.Tracer.Start(c, "RelationFriendList")
 	defer span.End()
 
 	// 获取参数

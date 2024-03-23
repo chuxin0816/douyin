@@ -21,7 +21,7 @@ type CommentServiceImpl struct{}
 
 // CommentAction implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.CommentActionRequest) (resp *comment.CommentActionResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.CommentAction")
+	ctx, span := tracing.Tracer.Start(ctx, "CommentAction")
 	defer span.End()
 
 	// 判断视频是否存在
@@ -167,7 +167,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 
 // CommentList implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.CommentListRequest) (resp *comment.CommentListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.CommentList")
+	ctx, span := tracing.Tracer.Start(ctx, "CommentList")
 	defer span.End()
 
 	// 获取评论列表

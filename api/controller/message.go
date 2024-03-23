@@ -28,7 +28,7 @@ func NewMessageController() *MessageController {
 }
 
 func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.MessageAction")
+	_, span := tracing.Tracer.Start(c, "MessageAction")
 	defer span.End()
 
 	// 获取参数
@@ -60,7 +60,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "controller.MessageChat")
+	_, span := tracing.Tracer.Start(c, "MessageChat")
 	defer span.End()
 
 	// 获取参数

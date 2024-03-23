@@ -40,7 +40,7 @@ func Init() {
 
 // UploadFile 上传文件到oss
 func UploadFile(data []byte, uuidName string) error {
-	_, span := tracing.Tracer.Start(context.Background(), "oss.UploadFile")
+	_, span := tracing.Tracer.Start(context.Background(), "UploadFile")
 	defer span.End()
 
 	videoName := uuidName + ".mp4"
@@ -98,7 +98,7 @@ func UploadFile(data []byte, uuidName string) error {
 
 // getCoverImage 获取视频第15帧作为封面
 func getCoverImage(videoName string) (io.Reader, error) {
-	_, span := tracing.Tracer.Start(context.Background(), "oss.GetCoverImage")
+	_, span := tracing.Tracer.Start(context.Background(), "GetCoverImage")
 	defer span.End()
 
 	buf := bytes.NewBuffer(nil)

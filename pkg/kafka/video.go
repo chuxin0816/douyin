@@ -31,7 +31,7 @@ func initVideoMQ() {
 }
 
 func (mq *videoMQ) consumeVideo(ctx context.Context) {
-	_, span := tracing.Tracer.Start(ctx, "kafka.consumeVideo")
+	_, span := tracing.Tracer.Start(ctx, "consumeVideo")
 	defer span.End()
 
 	for {
@@ -60,7 +60,7 @@ func (mq *videoMQ) consumeVideo(ctx context.Context) {
 }
 
 func UpdateVideo(video *model.Video) error {
-	_, span := tracing.Tracer.Start(context.Background(), "kafka.UpdateVideo")
+	_, span := tracing.Tracer.Start(context.Background(), "UpdateVideo")
 	defer span.End()
 
 	value, err := json.Marshal(video)

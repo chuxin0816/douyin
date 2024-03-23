@@ -31,7 +31,7 @@ func initCommentMQ() {
 }
 
 func (mq *commentMQ) consumeComment(ctx context.Context) {
-	_, span := tracing.Tracer.Start(ctx, "kafka.consumeComment")
+	_, span := tracing.Tracer.Start(ctx, "consumeComment")
 	defer span.End()
 
 	// 接收消息
@@ -79,7 +79,7 @@ func (mq *commentMQ) consumeComment(ctx context.Context) {
 }
 
 func CreateComment(ctx context.Context, comment *model.Comment) error {
-	_, span := tracing.Tracer.Start(ctx, "kafka.CreateComment")
+	_, span := tracing.Tracer.Start(ctx, "CreateComment")
 	defer span.End()
 
 	value, err := json.Marshal(comment)
@@ -95,7 +95,7 @@ func CreateComment(ctx context.Context, comment *model.Comment) error {
 }
 
 func DeleteComment(ctx context.Context, commentID int64) error {
-	_, span := tracing.Tracer.Start(ctx, "kafka.DeleteComment")
+	_, span := tracing.Tracer.Start(ctx, "DeleteComment")
 	defer span.End()
 
 	value, err := json.Marshal(commentID)

@@ -29,7 +29,7 @@ func syncRedisToMySQL() {
 }
 
 func syncUser() {
-	_, span := tracing.Tracer.Start(context.Background(), "kafka.syncUser")
+	_, span := tracing.Tracer.Start(context.Background(), "syncUser")
 	defer span.End()
 
 	// 备份缓存中的用户ID并清空
@@ -82,7 +82,7 @@ func syncUser() {
 	}
 }
 func syncVideo() {
-	_, span := tracing.Tracer.Start(context.Background(), "kafka.syncVideo")
+	_, span := tracing.Tracer.Start(context.Background(), "syncVideo")
 	defer span.End()
 
 	// 备份缓存中的视频ID并清空

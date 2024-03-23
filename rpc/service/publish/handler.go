@@ -18,7 +18,7 @@ type PublishServiceImpl struct{}
 
 // PublishAction implements the PublishServiceImpl interface.
 func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.PublishActionRequest) (resp *publish.PublishActionResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.PublishAction")
+	ctx, span := tracing.Tracer.Start(ctx, "PublishAction")
 	defer span.End()
 
 	// 生成uuid作为文件名
@@ -59,7 +59,7 @@ func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.Pub
 
 // PublishList implements the PublishServiceImpl interface.
 func (s *PublishServiceImpl) PublishList(ctx context.Context, req *publish.PublishListRequest) (resp *publish.PublishListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "rpc.PublishList")
+	ctx, span := tracing.Tracer.Start(ctx, "PublishList")
 	defer span.End()
 
 	// 查询视频列表
