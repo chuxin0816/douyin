@@ -35,6 +35,7 @@ func Init(ctx context.Context, serviceName string) {
 	)
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	Tracer = otel.Tracer(serviceName)
 }
 
 func Close() {
