@@ -31,7 +31,7 @@ func initUserMQ() {
 }
 
 func (mq *userMQ) consumeUser(ctx context.Context) {
-	_, span := tracing.Tracer.Start(ctx, "consumeUser")
+	ctx, span := tracing.Tracer.Start(ctx, "consumeUser")
 	defer span.End()
 
 	// 接收消息

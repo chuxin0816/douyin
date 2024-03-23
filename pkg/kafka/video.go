@@ -31,7 +31,7 @@ func initVideoMQ() {
 }
 
 func (mq *videoMQ) consumeVideo(ctx context.Context) {
-	_, span := tracing.Tracer.Start(ctx, "consumeVideo")
+	ctx, span := tracing.Tracer.Start(ctx, "consumeVideo")
 	defer span.End()
 
 	for {

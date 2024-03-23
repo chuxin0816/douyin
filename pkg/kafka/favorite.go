@@ -31,7 +31,7 @@ func initFavoriteMQ() {
 }
 
 func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
-	_, span := tracing.Tracer.Start(ctx, "consumeFavorite")
+	ctx, span := tracing.Tracer.Start(ctx, "consumeFavorite")
 	defer span.End()
 
 	// 接收消息
