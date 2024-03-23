@@ -7,7 +7,6 @@ import (
 	"douyin/rpc/kitex_gen/comment"
 	"strconv"
 
-	"github.com/cloudwego/kitex/pkg/klog"
 	"gorm.io/gorm"
 )
 
@@ -70,7 +69,6 @@ func CheckVideoExist(ctx context.Context, videoID int64) error {
 		if err == gorm.ErrRecordNotFound {
 			return ErrVideoNotExist
 		}
-		klog.Error("查询视频失败, err: ", err)
 		return err
 	}
 
