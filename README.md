@@ -3,7 +3,7 @@
 ## 接口文档：https://apifox.com/apidoc/shared-0c80e0c6-daca-4b12-96a4-01ca8c2b6cd1
 ## 项目演示地址：http://chuxin0816.com:8888/ (已关闭)
 ### 项目部署
-项目使用docker-compose部署，在配置好config/config.yaml并通过douyin.sql建表后运行`cd && docker-compose up -d`即可启动项目
+项目使用docker-compose部署，在配置好config/config.yaml后运行`cd && docker-compose up -d`即可启动项目
 > 如果内存不足可以分批构建后启动:
 ```shell
 cd cmd/docker && 
@@ -16,6 +16,7 @@ docker-compose build relation &&
 docker-compose build message &&
 docker-compose up -d
 ```
+初次启动部分服务会因为MySQL没有相关表而报错，需通过douyin.sql建表后再次启动失败的服务
 ******
 ## 项目结构：
 http请求->api/router->api/controller->rpc/client->rpc/service->dal
@@ -37,6 +38,7 @@ http请求->api/router->api/controller->rpc/client->rpc/service->dal
 * 使用ffmpeg进行视频转码和生成封面
 * 使用令牌桶作为限流中间件
 * 使用viper读取配置文件
+* 使用OpenTelemetry+Jaeger进行分布式链路追踪
 * 使用docker-compose部署项目
 ## 代码生成:
 ```shell
