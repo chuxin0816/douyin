@@ -28,7 +28,7 @@ func NewMessageController() *MessageController {
 }
 
 func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "MessageAction")
+	c, span := tracing.Tracer.Start(c, "MessageAction")
 	defer span.End()
 
 	// 获取参数
@@ -46,7 +46,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := client.MessageAction(userID, req.ToUserID, req.ActionType, req.Content)
+	resp, err := client.MessageAction(c, userID, req.ToUserID, req.ActionType, req.Content)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
@@ -60,7 +60,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "MessageChat")
+	c, span := tracing.Tracer.Start(c, "MessageChat")
 	defer span.End()
 
 	// 获取参数
@@ -78,7 +78,7 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := client.MessageChat(userID, req.ToUserID, req.PreMsgTime)
+	resp, err := client.MessageChat(c, userID, req.ToUserID, req.PreMsgTime)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)

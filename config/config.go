@@ -9,15 +9,15 @@ import (
 var Conf = &Config{}
 
 type Config struct {
-	JwtKey           string `mapstructure:"jwt_key"`
-	*SnowflakeConfig `mapstructure:"snowflake"`
-	*OssConfig       `mapstructure:"oss"`
-	*HertzConfig     `mapstructure:"hertz"`
-	*LogConfig       `mapstructure:"log"`
-	*DatabaseConfig  `mapstructure:"database"`
-	*ConsulConfig    `mapstructure:"consul"`
-	*KafkaConfig     `mapstructure:"kafka"`
-	*OpenTelemetryConfig    `mapstructure:"open_telemetry"`
+	JwtKey               string `mapstructure:"jwt_key"`
+	*SnowflakeConfig     `mapstructure:"snowflake"`
+	*OssConfig           `mapstructure:"oss"`
+	*HertzConfig         `mapstructure:"hertz"`
+	*LogConfig           `mapstructure:"log"`
+	*DatabaseConfig      `mapstructure:"database"`
+	*ConsulConfig        `mapstructure:"consul"`
+	*KafkaConfig         `mapstructure:"kafka"`
+	*OpenTelemetryConfig `mapstructure:"open_telemetry"`
 }
 
 type SnowflakeConfig struct {
@@ -86,17 +86,17 @@ type KafkaConfig struct {
 }
 
 type OpenTelemetryConfig struct {
-	ApiName string `mapstructure:"api_name"`
-	FeedName string `mapstructure:"feed_name"`
-	UserName string `mapstructure:"user_name"`
+	ApiName      string `mapstructure:"api_name"`
+	FeedName     string `mapstructure:"feed_name"`
+	UserName     string `mapstructure:"user_name"`
 	FavoriteName string `mapstructure:"favorite_name"`
-	CommentName string `mapstructure:"comment_name"`
-	PublishName string `mapstructure:"publish_name"`
+	CommentName  string `mapstructure:"comment_name"`
+	PublishName  string `mapstructure:"publish_name"`
 	RelationName string `mapstructure:"relation_name"`
-	MessageName string `mapstructure:"message_name"`
-	OssName string `mapstructure:"oss_name"`
-	KafkaName string `mapstructure:"kafka_name"`
-	JaegerAddr string `mapstructure:"jaeger_addr"`
+	MessageName  string `mapstructure:"message_name"`
+	OssName      string `mapstructure:"oss_name"`
+	KafkaName    string `mapstructure:"kafka_name"`
+	JaegerAddr   string `mapstructure:"jaeger_addr"`
 }
 
 func Init() {

@@ -25,8 +25,8 @@ func initMessageClient() {
 	}
 }
 
-func MessageAction(userID, toUserID, actionType int64, content string) (*message.MessageActionResponse, error) {
-	return messageClient.MessageAction(context.Background(), &message.MessageActionRequest{
+func MessageAction(ctx context.Context, userID, toUserID, actionType int64, content string) (*message.MessageActionResponse, error) {
+	return messageClient.MessageAction(ctx, &message.MessageActionRequest{
 		UserId:     userID,
 		ToUserId:   toUserID,
 		ActionType: actionType,
@@ -34,8 +34,8 @@ func MessageAction(userID, toUserID, actionType int64, content string) (*message
 	})
 }
 
-func MessageChat(userID, toUserID, lastTime int64) (*message.MessageChatResponse, error) {
-	return messageClient.MessageChat(context.Background(), &message.MessageChatRequest{
+func MessageChat(ctx context.Context, userID, toUserID, lastTime int64) (*message.MessageChatResponse, error) {
+	return messageClient.MessageChat(ctx, &message.MessageChatRequest{
 		UserId:   userID,
 		ToUserId: toUserID,
 		LastTime: lastTime,

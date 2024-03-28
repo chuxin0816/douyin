@@ -29,7 +29,7 @@ func NewFavoriteController() *FavoriteController {
 }
 
 func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "FavoriteAction")
+	c, span := tracing.Tracer.Start(c, "FavoriteAction")
 	defer span.End()
 
 	// 获取参数
@@ -52,7 +52,7 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := client.FavoriteAction(userID, req.VideoID, req.ActionType)
+	resp, err := client.FavoriteAction(c, userID, req.VideoID, req.ActionType)
 	if err != nil {
 		span.RecordError(err)
 
@@ -79,7 +79,7 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 }
 
 func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "FavoriteList")
+	c, span := tracing.Tracer.Start(c, "FavoriteList")
 	defer span.End()
 
 	// 获取参数
@@ -97,7 +97,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := client.FavoriteList(userID, req.UserID)
+	resp, err := client.FavoriteList(c, userID, req.UserID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)

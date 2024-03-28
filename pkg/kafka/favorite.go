@@ -87,8 +87,8 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 	}
 }
 
-func Favorite(favorite *model.Favorite) error {
-	_, span := tracing.Tracer.Start(context.Background(), "kafka.Favorite")
+func Favorite(ctx context.Context, favorite *model.Favorite) error {
+	ctx, span := tracing.Tracer.Start(ctx, "kafka.Favorite")
 	defer span.End()
 
 	data, err := json.Marshal(favorite)
@@ -99,7 +99,7 @@ func Favorite(favorite *model.Favorite) error {
 		return err
 	}
 
-	return favoriteMQInstance.Writer.WriteMessages(context.Background(), kafka.Message{
+	return favoriteMQInstance.Writer.WriteMessages(ctx, kafka.Message{
 		Value: data,
 	})
 }

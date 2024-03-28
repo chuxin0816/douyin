@@ -36,7 +36,7 @@ func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.Pub
 
 	// 上传视频到oss
 	go func() {
-		if err := oss.UploadFile(req.Data, uuidName); err != nil {
+		if err := oss.UploadFile(ctx, req.Data, uuidName); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "保存视频到oss失败")
 			klog.Error("保存视频到oss失败, err: ", err)

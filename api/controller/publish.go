@@ -30,7 +30,7 @@ func NewPublishController() *PublishController {
 }
 
 func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "PublishAction")
+	c, span := tracing.Tracer.Start(c, "PublishAction")
 	defer span.End()
 
 	// 获取参数
@@ -76,7 +76,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	}
 
 	// 业务逻辑处理
-	resp, err := client.PublishAction(userID, data, req.Title)
+	resp, err := client.PublishAction(c, userID, data, req.Title)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
@@ -90,7 +90,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "PublishList")
+	c, span := tracing.Tracer.Start(c, "PublishList")
 	defer span.End()
 
 	// 获取参数
@@ -109,7 +109,7 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := client.PublishList(userID, authorID)
+	resp, err := client.PublishList(c, userID, authorID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)

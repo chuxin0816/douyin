@@ -26,8 +26,8 @@ func initCommentClient() {
 	}
 }
 
-func CommentAction(userID, videoID, actionType int64, commentID *int64, commentText *string) (*comment.CommentActionResponse, error) {
-	return commentClient.CommentAction(context.Background(), &comment.CommentActionRequest{
+func CommentAction(ctx context.Context, userID, videoID, actionType int64, commentID *int64, commentText *string) (*comment.CommentActionResponse, error) {
+	return commentClient.CommentAction(ctx, &comment.CommentActionRequest{
 		UserId:      userID,
 		VideoId:     videoID,
 		ActionType:  actionType,
@@ -36,8 +36,8 @@ func CommentAction(userID, videoID, actionType int64, commentID *int64, commentT
 	})
 }
 
-func CommentList(userID *int64, videoID int64) (*comment.CommentListResponse, error) {
-	return commentClient.CommentList(context.Background(), &comment.CommentListRequest{
+func CommentList(ctx context.Context, userID *int64, videoID int64) (*comment.CommentListResponse, error) {
+	return commentClient.CommentList(ctx, &comment.CommentListRequest{
 		UserId:  userID,
 		VideoId: videoID,
 	})

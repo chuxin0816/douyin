@@ -25,8 +25,8 @@ func initFeedClient() {
 	}
 }
 
-func Feed(latestTime int64, userID *int64) (*feed.FeedResponse, error) {
-	return feedClient.Feed(context.Background(), &feed.FeedRequest{
+func Feed(ctx context.Context, latestTime int64, userID *int64) (*feed.FeedResponse, error) {
+	return feedClient.Feed(ctx, &feed.FeedRequest{
 		LatestTime: latestTime,
 		UserId:     userID,
 	})

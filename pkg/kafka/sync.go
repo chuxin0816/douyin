@@ -18,18 +18,18 @@ const (
 	aggregateInterval = time.Second * 10
 )
 
-func syncRedisToMySQL() {
+func syncRedisToMySQL(ctx context.Context) {
 	ticker := time.NewTicker(aggregateInterval)
 	defer ticker.Stop()
 	for {
 		<-ticker.C
-		go syncUser()
-		go syncVideo()
+		go syncUser(ctx)
+		go syncVideo(ctx)
 	}
 }
 
-func syncUser() {
-	_, span := tracing.Tracer.Start(context.Background(), "kafka.syncUser")
+func syncUser(ctx context.Context) {
+	ctx, span := tracing.Tracer.Start(ctx, "kafka.syncUser")
 	defer span.End()
 
 	// 备份缓存中的用户ID并清空
@@ -46,13 +46,13 @@ func syncUser() {
 
 	for _, userID := range backupUserID {
 		userIDStr := strconv.FormatInt(userID, 10)
-		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyUserTotalFavoritedPF+userIDStr))
-		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyUserFavoriteCountPF+userIDStr))
-		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyUserFollowCountPF+userIDStr))
-		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyUserFollowerCountPF+userIDStr))
-		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyUserWorkCountPF+userIDStr))
+		pipe.Get(ctx, dal.GetRedisKey(dal.KeyUserTotalFavoritedPF+userIDStr))
+		pipe.Get(ctx, dal.GetRedisKey(dal.KeyUserFavoriteCountPF+userIDStr))
+		pipe.Get(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF+userIDStr))
+		pipe.Get(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF+userIDStr))
+		pipe.Get(ctx, dal.GetRedisKey(dal.KeyUserWorkCountPF+userIDStr))
 
-		cmds, err := pipe.Exec(context.Background())
+		cmds, err := pipe.Exec(ctx)
 		if err != nil && err != redis.Nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "failed to exec pipeline")
@@ -73,7 +73,7 @@ func syncUser() {
 			FollowerCount:  followerCount,
 			WorkCount:      workCount,
 		}
-		if err := UpdateUser(mUser); err != nil {
+		if err := UpdateUser(ctx, mUser); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "同步redis用户缓存到mysql失败")
 			klog.Error("同步redis用户缓存到mysql失败,err: ", err)
@@ -81,8 +81,8 @@ func syncUser() {
 		}
 	}
 }
-func syncVideo() {
-	_, span := tracing.Tracer.Start(context.Background(), "kafka.syncVideo")
+func syncVideo(ctx context.Context) {
+	ctx, span := tracing.Tracer.Start(ctx, "kafka.syncVideo")
 	defer span.End()
 
 	// 备份缓存中的视频ID并清空
@@ -98,10 +98,10 @@ func syncVideo() {
 	pipe := dal.RDB.Pipeline()
 	for _, videoID := range backupVideoID {
 		videoIDStr := strconv.FormatInt(videoID, 10)
-		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyVideoFavoriteCountPF+videoIDStr))
-		pipe.Get(context.Background(), dal.GetRedisKey(dal.KeyVideoCommentCountPF+videoIDStr))
+		pipe.Get(ctx, dal.GetRedisKey(dal.KeyVideoFavoriteCountPF+videoIDStr))
+		pipe.Get(ctx, dal.GetRedisKey(dal.KeyVideoCommentCountPF+videoIDStr))
 
-		cmds, err := pipe.Exec(context.Background())
+		cmds, err := pipe.Exec(ctx)
 		if err != nil {
 			span.RecordError(err)
 
@@ -122,7 +122,7 @@ func syncVideo() {
 			FavoriteCount: videoFavoriteCount,
 			CommentCount:  videoCommentCount,
 		}
-		if err := UpdateVideo(mVideo); err != nil {
+		if err := UpdateVideo(ctx, mVideo); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "同步redis视频缓存到mysql失败")
 			klog.Errorf("同步redis视频缓存到mysql失败,err: ", err)

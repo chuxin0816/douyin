@@ -30,7 +30,7 @@ func NewUserController() *UserController {
 }
 
 func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "UserInfo")
+	c, span := tracing.Tracer.Start(c, "UserInfo")
 	defer span.End()
 
 	// 获取参数
@@ -48,7 +48,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := client.UserInfo(req.UserID, userID)
+	resp, err := client.UserInfo(c, req.UserID, userID)
 	if err != nil {
 		span.RecordError(err)
 
@@ -69,7 +69,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 }
 
 func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "Register")
+	c, span := tracing.Tracer.Start(c, "Register")
 	defer span.End()
 
 	// 获取参数
@@ -84,7 +84,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := client.Register(req.Username, req.Password)
+	resp, err := client.Register(c, req.Username, req.Password)
 	if err != nil {
 		span.RecordError(err)
 
@@ -105,7 +105,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 }
 
 func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "Login")
+	c, span := tracing.Tracer.Start(c, "Login")
 	defer span.End()
 
 	// 获取参数
@@ -120,7 +120,7 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := client.Login(req.Username, req.Password)
+	resp, err := client.Login(c, req.Username, req.Password)
 	if err != nil {
 		span.RecordError(err)
 

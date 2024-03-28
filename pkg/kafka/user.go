@@ -66,8 +66,8 @@ func (mq *userMQ) consumeUser(ctx context.Context) {
 	}
 }
 
-func UpdateUser(user *model.User) error {
-	_, span := tracing.Tracer.Start(context.Background(), "kafka.UpdateUser")
+func UpdateUser(ctx context.Context, user *model.User) error {
+	ctx, span := tracing.Tracer.Start(ctx, "kafka.UpdateUser")
 	defer span.End()
 
 	value, err := json.Marshal(user)
@@ -78,7 +78,7 @@ func UpdateUser(user *model.User) error {
 		return err
 	}
 
-	return userMQInstance.Writer.WriteMessages(context.Background(), kafka.Message{
+	return userMQInstance.Writer.WriteMessages(ctx, kafka.Message{
 		Value: value,
 	})
 }

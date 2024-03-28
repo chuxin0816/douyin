@@ -29,7 +29,7 @@ func NewRelationController() *RelationController {
 }
 
 func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "RelationAction")
+	c, span := tracing.Tracer.Start(c, "RelationAction")
 	defer span.End()
 
 	// 获取参数
@@ -52,7 +52,7 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := client.RelationAction(userID, req.ToUserID, req.ActionType)
+	resp, err := client.RelationAction(c, userID, req.ToUserID, req.ActionType)
 	if err != nil {
 		span.RecordError(err)
 		if errorIs(err, dal.ErrAlreadyFollow) {
@@ -78,7 +78,7 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 }
 
 func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "RelationFollowList")
+	c, span := tracing.Tracer.Start(c, "RelationFollowList")
 	defer span.End()
 
 	// 获取参数
@@ -96,7 +96,7 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := client.FollowList(userID, req.UserID)
+	resp, err := client.FollowList(c, userID, req.UserID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
@@ -110,7 +110,7 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 }
 
 func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "RelationFollowerList")
+	c, span := tracing.Tracer.Start(c, "RelationFollowerList")
 	defer span.End()
 
 	// 获取参数
@@ -128,7 +128,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := client.FollowerList(userID, req.UserID)
+	resp, err := client.FollowerList(c, userID, req.UserID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
@@ -142,7 +142,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 }
 
 func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "RelationFriendList")
+	c, span := tracing.Tracer.Start(c, "RelationFriendList")
 	defer span.End()
 
 	// 获取参数
@@ -160,7 +160,7 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := client.FriendList(userID, req.UserID)
+	resp, err := client.FriendList(c, userID, req.UserID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)

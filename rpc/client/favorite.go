@@ -25,16 +25,16 @@ func initFavoriteClient() {
 	}
 }
 
-func FavoriteAction(userID, videoID int64, actionType int64) (*favorite.FavoriteActionResponse, error) {
-	return favoriteClient.FavoriteAction(context.Background(), &favorite.FavoriteActionRequest{
+func FavoriteAction(ctx context.Context, userID, videoID int64, actionType int64) (*favorite.FavoriteActionResponse, error) {
+	return favoriteClient.FavoriteAction(ctx, &favorite.FavoriteActionRequest{
 		UserId:     userID,
 		VideoId:    videoID,
 		ActionType: actionType,
 	})
 }
 
-func FavoriteList(userID *int64, toUserID int64) (*favorite.FavoriteListResponse, error) {
-	return favoriteClient.FavoriteList(context.Background(), &favorite.FavoriteListRequest{
+func FavoriteList(ctx context.Context, userID *int64, toUserID int64) (*favorite.FavoriteListResponse, error) {
+	return favoriteClient.FavoriteList(ctx, &favorite.FavoriteListRequest{
 		UserId:   userID,
 		ToUserId: toUserID,
 	})

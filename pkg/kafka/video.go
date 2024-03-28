@@ -59,8 +59,8 @@ func (mq *videoMQ) consumeVideo(ctx context.Context) {
 
 }
 
-func UpdateVideo(video *model.Video) error {
-	_, span := tracing.Tracer.Start(context.Background(), "kafka.UpdateVideo")
+func UpdateVideo(ctx context.Context, video *model.Video) error {
+	ctx, span := tracing.Tracer.Start(ctx, "kafka.UpdateVideo")
 	defer span.End()
 
 	value, err := json.Marshal(video)
@@ -71,7 +71,7 @@ func UpdateVideo(video *model.Video) error {
 		return err
 	}
 
-	return videoMQInstance.Writer.WriteMessages(context.Background(), kafka.Message{
+	return videoMQInstance.Writer.WriteMessages(ctx, kafka.Message{
 		Value: value,
 	})
 }

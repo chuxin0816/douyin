@@ -32,7 +32,7 @@ func NewCommentController() *CommentController {
 }
 
 func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "CommentAction")
+	c, span := tracing.Tracer.Start(c, "CommentAction")
 	defer span.End()
 	// 获取参数
 	req := &CommentActionRequest{}
@@ -49,7 +49,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := client.CommentAction(userID, req.ActionType, req.VideoID, &req.CommentID, &req.CommentText)
+	resp, err := client.CommentAction(c, userID, req.ActionType, req.VideoID, &req.CommentID, &req.CommentText)
 	if err != nil {
 		span.RecordError(err)
 
@@ -76,7 +76,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "CommentList")
+	c, span := tracing.Tracer.Start(c, "CommentList")
 	defer span.End()
 
 	// 获取参数
@@ -94,7 +94,7 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := client.CommentList(userID, req.VideoID)
+	resp, err := client.CommentList(c, userID, req.VideoID)
 	if err != nil {
 		span.RecordError(err)
 		if errorIs(err, dal.ErrVideoNotExist) {

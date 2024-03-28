@@ -19,7 +19,7 @@ type FeedRequest struct {
 
 // Feed 不限制登录状态，返回按投稿时间倒序的视频列表，视频数由服务端控制，单次最多30个
 func Feed(c context.Context, ctx *app.RequestContext) {
-	_, span := tracing.Tracer.Start(c, "Feed")
+	c, span := tracing.Tracer.Start(c, "Feed")
 	defer span.End()
 
 	// 获取参数
@@ -37,7 +37,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := client.Feed(req.LatestTime, userID)
+	resp, err := client.Feed(c, req.LatestTime, userID)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)

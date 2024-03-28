@@ -25,30 +25,30 @@ func initRelationClient() {
 	}
 }
 
-func RelationAction(userID, toUserID int64, actionType int64) (*relation.RelationActionResponse, error) {
-	return relationClient.RelationAction(context.Background(), &relation.RelationActionRequest{
+func RelationAction(ctx context.Context, userID, toUserID int64, actionType int64) (*relation.RelationActionResponse, error) {
+	return relationClient.RelationAction(ctx, &relation.RelationActionRequest{
 		UserId:     userID,
 		ToUserId:   toUserID,
 		ActionType: actionType,
 	})
 }
 
-func FollowList(userID *int64, toUserID int64) (*relation.RelationFollowListResponse, error) {
-	return relationClient.RelationFollowList(context.Background(), &relation.RelationFollowListRequest{
+func FollowList(ctx context.Context, userID *int64, toUserID int64) (*relation.RelationFollowListResponse, error) {
+	return relationClient.RelationFollowList(ctx, &relation.RelationFollowListRequest{
 		UserId:   userID,
 		ToUserId: toUserID,
 	})
 }
 
-func FollowerList(userID *int64, toUserID int64) (*relation.RelationFollowerListResponse, error) {
-	return relationClient.RelationFollowerList(context.Background(), &relation.RelationFollowerListRequest{
+func FollowerList(ctx context.Context, userID *int64, toUserID int64) (*relation.RelationFollowerListResponse, error) {
+	return relationClient.RelationFollowerList(ctx, &relation.RelationFollowerListRequest{
 		UserId:   userID,
 		ToUserId: toUserID,
 	})
 }
 
-func FriendList(userID *int64, toUserID int64) (*relation.RelationFriendListResponse, error) {
-	return relationClient.RelationFriendList(context.Background(), &relation.RelationFriendListRequest{
+func FriendList(ctx context.Context, userID *int64, toUserID int64) (*relation.RelationFriendListResponse, error) {
+	return relationClient.RelationFriendList(ctx, &relation.RelationFriendListRequest{
 		UserId:   userID,
 		ToUserId: toUserID,
 	})
