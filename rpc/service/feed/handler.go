@@ -33,7 +33,7 @@ func (s *FeedServiceImpl) Feed(ctx context.Context, req *feed.FeedRequest) (resp
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "查询视频列表失败")
-		klog.Error("service.Feed: 查询视频列表失败")
+		klog.Error("service.Feed: 查询视频列表失败, err: ", err)
 		return nil, err
 	}
 

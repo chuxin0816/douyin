@@ -36,7 +36,7 @@ func GetFeedList(ctx context.Context, userID *int64, latestTime time.Time, count
 	// 将model.Video转换为response.VideoResponse
 	videoList = make([]*feed.Video, len(mVideoList))
 	for idx, mVideo := range mVideoList {
-		videoList = append(videoList, ToVideoResponse(ctx, userID, mVideo, authors[idx]))
+		videoList[idx] = ToVideoResponse(ctx, userID, mVideo, authors[idx])
 	}
 
 	// 计算下次请求的时间
