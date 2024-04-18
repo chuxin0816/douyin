@@ -7,6 +7,7 @@ import (
 	"douyin/logger"
 	"douyin/pkg/kafka"
 	"douyin/pkg/oss"
+	"douyin/pkg/snowflake"
 	"douyin/pkg/tracing"
 	publish "douyin/rpc/kitex_gen/publish/publishservice"
 	"net"
@@ -22,6 +23,7 @@ func main() {
 	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.PublishName)
 	defer tracing.Close()
 	logger.Init()
+	snowflake.Init()
 	oss.Init()
 	kafka.Init()
 	dal.Init()

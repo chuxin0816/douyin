@@ -25,9 +25,6 @@ const (
 )
 
 func Init() {
-	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.OssName)
-	defer tracing.Close()
-
 	client, err := oss.New(config.Conf.OssConfig.Endpoint, config.Conf.OssConfig.AccessKeyId, config.Conf.OssConfig.AccessKeySecret)
 	if err != nil {
 		panic(err)

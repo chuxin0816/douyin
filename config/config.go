@@ -94,8 +94,6 @@ type OpenTelemetryConfig struct {
 	PublishName  string `mapstructure:"publish_name"`
 	RelationName string `mapstructure:"relation_name"`
 	MessageName  string `mapstructure:"message_name"`
-	OssName      string `mapstructure:"oss_name"`
-	KafkaName    string `mapstructure:"kafka_name"`
 	JaegerAddr   string `mapstructure:"jaeger_addr"`
 }
 
