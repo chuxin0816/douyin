@@ -6,6 +6,8 @@ import (
 
 	"strconv"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, error) {
@@ -24,6 +26,9 @@ func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, erro
 		relation, err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).
 			Select(qRelation.ID).First()
 		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return false, nil
+			}
 			return false, err
 		}
 

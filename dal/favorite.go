@@ -5,6 +5,8 @@ import (
 	"douyin/dal/model"
 	"strconv"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool, error) {
@@ -23,6 +25,9 @@ func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool,
 		// 缓存未命中，查询mysql中是否有记录
 		var id int64
 		if err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Select(qFavorite.ID).Scan(&id); err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return false, nil
+			}
 			return false, err
 		}
 		if id != 0 {
