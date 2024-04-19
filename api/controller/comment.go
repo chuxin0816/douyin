@@ -49,7 +49,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := client.CommentAction(c, userID, req.ActionType, req.VideoID, &req.CommentID, &req.CommentText)
+	resp, err := client.CommentAction(c, userID, req.VideoID, req.ActionType, &req.CommentID, &req.CommentText)
 	if err != nil {
 		span.RecordError(err)
 
