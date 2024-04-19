@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	topicCache    = "cache"
+	topicCanal    = "canal"
 	topicComment  = "comment"
 	topicFavorite = "favorite"
 	topicVideo    = "video"
@@ -30,6 +30,7 @@ type dbMessage struct {
 
 func Init() {
 	initCacheMQ()
+	initSyncMQ()
 	initCommentMQ()
 	initFavoriteMQ()
 	initUserMQ()
@@ -50,6 +51,14 @@ func NewReader(topic string) *kafka.Reader {
 		Brokers:  config.Conf.KafkaConfig.Brokers,
 		Topic:    topic,
 		GroupID:  groupID,
+		MaxBytes: 10e6, // 10MB
+	})
+}
+
+func NewReaderWithoutGroupID(topic string) *kafka.Reader {
+	return kafka.NewReader(kafka.ReaderConfig{
+		Brokers:  config.Conf.KafkaConfig.Brokers,
+		Topic:    topic,
 		MaxBytes: 10e6, // 10MB
 	})
 }
