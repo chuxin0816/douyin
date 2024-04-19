@@ -50,6 +50,7 @@ feed: 66706.74
 userInfo: 54943.79
 publishList: 31212.05
 favoriteList: 49287.38
+commentList: 42918.76
 
 ## 未来更新:
 * 使用ElasticSearch对用户消息和系统日志进行索引存储

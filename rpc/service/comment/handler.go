@@ -106,7 +106,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 				return
 			}
 		}
-		if err := dal.RDB.Incr(ctx, key).Err(); err != nil {
+		if err := dal.RDB.IncrBy(ctx, key, req.ActionType).Err(); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "更新video的comment_count字段失败")
 			klog.Error("更新video的comment_count字段失败, err: ", err)
