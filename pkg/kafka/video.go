@@ -31,27 +31,18 @@ func initVideoMQ() {
 }
 
 func (mq *videoMQ) consumeVideo(ctx context.Context) {
-	ctx, span := tracing.Tracer.Start(ctx, "kafka.consumeVideo")
-	defer span.End()
-
 	for {
 		m, err := mq.Reader.ReadMessage(ctx)
 		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "failed to read message")
 			klog.Error("failed to read message: ", err)
 			break
 		}
 		video := &model.Video{}
 		if err := json.Unmarshal(m.Value, video); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "failed to unmarshal message")
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
 		if err := dal.UpdateVideo(ctx, video); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "failed to update video")
 			klog.Error("failed to update video: ", err)
 			continue
 		}

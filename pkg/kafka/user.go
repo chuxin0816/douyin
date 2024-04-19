@@ -31,37 +31,26 @@ func initUserMQ() {
 }
 
 func (mq *userMQ) consumeUser(ctx context.Context) {
-	ctx, span := tracing.Tracer.Start(ctx, "kafka.consumeUser")
-	defer span.End()
-
 	// 接收消息
 	for {
 		m, err := mq.Reader.ReadMessage(ctx)
 		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "failed to read message")
 			klog.Error("failed to read message: ", err)
 			break
 		}
 		user := &model.User{}
 		if err := json.Unmarshal(m.Value, user); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "failed to unmarshal message")
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
 		// 更新数据
 		if err := dal.UpdateUser(ctx, user); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "failed to update user")
 			klog.Error("failed to update user: ", err)
 			continue
 		}
 	}
 	// 程序退出前关闭Reader
 	if err := mq.Reader.Close(); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "failed to close reader")
 		klog.Fatal("failed to close reader:", err)
 	}
 }
