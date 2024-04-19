@@ -23,9 +23,9 @@ func main() {
 	defer tracing.Close()
 	logger.Init()
 	snowflake.Init()
-	kafka.Init()
 	dal.Init()
 	defer dal.Close()
+	kafka.Init()
 
 	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.MessageAddr)
 	if err != nil {

@@ -22,9 +22,9 @@ func main() {
 	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.FavoriteName)
 	defer tracing.Close()
 	logger.Init()
-	kafka.Init()
 	dal.Init()
 	defer dal.Close()
+	kafka.Init()
 
 	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.FavoriteAddr)
 	if err != nil {
