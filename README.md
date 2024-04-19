@@ -46,15 +46,15 @@ cd rpc/service/feed
 kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
 ##  性能测试
 > 使用wrk进行性能测试，100个连接，8个线程，压力测试30s，QPS结果如下：
-feed: 66706.74
-userInfo: 54943.79
-publishList: 31212.05
-favoriteList: 49287.38
-commentList: 42918.76
-followList: 45656.21
-followerList: 50199.36
-friendList: 47122.01
-messageList: 54190.47
+feed: 64368.94
+userInfo: 2202.02
+publishList: 1499.42
+favoriteList: 2503.28
+commentList: 1895.63
+followList: 2182.01
+followerList: 1985.65
+friendList: 1948.43
+messageList: 2599.73
 
 ## 未来更新:
 * 使用ElasticSearch对用户消息和系统日志进行索引存储

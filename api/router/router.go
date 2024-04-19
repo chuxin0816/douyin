@@ -6,7 +6,6 @@ import (
 	"douyin/api/middleware"
 	"douyin/config"
 	"fmt"
-	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -20,7 +19,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 		server.WithMaxRequestBodySize(1024*1024*128),
 	)
 
-	h.Use(middleware.RatelimitMiddleware(time.Millisecond, 100))
+	// h.Use(middleware.RatelimitMiddleware(time.Millisecond, 100))
 
 	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
 		ctx.JSON(consts.StatusOK, utils.H{"message": "pong"})
