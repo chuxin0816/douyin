@@ -52,6 +52,5 @@ publishList: 29434.57
 
 ## 未来更新:
 * 使用ElasticSearch对用户消息和系统日志进行索引存储
-* 使用Kong作为网关
-* 分布式链路追踪，使用Prometheus和Grafana监控服务
+* 使用Prometheus和Grafana监控服务
 * 使用Kubernetes编排容器

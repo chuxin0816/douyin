@@ -23,9 +23,9 @@ type mq struct {
 }
 
 type dbMessage struct {
-	Data  map[string]string `json:"data"`
-	Table string            `json:"table"`
-	Type  string            `json:"type"`
+	Data  []map[string]string `json:"data"`
+	Table string              `json:"table"`
+	Type  string              `json:"type"`
 }
 
 func Init() {
