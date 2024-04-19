@@ -34,9 +34,10 @@ func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, erro
 
 		if relation.ID != 0 {
 			// 写入redis缓存
-			RDB.SAdd(ctx, key, userID)
-			RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
-
+			go func() {
+				RDB.SAdd(ctx, key, userID)
+				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
+			}()
 			return true, nil
 		}
 
