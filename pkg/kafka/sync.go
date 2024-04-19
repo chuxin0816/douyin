@@ -102,14 +102,8 @@ func syncVideo(ctx context.Context) {
 		pipe.Get(ctx, dal.GetRedisKey(dal.KeyVideoCommentCountPF+videoIDStr))
 
 		cmds, err := pipe.Exec(ctx)
-		if err != nil {
+		if err != nil && err != redis.Nil {
 			span.RecordError(err)
-
-			if err == redis.Nil {
-				span.SetStatus(codes.Error, "redis中不存在该视频缓存")
-				klog.Warnf("redis中不存在视频ID为%d的缓存", videoID)
-				continue
-			}
 			span.SetStatus(codes.Error, "同步redis视频缓存到mysql失败")
 			klog.Errorf("同步redis视频缓存到mysql失败,err: ", err)
 			continue

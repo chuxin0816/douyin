@@ -116,6 +116,12 @@ func GetUserFollowerCount(ctx context.Context, userID int64) (int64, error) {
 	return cnt, err
 }
 
+func GetUserWorkCount(ctx context.Context, userID int64) (int64, error) {
+	var cnt int64
+	err := qUser.WithContext(ctx).Where(qUser.ID.Eq(userID)).Select(qUser.WorkCount).Scan(&cnt)
+	return cnt, err
+}
+
 func ToUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *user.User {
 	userResponse := &user.User{
 		Id:              mUser.ID,

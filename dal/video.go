@@ -57,25 +57,10 @@ func SaveVideo(ctx context.Context, userID int64, videoName, coverName, title st
 		UploadTime: time.Now(),
 		Title:      title,
 	}
-
-	// 保存视频信息到数据库
-	if err := qVideo.WithContext(ctx).Create(video); err != nil {
-		return err
-	}
-
-	// 修改用户发布视频数
-	key := GetRedisKey(KeyUserWorkCountPF + strconv.FormatInt(userID, 10))
-	if err := RDB.Incr(ctx, key).Err(); err != nil {
-		return err
-	}
-
 	// 添加到布隆过滤器
 	bloomFilter.Add([]byte(strconv.FormatInt(video.ID, 10)))
 
-	// 写入待同步队列
-	CacheUserID.Store(userID, struct{}{})
-
-	return nil
+	return qVideo.WithContext(ctx).Create(video)
 }
 
 // GetPublishList 获取用户发布的视频列表
