@@ -5,7 +5,6 @@ import (
 	"douyin/config"
 	"douyin/rpc/kitex_gen/comment"
 	"douyin/rpc/kitex_gen/comment/commentservice"
-	"douyin/rpc/kitex_gen/feed/feedservice"
 
 	"github.com/cloudwego/kitex/client"
 	consul "github.com/kitex-contrib/registry-consul"
@@ -20,7 +19,7 @@ func initCommentClient() {
 		panic(err)
 	}
 
-	feedClient, err = feedservice.NewClient(config.Conf.ConsulConfig.FeedServiceName, client.WithResolver(r))
+	commentClient, err = commentservice.NewClient(config.Conf.ConsulConfig.CommentServiceName, client.WithResolver(r))
 	if err != nil {
 		panic(err)
 	}

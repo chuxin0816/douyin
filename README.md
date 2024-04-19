@@ -48,7 +48,8 @@ kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thr
 > 使用wrk进行性能测试，100个连接，8个线程，压力测试30s，QPS结果如下：
 feed: 66706.74
 userInfo: 54943.79
-publishList: 29434.57
+publishList: 31212.05
+favoriteList: 49287.38
 
 ## 未来更新:
 * 使用ElasticSearch对用户消息和系统日志进行索引存储

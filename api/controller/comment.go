@@ -6,6 +6,7 @@ import (
 	"douyin/pkg/jwt"
 	"douyin/pkg/tracing"
 	"douyin/rpc/client"
+	"fmt"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -50,6 +51,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 
 	// 业务逻辑处理
 	resp, err := client.CommentAction(c, userID, req.ActionType, req.VideoID, &req.CommentID, &req.CommentText)
+	fmt.Println("resp: ", resp)
 	if err != nil {
 		span.RecordError(err)
 
