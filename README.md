@@ -51,6 +51,10 @@ userInfo: 54943.79
 publishList: 31212.05
 favoriteList: 49287.38
 commentList: 42918.76
+followList: 45656.21
+followerList: 50199.36
+friendList: 47122.01
+messageList: 54190.47
 
 ## 未来更新:
 * 使用ElasticSearch对用户消息和系统日志进行索引存储
