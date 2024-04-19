@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -73,7 +74,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 				klog.Error("查询数据库失败, err: ", err)
 				return
 			}
-			if err = dal.RDB.Set(ctx, keyUserFollowCnt, cnt, 0).Err(); err != nil {
+			if err = dal.RDB.Set(ctx, keyUserFollowCnt, cnt, redis.KeepTTL).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)
@@ -86,7 +87,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 				klog.Error("查询数据库失败, err: ", err)
 				return
 			}
-			if err = dal.RDB.Set(ctx, keyUserFollowerCnt, cnt, 0).Err(); err != nil {
+			if err = dal.RDB.Set(ctx, keyUserFollowerCnt, cnt, redis.KeepTTL).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)
