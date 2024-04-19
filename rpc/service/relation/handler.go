@@ -57,8 +57,8 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 
 	// 更新缓存相关字段
 	go func() {
-		keyUserFollowCnt := dal.KeyUserFollowCountPF + strconv.FormatInt(req.UserId, 10)
-		keyUserFollowerCnt := dal.KeyUserFollowerCountPF + strconv.FormatInt(req.ToUserId, 10)
+		keyUserFollowCnt := dal.GetRedisKey(dal.KeyUserFollowCountPF + strconv.FormatInt(req.UserId, 10))
+		keyUserFollowerCnt := dal.GetRedisKey(dal.KeyUserFollowerCountPF + strconv.FormatInt(req.ToUserId, 10))
 		// 检查key是否存在
 		if exist, err := dal.RDB.Exists(ctx, keyUserFollowCnt, keyUserFollowerCnt).Result(); err != nil {
 			span.RecordError(err)
