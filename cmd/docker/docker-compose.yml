@@ -19,8 +19,6 @@ services:
     build: 
       context: ../..
       dockerfile: cmd/docker/feed/dockerfile
-    depends_on:
-      - api
     ports:
       - "8890:8890"
     container_name: Feed-douyin
@@ -29,8 +27,6 @@ services:
     build:
       context: ../..
       dockerfile: cmd/docker/user/dockerfile
-    depends_on:
-      - api
     ports:
       - "8891:8891"
     container_name: User-douyin
@@ -39,8 +35,6 @@ services:
     build:
       context: ../..
       dockerfile: cmd/docker/favorite/dockerfile
-    depends_on:
-      - api
     ports:
       - "8892:8892"
     container_name: Favorite-douyin
@@ -49,8 +43,6 @@ services:
     build:
       context: ../..
       dockerfile: cmd/docker/comment/dockerfile
-    depends_on:
-      - api
     ports:
       - "8893:8893"
     container_name: Comment-douyin
@@ -59,8 +51,6 @@ services:
     build:
       context: ../..
       dockerfile: cmd/docker/publish/dockerfile
-    depends_on:
-      - api
     ports:
       - "8894:8894"
     container_name: Publish-douyin
@@ -69,8 +59,6 @@ services:
     build:
       context: ../..
       dockerfile: cmd/docker/relation/dockerfile
-    depends_on:
-      - api
     ports:
       - "8895:8895"
     container_name: Relation-douyin
@@ -79,8 +67,6 @@ services:
     build:
       context: ../..
       dockerfile: cmd/docker/message/dockerfile
-    depends_on:
-      - api
     ports:
       - "8896:8896"
     container_name: Message-douyin
