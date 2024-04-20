@@ -21,10 +21,10 @@ docker-compose up -d
 ## 项目结构：
 http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ##  性能测试
-> 使用wrk进行性能测试，100个连接，8个线程，压力测试30s，QPS结果如下：
+> 使用wrk进行性能测试，400个连接，16个线程，压力测试30s，QPS结果如下：
 ```shell
-feed: 3346.78
-login: 51.44
+feed: 3416.06
+userLogin: 131
 userInfo: 2202.02
 publishList: 2174.44
 favoriteList: 2503.28

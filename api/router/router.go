@@ -11,7 +11,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"github.com/hertz-contrib/pprof"
 )
 
 func Setup(conf *config.HertzConfig) *server.Hertz {
@@ -21,7 +20,6 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	)
 
 	// h.Use(middleware.RatelimitMiddleware(1500))
-	pprof.Register(h)
 
 	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
 		ctx.JSON(consts.StatusOK, utils.H{"message": "pong"})
