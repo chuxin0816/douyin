@@ -40,9 +40,10 @@ func Init() {
 
 func NewWriter(topic string) *kafka.Writer {
 	return kafka.NewWriter(kafka.WriterConfig{
-		Brokers:  config.Conf.KafkaConfig.Brokers,
-		Topic:    topic,
-		Balancer: &kafka.LeastBytes{},
+		Brokers:      config.Conf.KafkaConfig.Brokers,
+		Topic:        topic,
+		Balancer:     &kafka.LeastBytes{},
+		RequiredAcks: int(kafka.RequireOne),
 	})
 }
 

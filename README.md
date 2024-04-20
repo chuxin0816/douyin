@@ -23,12 +23,12 @@ http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ##  性能测试
 > 使用wrk进行性能测试，100个连接，8个线程，压力测试30s，QPS结果如下：
 ```shell
-feed: 1710.92
+feed: 3346.78
 login: 51.44
 userInfo: 2202.02
 publishList: 2174.44
 favoriteList: 2503.28
-comment: 89.45
+comment:  92.56
 commentList: 1895.63
 followList: 2182.0
 followerList: 1985.65

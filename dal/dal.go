@@ -70,6 +70,16 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+	sqlDB.SetMaxIdleConns(100)
+	sqlDB.SetMaxOpenConns(200)
+	sqlDB.SetConnMaxLifetime(24 * time.Hour)
+	sqlDB.SetConnMaxIdleTime(time.Hour)
+	
 	query.SetDefault(db)
 	qComment = query.Comment
 	qFavorite = query.Favorite
