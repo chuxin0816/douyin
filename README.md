@@ -21,20 +21,7 @@ docker-compose up -d
 ## 项目结构：
 http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ##  性能测试
-> 使用wrk进行性能测试，400个连接，16个线程，压力测试30s，QPS结果如下：
-```shell
-feed: 3416.06
-userLogin: 131
-userInfo: 2202.02
-publishList: 2174.44
-favoriteList: 2503.28
-comment:  92.56
-commentList: 1895.63
-followList: 2182.0
-followerList: 1985.65
-friendList: 1948.43
-messageList: 2599.73
-```
+> 使用wrk进行性能测试，400个连接，16个线程，压力测试20s：读接口平均QPS 3000+，写接口平均QPS 2000+
 ## 技术选型：
 * 使用Hertz作为http微服务框架，具有高性能，高可用，高扩展性的特点
 * 使用Kitex作为rpc微服务框架，具有高性能、强可扩展的特点
