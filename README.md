@@ -20,6 +20,21 @@ docker-compose up -d
 ******
 ## 项目结构：
 http请求->api/router->api/controller->rpc/client->rpc/service->dal
+##  性能测试
+> 使用wrk进行性能测试，100个连接，8个线程，压力测试30s，QPS结果如下：
+```shell
+feed: 1710.92
+login: 51.44
+userInfo: 2202.02
+publishList: 2174.44
+favoriteList: 2503.28
+comment: 89.45
+commentList: 1895.63
+followList: 2182.0
+followerList: 1985.65
+friendList: 1948.43
+messageList: 2599.73
+```
 ## 技术选型：
 * 使用Hertz作为http微服务框架，具有高性能，高可用，高扩展性的特点
 * 使用Kitex作为rpc微服务框架，具有高性能、强可扩展的特点
@@ -44,18 +59,7 @@ http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ```shell
 cd rpc/service/feed
 kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
-##  性能测试
-> 使用wrk进行性能测试，100个连接，8个线程，压力测试30s，QPS结果如下：
-feed: 64368.94
-userInfo: 2202.02
-publishList: 1499.42
-favoriteList: 2503.28
-commentList: 1895.63
-followList: 2182.01
-followerList: 1985.65
-friendList: 1948.43
-messageList: 2599.73
-
+```
 ## 未来更新:
 * 使用ElasticSearch对用户消息和系统日志进行索引存储
 * 使用Prometheus和Grafana监控服务
