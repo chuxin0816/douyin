@@ -48,7 +48,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 	req.Password = string(bPassword)
 
 	// 保存用户信息
-	dal.CreateUser(ctx, req.Username, req.Password, userID)
+	err = dal.CreateUser(ctx, req.Username, req.Password, userID)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "保存用户信息失败")
