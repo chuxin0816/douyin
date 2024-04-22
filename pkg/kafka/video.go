@@ -2,10 +2,11 @@ package kafka
 
 import (
 	"context"
+	"encoding/json"
+
 	"douyin/dal"
 	"douyin/dal/model"
 	"douyin/pkg/tracing"
-	"encoding/json"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
@@ -47,7 +48,6 @@ func (mq *videoMQ) consumeVideo(ctx context.Context) {
 			continue
 		}
 	}
-
 }
 
 func UpdateVideo(ctx context.Context, video *model.Video) error {

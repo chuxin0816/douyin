@@ -3,12 +3,13 @@ package oss
 import (
 	"bytes"
 	"context"
-	"douyin/config"
-	"douyin/pkg/tracing"
 	"io"
 	"os"
 	"path"
 	"sync"
+
+	"douyin/config"
+	"douyin/pkg/tracing"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/cloudwego/kitex/pkg/klog"

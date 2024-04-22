@@ -98,11 +98,11 @@ type OpenTelemetryConfig struct {
 }
 
 func Init() {
-	//指定配置文件类型(专门用于解析远程配置文件）
+	// 指定配置文件类型(专门用于解析远程配置文件）
 	// viper.SetConfigType("json")
 
-	viper.SetConfigName("config")   //指定配置文件的文件名称(不需要扩展名)
-	viper.AddConfigPath("./config") //指定查找配置文件的路径(这里使用相对路径)
+	viper.SetConfigName("config")   // 指定配置文件的文件名称(不需要扩展名)
+	viper.AddConfigPath("./config") // 指定查找配置文件的路径(这里使用相对路径)
 
 	err := viper.ReadInConfig()
 	if err != nil {

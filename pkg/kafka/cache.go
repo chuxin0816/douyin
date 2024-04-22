@@ -2,9 +2,10 @@ package kafka
 
 import (
 	"context"
-	"douyin/dal"
 	"encoding/json"
 	"fmt"
+
+	"douyin/dal"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )

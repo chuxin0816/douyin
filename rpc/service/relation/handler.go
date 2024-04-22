@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"strconv"
+
 	"douyin/dal"
 	"douyin/dal/model"
 	"douyin/pkg/tracing"
 	relation "douyin/rpc/kitex_gen/relation"
 	"douyin/rpc/kitex_gen/user"
-	"strconv"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
@@ -132,7 +133,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 		return nil, err
 	}
 
-	//将model.User转换为user.User
+	// 将model.User转换为user.User
 	userList := make([]*user.User, len(mUserList))
 	for i, u := range mUserList {
 		userList[i] = dal.ToUserResponse(ctx, req.UserId, u)

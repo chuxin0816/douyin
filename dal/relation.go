@@ -2,10 +2,10 @@ package dal
 
 import (
 	"context"
-	"douyin/dal/model"
-
 	"strconv"
 	"time"
+
+	"douyin/dal/model"
 
 	"gorm.io/gorm"
 )
@@ -58,6 +58,7 @@ func UnFollow(ctx context.Context, userID, toUserID int64) error {
 	_, err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).Delete()
 	return err
 }
+
 func FollowList(ctx context.Context, toUserID int64) ([]*model.User, error) {
 	// 查询用户ID列表
 	var userIDList []int64

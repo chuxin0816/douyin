@@ -2,11 +2,12 @@ package dal
 
 import (
 	"context"
+	"strconv"
+	"time"
+
 	"douyin/dal/model"
 	"douyin/pkg/snowflake"
 	"douyin/rpc/kitex_gen/feed"
-	"strconv"
-	"time"
 )
 
 const (

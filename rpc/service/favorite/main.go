@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
+	"log"
+	"net"
+
 	"douyin/config"
 	"douyin/dal"
 	"douyin/logger"
 	"douyin/pkg/kafka"
 	"douyin/pkg/tracing"
 	favorite "douyin/rpc/kitex_gen/favorite/favoriteservice"
-	"log"
-	"net"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -43,7 +44,6 @@ func main() {
 		server.WithRegistry(r),
 	)
 	err = svr.Run()
-
 	if err != nil {
 		log.Println(err.Error())
 	}

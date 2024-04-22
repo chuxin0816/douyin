@@ -2,14 +2,15 @@ package dal
 
 import (
 	"context"
-	"douyin/config"
-	"douyin/dal/query"
 	"errors"
 	"fmt"
 	"math/rand"
 	"strconv"
 	"sync"
 	"time"
+
+	"douyin/config"
+	"douyin/dal/query"
 
 	"github.com/bits-and-blooms/bloom/v3"
 
@@ -79,7 +80,7 @@ func Init() {
 	sqlDB.SetMaxOpenConns(200)
 	sqlDB.SetConnMaxLifetime(24 * time.Hour)
 	sqlDB.SetConnMaxIdleTime(time.Hour)
-	
+
 	query.SetDefault(db)
 	qComment = query.Comment
 	qFavorite = query.Favorite

@@ -2,10 +2,11 @@ package router
 
 import (
 	"context"
+	"fmt"
+
 	"douyin/api/controller"
 	"douyin/api/middleware"
 	"douyin/config"
-	"fmt"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"

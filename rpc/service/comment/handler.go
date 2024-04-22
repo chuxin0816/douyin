@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
+	"errors"
+	"strconv"
+	"time"
+
 	"douyin/dal"
 	"douyin/dal/model"
 	"douyin/pkg/kafka"
 	"douyin/pkg/snowflake"
 	"douyin/pkg/tracing"
 	comment "douyin/rpc/kitex_gen/comment"
-	"errors"
-	"strconv"
-	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"

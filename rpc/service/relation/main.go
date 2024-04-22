@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"net"
+
 	"douyin/config"
 	"douyin/dal"
 	"douyin/logger"
 	"douyin/pkg/kafka"
 	"douyin/pkg/tracing"
 	relation "douyin/rpc/kitex_gen/relation/relationservice"
-	"net"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -45,5 +46,4 @@ func main() {
 	if err = svr.Run(); err != nil {
 		klog.Fatal("run server failed: ", err)
 	}
-
 }

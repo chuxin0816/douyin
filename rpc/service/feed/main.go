@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"net"
+
 	"douyin/config"
 	"douyin/dal"
 	"douyin/logger"
 	"douyin/pkg/kafka"
 	"douyin/pkg/tracing"
 	feed "douyin/rpc/kitex_gen/feed/feedservice"
-	"net"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

@@ -2,6 +2,7 @@ package tracing
 
 import (
 	"context"
+
 	"douyin/config"
 
 	"go.opentelemetry.io/otel"

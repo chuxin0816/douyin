@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"net"
+
 	"douyin/config"
 	"douyin/dal"
 	"douyin/logger"
@@ -9,7 +11,6 @@ import (
 	"douyin/pkg/snowflake"
 	"douyin/pkg/tracing"
 	user "douyin/rpc/kitex_gen/user/userservice"
-	"net"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

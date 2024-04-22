@@ -1,15 +1,14 @@
 package jwt
 
 import (
-	"douyin/config"
 	"time"
+
+	"douyin/config"
 
 	"github.com/golang-jwt/jwt"
 )
 
-var (
-	jwtKey = []byte(config.Conf.JwtKey)
-)
+var jwtKey = []byte(config.Conf.JwtKey)
 
 const (
 	issuer        = "chuxin"

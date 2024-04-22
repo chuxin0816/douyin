@@ -2,13 +2,14 @@ package kafka
 
 import (
 	"context"
-	"douyin/dal"
-	"douyin/dal/model"
-	"douyin/pkg/tracing"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
+
+	"douyin/dal"
+	"douyin/dal/model"
+	"douyin/pkg/tracing"
 
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/codes"
@@ -128,6 +129,7 @@ func syncUser(ctx context.Context) {
 		}
 	}
 }
+
 func syncVideo(ctx context.Context) {
 	ctx, span := tracing.Tracer.Start(ctx, "kafka.syncVideo")
 	defer span.End()

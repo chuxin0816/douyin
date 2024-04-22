@@ -1,8 +1,9 @@
 package snowflake
 
 import (
-	"douyin/config"
 	"time"
+
+	"douyin/config"
 
 	"github.com/bwmarrin/snowflake"
 )
@@ -14,7 +15,7 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-	snowflake.Epoch = st.UnixNano() / 1000000 //纳秒转毫秒
+	snowflake.Epoch = st.UnixNano() / 1000000 // 纳秒转毫秒
 	node, err = snowflake.NewNode(config.Conf.SnowflakeConfig.MachineID)
 	if err != nil {
 		panic(err)

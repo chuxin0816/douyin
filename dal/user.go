@@ -2,10 +2,11 @@ package dal
 
 import (
 	"context"
-	"douyin/dal/model"
-	"douyin/rpc/kitex_gen/user"
 	"strconv"
 	"time"
+
+	"douyin/dal/model"
+	"douyin/rpc/kitex_gen/user"
 
 	"gorm.io/gorm"
 )

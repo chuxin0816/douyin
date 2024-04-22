@@ -2,9 +2,10 @@ package dal
 
 import (
 	"context"
-	"douyin/dal/model"
 	"strconv"
 	"time"
+
+	"douyin/dal/model"
 
 	"gorm.io/gorm"
 )

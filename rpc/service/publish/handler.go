@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"os"
+	"strconv"
+
 	"douyin/dal"
 	"douyin/pkg/oss"
 	"douyin/pkg/tracing"
 	publish "douyin/rpc/kitex_gen/publish"
-	"os"
-	"strconv"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"
@@ -29,7 +30,7 @@ func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.Pub
 	coverName := uuidName + ".jpeg"
 
 	// 保存视频到本地
-	if err := os.WriteFile(videoName, req.Data, 0644); err != nil {
+	if err := os.WriteFile(videoName, req.Data, 0o644); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "保存视频到本地失败")
 		klog.Error("保存视频到本地失败, err: ", err)
@@ -88,7 +89,6 @@ func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.Pub
 
 		// 写入待同步队列
 		dal.CacheUserID.Store(req.UserId, struct{}{})
-
 	}()
 
 	// 返回响应

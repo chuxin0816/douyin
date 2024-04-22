@@ -1,10 +1,11 @@
 package logger
 
 import (
-	"douyin/config"
 	"os"
 	"path"
 	"time"
+
+	"douyin/config"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	kitexlogrus "github.com/kitex-contrib/obs-opentelemetry/logging/logrus"

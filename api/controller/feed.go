@@ -2,10 +2,11 @@ package controller
 
 import (
 	"context"
+	"time"
+
 	"douyin/pkg/jwt"
 	"douyin/pkg/tracing"
 	"douyin/rpc/client"
-	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"

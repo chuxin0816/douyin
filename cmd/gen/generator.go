@@ -20,7 +20,6 @@ func connectDB(dsn string) *gorm.DB {
 }
 
 func main() {
-
 	dsn := "root:123456@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
 
 	// 指定生成代码的具体相对目录(相对当前文件)，默认为：./query

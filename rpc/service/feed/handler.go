@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
+	"time"
+
 	"douyin/dal"
 	"douyin/pkg/tracing"
 	feed "douyin/rpc/kitex_gen/feed"
-	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"

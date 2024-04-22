@@ -2,11 +2,11 @@ package dal
 
 import (
 	"context"
+	"time"
+
 	"douyin/dal/model"
 	"douyin/pkg/snowflake"
 	"douyin/rpc/kitex_gen/message"
-
-	"time"
 )
 
 func MessageAction(ctx context.Context, userID, toUserID int64, content string) error {

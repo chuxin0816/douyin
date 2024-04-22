@@ -2,11 +2,12 @@ package controller
 
 import (
 	"context"
+	"io"
+	"mime/multipart"
+
 	"douyin/pkg/jwt"
 	"douyin/pkg/tracing"
 	"douyin/rpc/client"
-	"io"
-	"mime/multipart"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/pkg/klog"

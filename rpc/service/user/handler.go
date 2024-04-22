@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
+
 	"douyin/dal"
 	"douyin/pkg/jwt"
 	"douyin/pkg/snowflake"
 	"douyin/pkg/tracing"
 	user "douyin/rpc/kitex_gen/user"
-	"errors"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"

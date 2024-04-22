@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
+	"strconv"
+
 	"douyin/dal"
 	"douyin/dal/model"
 	"douyin/pkg/kafka"
 	"douyin/pkg/tracing"
 	favorite "douyin/rpc/kitex_gen/favorite"
-	"errors"
-	"strconv"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
