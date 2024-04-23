@@ -12,13 +12,17 @@ import (
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
 )
 
 func Setup(conf *config.HertzConfig) *server.Hertz {
+	tracer, cfg := hertztracing.NewServerTracer()
 	h := server.Default(
 		server.WithHostPorts(fmt.Sprintf("%s:%d", conf.Host, conf.Port)),
 		server.WithMaxRequestBodySize(1024*1024*128),
+		tracer,
 	)
+	h.Use(hertztracing.ServerMiddleware(cfg))
 
 	h.Use(middleware.RatelimitMiddleware(3000))
 
