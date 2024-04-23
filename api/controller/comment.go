@@ -9,7 +9,7 @@ import (
 	"douyin/rpc/client"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 
 	"go.opentelemetry.io/otel/codes"
 )
@@ -42,7 +42,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 		Error(ctx, CodeInvalidParam)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "参数校验失败")
-		klog.Error("参数校验失败, err: ", err)
+		hlog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -62,18 +62,18 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 		if errorIs(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
 			span.SetStatus(codes.Error, "视频不存在")
-			klog.Error("视频不存在")
+			hlog.Error("视频不存在")
 			return
 		}
 		if errorIs(err, dal.ErrCommentNotExist) {
 			Error(ctx, CodeCommentNotExist)
 			span.SetStatus(codes.Error, "评论不存在")
-			klog.Error("评论不存在")
+			hlog.Error("评论不存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
 		span.SetStatus(codes.Error, "业务逻辑处理失败")
-		klog.Error("业务逻辑处理失败, err: ", err)
+		hlog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
 
@@ -92,7 +92,7 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 		Error(ctx, CodeInvalidParam)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "参数校验失败")
-		klog.Error("参数校验失败, err: ", err)
+		hlog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -106,12 +106,12 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 		if errorIs(err, dal.ErrVideoNotExist) {
 			Error(ctx, CodeVideoNotExist)
 			span.SetStatus(codes.Error, "视频不存在")
-			klog.Error("视频不存在")
+			hlog.Error("视频不存在")
 			return
 		}
 		Error(ctx, CodeServerBusy)
 		span.SetStatus(codes.Error, "业务逻辑处理失败")
-		klog.Error("业务逻辑处理失败, err: ", err)
+		hlog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
 

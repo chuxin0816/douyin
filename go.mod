@@ -12,6 +12,8 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
+	github.com/hertz-contrib/logger/logrus v1.0.1
+	github.com/hertz-contrib/obs-opentelemetry/tracing v0.4.0
 	github.com/juju/ratelimit v1.0.2
 	github.com/kitex-contrib/obs-opentelemetry/logging/logrus v0.0.0-20240305123358-828863cc5853
 	github.com/kitex-contrib/registry-consul v0.0.0-20230406075225-7d341f036654

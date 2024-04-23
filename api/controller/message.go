@@ -7,7 +7,7 @@ import (
 	"douyin/rpc/client"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -39,7 +39,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 		Error(ctx, CodeInvalidParam)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "参数校验失败")
-		klog.Error("参数校验失败, err: ", err)
+		hlog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -52,7 +52,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "业务处理失败")
-		klog.Error("业务处理失败, err: ", err)
+		hlog.Error("业务处理失败, err: ", err)
 		return
 	}
 
@@ -71,7 +71,7 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 		Error(ctx, CodeInvalidParam)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "参数校验失败")
-		klog.Error("参数校验失败, err: ", err)
+		hlog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "业务处理失败")
-		klog.Error("业务处理失败, err: ", err)
+		hlog.Error("业务处理失败, err: ", err)
 		return
 	}
 

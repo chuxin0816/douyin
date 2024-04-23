@@ -10,7 +10,7 @@ import (
 	"douyin/rpc/client"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -41,7 +41,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 		Error(ctx, CodeInvalidParam)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "参数校验失败")
-		klog.Error("参数校验失败, err: ", err)
+		hlog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	if req.Data.Size > 1024*1024*100 {
 		Error(ctx, CodeFileTooLarge)
 		span.SetStatus(codes.Error, "文件太大")
-		klog.Error("文件太大")
+		hlog.Error("文件太大")
 		return
 	}
 
@@ -62,7 +62,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "文件打开失败")
-		klog.Error("文件打开失败, err: ", err)
+		hlog.Error("文件打开失败, err: ", err)
 		return
 	}
 	defer file.Close()
@@ -72,7 +72,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "文件读取失败")
-		klog.Error("文件读取失败, err: ", err)
+		hlog.Error("文件读取失败, err: ", err)
 		return
 	}
 
@@ -82,7 +82,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "业务处理失败")
-		klog.Error("业务处理失败, err: ", err)
+		hlog.Error("业务处理失败, err: ", err)
 		return
 	}
 
@@ -101,7 +101,7 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 		Error(ctx, CodeInvalidParam)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "参数校验失败")
-		klog.Error("参数校验失败, err: ", err)
+		hlog.Error("参数校验失败, err: ", err)
 		return
 	}
 	authorID := req.UserID
@@ -115,7 +115,7 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "业务处理失败")
-		klog.Error("业务处理失败, err: ", err)
+		hlog.Error("业务处理失败, err: ", err)
 		return
 	}
 

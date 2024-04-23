@@ -9,7 +9,7 @@ import (
 	"douyin/rpc/client"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -30,7 +30,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 		Error(ctx, CodeInvalidParam)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "参数解析失败")
-		klog.Error("参数解析失败, err: ", err)
+		hlog.Error("参数解析失败, err: ", err)
 		return
 	}
 
@@ -43,7 +43,7 @@ func Feed(c context.Context, ctx *app.RequestContext) {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "业务逻辑处理失败")
-		klog.Error("业务逻辑处理失败, err: ", err)
+		hlog.Error("业务逻辑处理失败, err: ", err)
 		return
 	}
 

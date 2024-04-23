@@ -9,7 +9,7 @@ import (
 	"douyin/rpc/client"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -40,7 +40,7 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 		Error(ctx, CodeInvalidParam)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "参数校验失败")
-		klog.Error("参数校验失败, err: ", err)
+		hlog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -60,18 +60,18 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 		if errorIs(err, dal.ErrAlreadyFavorite) {
 			Error(ctx, CodeAlreadyFavorite)
 			span.SetStatus(codes.Error, "已经点赞过了")
-			klog.Error("已经点赞过了")
+			hlog.Error("已经点赞过了")
 			return
 		}
 		if errorIs(err, dal.ErrNotFavorite) {
 			Error(ctx, CodeNotFavorite)
 			span.SetStatus(codes.Error, "还没有点赞过")
-			klog.Error("还没有点赞过")
+			hlog.Error("还没有点赞过")
 			return
 		}
 		Error(ctx, CodeServerBusy)
 		span.SetStatus(codes.Error, "业务处理失败")
-		klog.Error("业务处理失败, err: ", err)
+		hlog.Error("业务处理失败, err: ", err)
 		return
 	}
 
@@ -90,7 +90,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 		Error(ctx, CodeInvalidParam)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "参数校验失败")
-		klog.Error("参数校验失败, err: ", err)
+		hlog.Error("参数校验失败, err: ", err)
 		return
 	}
 
@@ -103,7 +103,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "业务处理失败")
-		klog.Error("业务处理失败, err: ", err)
+		hlog.Error("业务处理失败, err: ", err)
 		return
 	}
 
