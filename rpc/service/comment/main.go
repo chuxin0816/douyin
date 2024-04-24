@@ -15,6 +15,7 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
+	kitexTracing "github.com/kitex-contrib/obs-opentelemetry/tracing"
 	consul "github.com/kitex-contrib/registry-consul"
 )
 
@@ -41,8 +42,9 @@ func main() {
 
 	svr := comment.NewServer(new(CommentServiceImpl),
 		server.WithServiceAddr(addr),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.CommentServiceName}),
 		server.WithRegistry(r),
+		server.WithSuite(kitexTracing.NewServerSuite()),
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.CommentName}),
 	)
 
 	if err = svr.Run(); err != nil {

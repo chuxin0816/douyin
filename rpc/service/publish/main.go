@@ -17,6 +17,7 @@ import (
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	consul "github.com/kitex-contrib/registry-consul"
+	kitexTracing "github.com/kitex-contrib/obs-opentelemetry/tracing"
 )
 
 func main() {
@@ -43,8 +44,9 @@ func main() {
 
 	svr := publish.NewServer(new(PublishServiceImpl),
 		server.WithServiceAddr(addr),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.PublishServiceName}),
 		server.WithRegistry(r),
+		server.WithSuite(kitexTracing.NewServerSuite()),
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.PublishName}),
 	)
 
 	if err = svr.Run(); err != nil {
