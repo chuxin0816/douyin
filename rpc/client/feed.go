@@ -8,6 +8,8 @@ import (
 	"douyin/rpc/kitex_gen/feed/feedservice"
 
 	"github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	consul "github.com/kitex-contrib/registry-consul"
 )
 
@@ -20,7 +22,11 @@ func initFeedClient() {
 		panic(err)
 	}
 
-	feedClient, err = feedservice.NewClient(config.Conf.ConsulConfig.FeedServiceName, client.WithResolver(r))
+	feedClient, err = feedservice.NewClient(config.Conf.ConsulConfig.FeedServiceName,
+		client.WithResolver(r),
+		client.WithSuite(tracing.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),
+	)
 	if err != nil {
 		panic(err)
 	}

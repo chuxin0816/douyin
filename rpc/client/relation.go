@@ -8,6 +8,8 @@ import (
 	"douyin/rpc/kitex_gen/relation/relationservice"
 
 	"github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	consul "github.com/kitex-contrib/registry-consul"
 )
 
@@ -20,7 +22,11 @@ func initRelationClient() {
 		panic(err)
 	}
 
-	relationClient, err = relationservice.NewClient(config.Conf.ConsulConfig.RelationServiceName, client.WithResolver(r))
+	relationClient, err = relationservice.NewClient(config.Conf.ConsulConfig.RelationServiceName,
+		client.WithResolver(r),
+		client.WithSuite(tracing.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),
+	)
 	if err != nil {
 		panic(err)
 	}

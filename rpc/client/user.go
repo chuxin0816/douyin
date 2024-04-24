@@ -8,6 +8,8 @@ import (
 	"douyin/rpc/kitex_gen/user/userservice"
 
 	"github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	consul "github.com/kitex-contrib/registry-consul"
 )
 
@@ -20,7 +22,11 @@ func initUserClient() {
 		panic(err)
 	}
 
-	userClient, err = userservice.NewClient(config.Conf.ConsulConfig.UserServiceName, client.WithResolver(r))
+	userClient, err = userservice.NewClient(config.Conf.ConsulConfig.UserServiceName,
+		client.WithResolver(r),
+		client.WithSuite(tracing.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),
+	)
 	if err != nil {
 		panic(err)
 	}

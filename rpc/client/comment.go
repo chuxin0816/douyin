@@ -8,6 +8,8 @@ import (
 	"douyin/rpc/kitex_gen/comment/commentservice"
 
 	"github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	consul "github.com/kitex-contrib/registry-consul"
 )
 
@@ -20,7 +22,12 @@ func initCommentClient() {
 		panic(err)
 	}
 
-	commentClient, err = commentservice.NewClient(config.Conf.ConsulConfig.CommentServiceName, client.WithResolver(r))
+	commentClient, err = commentservice.NewClient(
+		config.Conf.ConsulConfig.CommentServiceName, 
+		client.WithResolver(r),
+		client.WithSuite(tracing.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),
+	)
 	if err != nil {
 		panic(err)
 	}
