@@ -14,6 +14,7 @@ import (
 
 	"github.com/bits-and-blooms/bloom/v3"
 
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/singleflight"
 	"gorm.io/driver/mysql"
@@ -98,8 +99,11 @@ func Init() {
 		Password: config.Conf.DatabaseConfig.RedisConfig.Password,
 		DB:       config.Conf.DatabaseConfig.RedisConfig.DB,
 	})
-	err = RDB.Ping(context.Background()).Err()
-	if err != nil {
+	if err := redisotel.InstrumentTracing(RDB); err != nil {
+		panic(err)
+	}
+
+	if err := RDB.Ping(context.Background()).Err(); err != nil {
 		panic(err)
 	}
 

@@ -18,6 +18,7 @@ require (
 	github.com/kitex-contrib/obs-opentelemetry v0.2.6
 	github.com/kitex-contrib/obs-opentelemetry/logging/logrus v0.0.0-20240305123358-828863cc5853
 	github.com/kitex-contrib/registry-consul v0.0.0-20230406075225-7d341f036654
+	github.com/redis/go-redis/extra/redisotel/v9 v9.0.5
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/spf13/viper v1.18.2
@@ -101,6 +102,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+	github.com/redis/go-redis/extra/rediscmd/v9 v9.0.5 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
