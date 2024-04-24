@@ -22,7 +22,7 @@ func initRelationClient() {
 		panic(err)
 	}
 
-	relationClient, err = relationservice.NewClient(config.Conf.ConsulConfig.RelationServiceName,
+	relationClient, err = relationservice.NewClient(config.Conf.OpenTelemetryConfig.RelationName,
 		client.WithResolver(r),
 		client.WithSuite(tracing.NewClientSuite()),
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),

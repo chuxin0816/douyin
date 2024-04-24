@@ -22,7 +22,7 @@ func initFavoriteClient() {
 		panic(err)
 	}
 
-	favoriteClient, err = favoriteservice.NewClient(config.Conf.ConsulConfig.FavoriteServiceName,
+	favoriteClient, err = favoriteservice.NewClient(config.Conf.OpenTelemetryConfig.FavoriteName,
 		client.WithResolver(r),
 		client.WithSuite(tracing.NewClientSuite()),
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),

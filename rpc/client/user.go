@@ -22,7 +22,7 @@ func initUserClient() {
 		panic(err)
 	}
 
-	userClient, err = userservice.NewClient(config.Conf.ConsulConfig.UserServiceName,
+	userClient, err = userservice.NewClient(config.Conf.OpenTelemetryConfig.UserName,
 		client.WithResolver(r),
 		client.WithSuite(tracing.NewClientSuite()),
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),

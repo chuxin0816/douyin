@@ -23,7 +23,7 @@ func initCommentClient() {
 	}
 
 	commentClient, err = commentservice.NewClient(
-		config.Conf.ConsulConfig.CommentServiceName, 
+		config.Conf.OpenTelemetryConfig.CommentName, 
 		client.WithResolver(r),
 		client.WithSuite(tracing.NewClientSuite()),
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),

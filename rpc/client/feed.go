@@ -22,7 +22,7 @@ func initFeedClient() {
 		panic(err)
 	}
 
-	feedClient, err = feedservice.NewClient(config.Conf.ConsulConfig.FeedServiceName,
+	feedClient, err = feedservice.NewClient(config.Conf.OpenTelemetryConfig.FeedName,
 		client.WithResolver(r),
 		client.WithSuite(tracing.NewClientSuite()),
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),

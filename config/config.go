@@ -72,13 +72,6 @@ type ConsulConfig struct {
 	PublishAddr         string `mapstructure:"publish_addr"`
 	RelationAddr        string `mapstructure:"relation_addr"`
 	MessageAddr         string `mapstructure:"message_addr"`
-	FeedServiceName     string `mapstructure:"feed_service_name"`
-	UserServiceName     string `mapstructure:"user_service_name"`
-	FavoriteServiceName string `mapstructure:"favorite_service_name"`
-	CommentServiceName  string `mapstructure:"comment_service_name"`
-	PublishServiceName  string `mapstructure:"publish_service_name"`
-	RelationServiceName string `mapstructure:"relation_service_name"`
-	MessageServiceName  string `mapstructure:"message_service_name"`
 }
 
 type KafkaConfig struct {
