@@ -9,8 +9,8 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/kitex/pkg/klog"
-	hertzlogrus "github.com/hertz-contrib/logger/logrus"
-	kitexlogrus "github.com/kitex-contrib/obs-opentelemetry/logging/logrus"
+	hertzzap "github.com/hertz-contrib/logger/zap"
+	kitexzap "github.com/kitex-contrib/obs-opentelemetry/logging/zap"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -42,10 +42,10 @@ func Init() {
 		Compress:   true,                             // 用 gzip 压缩。
 	}
 
-	hlog.SetLogger(hertzlogrus.NewLogger())
+	hlog.SetLogger(hertzzap.NewLogger())
 	hlog.SetLevel(hlog.LevelDebug)
 	hlog.SetOutput(lumberjackLogger)
-	klog.SetLogger(kitexlogrus.NewLogger())
+	klog.SetLogger(kitexzap.NewLogger())
 	klog.SetLevel(klog.LevelDebug)
 	klog.SetOutput(lumberjackLogger)
 }

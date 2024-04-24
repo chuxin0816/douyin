@@ -12,11 +12,11 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
-	github.com/hertz-contrib/logger/logrus v1.0.1
+	github.com/hertz-contrib/logger/zap v1.1.0
 	github.com/hertz-contrib/obs-opentelemetry/tracing v0.4.0
 	github.com/juju/ratelimit v1.0.2
 	github.com/kitex-contrib/obs-opentelemetry v0.2.6
-	github.com/kitex-contrib/obs-opentelemetry/logging/logrus v0.0.0-20240305123358-828863cc5853
+	github.com/kitex-contrib/obs-opentelemetry/logging/zap v0.0.0-20240423095615-4bd94c002638
 	github.com/kitex-contrib/registry-consul v0.0.0-20230406075225-7d341f036654
 	github.com/redis/go-redis/extra/redisotel/v9 v9.0.5
 	github.com/redis/go-redis/v9 v9.5.1
@@ -105,7 +105,6 @@ require (
 	github.com/redis/go-redis/extra/rediscmd/v9 v9.0.5 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
@@ -120,7 +119,9 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.24.0 // indirect
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.1.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
+	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/exp v0.0.0-20240318143956-a85f2c67cd81 // indirect
 	golang.org/x/mod v0.16.0 // indirect
