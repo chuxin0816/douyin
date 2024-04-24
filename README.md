@@ -8,6 +8,7 @@
 ```shell
 cd cmd/docker && 
 docker-compose build api &&
+docker-compose build feed &&
 docker-compose build user &&
 docker-compose build favorite &&
 docker-compose build comment &&
