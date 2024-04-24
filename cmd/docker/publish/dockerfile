@@ -16,11 +16,11 @@ COPY . .
 
 RUN cd rpc/service/publish && sh build.sh
 
-FROM ubuntu:lunar
+FROM ubuntu:jammy
 
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends \
+    apt-get install -y --no-install-recommends --fix-missing \
     ffmpeg 
 
 COPY ./config/config.yaml /config/config.yaml
