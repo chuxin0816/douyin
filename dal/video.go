@@ -140,7 +140,7 @@ func ToVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video, au
 	// 使用singleflight避免缓存击穿和减少缓存压力
 	// 查询缓存判断是否点赞
 	key := GetRedisKey(KeyUserFavoritePF + strconv.FormatInt(*userID, 10))
-	g.Do(key, func() (interface{}, error) {
+	_, _, _ = g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
 			g.Forget(key)

@@ -92,7 +92,7 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 					pipeline.SAdd(ctx, key, videoID)
 				}
 				pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
-				pipeline.Exec(ctx)
+				_, _ = pipeline.Exec(ctx)
 			}()
 		}
 		return nil, nil
