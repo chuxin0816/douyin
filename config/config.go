@@ -4,6 +4,12 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
+	_ "github.com/spf13/viper/remote"
+)
+
+const (
+	consulEndpoint   = "consul:8500"
+	consulConfigPath = "config"
 )
 
 var Conf = &Config{}
@@ -64,14 +70,14 @@ type RedisConfig struct {
 }
 
 type ConsulConfig struct {
-	ConsulAddr          string `mapstructure:"consul_addr"`
-	FeedAddr            string `mapstructure:"feed_addr"`
-	UserAddr            string `mapstructure:"user_addr"`
-	FavoriteAddr        string `mapstructure:"favorite_addr"`
-	CommentAddr         string `mapstructure:"comment_addr"`
-	PublishAddr         string `mapstructure:"publish_addr"`
-	RelationAddr        string `mapstructure:"relation_addr"`
-	MessageAddr         string `mapstructure:"message_addr"`
+	ConsulAddr   string `mapstructure:"consul_addr"`
+	FeedAddr     string `mapstructure:"feed_addr"`
+	UserAddr     string `mapstructure:"user_addr"`
+	FavoriteAddr string `mapstructure:"favorite_addr"`
+	CommentAddr  string `mapstructure:"comment_addr"`
+	PublishAddr  string `mapstructure:"publish_addr"`
+	RelationAddr string `mapstructure:"relation_addr"`
+	MessageAddr  string `mapstructure:"message_addr"`
 }
 
 type KafkaConfig struct {
@@ -91,13 +97,13 @@ type OpenTelemetryConfig struct {
 }
 
 func Init() {
-	// 指定配置文件类型(专门用于解析远程配置文件）
-	// viper.SetConfigType("json")
+	err := viper.AddRemoteProvider("consul", consulEndpoint, consulConfigPath)
+	if err != nil {
+		panic(err)
+	}
+	viper.SetConfigType("yaml")
 
-	viper.SetConfigName("config")   // 指定配置文件的文件名称(不需要扩展名)
-	viper.AddConfigPath("./config") // 指定查找配置文件的路径(这里使用相对路径)
-
-	err := viper.ReadInConfig()
+	err = viper.ReadRemoteConfig()
 	if err != nil {
 		panic(err)
 	}

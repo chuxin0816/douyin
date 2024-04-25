@@ -26,7 +26,7 @@ http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ## 技术选型：
 * 使用Hertz作为http微服务框架，具有高性能，高可用，高扩展性的特点
 * 使用Kitex作为rpc微服务框架，具有高性能、强可扩展的特点
-* 使用consul作为服务发现和注册中心
+* 使用consul作为服务发现和注册中心，配置中心
 * 使用GORM GEN操作Mysql，具有简单易用，防SQL注入等优点
 * 使用Redis作为缓存，提高访问速度，使用定时同步缓存保证数据一致性
 * 使用canal订阅Mysql的binlog，发送到kafka异步删除点赞和关注关系缓存
@@ -40,7 +40,7 @@ http请求->api/router->api/controller->rpc/client->rpc/service->dal
 * 使用阿里云oss存储视频文件
 * 使用ffmpeg进行视频转码和生成封面
 * 使用令牌桶作为限流中间件
-* 使用viper读取配置文件
+* 使用viper读取远程配置文件
 * 使用OpenTelemetry+Jaeger进行分布式链路追踪
 * 使用docker-compose部署项目
 ## 代码生成:
