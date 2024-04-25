@@ -3,7 +3,6 @@ package dal
 import (
 	"context"
 	"strconv"
-	"time"
 
 	"douyin/dal/model"
 	"douyin/rpc/kitex_gen/user"
@@ -143,35 +142,11 @@ func ToUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *
 	}
 
 	// 判断是否关注
-	// 从缓存中查询是否关注
-	key := GetRedisKey(KeyUserFollowerPF + strconv.FormatInt(mUser.ID, 10))
-	// 使用singleflight避免缓存击穿和减少缓存压力
-	g.Do(key, func() (interface{}, error) {
-		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
-		}()
-		if RDB.SIsMember(ctx, key, followerID).Val() {
-			userResponse.IsFollow = true
-			return nil, nil
-		}
-
-		relation, err := qRelation.WithContext(ctx).
-			Where(qRelation.UserID.Eq(mUser.ID), qRelation.FollowerID.Eq(*followerID)).
-			Select(qRelation.ID).First()
-		if err != nil {
-			return nil, err
-		}
-		if relation.ID != 0 {
-			userResponse.IsFollow = true
-			// 写入缓存
-			go func() {
-				RDB.SAdd(ctx, key, followerID)
-				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
-			}()
-		}
-		return nil, nil
-	})
+	exist, err := CheckRelationExist(ctx, *followerID, mUser.ID)
+	if err != nil {
+		return userResponse
+	}
+	userResponse.IsFollow = exist
 
 	return userResponse
 }

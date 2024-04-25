@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// CheckRelationExist 检查userID是否关注了toUserID
 func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, error) {
 	key := GetRedisKey(KeyUserFollowerPF + strconv.FormatInt(toUserID, 10))
 	// 使用singleflight避免缓存击穿和减少缓存压力
