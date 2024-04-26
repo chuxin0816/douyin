@@ -3,6 +3,7 @@ package dal
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"douyin/dal/model"
@@ -11,8 +12,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 )
-
-
 
 func MessageAction(ctx context.Context, message *model.Message) error {
 	message.ID = snowflake.GenerateID()
@@ -61,10 +60,16 @@ func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*mess
 		return nil, err
 	}
 
+	var wgMessageList sync.WaitGroup
+	wgMessageList.Add(len(mMessageList))
 	messageList := make([]*message.Message, len(mMessageList))
 	for i, m := range mMessageList {
-		messageList[i] = ToMessageResponse(m)
+		go func(i int, m *model.Message) {
+			defer wgMessageList.Done()
+			messageList[i] = ToMessageResponse(m)
+		}(i, m)
 	}
+	wgMessageList.Wait()
 
 	return messageList, nil
 }

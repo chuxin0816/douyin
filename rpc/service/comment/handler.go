@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"sync"
 	"time"
 
 	"douyin/dal"
@@ -161,10 +162,16 @@ func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.Comme
 	}
 
 	// 将用户信息与评论列表进行关联
+	var wgCommentList sync.WaitGroup
+	wgCommentList.Add(len(mCommentList))
 	commentList := make([]*comment.Comment, len(mCommentList))
 	for i, c := range mCommentList {
-		commentList[i] = dal.ToCommentResponse(ctx, req.UserId, c, mUsers[i])
+		go func(i int, c *model.Comment) {
+			defer wgCommentList.Done()
+			commentList[i] = dal.ToCommentResponse(ctx, req.UserId, c, mUsers[i])
+		}(i, c)
 	}
+	wgCommentList.Wait()
 
 	// 返回响应
 	resp = &comment.CommentListResponse{CommentList: commentList}

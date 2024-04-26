@@ -3,6 +3,7 @@ package dal
 import (
 	"context"
 	"strconv"
+	"sync"
 	"time"
 
 	"douyin/dal/model"
@@ -35,10 +36,16 @@ func GetFeedList(ctx context.Context, userID *int64, latestTime time.Time, count
 	}
 
 	// 将model.Video转换为response.VideoResponse
+	var wgVideoList sync.WaitGroup
+	wgVideoList.Add(len(mVideoList))
 	videoList = make([]*feed.Video, len(mVideoList))
-	for idx, mVideo := range mVideoList {
-		videoList[idx] = ToVideoResponse(ctx, userID, mVideo, authors[idx])
+	for i, mVideo := range mVideoList {
+		go func(i int, mVideo *model.Video) {
+			defer wgVideoList.Done()
+			videoList[i] = ToVideoResponse(ctx, userID, mVideo, authors[i])
+		}(i, mVideo)
 	}
+	wgVideoList.Wait()
 
 	// 计算下次请求的时间
 	if len(mVideoList) > 0 {
@@ -80,10 +87,16 @@ func GetPublishList(ctx context.Context, userID *int64, authorID int64) ([]*feed
 	}
 
 	// 将model.Video转换为response.VideoResponse
-	videoList := make([]*feed.Video, 0, len(mVideoList))
-	for _, mVideo := range mVideoList {
-		videoList = append(videoList, ToVideoResponse(ctx, userID, mVideo, author))
+	var wgVideoList sync.WaitGroup
+	wgVideoList.Add(len(mVideoList))
+	videoList := make([]*feed.Video, len(mVideoList))
+	for i, mVideo := range mVideoList {
+		go func(i int, mVideo *model.Video) {
+			defer wgVideoList.Done()
+			videoList[i] = ToVideoResponse(ctx, userID, mVideo, author)
+		}(i, mVideo)
 	}
+	wgVideoList.Wait()
 
 	return videoList, nil
 }

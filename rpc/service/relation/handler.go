@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"strconv"
+	"sync"
 
 	"douyin/dal"
 	"douyin/dal/model"
@@ -134,10 +135,16 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 	}
 
 	// 将model.User转换为user.User
+	var wgUserList sync.WaitGroup
+	wgUserList.Add(len(mUserList))
 	userList := make([]*user.User, len(mUserList))
 	for i, u := range mUserList {
-		userList[i] = dal.ToUserResponse(ctx, req.UserId, u)
+		go func(i int, u *model.User) {
+			defer wgUserList.Done()
+			userList[i] = dal.ToUserResponse(ctx, req.UserId, u)
+		}(i, u)
 	}
+	wgUserList.Wait()
 
 	// 返回响应
 	resp = &relation.RelationFollowListResponse{UserList: userList}
@@ -160,10 +167,16 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 	}
 
 	// 将model.User转换为user.User
+	var wgUserList sync.WaitGroup
+	wgUserList.Add(len(mUserList))
 	userList := make([]*user.User, len(mUserList))
 	for i, u := range mUserList {
-		userList[i] = dal.ToUserResponse(ctx, req.UserId, u)
+		go func(i int, u *model.User) {
+			defer wgUserList.Done()
+			userList[i] = dal.ToUserResponse(ctx, req.UserId, u)
+		}(i, u)
 	}
+	wgUserList.Wait()
 
 	// 返回响应
 	resp = &relation.RelationFollowerListResponse{UserList: userList}
@@ -209,10 +222,16 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 	}
 
 	// 将model.User转换为user.User
+	var wgFriendList sync.WaitGroup
+	wgFriendList.Add(len(dFriendList))
 	friendList := make([]*user.User, len(dFriendList))
 	for i, u := range dFriendList {
-		friendList[i] = dal.ToUserResponse(ctx, req.UserId, u)
+		go func(i int, u *model.User) {
+			defer wgFriendList.Done()
+			friendList[i] = dal.ToUserResponse(ctx, req.UserId, u)
+		}(i, u)
 	}
+	wgFriendList.Wait()
 
 	// 返回响应
 	resp = &relation.RelationFriendListResponse{UserList: friendList}
