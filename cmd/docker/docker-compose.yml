@@ -87,6 +87,12 @@ services:
       - "6379:6379"
     container_name: Redis-douyin
 
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    container_name: Mongo-douyin
+
   kafka-0:
     image: bitnami/kafka:latest
     ports:
