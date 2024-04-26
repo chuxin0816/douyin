@@ -13,6 +13,8 @@ import (
 	"douyin/dal/query"
 
 	"github.com/bits-and-blooms/bloom/v3"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
@@ -43,6 +45,7 @@ var (
 var (
 	db           *gorm.DB
 	RDB          *redis.Client
+	Mongo        *mongo.Database
 	g            *singleflight.Group
 	bloomFilter  *bloom.BloomFilter
 	CacheUserID  sync.Map
@@ -53,13 +56,13 @@ var (
 var (
 	qComment  = query.Comment
 	qFavorite = query.Favorite
-	qMessage  = query.Message
 	qRelation = query.Relation
 	qUser     = query.User
 	qVideo    = query.Video
 )
 
 func Init() {
+	// 初始化MySQL
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.Conf.DatabaseConfig.MysqlConfig.User,
 		config.Conf.DatabaseConfig.MysqlConfig.Password,
@@ -89,11 +92,11 @@ func Init() {
 	query.SetDefault(db)
 	qComment = query.Comment
 	qFavorite = query.Favorite
-	qMessage = query.Message
 	qRelation = query.Relation
 	qUser = query.User
 	qVideo = query.Video
 
+	// 初始化Redis
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     config.Conf.DatabaseConfig.RedisConfig.Addr,
 		Password: config.Conf.DatabaseConfig.RedisConfig.Password,
@@ -106,6 +109,19 @@ func Init() {
 	if err := RDB.Ping(context.Background()).Err(); err != nil {
 		panic(err)
 	}
+
+	// 初始化MongoDB
+	uri := fmt.Sprintf("mongodb://%s:%d", config.Conf.MongoConfig.Host, config.Conf.MongoConfig.Port)
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
+	if err != nil {
+		panic(err)
+	}
+	err = client.Ping(context.Background(), nil)
+	if err != nil {
+		panic(err)
+	}
+
+	Mongo = client.Database("douyin")
 
 	// 初始化singleflight
 	g = &singleflight.Group{}

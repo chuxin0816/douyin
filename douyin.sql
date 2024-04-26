@@ -46,19 +46,6 @@ CREATE TABLE `favorite` (
   KEY `idx_user_video` (`user_id`,`video_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- ----------------------------
--- Table structure for message
--- ----------------------------
-DROP TABLE IF EXISTS `message`;
-CREATE TABLE `message` (
-  `id` bigint unsigned NOT NULL,
-  `to_user_id` bigint NOT NULL DEFAULT '0',
-  `from_user_id` bigint NOT NULL DEFAULT '0',
-  `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
-  `create_time` bigint NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `idx_from_to_time` (`from_user_id`,`to_user_id`,`create_time`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Table structure for relation

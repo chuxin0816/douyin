@@ -2,21 +2,24 @@ package dal
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"douyin/dal/model"
 	"douyin/pkg/snowflake"
 	"douyin/rpc/kitex_gen/message"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
-func MessageAction(ctx context.Context, userID, toUserID int64, content string) error {
-	err := qMessage.WithContext(ctx).Create(&model.Message{
-		ID:         snowflake.GenerateID(),
-		FromUserID: userID,
-		ToUserID:   toUserID,
-		Content:    content,
-		CreateTime: time.Now().Unix(),
-	})
+const collectionMessage = "message"
+
+func MessageAction(ctx context.Context, message *model.Message) error {
+	message.ID = snowflake.GenerateID()
+	message.CreateTime = time.Now().Unix()
+
+	collection := Mongo.Collection(collectionMessage)
+	_, err := collection.InsertOne(ctx, message)
 	if err != nil {
 		return err
 	}
@@ -25,10 +28,39 @@ func MessageAction(ctx context.Context, userID, toUserID int64, content string) 
 }
 
 func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*message.Message, error) {
-	mMessageList, err := qMessage.WithContext(ctx).Where(qMessage.FromUserID.Eq(userID), qMessage.ToUserID.Eq(toUserID), qMessage.CreateTime.Gt(lastTime)).
-		Or(qMessage.FromUserID.Eq(toUserID), qMessage.ToUserID.Eq(userID), qMessage.CreateTime.Gt(lastTime)).
-		Order(qMessage.CreateTime).Find()
+	collection := Mongo.Collection(collectionMessage)
+
+	var convertID string
+	if userID < toUserID {
+		convertID = fmt.Sprintf("%d_%d", userID, toUserID)
+	} else {
+		convertID = fmt.Sprintf("%d_%d", toUserID, userID)
+	}
+	// 查询条件
+	filter := bson.D{
+		{
+			"$and", bson.A{
+				bson.D{{"convert_id", convertID}},
+				bson.D{{"create_time", bson.D{{"$gt", lastTime}}}},
+			},
+		},
+	}
+
+	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	mMessageList := make([]*model.Message, 0)
+	for cursor.Next(ctx) {
+		var m model.Message
+		if err := cursor.Decode(&m); err != nil {
+			return nil, err
+		}
+		mMessageList = append(mMessageList, &m)
+	}
+	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
 

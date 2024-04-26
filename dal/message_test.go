@@ -2,13 +2,14 @@ package dal
 
 import (
 	"context"
+	"douyin/dal/model"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMessageAction(t *testing.T) {
-	err := MessageAction(context.Background(), 12182603931062272, 10760536648060928, "hhh")
+	err := MessageAction(context.Background(), &model.Message{})
 	if err != nil {
 		t.Log(err)
 		t.Fail()

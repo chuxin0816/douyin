@@ -19,7 +19,6 @@ var (
 	Q        = new(Query)
 	Comment  *comment
 	Favorite *favorite
-	Message  *message
 	Relation *relation
 	User     *user
 	Video    *video
@@ -29,7 +28,6 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Comment = &Q.Comment
 	Favorite = &Q.Favorite
-	Message = &Q.Message
 	Relation = &Q.Relation
 	User = &Q.User
 	Video = &Q.Video
@@ -40,7 +38,6 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		db:       db,
 		Comment:  newComment(db, opts...),
 		Favorite: newFavorite(db, opts...),
-		Message:  newMessage(db, opts...),
 		Relation: newRelation(db, opts...),
 		User:     newUser(db, opts...),
 		Video:    newVideo(db, opts...),
@@ -52,7 +49,6 @@ type Query struct {
 
 	Comment  comment
 	Favorite favorite
-	Message  message
 	Relation relation
 	User     user
 	Video    video
@@ -65,7 +61,6 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		db:       db,
 		Comment:  q.Comment.clone(db),
 		Favorite: q.Favorite.clone(db),
-		Message:  q.Message.clone(db),
 		Relation: q.Relation.clone(db),
 		User:     q.User.clone(db),
 		Video:    q.Video.clone(db),
@@ -85,7 +80,6 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		db:       db,
 		Comment:  q.Comment.replaceDB(db),
 		Favorite: q.Favorite.replaceDB(db),
-		Message:  q.Message.replaceDB(db),
 		Relation: q.Relation.replaceDB(db),
 		User:     q.User.replaceDB(db),
 		Video:    q.Video.replaceDB(db),
@@ -95,7 +89,6 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 type queryCtx struct {
 	Comment  ICommentDo
 	Favorite IFavoriteDo
-	Message  IMessageDo
 	Relation IRelationDo
 	User     IUserDo
 	Video    IVideoDo
@@ -105,7 +98,6 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		Comment:  q.Comment.WithContext(ctx),
 		Favorite: q.Favorite.WithContext(ctx),
-		Message:  q.Message.WithContext(ctx),
 		Relation: q.Relation.WithContext(ctx),
 		User:     q.User.WithContext(ctx),
 		Video:    q.Video.WithContext(ctx),
