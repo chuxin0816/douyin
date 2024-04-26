@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"douyin/dal/model"
+	"douyin/pkg/snowflake"
 
 	"gorm.io/gorm"
 )
@@ -52,7 +53,12 @@ func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, erro
 }
 
 func Follow(ctx context.Context, userID, toUserID int64) error {
-	return qRelation.WithContext(ctx).Create(&model.Relation{UserID: toUserID, FollowerID: userID})
+	relation := &model.Relation{
+		ID:         snowflake.GenerateID(),
+		UserID:     toUserID,
+		FollowerID: userID,
+	}
+	return qRelation.WithContext(ctx).Create(relation)
 }
 
 func UnFollow(ctx context.Context, userID, toUserID int64) error {
