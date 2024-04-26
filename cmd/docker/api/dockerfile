@@ -18,7 +18,6 @@ RUN go build -o app api/main.go
 
 FROM scratch
 
-COPY ./config/config.yaml /config/config.yaml
 COPY --from=builder /douyin/app /
 
 ENTRYPOINT ["/app"]

@@ -18,7 +18,6 @@ RUN cd rpc/service/comment && sh build.sh
 
 FROM scratch
 
-COPY ./config/config.yaml /config/config.yaml
 COPY --from=builder /douyin/rpc/service/comment/output/bin/comment /
 
 ENTRYPOINT ["/comment"]

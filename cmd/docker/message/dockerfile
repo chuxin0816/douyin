@@ -18,7 +18,6 @@ RUN cd rpc/service/message && sh build.sh
 
 FROM scratch
 
-COPY ./config/config.yaml /config/config.yaml
 COPY --from=builder /douyin/rpc/service/message/output/bin/message /
 
 ENTRYPOINT ["/message"]

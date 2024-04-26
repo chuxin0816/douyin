@@ -18,7 +18,6 @@ RUN cd rpc/service/user && sh build.sh
 
 FROM scratch
 
-COPY ./config/config.yaml /config/config.yaml
 COPY --from=builder /douyin/rpc/service/user/output/bin/user /
 
 ENTRYPOINT ["/user"]

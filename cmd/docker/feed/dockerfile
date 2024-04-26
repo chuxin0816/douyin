@@ -18,7 +18,6 @@ RUN cd rpc/service/feed && sh build.sh
 
 FROM scratch
 
-COPY ./config/config.yaml /config/config.yaml
 COPY --from=builder /douyin/rpc/service/feed/output/bin/feed /
 
 ENTRYPOINT ["/feed"]

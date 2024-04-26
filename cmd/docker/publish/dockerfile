@@ -23,7 +23,6 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends --fix-missing \
     ffmpeg 
 
-COPY ./config/config.yaml /config/config.yaml
 COPY --from=builder /douyin/rpc/service/publish/output/bin/publish /
 
 ENTRYPOINT ["/publish"]

@@ -18,7 +18,6 @@ RUN cd rpc/service/favorite && sh build.sh
 
 FROM scratch
 
-COPY ./config/config.yaml /config/config.yaml
 COPY --from=builder /douyin/rpc/service/favorite/output/bin/favorite /
 
 ENTRYPOINT ["/favorite"]
