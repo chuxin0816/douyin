@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"douyin/dal/model"
+	"douyin/pkg/snowflake"
 
 	"gorm.io/gorm"
 )
@@ -48,6 +49,7 @@ func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool,
 
 func CreateFavorite(ctx context.Context, userID, videoID int64) error {
 	mFavorite := &model.Favorite{
+		ID:      snowflake.GenerateID(),
 		UserID:  userID,
 		VideoID: videoID,
 	}
