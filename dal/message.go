@@ -35,9 +35,9 @@ func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*mess
 	// 查询条件
 	filter := bson.D{
 		{
-			"$and", bson.A{
-				bson.D{{"convert_id", convertID}},
-				bson.D{{"create_time", bson.D{{"$gt", lastTime}}}},
+			Key: "$and", Value: bson.A{
+				bson.D{{Key: "convert_id", Value: convertID}},
+				bson.D{{Key: "create_time", Value: bson.D{{Key: "$gt", Value: lastTime}}}},
 			},
 		},
 	}
