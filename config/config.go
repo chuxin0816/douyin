@@ -71,8 +71,9 @@ type RedisConfig struct {
 }
 
 type MongoConfig struct {
-	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
+	Host   string `mapstructure:"host"`
+	Port   int    `mapstructure:"port"`
+	DBName string `mapstructure:"dbname"`
 }
 
 type ConsulConfig struct {

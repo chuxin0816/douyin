@@ -12,14 +12,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-const collectionMessage = "message"
+
 
 func MessageAction(ctx context.Context, message *model.Message) error {
 	message.ID = snowflake.GenerateID()
 	message.CreateTime = time.Now().Unix()
 
-	collection := Mongo.Collection(collectionMessage)
-	_, err := collection.InsertOne(ctx, message)
+	_, err := collectionMessage.InsertOne(ctx, message)
 	if err != nil {
 		return err
 	}
@@ -28,8 +27,6 @@ func MessageAction(ctx context.Context, message *model.Message) error {
 }
 
 func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*message.Message, error) {
-	collection := Mongo.Collection(collectionMessage)
-
 	var convertID string
 	if userID < toUserID {
 		convertID = fmt.Sprintf("%d_%d", userID, toUserID)
@@ -46,7 +43,7 @@ func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*mess
 		},
 	}
 
-	cursor, err := collection.Find(ctx, filter)
+	cursor, err := collectionMessage.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}

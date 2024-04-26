@@ -43,13 +43,13 @@ var (
 )
 
 var (
-	db           *gorm.DB
-	RDB          *redis.Client
-	Mongo        *mongo.Database
-	g            *singleflight.Group
-	bloomFilter  *bloom.BloomFilter
-	CacheUserID  sync.Map
-	CacheVideoID sync.Map
+	db                *gorm.DB
+	RDB               *redis.Client
+	collectionMessage *mongo.Collection
+	g                 *singleflight.Group
+	bloomFilter       *bloom.BloomFilter
+	CacheUserID       sync.Map
+	CacheVideoID      sync.Map
 )
 
 // nil值，用于占位，于Init函数中初始化
@@ -121,7 +121,7 @@ func Init() {
 		panic(err)
 	}
 
-	Mongo = client.Database("douyin")
+	collectionMessage = client.Database(config.Conf.MongoConfig.DBName).Collection("message")
 
 	// 初始化singleflight
 	g = &singleflight.Group{}
