@@ -31,7 +31,7 @@ func TestGetUserByName(t *testing.T) {
 }
 
 func TestCreateUser(t *testing.T) {
-	err := CreateUser(context.Background(), "test02", "123456", 1111)
+	_, err := CreateUser(context.Background(), "test02", "123456")
 	if err != nil {
 		t.Log(err)
 		t.Fail()
