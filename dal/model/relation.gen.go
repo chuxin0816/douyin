@@ -8,7 +8,7 @@ const TableNameRelation = "relation"
 
 // Relation mapped from table <relation>
 type Relation struct {
-	ID         int64 `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
+	ID         int64 `gorm:"column:id;primaryKey" json:"id"`
 	UserID     int64 `gorm:"column:user_id;not null" json:"user_id"`
 	FollowerID int64 `gorm:"column:follower_id;not null" json:"follower_id"`
 }
