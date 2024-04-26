@@ -29,6 +29,7 @@ http请求->api/router->api/controller->rpc/client->rpc/service->dal
 * 使用consul作为服务发现和注册中心，配置中心
 * 使用GORM GEN操作Mysql，具有简单易用，防SQL注入等优点
 * 使用Redis作为缓存，提高访问速度，使用定时同步缓存保证数据一致性
+* 使用MongoDB存储用户消息，避免消息表过大
 * 使用canal订阅Mysql的binlog，发送到kafka异步删除点赞和关注关系缓存
 * 使用kafka作为消息队列，对于高频的点赞和评论异步写入数据库，对于点赞数，粉丝数等数量缓存定时同步到数据库
 * 使用布隆过滤器防止缓存穿透，使用随机延时防止缓存雪崩
