@@ -71,7 +71,7 @@ type RedisConfig struct {
 }
 
 type MongoConfig struct {
-	Host string `mapstructure:"addr"`
+	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
 }
 
