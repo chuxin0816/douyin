@@ -5,12 +5,14 @@ import (
 	"strconv"
 
 	"douyin/dal/model"
+	"douyin/pkg/snowflake"
 	"douyin/rpc/kitex_gen/comment"
 
 	"gorm.io/gorm"
 )
 
 func CreateComment(ctx context.Context, comment *model.Comment) error {
+	comment.ID = snowflake.GenerateID()
 	return qComment.WithContext(ctx).Create(comment)
 }
 

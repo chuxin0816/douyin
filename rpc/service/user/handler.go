@@ -6,7 +6,6 @@ import (
 
 	"douyin/dal"
 	"douyin/pkg/jwt"
-	"douyin/pkg/snowflake"
 	"douyin/pkg/tracing"
 	user "douyin/rpc/kitex_gen/user"
 
@@ -34,9 +33,6 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 		return nil, dal.ErrUserExist
 	}
 
-	// 生成用户id
-	userID := snowflake.GenerateID()
-
 	// 加密密码
 	bPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -48,7 +44,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 	req.Password = string(bPassword)
 
 	// 保存用户信息
-	err = dal.CreateUser(ctx, req.Username, req.Password, userID)
+	userID, err := dal.CreateUser(ctx, req.Username, req.Password)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "保存用户信息失败")

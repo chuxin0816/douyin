@@ -9,7 +9,6 @@ import (
 	"douyin/dal"
 	"douyin/dal/model"
 	"douyin/pkg/kafka"
-	"douyin/pkg/snowflake"
 	"douyin/pkg/tracing"
 	comment "douyin/rpc/kitex_gen/comment"
 
@@ -44,7 +43,6 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 	// 判断actionType
 	if req.ActionType == 1 {
 		// 发布评论
-		mComment.ID = snowflake.GenerateID()
 		mComment.CreateTime = time.Now()
 
 		// 通过kafka异步写入数据库

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"douyin/dal/model"
+	"douyin/pkg/snowflake"
 	"douyin/rpc/kitex_gen/user"
 
 	"gorm.io/gorm"
@@ -76,7 +77,9 @@ func GetUserByName(ctx context.Context, username string) *model.User {
 	return user
 }
 
-func CreateUser(ctx context.Context, username, password string, userID int64) error {
+func CreateUser(ctx context.Context, username, password string) (userID int64, err error) {
+	userID = snowflake.GenerateID()
+
 	// 写入布隆过滤器
 	bloomFilter.Add([]byte(strconv.FormatInt(userID, 10)))
 	bloomFilter.Add([]byte(username))
@@ -87,9 +90,9 @@ func CreateUser(ctx context.Context, username, password string, userID int64) er
 		Password: password,
 	}
 	if err := qUser.WithContext(ctx).Create(user); err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return userID, nil
 }
 
 func GetUserFavoriteCount(ctx context.Context, userID int64) (int64, error) {
