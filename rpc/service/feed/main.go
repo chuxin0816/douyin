@@ -8,14 +8,15 @@ import (
 	"douyin/dal"
 	"douyin/logger"
 	"douyin/pkg/kafka"
+	"douyin/pkg/snowflake"
 	"douyin/pkg/tracing"
 	feed "douyin/rpc/kitex_gen/feed/feedservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
-	consul "github.com/kitex-contrib/registry-consul"
 	kitexTracing "github.com/kitex-contrib/obs-opentelemetry/tracing"
+	consul "github.com/kitex-contrib/registry-consul"
 )
 
 func main() {
@@ -23,6 +24,7 @@ func main() {
 	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.FeedName)
 	defer tracing.Close()
 	logger.Init()
+	snowflake.Init()
 	dal.Init()
 	defer dal.Close()
 	kafka.Init()
