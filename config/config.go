@@ -53,6 +53,7 @@ type LogConfig struct {
 type DatabaseConfig struct {
 	*MysqlConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
+	*MongoConfig `mapstructure:"mongo"`
 }
 
 type MysqlConfig struct {
@@ -67,6 +68,11 @@ type RedisConfig struct {
 	Addr     string `mapstructure:"addr"`
 	Password string `mapstructure:"password"`
 	DB       int    `mapstructure:"db"`
+}
+
+type MongoConfig struct {
+	Host string `mapstructure:"addr"`
+	Port int    `mapstructure:"port"`
 }
 
 type ConsulConfig struct {
