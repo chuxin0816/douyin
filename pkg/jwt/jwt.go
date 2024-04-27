@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-var jwtKey = []byte(config.Conf.JwtKey)
+var jwtKey []byte
 
 const (
 	issuer        = "chuxin"
@@ -20,6 +20,10 @@ type Claims struct {
 	*jwt.StandardClaims
 }
 
+func Init(){
+	jwtKey = []byte(config.Conf.JwtKey)
+
+}
 func GenerateToken(userID int64) (string, error) {
 	claims := &Claims{
 		UserID: userID,

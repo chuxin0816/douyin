@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"net"
 
 	"douyin/config"
@@ -16,13 +15,14 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
-	consul "github.com/kitex-contrib/registry-consul"
 	kitexTracing "github.com/kitex-contrib/obs-opentelemetry/tracing"
+	consul "github.com/kitex-contrib/registry-consul"
 )
 
 func main() {
 	config.Init()
-	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.PublishName)
+	go watchConfig()
+	tracing.Init(config.Conf.OpenTelemetryConfig.PublishName)
 	defer tracing.Close()
 	logger.Init()
 	snowflake.Init()
@@ -51,5 +51,32 @@ func main() {
 
 	if err = svr.Run(); err != nil {
 		klog.Fatal("run server failed: ", err)
+	}
+}
+
+func watchConfig() {
+	for {
+		select {
+		case <-config.NoticeOpenTelemetry:
+			tracing.Init(config.Conf.OpenTelemetryConfig.PublishName)
+
+		case <-config.NoticeLog:
+			logger.Init()
+
+		case <-config.NoticeSnowflake:
+			snowflake.Init()
+
+		case <-config.NoticeOss:
+			oss.Init()
+
+		case <-config.NoticeMySQL:
+			dal.InitMySQL()
+
+		case <-config.NoticeRedis:
+			dal.InitRedis()
+
+		case <-config.NoticeKafka:
+			kafka.Init()
+		}
 	}
 }

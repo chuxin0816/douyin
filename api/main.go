@@ -1,11 +1,10 @@
 package main
 
 import (
-	"context"
-
 	"douyin/api/router"
 	"douyin/config"
 	"douyin/logger"
+	"douyin/pkg/jwt"
 	"douyin/pkg/tracing"
 	"douyin/rpc/client"
 )
@@ -13,9 +12,13 @@ import (
 func main() {
 	// 加载配置
 	config.Init()
+	go watchConfig()
+
+	// 初始化jwt
+	jwt.Init()
 
 	// 初始化链路追踪
-	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.ApiName)
+	tracing.Init(config.Conf.OpenTelemetryConfig.ApiName)
 	defer tracing.Close()
 
 	// 初始化日志
@@ -28,4 +31,22 @@ func main() {
 	h := router.Setup(config.Conf.HertzConfig)
 
 	h.Spin()
+}
+
+func watchConfig() {
+	for {
+		select {
+		case <-config.NoticeJwt:
+			jwt.Init()
+
+		case <-config.NoticeOpenTelemetry:
+			tracing.Init(config.Conf.OpenTelemetryConfig.ApiName)
+
+		case <-config.NoticeLog:
+			logger.Init()
+
+		case <-config.NoticeConsul:
+			client.InitRpcClient()
+		}
+	}
 }

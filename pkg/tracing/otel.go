@@ -19,8 +19,8 @@ var (
 	Tracer trace2.Tracer
 )
 
-func Init(ctx context.Context, serviceName string) {
-	exporter, err := otlptracehttp.New(ctx,
+func Init(serviceName string) {
+	exporter, err := otlptracehttp.New(context.Background(),
 		otlptracehttp.WithEndpoint(config.Conf.OpenTelemetryConfig.JaegerAddr),
 		otlptracehttp.WithInsecure())
 	if err != nil {

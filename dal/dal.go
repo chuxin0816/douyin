@@ -63,12 +63,31 @@ var (
 
 func Init() {
 	// 初始化MySQL
+	InitMySQL()
+
+	// 初始化Redis
+	InitRedis()
+
+	// 初始化MongoDB
+	InitMongo()
+
+	// 初始化singleflight
+	g = &singleflight.Group{}
+
+	// 初始化布隆过滤器
+	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
+	if err := loadDataToBloom(); err != nil {
+		panic(err)
+	}
+}
+
+func InitMySQL() {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		config.Conf.DatabaseConfig.MysqlConfig.User,
-		config.Conf.DatabaseConfig.MysqlConfig.Password,
-		config.Conf.DatabaseConfig.MysqlConfig.Host,
-		config.Conf.DatabaseConfig.MysqlConfig.Port,
-		config.Conf.DatabaseConfig.MysqlConfig.DBName,
+		config.Conf.DatabaseConfig.MySQLConfig.User,
+		config.Conf.DatabaseConfig.MySQLConfig.Password,
+		config.Conf.DatabaseConfig.MySQLConfig.Host,
+		config.Conf.DatabaseConfig.MySQLConfig.Port,
+		config.Conf.DatabaseConfig.MySQLConfig.DBName,
 	)
 
 	var err error
@@ -95,8 +114,9 @@ func Init() {
 	qRelation = query.Relation
 	qUser = query.User
 	qVideo = query.Video
+}
 
-	// 初始化Redis
+func InitRedis() {
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     config.Conf.DatabaseConfig.RedisConfig.Addr,
 		Password: config.Conf.DatabaseConfig.RedisConfig.Password,
@@ -109,8 +129,9 @@ func Init() {
 	if err := RDB.Ping(context.Background()).Err(); err != nil {
 		panic(err)
 	}
+}
 
-	// 初始化MongoDB
+func InitMongo() {
 	uri := fmt.Sprintf("mongodb://%s:%d", config.Conf.MongoConfig.Host, config.Conf.MongoConfig.Port)
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 	if err != nil {
@@ -122,15 +143,6 @@ func Init() {
 	}
 
 	collectionMessage = client.Database(config.Conf.MongoConfig.DBName).Collection("message")
-
-	// 初始化singleflight
-	g = &singleflight.Group{}
-
-	// 初始化布隆过滤器
-	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
-	if err := loadDataToBloom(); err != nil {
-		panic(err)
-	}
 }
 
 func Close() {

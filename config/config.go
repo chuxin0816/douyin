@@ -1,8 +1,10 @@
 package config
 
 import (
+	"reflect"
+	"time"
+
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	_ "github.com/spf13/viper/remote"
 )
@@ -12,7 +14,19 @@ const (
 	consulConfigPath = "config"
 )
 
-var Conf = &Config{}
+var (
+	Conf                = &Config{}
+	NoticeJwt           = make(chan struct{})
+	NoticeSnowflake     = make(chan struct{})
+	NoticeOss           = make(chan struct{})
+	NoticeLog           = make(chan struct{})
+	NoticeMySQL         = make(chan struct{})
+	NoticeRedis         = make(chan struct{})
+	NoticeMongo         = make(chan struct{})
+	NoticeConsul        = make(chan struct{})
+	NoticeKafka         = make(chan struct{})
+	NoticeOpenTelemetry = make(chan struct{})
+)
 
 type Config struct {
 	JwtKey               string `mapstructure:"jwt_key"`
@@ -51,12 +65,12 @@ type LogConfig struct {
 }
 
 type DatabaseConfig struct {
-	*MysqlConfig `mapstructure:"mysql"`
+	*MySQLConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
 	*MongoConfig `mapstructure:"mongo"`
 }
 
-type MysqlConfig struct {
+type MySQLConfig struct {
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 	Host     string `mapstructure:"host"`
@@ -104,14 +118,12 @@ type OpenTelemetryConfig struct {
 }
 
 func Init() {
-	err := viper.AddRemoteProvider("consul", consulEndpoint, consulConfigPath)
-	if err != nil {
+	if err := viper.AddRemoteProvider("consul", consulEndpoint, consulConfigPath); err != nil {
 		panic(err)
 	}
 	viper.SetConfigType("yaml")
 
-	err = viper.ReadRemoteConfig()
-	if err != nil {
+	if err := viper.ReadRemoteConfig(); err != nil {
 		panic(err)
 	}
 
@@ -121,12 +133,64 @@ func Init() {
 	}
 
 	// 监控配置文件变化
-	viper.WatchConfig()
-	viper.OnConfigChange(func(in fsnotify.Event) {
-		if err := viper.Unmarshal(Conf); err != nil {
-			klog.Error("viper unmarshal failed, err:%v", err)
-		} else {
-			klog.Notice("config file changed")
+	go func() {
+		for {
+			time.Sleep(time.Second * 5)
+
+			if err := viper.WatchRemoteConfig(); err != nil {
+				klog.Error("watch remote config failed, err:%v", err)
+				continue
+			}
+
+			newConf := &Config{}
+			if err := viper.Unmarshal(newConf); err != nil {
+				klog.Error("viper unmarshal failed, err:%v", err)
+				continue
+			}
+			if reflect.DeepEqual(Conf, newConf) {
+				continue
+			}
+			switch {
+			case !reflect.DeepEqual(Conf.JwtKey, newConf.JwtKey):
+				Conf.JwtKey = newConf.JwtKey
+				NoticeJwt <- struct{}{}
+
+			case !reflect.DeepEqual(Conf.SnowflakeConfig, newConf.SnowflakeConfig):
+				Conf.SnowflakeConfig = newConf.SnowflakeConfig
+				NoticeSnowflake <- struct{}{}
+
+			case !reflect.DeepEqual(Conf.OssConfig, newConf.OssConfig):
+				Conf.OssConfig = newConf.OssConfig
+				NoticeOss <- struct{}{}
+
+			case !reflect.DeepEqual(Conf.LogConfig, newConf.LogConfig):
+				Conf.LogConfig = newConf.LogConfig
+				NoticeLog <- struct{}{}
+
+			case !reflect.DeepEqual(Conf.DatabaseConfig.MySQLConfig, newConf.DatabaseConfig.MySQLConfig):
+				Conf.DatabaseConfig.MySQLConfig = newConf.DatabaseConfig.MySQLConfig
+				NoticeMySQL <- struct{}{}
+
+			case !reflect.DeepEqual(Conf.DatabaseConfig.RedisConfig, newConf.DatabaseConfig.RedisConfig):
+				Conf.DatabaseConfig.RedisConfig = newConf.DatabaseConfig.RedisConfig
+				NoticeRedis <- struct{}{}
+
+			case !reflect.DeepEqual(Conf.DatabaseConfig.MongoConfig, newConf.DatabaseConfig.MongoConfig):
+				Conf.DatabaseConfig.MongoConfig = newConf.DatabaseConfig.MongoConfig
+				NoticeMongo <- struct{}{}
+
+			case !reflect.DeepEqual(Conf.ConsulConfig, newConf.ConsulConfig):
+				Conf.ConsulConfig = newConf.ConsulConfig
+				NoticeConsul <- struct{}{}
+
+			case !reflect.DeepEqual(Conf.KafkaConfig, newConf.KafkaConfig):
+				Conf.KafkaConfig = newConf.KafkaConfig
+				NoticeKafka <- struct{}{}
+
+			case !reflect.DeepEqual(Conf.OpenTelemetryConfig, newConf.OpenTelemetryConfig):
+				Conf.OpenTelemetryConfig = newConf.OpenTelemetryConfig
+				NoticeOpenTelemetry <- struct{}{}
+			}
 		}
-	})
+	}()
 }

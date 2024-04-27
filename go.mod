@@ -11,7 +11,6 @@ require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cloudwego/hertz v0.8.1
 	github.com/cloudwego/kitex v0.9.3-rc
-	github.com/fsnotify/fsnotify v1.7.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/hertz-contrib/logger/zap v1.1.0
@@ -78,6 +77,7 @@ require (
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
+	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.8.1 // indirect

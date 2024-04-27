@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"net"
 
 	"douyin/config"
@@ -21,7 +20,8 @@ import (
 
 func main() {
 	config.Init()
-	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.RelationName)
+	go watchConfig()
+	tracing.Init(config.Conf.OpenTelemetryConfig.RelationName)
 	defer tracing.Close()
 	logger.Init()
 	snowflake.Init()
@@ -49,5 +49,29 @@ func main() {
 
 	if err = svr.Run(); err != nil {
 		klog.Fatal("run server failed: ", err)
+	}
+}
+
+func watchConfig() {
+	for {
+		select {
+		case <-config.NoticeOpenTelemetry:
+			tracing.Init(config.Conf.OpenTelemetryConfig.RelationName)
+		
+		case <-config.NoticeLog:
+			logger.Init()
+
+		case <-config.NoticeSnowflake:
+			snowflake.Init()
+
+		case <-config.NoticeMySQL:
+			dal.InitMySQL()
+
+		case <-config.NoticeRedis:
+			dal.InitRedis()
+
+		case <-config.NoticeKafka:
+			kafka.Init()
+		}
 	}
 }

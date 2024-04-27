@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net"
 
@@ -22,7 +21,8 @@ import (
 
 func main() {
 	config.Init()
-	tracing.Init(context.Background(), config.Conf.OpenTelemetryConfig.FavoriteName)
+	go watchConfig()
+	tracing.Init(config.Conf.OpenTelemetryConfig.FavoriteName)
 	defer tracing.Close()
 	logger.Init()
 	snowflake.Init()
@@ -50,5 +50,29 @@ func main() {
 	err = svr.Run()
 	if err != nil {
 		log.Println(err.Error())
+	}
+}
+
+func watchConfig() {
+	for {
+		select {
+		case <-config.NoticeOpenTelemetry:
+			tracing.Init(config.Conf.OpenTelemetryConfig.FavoriteName)
+
+		case <-config.NoticeLog:
+			logger.Init()
+
+		case <-config.NoticeSnowflake:
+			snowflake.Init()
+
+		case <-config.NoticeMySQL:
+			dal.InitMySQL()
+
+		case <-config.NoticeRedis:
+			dal.InitRedis()
+
+		case <-config.NoticeKafka:
+			kafka.Init()
+		}
 	}
 }
