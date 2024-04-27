@@ -3,7 +3,6 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"douyin/dal"
 
@@ -38,7 +37,6 @@ func (mq *cacheMQ) removeCache(ctx context.Context) {
 		}
 		msg := &dbMessage{}
 		if err := json.Unmarshal(m.Value, msg); err != nil {
-			fmt.Println("err:", err)
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}

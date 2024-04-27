@@ -3,7 +3,6 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -48,7 +47,6 @@ func (mq *syncMQ) syncBloomFilter(ctx context.Context) {
 		}
 		msg := &dbMessage{}
 		if err := json.Unmarshal(m.Value, msg); err != nil {
-			fmt.Println("err:", err)
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
