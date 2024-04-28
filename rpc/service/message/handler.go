@@ -7,6 +7,7 @@ import (
 
 	"douyin/dal"
 	"douyin/dal/model"
+	"douyin/pkg/kafka"
 	"douyin/pkg/tracing"
 	message "douyin/rpc/kitex_gen/message"
 
@@ -49,7 +50,6 @@ func (s *MessageServiceImpl) MessageAction(ctx context.Context, req *message.Mes
 		convertID = fmt.Sprintf("%d_%d", req.ToUserId, req.UserId)
 	}
 
-	// 操作数据库
 	msg := &model.Message{
 		ToUserID:   req.ToUserId,
 		FromUserID: req.UserId,
@@ -57,10 +57,11 @@ func (s *MessageServiceImpl) MessageAction(ctx context.Context, req *message.Mes
 		Content:    req.Content,
 		CreateTime: time.Now().Unix(),
 	}
-	if err := dal.MessageAction(ctx, msg); err != nil {
+	// 通过kafka更新数据库
+	if err := kafka.SendMessage(ctx, msg); err != nil {
 		span.RecordError(err)
-		span.SetStatus(codes.Error, "操作数据库失败")
-		klog.Error("操作数据库失败, err: ", err)
+		span.SetStatus(codes.Error, "通过kafka更新数据库失败")
+		klog.Error("通过kafka更新数据库失败, err: ", err)
 		return nil, err
 	}
 

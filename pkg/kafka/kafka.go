@@ -10,6 +10,8 @@ const (
 	topicCanal    = "canal"
 	topicComment  = "comment"
 	topicFavorite = "favorite"
+	topicRelation = "relation"
+	topicMessage  = "message"
 	topicVideo    = "video"
 	topicUser     = "user"
 	groupID       = "backend"
@@ -32,6 +34,7 @@ func Init() {
 	initSyncMQ()
 	initCommentMQ()
 	initFavoriteMQ()
+	initMessageMQ()
 	initUserMQ()
 	initVideoMQ()
 }
