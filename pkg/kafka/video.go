@@ -48,6 +48,11 @@ func (mq *videoMQ) consumeVideo(ctx context.Context) {
 			continue
 		}
 	}
+
+	// 程序退出前关闭Reader
+	if err := mq.Reader.Close(); err != nil {
+		klog.Fatal("failed to close reader:", err)
+	}
 }
 
 func UpdateVideo(ctx context.Context, video *model.Video) error {

@@ -51,6 +51,11 @@ func (mq *messageMQ) consumeMessage(ctx context.Context) {
 			klog.Error("failed to write message to database: ", err)
 		}
 	}
+
+	// 程序退出前关闭Reader
+	if err := mq.Reader.Close(); err != nil {
+		klog.Fatal("failed to close reader:", err)
+	}
 }
 
 func SendMessage(ctx context.Context, message *model.Message) error {

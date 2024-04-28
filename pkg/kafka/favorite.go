@@ -67,6 +67,7 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 			}
 		}
 	}
+	
 	// 程序退出前关闭Reader
 	if err := mq.Reader.Close(); err != nil {
 		klog.Fatal("failed to close reader:", err)
