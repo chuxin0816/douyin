@@ -7,6 +7,7 @@ import (
 
 	"douyin/dal"
 	"douyin/dal/model"
+	"douyin/pkg/kafka"
 	"douyin/pkg/tracing"
 	relation "douyin/rpc/kitex_gen/relation"
 	"douyin/rpc/kitex_gen/user"
@@ -77,21 +78,16 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 		return nil, dal.ErrFollowLimit
 	}
 
-	// 操作数据库
-	if req.ActionType == 1 {
-		if err := dal.Follow(ctx, req.UserId, req.ToUserId); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "关注失败")
-			klog.Error("关注失败, err: ", err)
-			return nil, err
-		}
-	} else {
-		if err := dal.UnFollow(ctx, req.UserId, req.ToUserId); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "取消关注失败")
-			klog.Error("取消关注失败, err: ", err)
-			return nil, err
-		}
+	// 通过kafka更新数据库
+	err = kafka.Relation(ctx, &model.Relation{
+		UserID:     req.ToUserId,
+		FollowerID: req.UserId,
+	})
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "通过kafka更新数据库失败")
+		klog.Error("通过kafka更新数据库失败, err: ", err)
+		return nil, err
 	}
 
 	// 更新缓存相关字段
