@@ -41,35 +41,38 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 	}
 
 	// 检查关注数是否超过10k
+	var followCnt int64
 	keyUserFollowCnt := dal.GetRedisKey(dal.KeyUserFollowCountPF + strconv.FormatInt(req.UserId, 10))
-	if exist, err := dal.RDB.Exists(ctx, keyUserFollowCnt).Result(); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "检查key是否存在失败")
-		klog.Error("检查key是否存在失败, err: ", err)
-		return nil, err
-	} else if exist == 0 {
-		cnt, err := dal.GetUserFollowCount(ctx, req.UserId)
+	cnt, err := dal.RDB.Get(ctx, keyUserFollowCnt).Result()
+	if err == redis.Nil {
+		followCnt, err = dal.GetUserFollowCount(ctx, req.UserId)
 		if err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "查询数据库失败")
 			klog.Error("查询数据库失败, err: ", err)
 			return nil, err
 		}
-		if err = dal.RDB.Set(ctx, keyUserFollowCnt, cnt, redis.KeepTTL).Err(); err != nil {
+		if err = dal.RDB.Set(ctx, keyUserFollowCnt, followCnt, redis.KeepTTL).Err(); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "写入缓存失败")
 			klog.Error("写入缓存失败, err: ", err)
 			return nil, err
 		}
-	}
-	followCnt, err := strconv.Atoi(dal.RDB.Get(ctx, keyUserFollowCnt).Val())
-	if err != nil {
+	} else if err != nil {
 		span.RecordError(err)
-		span.SetStatus(codes.Error, "类型转换失败")
-		klog.Error("类型转换失败, err: ", err)
+		span.SetStatus(codes.Error, "查询缓存失败")
+		klog.Error("查询缓存失败, err: ", err)
 		return nil, err
+	} else {
+		followCnt, err = strconv.ParseInt(cnt, 10, 64)
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "类型转换失败")
+			klog.Error("类型转换失败, err: ", err)
+			return nil, err
+		}
 	}
-
+	
 	if followCnt >= 10000 {
 		return nil, dal.ErrFollowLimit
 	}

@@ -272,8 +272,15 @@ func RemoveFavoriteCache(ctx context.Context, userID, videoID string) error {
 }
 
 func RemoveRelationCache(ctx context.Context, userID, toUserID string) error {
-	key := GetRedisKey(KeyUserFollowerPF + toUserID)
-	return RDB.SRem(ctx, key, userID).Err()
+	keyFollowPF := GetRedisKey(KeyUserFollowPF + userID)
+	keyFollower := GetRedisKey(KeyUserFollowerPF + toUserID)
+
+	pipe := RDB.Pipeline()
+	pipe.SRem(ctx, keyFollowPF, toUserID)
+	pipe.SRem(ctx, keyFollower, userID)
+	_, err := pipe.Exec(ctx)
+
+	return err
 }
 
 // GetRandomTime 获取0-30min随机时间

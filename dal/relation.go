@@ -8,6 +8,7 @@ import (
 	"douyin/dal/model"
 	"douyin/pkg/snowflake"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -66,11 +67,24 @@ func UnFollow(ctx context.Context, userID, toUserID int64) error {
 	return err
 }
 
-func FollowList(ctx context.Context, toUserID int64) ([]*model.User, error) {
+func FollowList(ctx context.Context, userID int64) ([]*model.User, error) {
 	// 查询用户ID列表
 	var userIDList []int64
-	if err := qRelation.WithContext(ctx).Where(qRelation.FollowerID.Eq(toUserID)).Select(qRelation.UserID).Scan(&userIDList); err != nil {
+	userIDs, err := RDB.SMembers(ctx, GetRedisKey(KeyUserFollowPF+strconv.FormatInt(userID, 10))).Result()
+	if err == redis.Nil {
+		if err := qRelation.WithContext(ctx).Where(qRelation.FollowerID.Eq(userID)).Select(qRelation.UserID).Scan(&userIDList); err != nil {
+			return nil, err
+		}
+	} else if err != nil {
 		return nil, err
+	} else {
+		for _, id := range userIDs {
+			userID, err := strconv.ParseInt(id, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			userIDList = append(userIDList, userID)
+		}
 	}
 
 	// 查询用户列表
@@ -82,11 +96,24 @@ func FollowList(ctx context.Context, toUserID int64) ([]*model.User, error) {
 	return userList, nil
 }
 
-func FollowerList(ctx context.Context, toUserID int64) ([]*model.User, error) {
+func FollowerList(ctx context.Context, userID int64) ([]*model.User, error) {
 	// 查询粉丝ID列表
 	var followerIDList []int64
-	if err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(toUserID)).Select(qRelation.FollowerID).Scan(&followerIDList); err != nil {
+	userIDs, err := RDB.SMembers(ctx, GetRedisKey(KeyUserFollowerPF+strconv.FormatInt(userID, 10))).Result()
+	if err == redis.Nil {
+		if err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(userID)).Select(qRelation.FollowerID).Scan(&followerIDList); err != nil {
+			return nil, err
+		}
+	} else if err != nil {
 		return nil, err
+	} else {
+		for _, id := range userIDs {
+			userID, err := strconv.ParseInt(id, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			followerIDList = append(followerIDList, userID)
+		}
 	}
 
 	// 查询粉丝列表
