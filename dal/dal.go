@@ -41,6 +41,7 @@ var (
 	ErrPassword        = errors.New("密码错误")
 	ErrAlreadyFollow   = errors.New("已经关注过了")
 	ErrNotFollow       = errors.New("还没有关注过")
+	ErrFollowLimit     = errors.New("关注数超过限制")
 	ErrAlreadyFavorite = errors.New("已经点赞过了")
 	ErrNotFavorite     = errors.New("还没有点赞过")
 	ErrCommentNotExist = errors.New("comment not exist")

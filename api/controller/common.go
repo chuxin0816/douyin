@@ -24,6 +24,7 @@ const (
 	CodeCommentNotExist
 	CodeAlreadyFollow
 	CodeNotFollow
+	CodeFollowLimit
 	CodeServerBusy
 )
 
@@ -41,6 +42,7 @@ var codeMsgMap = map[int32]string{
 	CodeCommentNotExist: "评论不存在",
 	CodeAlreadyFollow:   "已经关注过了",
 	CodeNotFollow:       "还没有关注过",
+	CodeFollowLimit:     "关注数超过限制",
 	CodeServerBusy:      "服务器繁忙",
 }
 

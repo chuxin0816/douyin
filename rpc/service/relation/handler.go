@@ -40,6 +40,40 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 		return nil, dal.ErrNotFollow
 	}
 
+	// 检查关注数是否超过10k
+	keyUserFollowCnt := dal.GetRedisKey(dal.KeyUserFollowCountPF + strconv.FormatInt(req.UserId, 10))
+	if exist, err := dal.RDB.Exists(ctx, keyUserFollowCnt).Result(); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "检查key是否存在失败")
+		klog.Error("检查key是否存在失败, err: ", err)
+		return nil, err
+	} else if exist == 0 {
+		cnt, err := dal.GetUserFollowCount(ctx, req.UserId)
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "查询数据库失败")
+			klog.Error("查询数据库失败, err: ", err)
+			return nil, err
+		}
+		if err = dal.RDB.Set(ctx, keyUserFollowCnt, cnt, redis.KeepTTL).Err(); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "写入缓存失败")
+			klog.Error("写入缓存失败, err: ", err)
+			return nil, err
+		}
+	}
+	followCnt, err := strconv.Atoi(dal.RDB.Get(ctx, keyUserFollowCnt).Val())
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "类型转换失败")
+		klog.Error("类型转换失败, err: ", err)
+		return nil, err
+	}
+
+	if followCnt >= 10000 {
+		return nil, dal.ErrFollowLimit
+	}
+
 	// 操作数据库
 	if req.ActionType == 1 {
 		if err := dal.Follow(ctx, req.UserId, req.ToUserId); err != nil {
@@ -59,30 +93,16 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 
 	// 更新缓存相关字段
 	go func() {
-		keyUserFollowCnt := dal.GetRedisKey(dal.KeyUserFollowCountPF + strconv.FormatInt(req.UserId, 10))
 		keyUserFollowerCnt := dal.GetRedisKey(dal.KeyUserFollowerCountPF + strconv.FormatInt(req.ToUserId, 10))
 		// 检查key是否存在
-		if exist, err := dal.RDB.Exists(ctx, keyUserFollowCnt, keyUserFollowerCnt).Result(); err != nil {
+		if exist, err := dal.RDB.Exists(ctx, keyUserFollowerCnt).Result(); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "检查key是否存在失败")
 			klog.Error("检查key是否存在失败, err: ", err)
 			return
-		} else if exist != 2 {
+		} else if exist == 0 {
 			// 缓存不存在，查询数据库写入缓存
-			cnt, err := dal.GetUserFollowCount(ctx, req.UserId)
-			if err != nil {
-				span.RecordError(err)
-				span.SetStatus(codes.Error, "查询数据库失败")
-				klog.Error("查询数据库失败, err: ", err)
-				return
-			}
-			if err = dal.RDB.Set(ctx, keyUserFollowCnt, cnt, redis.KeepTTL).Err(); err != nil {
-				span.RecordError(err)
-				span.SetStatus(codes.Error, "写入缓存失败")
-				klog.Error("写入缓存失败, err: ", err)
-				return
-			}
-			cnt, err = dal.GetUserFollowerCount(ctx, req.ToUserId)
+			cnt, err := dal.GetUserFollowerCount(ctx, req.ToUserId)
 			if err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "查询数据库失败")

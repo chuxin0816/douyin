@@ -68,6 +68,12 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 			hlog.Error("还没有关注过, err: ", err)
 			return
 		}
+		if errorIs(err, dal.ErrFollowLimit){
+			Error(ctx, CodeFollowLimit)
+			span.SetStatus(codes.Error, "关注数超过上限")
+			hlog.Error("关注数超过上限, err: ", err)
+			return
+		}
 		Error(ctx, CodeServerBusy)
 		span.SetStatus(codes.Error, "业务逻辑处理失败")
 		hlog.Error("业务逻辑处理失败, err: ", err)
