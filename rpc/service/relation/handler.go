@@ -72,7 +72,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 			return nil, err
 		}
 	}
-	
+
 	if followCnt >= 10000 {
 		return nil, dal.ErrFollowLimit
 	}
@@ -150,12 +150,21 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 	ctx, span := tracing.Tracer.Start(ctx, "RelationFollowList")
 	defer span.End()
 
-	// 操作数据库
-	mUserList, err := dal.FollowList(ctx, req.ToUserId)
+	// 获取关注列表
+	followList, err := dal.FollowList(ctx, req.ToUserId)
 	if err != nil {
 		span.RecordError(err)
-		span.SetStatus(codes.Error, "操作数据库失败")
-		klog.Error("操作数据库失败, err: ", err)
+		span.SetStatus(codes.Error, "获取关注列表失败")
+		klog.Error("获取关注列表失败, err: ", err)
+		return nil, err
+	}
+
+	// 获取用户信息
+	mUserList, err := dal.GetUserByIDs(ctx, followList)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "获取用户信息失败")
+		klog.Error("获取用户信息失败, err: ", err)
 		return nil, err
 	}
 
@@ -182,12 +191,21 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 	ctx, span := tracing.Tracer.Start(ctx, "RelationFollowerList")
 	defer span.End()
 
-	// 操作数据库
-	mUserList, err := dal.FollowerList(ctx, req.ToUserId)
+	// 获取粉丝列表
+	followerList, err := dal.FollowerList(ctx, req.ToUserId)
 	if err != nil {
 		span.RecordError(err)
-		span.SetStatus(codes.Error, "操作数据库失败")
-		klog.Error("操作数据库失败, err: ", err)
+		span.SetStatus(codes.Error, "获取粉丝列表失败")
+		klog.Error("获取粉丝列表失败, err: ", err)
+		return nil, err
+	}
+
+	// 获取用户信息
+	mUserList, err := dal.GetUserByIDs(ctx, followerList)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "获取用户信息失败")
+		klog.Error("获取用户信息失败, err: ", err)
 		return nil, err
 	}
 
@@ -215,7 +233,7 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 	defer span.End()
 
 	// 获取关注列表
-	mFollowList, err := dal.FollowList(ctx, req.ToUserId)
+	followList, err := dal.FollowList(ctx, req.ToUserId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取关注列表失败")
@@ -224,7 +242,7 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 	}
 
 	// 获取粉丝列表
-	mFollowerList, err := dal.FollowerList(ctx, req.ToUserId)
+	followerList, err := dal.FollowerList(ctx, req.ToUserId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取粉丝列表失败")
@@ -233,33 +251,42 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 	}
 
 	// 获取好友列表
-	size := min(len(mFollowList), len(mFollowerList))
-	dFriendList := make([]*model.User, 0, size)
-	mp := make(map[int64]struct{}, len(mFollowList))
-	for _, user := range mFollowList {
-		mp[user.ID] = struct{}{}
+	size := min(len(followList), len(followerList))
+	friendList := make([]int64, 0, size)
+	mp := make(map[int64]struct{}, len(followList))
+	for _, userID := range followList {
+		mp[userID] = struct{}{}
 	}
 
-	for _, user := range mFollowerList {
-		if _, ok := mp[user.ID]; ok {
-			dFriendList = append(dFriendList, user)
+	for _, userID := range followerList {
+		if _, ok := mp[userID]; ok {
+			friendList = append(friendList, userID)
 		}
+	}
+
+	// 获取用户信息
+	mFriendList, err := dal.GetUserByIDs(ctx, friendList)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "获取用户信息失败")
+		klog.Error("获取用户信息失败, err: ", err)
+		return nil, err
 	}
 
 	// 将model.User转换为user.User
 	var wgFriendList sync.WaitGroup
-	wgFriendList.Add(len(dFriendList))
-	friendList := make([]*user.User, len(dFriendList))
-	for i, u := range dFriendList {
+	wgFriendList.Add(len(mFriendList))
+	userList := make([]*user.User, len(mFriendList))
+	for i, u := range mFriendList {
 		go func(i int, u *model.User) {
 			defer wgFriendList.Done()
-			friendList[i] = dal.ToUserResponse(ctx, req.UserId, u)
+			userList[i] = dal.ToUserResponse(ctx, req.UserId, u)
 		}(i, u)
 	}
 	wgFriendList.Wait()
 
 	// 返回响应
-	resp = &relation.RelationFriendListResponse{UserList: friendList}
+	resp = &relation.RelationFriendListResponse{UserList: userList}
 
 	return
 }

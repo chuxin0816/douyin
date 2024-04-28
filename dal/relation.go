@@ -67,60 +67,93 @@ func UnFollow(ctx context.Context, userID, toUserID int64) error {
 	return err
 }
 
-func FollowList(ctx context.Context, userID int64) ([]*model.User, error) {
-	// 查询用户ID列表
-	var userIDList []int64
-	userIDs, err := RDB.SMembers(ctx, GetRedisKey(KeyUserFollowPF+strconv.FormatInt(userID, 10))).Result()
-	if err == redis.Nil {
-		if err := qRelation.WithContext(ctx).Where(qRelation.FollowerID.Eq(userID)).Select(qRelation.UserID).Scan(&userIDList); err != nil {
-			return nil, err
-		}
-	} else if err != nil {
-		return nil, err
-	} else {
-		for _, id := range userIDs {
-			userID, err := strconv.ParseInt(id, 10, 64)
-			if err != nil {
+func FollowList(ctx context.Context, userID int64) (followList []int64, err error) {
+	// 使用singleflight防止缓存击穿并减少redis压力
+	key := GetRedisKey(KeyUserFollowPF + strconv.FormatInt(userID, 10))
+	_, err, _ = g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
+
+		// 先查询redis缓存
+		userIDs, err := RDB.SMembers(ctx, key).Result()
+		if err == redis.Nil {
+			// 缓存未命中, 查询数据库
+			if err := qRelation.WithContext(ctx).Where(qRelation.FollowerID.Eq(userID)).Select(qRelation.UserID).Scan(&followList); err != nil {
 				return nil, err
 			}
-			userIDList = append(userIDList, userID)
+
+			// 写入redis缓存
+			if len(followList) > 0 {
+				go func() {
+					pipe := RDB.Pipeline()
+					pipe.SAdd(ctx, key, followList)
+					pipe.Expire(ctx, key, ExpireTime+GetRandomTime())
+					_, _ = pipe.Exec(ctx)
+				}()
+			}
+
+			return nil, nil
+		} else if err != nil {
+			return nil, err
+		} else {
+			for _, id := range userIDs {
+				userID, err := strconv.ParseInt(id, 10, 64)
+				if err != nil {
+					return nil, err
+				}
+				followList = append(followList, userID)
+			}
+
+			return nil, nil
 		}
-	}
+	})
 
-	// 查询用户列表
-	userList, err := GetUserByIDs(ctx, userIDList)
-	if err != nil {
-		return nil, err
-	}
-
-	return userList, nil
+	return
 }
 
-func FollowerList(ctx context.Context, userID int64) ([]*model.User, error) {
-	// 查询粉丝ID列表
-	var followerIDList []int64
-	userIDs, err := RDB.SMembers(ctx, GetRedisKey(KeyUserFollowerPF+strconv.FormatInt(userID, 10))).Result()
-	if err == redis.Nil {
-		if err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(userID)).Select(qRelation.FollowerID).Scan(&followerIDList); err != nil {
-			return nil, err
-		}
-	} else if err != nil {
-		return nil, err
-	} else {
-		for _, id := range userIDs {
-			userID, err := strconv.ParseInt(id, 10, 64)
-			if err != nil {
+func FollowerList(ctx context.Context, userID int64) (followerList []int64, err error) {
+	// 使用singleflight防止缓存击穿并减少redis压力
+	key := GetRedisKey(KeyUserFollowerPF + strconv.FormatInt(userID, 10))
+	_, err, _ = g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
+		// 先查询redis缓存
+		userIDs, err := RDB.SMembers(ctx, key).Result()
+		if err == redis.Nil {
+			// 缓存未命中，查询mysql
+			if err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(userID)).Select(qRelation.FollowerID).Scan(&followerList); err != nil {
 				return nil, err
 			}
-			followerIDList = append(followerIDList, userID)
+
+			// 写入redis缓存
+			if len(followerList) > 0 {
+				go func() {
+					pipeline := RDB.Pipeline()
+					pipeline.SAdd(ctx, key, followerList)
+					pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
+					_, _ = pipeline.Exec(ctx)
+				}()
+			}
+			return nil, nil
+		} else if err != nil {
+			return nil, err
+		} else {
+			// 缓存命中，转换为int64
+			followerList = make([]int64, len(userIDs))
+			for i, id := range userIDs {
+				userID, err := strconv.ParseInt(id, 10, 64)
+				if err != nil {
+					return nil, err
+				}
+				followerList[i] = userID
+			}
+			return nil, nil
 		}
-	}
+	})
 
-	// 查询粉丝列表
-	followerList, err := GetUserByIDs(ctx, followerIDList)
-	if err != nil {
-		return nil, err
-	}
-
-	return followerList, nil
+	return
 }

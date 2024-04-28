@@ -8,6 +8,7 @@ import (
 	"douyin/dal/model"
 	"douyin/pkg/snowflake"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -71,37 +72,39 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 		}()
 
 		// 先查询redis缓存
-		videoIDStrs := RDB.SMembers(ctx, key).Val()
-		if len(videoIDStrs) != 0 {
+		videoIDStrs, err := RDB.SMembers(ctx, key).Result()
+		if err == redis.Nil {
+			// 缓存未命中，查询mysql
+			if err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID)).Select(qFavorite.VideoID).Scan(&videoIDs); err != nil {
+				return nil, err
+			}
+
+			// 写入redis缓存
+			if len(videoIDs) > 0 {
+				go func() {
+					pipeline := RDB.Pipeline()
+					pipeline.SAdd(ctx, key, videoIDs)
+					pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
+					_, _ = pipeline.Exec(ctx)
+				}()
+			}
+
+			return nil, nil
+		} else if err != nil {
+			return nil, err
+		} else {
+			// 缓存命中，转换为int64
 			videoIDs = make([]int64, len(videoIDStrs))
 			for i, videoIDStr := range videoIDStrs {
-				videoID, _ := strconv.ParseInt(videoIDStr, 10, 64)
+				videoID, err := strconv.ParseInt(videoIDStr, 10, 64)
+				if err != nil {
+					return nil, err
+				}
 				videoIDs[i] = videoID
 			}
 			return nil, nil
 		}
-
-		// 缓存未命中，查询mysql
-		if err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID)).Select(qFavorite.VideoID).Scan(&videoIDs); err != nil {
-			return nil, err
-		}
-
-		// 写入redis缓存
-		if len(videoIDs) > 0 {
-			go func() {
-				pipeline := RDB.Pipeline()
-				for _, videoID := range videoIDs {
-					pipeline.SAdd(ctx, key, videoID)
-				}
-				pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
-				_, _ = pipeline.Exec(ctx)
-			}()
-		}
-		return nil, nil
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return videoIDs, nil
+	
+	return
 }
