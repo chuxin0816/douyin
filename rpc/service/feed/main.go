@@ -57,20 +57,20 @@ func watchConfig() {
 		select {
 		case <-config.NoticeOpenTelemetry:
 			tracing.Init(config.Conf.OpenTelemetryConfig.FeedName)
-		
+
 		case <-config.NoticeLog:
 			logger.Init()
 
 		case <-config.NoticeSnowflake:
 			snowflake.Init()
 
-			case <-config.NoticeMySQL:
+		case <-config.NoticeMySQL:
 			dal.InitMySQL()
 
-			case <-config.NoticeRedis:
+		case <-config.NoticeRedis:
 			dal.InitRedis()
 
-			case <-config.NoticeKafka:
+		case <-config.NoticeKafka:
 			kafka.Init()
 		}
 	}

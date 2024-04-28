@@ -150,44 +150,53 @@ func Init() {
 			if reflect.DeepEqual(Conf, newConf) {
 				continue
 			}
-			switch {
-			case !reflect.DeepEqual(Conf.JwtKey, newConf.JwtKey):
+
+			if !reflect.DeepEqual(Conf.JwtKey, newConf.JwtKey) {
 				Conf.JwtKey = newConf.JwtKey
 				NoticeJwt <- struct{}{}
+			}
 
-			case !reflect.DeepEqual(Conf.SnowflakeConfig, newConf.SnowflakeConfig):
+			if !reflect.DeepEqual(Conf.SnowflakeConfig, newConf.SnowflakeConfig) {
 				Conf.SnowflakeConfig = newConf.SnowflakeConfig
 				NoticeSnowflake <- struct{}{}
+			}
 
-			case !reflect.DeepEqual(Conf.OssConfig, newConf.OssConfig):
+			if !reflect.DeepEqual(Conf.OssConfig, newConf.OssConfig) {
 				Conf.OssConfig = newConf.OssConfig
 				NoticeOss <- struct{}{}
+			}
 
-			case !reflect.DeepEqual(Conf.LogConfig, newConf.LogConfig):
+			if !reflect.DeepEqual(Conf.LogConfig, newConf.LogConfig) {
 				Conf.LogConfig = newConf.LogConfig
 				NoticeLog <- struct{}{}
+			}
 
-			case !reflect.DeepEqual(Conf.DatabaseConfig.MySQLConfig, newConf.DatabaseConfig.MySQLConfig):
-				Conf.DatabaseConfig.MySQLConfig = newConf.DatabaseConfig.MySQLConfig
-				NoticeMySQL <- struct{}{}
+			if !reflect.DeepEqual(Conf.DatabaseConfig, newConf.DatabaseConfig) {
+				if !reflect.DeepEqual(Conf.DatabaseConfig.MySQLConfig, newConf.DatabaseConfig.MySQLConfig) {
+					Conf.DatabaseConfig.MySQLConfig = newConf.DatabaseConfig.MySQLConfig
+					NoticeMySQL <- struct{}{}
+				}
+				if !reflect.DeepEqual(Conf.DatabaseConfig.RedisConfig, newConf.DatabaseConfig.RedisConfig) {
+					Conf.DatabaseConfig.RedisConfig = newConf.DatabaseConfig.RedisConfig
+					NoticeRedis <- struct{}{}
+				}
+				if !reflect.DeepEqual(Conf.DatabaseConfig.MongoConfig, newConf.DatabaseConfig.MongoConfig) {
+					Conf.DatabaseConfig.MongoConfig = newConf.DatabaseConfig.MongoConfig
+					NoticeMongo <- struct{}{}
+				}
+			}
 
-			case !reflect.DeepEqual(Conf.DatabaseConfig.RedisConfig, newConf.DatabaseConfig.RedisConfig):
-				Conf.DatabaseConfig.RedisConfig = newConf.DatabaseConfig.RedisConfig
-				NoticeRedis <- struct{}{}
-
-			case !reflect.DeepEqual(Conf.DatabaseConfig.MongoConfig, newConf.DatabaseConfig.MongoConfig):
-				Conf.DatabaseConfig.MongoConfig = newConf.DatabaseConfig.MongoConfig
-				NoticeMongo <- struct{}{}
-
-			case !reflect.DeepEqual(Conf.ConsulConfig, newConf.ConsulConfig):
+			if !reflect.DeepEqual(Conf.ConsulConfig, newConf.ConsulConfig) {
 				Conf.ConsulConfig = newConf.ConsulConfig
 				NoticeConsul <- struct{}{}
+			}
 
-			case !reflect.DeepEqual(Conf.KafkaConfig, newConf.KafkaConfig):
+			if !reflect.DeepEqual(Conf.KafkaConfig, newConf.KafkaConfig) {
 				Conf.KafkaConfig = newConf.KafkaConfig
 				NoticeKafka <- struct{}{}
+			}
 
-			case !reflect.DeepEqual(Conf.OpenTelemetryConfig, newConf.OpenTelemetryConfig):
+			if !reflect.DeepEqual(Conf.OpenTelemetryConfig, newConf.OpenTelemetryConfig) {
 				Conf.OpenTelemetryConfig = newConf.OpenTelemetryConfig
 				NoticeOpenTelemetry <- struct{}{}
 			}
