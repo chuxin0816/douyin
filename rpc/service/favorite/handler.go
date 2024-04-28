@@ -149,9 +149,11 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 		}
 
 		// 写入待同步切片
-		dal.CacheUserID.Store(req.UserId, struct{}{})
-		dal.CacheUserID.Store(authorID, struct{}{})
-		dal.CacheVideoID.Store(req.VideoId, struct{}{})
+		dal.Mu.Lock()
+		dal.CacheUserID[req.UserId] = struct{}{}
+		dal.CacheUserID[authorID] = struct{}{}
+		dal.CacheVideoID[req.VideoId] = struct{}{}
+		dal.Mu.Unlock()
 	}()
 
 	// 返回响应

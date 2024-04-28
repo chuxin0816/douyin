@@ -114,7 +114,9 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 		}
 
 		// 写入待同步切片
-		dal.CacheVideoID.Store(req.VideoId, struct{}{})
+		dal.Mu.Lock()
+		dal.CacheVideoID[req.VideoId] = struct{}{}
+		dal.Mu.Unlock()
 	}()
 
 	// 获取用户信息

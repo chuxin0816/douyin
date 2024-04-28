@@ -1,8 +1,6 @@
 package kafka
 
 import (
-	"context"
-
 	"douyin/config"
 
 	"github.com/segmentio/kafka-go"
@@ -36,7 +34,6 @@ func Init() {
 	initFavoriteMQ()
 	initUserMQ()
 	initVideoMQ()
-	go syncRedisToMySQL(context.Background())
 }
 
 func NewWriter(topic string) *kafka.Writer {

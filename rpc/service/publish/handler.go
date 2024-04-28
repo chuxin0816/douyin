@@ -88,7 +88,9 @@ func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.Pub
 		}
 
 		// 写入待同步队列
-		dal.CacheUserID.Store(req.UserId, struct{}{})
+		dal.Mu.Lock()
+		dal.CacheUserID[req.UserId] = struct{}{}
+		dal.Mu.Unlock()
 	}()
 
 	// 返回响应

@@ -110,8 +110,10 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 			return
 		}
 		// 写入待同步切片
-		dal.CacheUserID.Store(req.UserId, struct{}{})
-		dal.CacheUserID.Store(req.ToUserId, struct{}{})
+		dal.Mu.Lock()
+		dal.CacheUserID[req.UserId] = struct{}{}
+		dal.CacheUserID[req.ToUserId] = struct{}{}
+		dal.Mu.Unlock()
 	}()
 
 	// 返回响应

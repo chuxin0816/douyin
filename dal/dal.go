@@ -10,24 +10,29 @@ import (
 	"time"
 
 	"douyin/config"
+	"douyin/dal/model"
 	"douyin/dal/query"
+	"douyin/pkg/tracing"
 
 	"github.com/bits-and-blooms/bloom/v3"
+	"github.com/u2takey/go-utils/klog"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/otel/codes"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/singleflight"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/plugin/opentelemetry/tracing"
+	gormTracing "gorm.io/plugin/opentelemetry/tracing"
 )
 
 const (
-	ExpireTime = time.Hour * 72
-	delayTime  = 100 * time.Millisecond
-	randFactor = 30
+	ExpireTime        = time.Hour * 72
+	delayTime         = 100 * time.Millisecond
+	randFactor        = 30
+	aggregateInterval = time.Second * 2
 )
 
 var (
@@ -46,10 +51,11 @@ var (
 	db                *gorm.DB
 	RDB               *redis.Client
 	collectionMessage *mongo.Collection
-	g                 *singleflight.Group
+	g                 = &singleflight.Group{}
 	bloomFilter       *bloom.BloomFilter
-	CacheUserID       sync.Map
-	CacheVideoID      sync.Map
+	CacheUserID       = make(map[int64]struct{})
+	CacheVideoID      = make(map[int64]struct{})
+	Mu                sync.Mutex
 )
 
 // nil值，用于占位，于Init函数中初始化
@@ -71,14 +77,13 @@ func Init() {
 	// 初始化MongoDB
 	InitMongo()
 
-	// 初始化singleflight
-	g = &singleflight.Group{}
-
 	// 初始化布隆过滤器
 	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
 	if err := loadDataToBloom(); err != nil {
 		panic(err)
 	}
+
+	go syncRedisToMySQL(context.Background())
 }
 
 func InitMySQL() {
@@ -95,7 +100,7 @@ func InitMySQL() {
 	if err != nil {
 		panic(err)
 	}
-	if err := db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+	if err := db.Use(gormTracing.NewPlugin(gormTracing.WithoutMetrics())); err != nil {
 		panic(err)
 	}
 
@@ -147,6 +152,117 @@ func InitMongo() {
 
 func Close() {
 	RDB.Close()
+}
+
+func syncRedisToMySQL(ctx context.Context) {
+	ticker := time.NewTicker(aggregateInterval)
+	defer ticker.Stop()
+	for {
+		<-ticker.C
+		go syncUser(ctx)
+		go syncVideo(ctx)
+	}
+}
+
+func syncUser(ctx context.Context) {
+	if len(CacheUserID) == 0 {
+		return
+	}
+
+	ctx, span := tracing.Tracer.Start(ctx, "syncUser")
+	defer span.End()
+
+	// 备份缓存中的用户ID并清空
+	Mu.Lock()
+	backup := CacheUserID
+	CacheUserID = make(map[int64]struct{})
+	Mu.Unlock()
+
+	// 同步redis的用户缓存到Mysql
+	pipe := RDB.Pipeline()
+
+	for userID := range backup {
+		userIDStr := strconv.FormatInt(userID, 10)
+		pipe.Get(ctx, GetRedisKey(KeyUserTotalFavoritedPF+userIDStr))
+		pipe.Get(ctx, GetRedisKey(KeyUserFavoriteCountPF+userIDStr))
+		pipe.Get(ctx, GetRedisKey(KeyUserFollowCountPF+userIDStr))
+		pipe.Get(ctx, GetRedisKey(KeyUserFollowerCountPF+userIDStr))
+		pipe.Get(ctx, GetRedisKey(KeyUserWorkCountPF+userIDStr))
+
+		cmds, err := pipe.Exec(ctx)
+		if err != nil && err != redis.Nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "failed to exec pipeline")
+			klog.Error("同步redis用户缓存到mysql失败,err: ", err)
+			return
+		}
+
+		totalFavorited, _ := strconv.ParseInt(cmds[0].(*redis.StringCmd).Val(), 10, 64)
+		favoriteCount, _ := strconv.ParseInt(cmds[1].(*redis.StringCmd).Val(), 10, 64)
+		followCount, _ := strconv.ParseInt(cmds[2].(*redis.StringCmd).Val(), 10, 64)
+		followerCount, _ := strconv.ParseInt(cmds[3].(*redis.StringCmd).Val(), 10, 64)
+		workCount, _ := strconv.ParseInt(cmds[4].(*redis.StringCmd).Val(), 10, 64)
+		mUser := &model.User{
+			ID:             userID,
+			TotalFavorited: totalFavorited,
+			FavoriteCount:  favoriteCount,
+			FollowCount:    followCount,
+			FollowerCount:  followerCount,
+			WorkCount:      workCount,
+		}
+		if err := UpdateUser(ctx, mUser); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "同步redis用户缓存到mysql失败")
+			klog.Error("同步redis用户缓存到mysql失败,err: ", err)
+			continue
+		}
+	}
+}
+
+func syncVideo(ctx context.Context) {
+	if len(CacheVideoID) == 0 {
+		return
+	}
+
+	ctx, span := tracing.Tracer.Start(ctx, "syncVideo")
+	defer span.End()
+
+	// 备份缓存中的视频ID并清空
+	Mu.Lock()
+	backup := CacheVideoID
+	CacheVideoID = make(map[int64]struct{})
+	Mu.Unlock()
+
+	// 同步redis中的视频缓存到Mysql
+	pipe := RDB.Pipeline()
+
+	for videoID := range backup {
+		videoIDStr := strconv.FormatInt(videoID, 10)
+		pipe.Get(ctx, GetRedisKey(KeyVideoFavoriteCountPF+videoIDStr))
+		pipe.Get(ctx, GetRedisKey(KeyVideoCommentCountPF+videoIDStr))
+
+		cmds, err := pipe.Exec(ctx)
+		if err != nil && err != redis.Nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "同步redis视频缓存到mysql失败")
+			klog.Errorf("同步redis视频缓存到mysql失败,err: ", err)
+			continue
+		}
+
+		videoFavoriteCount, _ := strconv.ParseInt(cmds[0].(*redis.StringCmd).Val(), 10, 64)
+		videoCommentCount, _ := strconv.ParseInt(cmds[1].(*redis.StringCmd).Val(), 10, 64)
+		mVideo := &model.Video{
+			ID:            videoID,
+			FavoriteCount: videoFavoriteCount,
+			CommentCount:  videoCommentCount,
+		}
+		if err := UpdateVideo(ctx, mVideo); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "同步redis视频缓存到mysql失败")
+			klog.Errorf("同步redis视频缓存到mysql失败,err: ", err)
+			continue
+		}
+	}
 }
 
 func RemoveFavoriteCache(ctx context.Context, userID, videoID string) error {
