@@ -15,7 +15,7 @@ import (
 	"douyin/pkg/tracing"
 
 	"github.com/bits-and-blooms/bloom/v3"
-	"github.com/u2takey/go-utils/klog"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.opentelemetry.io/otel/codes"
