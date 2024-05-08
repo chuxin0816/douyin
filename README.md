@@ -1,50 +1,51 @@
-# 抖音
-> 字节跳动青训营项目，简易版抖音，实现了抖音的基本功能
-## 接口文档：https://apifox.com/apidoc/shared-0c80e0c6-daca-4b12-96a4-01ca8c2b6cd1
-## 项目演示地址：http://chuxin0816.com:8888/ (已关闭)
-### 项目部署
-项目使用docker-compose部署，在配置好config/config.yaml后运行`cd && docker-compose up -d`即可启动项目
-> 如果内存不足可以分批构建后启动:
-```shell
-cd cmd/docker && 
-docker-compose build api &&
-docker-compose build feed &&
-docker-compose build user &&
-docker-compose build favorite &&
-docker-compose build comment &&
-docker-compose build publish &&
-docker-compose build relation &&
-docker-compose build message &&
-docker-compose up -d
-```
-初次启动部分服务会因为MySQL没有相关表而报错，需通过douyin.sql建表后再次启动失败的服务
-******
+<div align="center">
+
+# 极简版抖音
+
+</div>
+
+该项目为字节跳动青训营项目，实现了抖音主要功能模块，包括视频流、视频投稿、注册登录、个人信息、点赞评论、用户关注、即时通讯等核心业务，从[单体架构](https://github.com/chuxin0816/douyin/tree/v1)升级到[微服务架构](https://github.com/chuxin0816/douyin)，并持续优化相关技术实现。
+
+接口文档: [Apifox](https://apifox.com/apidoc/shared-0c80e0c6-daca-4b12-96a4-01ca8c2b6cd1) ｜ 项目演示地址：http://chuxin0816.com:8888/ (已关闭)
+## 项目部署
+`cd cmd/docker && docker-compose up -d `
+> 初次启动需要在MySQL创建canal用户，配置canal(投递到kafka)并参考config/config.yaml配置文件修改配置上传到consul， 将douyin.sql导入MySQL数据库，将message.js导入MongoDB数据库
 ## 项目结构：
-http请求->api/router->api/controller->rpc/client->rpc/service->dal
+```shell
+. #篇幅有限，只展示部分目录
+├── api            HTTP服务
+├── cmd
+│   ├── docker     
+│   └── gen        Gorm Gen
+├── config         
+├── dal            访问数据库代码(MySQL, MongoDB, Redis)
+├── logger         
+├── pkg
+│   ├── jwt
+│   ├── kafka
+│   ├── oss
+│   ├── snowflake
+│   └── tracing
+├── rpc
+│   ├── client     RPC客户端
+│   ├── idl        
+│   ├── kitex_gen
+│   └── service    RPC服务端
+├── douyin.sql     MySQL表结构
+└── message.js     MongoDB表结构
+```
+> 请求链路: http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ##  性能测试
-> 使用wrk进行性能测试，400个连接，16个线程，压力测试30s：读接口QPS 3500+，写接口QPS 2800+，压测过程全链路无错误
+使用wrk进行性能测试，400个连接，16个线程，压力测试30s：读接口QPS 3500+，写接口QPS 2800+，压测过程全链路无错误
 ## 技术选型：
-* 使用Hertz作为http微服务框架，具有高性能，高可用，高扩展性的特点
-* 使用Kitex作为rpc微服务框架，具有高性能、强可扩展的特点
-* 使用consul作为服务发现和注册中心，配置中心
-* 使用GORM GEN操作Mysql，具有简单易用，防SQL注入等优点
-* 使用Redis作为缓存，提高访问速度，使用定时同步缓存保证数据一致性
-* 使用MongoDB存储用户消息，避免消息表过大
-* 使用canal订阅Mysql的binlog，发送到kafka异步删除点赞和关注关系缓存
-* 使用kafka作为消息队列，对于高频的点赞和评论异步写入数据库，对于点赞数，粉丝数等数量缓存定时同步到数据库
-* 使用布隆过滤器防止缓存穿透，使用随机延时防止缓存雪崩
-* 使用SingleFlight防止缓存击穿
-* 使用Kitex集成的zap日志库记录日志
-* 使用JWT作为用户认证，使用中间件进行认证
-* 使用bcrypt加密用户密码
-* 使用snowflake生成各种id，使用uuid生成oss文件名
-* 使用阿里云oss存储视频文件
-* 使用ffmpeg进行视频转码和生成封面
-* 使用令牌桶作为限流中间件
-* 使用viper读取远程配置文件
-* 使用OpenTelemetry+Jaeger进行分布式链路追踪
-* 使用docker-compose部署项目
-## 代码生成:
+- 框架选型：使用 **Hertz** 作为 HTTP 微服务框架，**Kitex** 作为 RPC 微服务框架；使用 **GORM GEN** 生成代码并操作 MySQL 数据库，具备简单易用、防 SQL 注入等特性。
+- 数据库：使用 **MySQL** 和 **MongoDB** 存储数据，使用 **Redis** 作为分布式缓存。
+- 服务注册与发现：使用 **Consul** 作为服务发现与注册中心和配置中心，并通过 **viper** 实时监控和重新读取配置文件。
+- 缓存策略：通过**旁路缓存**和**写回**策略提升数据访问速度并减轻数据库压力。使用 **SingleFlight** 减轻 Redis 压力和防止缓存击穿、使用布隆过滤器减少缓存穿透，并通过随机延时策略避免缓存雪崩。
+- 中间件：采用**令牌桶**作为限流中间件，**JWT** 作为用户认证中间件，使用 **Kafka** 作为消息队列，实现对高频的点赞和评论操作削峰、配合 **Canal** 删除缓存、同步布隆过滤器等操作
+- 云原生：通过 **OpenTelemetry** + **Jaeger** 实现分布式链路追踪，使用 **Docker Compose** 快速部署项目
+- 其他：使用 **Snowflake** 算法生成全局唯一ID，使用 **ffmpeg** 截取视频第5帧作为封面，使用 **OSS** 存储视频和视频封面
+## kitex代码生成示例:
 ```shell
 cd rpc/service/feed
 kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift

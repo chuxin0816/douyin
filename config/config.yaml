@@ -1,0 +1,79 @@
+jwt_key: chux1no8l6
+
+snowflake:
+  start_time: "2023-06-28"
+  machine_id: 1
+
+oss:
+  endpoint: oss.chuxin0816.com
+  access_key_id: example
+  access_key_secret: example
+  bucket_name: example
+
+hertz:
+  host: 0.0.0.0
+  port: 8888
+
+log:
+  path: ./logs
+  max_size: 10485760 #10M
+  max_backups: 10
+  max_age: 30
+
+database:
+  mysql:
+    user: root
+    password: 123456
+    # host: 127.0.0.1
+    host: mysql
+    port: 3306
+    dbname: douyin
+
+  redis:
+    # Addr: 127.0.0.1:6379
+    Addr: redis:6379
+    password: 
+    db: 1
+  
+  mongo:
+    host: mongo
+    port: 27017
+    dbname: douyin
+
+consul:
+  # consul_addr: 127.0.0.1:8500
+  # feed_addr: 127.0.0.1:8890
+  # user_addr: 127.0.0.1:8891
+  # favorite_addr: 127.0.0.1:8892
+  # comment_addr: 127.0.0.1:8893
+  # publish_addr: 127.0.0.1:8894
+  # relation_addr: 127.0.0.1:8895
+  # message_addr: 127.0.0.1:8896
+  consul_addr: consul:8500
+  feed_addr: feed:8890
+  user_addr: user:8891
+  favorite_addr: favorite:8892
+  comment_addr: comment:8893
+  publish_addr: publish:8894
+  relation_addr: relation:8895
+  message_addr: message:8896
+
+kafka:
+  brokers:
+    # - "127.0.0.1:9092"
+    # - "127.0.0.1:9093"
+    # - "127.0.0.1:9094"
+    - "kafka-0:9092"
+    - "kafka-1:9092"
+    - "kafka-2:9092"
+
+open_telemetry:
+  api_name: "api"
+  feed_name: "feed"
+  user_name: "user"
+  favorite_name: "favorite"
+  comment_name: "comment"
+  publish_name: "publish"
+  relation_name: "relation"
+  message_name: "message"
+  jaeger_addr: "jaeger:4318"
