@@ -2,6 +2,7 @@
 
 # 极简版抖音
 
+[![Visitors](https://api.visitorbadge.io/api/daily?path=https://github.com/chuxin0816/douyin&label=VISITORS%20TODAY&countColor=%231758f0)](https://github.com/chuxin0816/douyin)
 </div>
 
 该项目为字节跳动青训营项目，实现了抖音主要功能模块，包括视频流、视频投稿、注册登录、个人信息、点赞评论、用户关注、即时通讯等核心业务，从[单体架构](https://github.com/chuxin0816/douyin/tree/v1)升级到[微服务架构](https://github.com/chuxin0816/douyin)，并持续优化相关技术实现。
