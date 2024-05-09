@@ -48,8 +48,11 @@
 - 其他：使用 **Snowflake** 算法生成全局唯一ID，使用 **ffmpeg** 截取视频第5帧作为封面，使用 **OSS** 存储视频和视频封面
 ## kitex代码生成示例:
 ```shell
-cd rpc/service/feed
-kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
+1. gorm/gen生成
+cwgo model --db_type mysql --dsn "root:123456@tcp(127.0.0.1:3306)/douyin?charset=utf8&parseTime=True&loc=Local" --out_dir ./dal/query
+2. kitex生成
+cd rpc/service/feed 
+cwgo fallback kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
 ```
 ## 未来更新:
 * 使用ElasticSearch对用户消息和系统日志进行索引存储
