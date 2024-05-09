@@ -34,7 +34,7 @@ func main() {
 		// gen.WithoutContext：禁用WithContext模式
 		// gen.WithDefaultQuery：生成一个全局Query对象Q
 		// gen.WithQueryInterface：生成Query接口
-		Mode: gen.WithDefaultQuery | gen.WithQueryInterface,
+		// Mode: gen.WithDefaultQuery | gen.WithQueryInterface,
 	})
 
 	// 通常复用项目中已有的SQL连接配置db(*gorm.DB)
