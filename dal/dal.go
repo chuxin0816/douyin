@@ -61,11 +61,12 @@ var (
 
 // nil值，用于占位，于Init函数中初始化
 var (
-	qComment  = query.Comment
-	qFavorite = query.Favorite
-	qRelation = query.Relation
-	qUser     = query.User
-	qVideo    = query.Video
+	q         *query.Query
+	qComment  = q.Comment
+	qFavorite = q.Favorite
+	qRelation = q.Relation
+	qUser     = q.User
+	qVideo    = q.Video
 )
 
 func Init() {
@@ -114,12 +115,12 @@ func InitMySQL() {
 	sqlDB.SetConnMaxLifetime(24 * time.Hour)
 	sqlDB.SetConnMaxIdleTime(time.Hour)
 
-	query.SetDefault(db)
-	qComment = query.Comment
-	qFavorite = query.Favorite
-	qRelation = query.Relation
-	qUser = query.User
-	qVideo = query.Video
+	q = query.Use(db)
+	qComment = q.Comment
+	qFavorite = q.Favorite
+	qRelation = q.Relation
+	qUser = q.User
+	qVideo = q.Video
 }
 
 func InitRedis() {

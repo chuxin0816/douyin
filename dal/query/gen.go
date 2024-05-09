@@ -15,24 +15,6 @@ import (
 	"gorm.io/plugin/dbresolver"
 )
 
-var (
-	Q        = new(Query)
-	Comment  *comment
-	Favorite *favorite
-	Relation *relation
-	User     *user
-	Video    *video
-)
-
-func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
-	*Q = *Use(db, opts...)
-	Comment = &Q.Comment
-	Favorite = &Q.Favorite
-	Relation = &Q.Relation
-	User = &Q.User
-	Video = &Q.Video
-}
-
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:       db,
@@ -68,11 +50,11 @@ func (q *Query) clone(db *gorm.DB) *Query {
 }
 
 func (q *Query) ReadDB() *Query {
-	return q.ReplaceDB(q.db.Clauses(dbresolver.Read))
+	return q.clone(q.db.Clauses(dbresolver.Read))
 }
 
 func (q *Query) WriteDB() *Query {
-	return q.ReplaceDB(q.db.Clauses(dbresolver.Write))
+	return q.clone(q.db.Clauses(dbresolver.Write))
 }
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
@@ -87,11 +69,11 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 }
 
 type queryCtx struct {
-	Comment  ICommentDo
-	Favorite IFavoriteDo
-	Relation IRelationDo
-	User     IUserDo
-	Video    IVideoDo
+	Comment  *commentDo
+	Favorite *favoriteDo
+	Relation *relationDo
+	User     *userDo
+	Video    *videoDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
@@ -109,14 +91,10 @@ func (q *Query) Transaction(fc func(tx *Query) error, opts ...*sql.TxOptions) er
 }
 
 func (q *Query) Begin(opts ...*sql.TxOptions) *QueryTx {
-	tx := q.db.Begin(opts...)
-	return &QueryTx{Query: q.clone(tx), Error: tx.Error}
+	return &QueryTx{q.clone(q.db.Begin(opts...))}
 }
 
-type QueryTx struct {
-	*Query
-	Error error
-}
+type QueryTx struct{ *Query }
 
 func (q *QueryTx) Commit() error {
 	return q.db.Commit().Error
