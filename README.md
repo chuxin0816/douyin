@@ -9,17 +9,15 @@
 
 接口文档: [Apifox](https://apifox.com/apidoc/shared-0c80e0c6-daca-4b12-96a4-01ca8c2b6cd1) ｜ 项目演示地址：http://chuxin0816.com:8888/ (已关闭)
 ## 项目部署
-`cd cmd/docker && docker-compose up -d `
+`cd docker && docker-compose up -d `
 > 初次启动需要在MySQL创建canal用户，配置canal(投递到kafka)并参考config/config.yaml配置文件修改配置上传到consul， 将douyin.sql导入MySQL数据库，将message.js导入MongoDB数据库
 ## 项目结构：
 ```shell
 . #篇幅有限，只展示部分目录
 ├── api            HTTP服务
-├── cmd
-│   ├── docker     
-│   └── gen        Gorm Gen
 ├── config         
 ├── dal            访问数据库代码(MySQL, MongoDB, Redis)
+├── docker
 ├── logger         
 ├── pkg
 │   ├── jwt

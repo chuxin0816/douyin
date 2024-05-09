@@ -1,8 +1,8 @@
 services:
   api:
     build:
-      context: ../..
-      dockerfile: cmd/docker/api/dockerfile
+      context: ..
+      dockerfile: docker/api/dockerfile
     depends_on:
       - mysql
       - redis
@@ -18,56 +18,56 @@ services:
 
   feed:
     build: 
-      context: ../..
-      dockerfile: cmd/docker/feed/dockerfile
+      context: ..
+      dockerfile: docker/feed/dockerfile
     ports:
       - "8890:8890"
     container_name: Feed-douyin
 
   user:
     build:
-      context: ../..
-      dockerfile: cmd/docker/user/dockerfile
+      context: ..
+      dockerfile: docker/user/dockerfile
     ports:
       - "8891:8891"
     container_name: User-douyin
 
   favorite:
     build:
-      context: ../..
-      dockerfile: cmd/docker/favorite/dockerfile
+      context: ..
+      dockerfile: docker/favorite/dockerfile
     ports:
       - "8892:8892"
     container_name: Favorite-douyin
 
   comment:
     build:
-      context: ../..
-      dockerfile: cmd/docker/comment/dockerfile
+      context: ..
+      dockerfile: docker/comment/dockerfile
     ports:
       - "8893:8893"
     container_name: Comment-douyin
 
   publish:
     build:
-      context: ../..
-      dockerfile: cmd/docker/publish/dockerfile
+      context: ..
+      dockerfile: docker/publish/dockerfile
     ports:
       - "8894:8894"
     container_name: Publish-douyin
 
   relation:
     build:
-      context: ../..
-      dockerfile: cmd/docker/relation/dockerfile
+      context: ..
+      dockerfile: docker/relation/dockerfile
     ports:
       - "8895:8895"
     container_name: Relation-douyin
 
   message:
     build:
-      context: ../..
-      dockerfile: cmd/docker/message/dockerfile
+      context: ..
+      dockerfile: docker/message/dockerfile
     ports:
       - "8896:8896"
     container_name: Message-douyin
