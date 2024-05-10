@@ -67,6 +67,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 
 	// 通过kafka更新favorite表
 	err = kafka.Favorite(ctx, &model.Favorite{
+		ID:      req.ActionType,
 		UserID:  req.UserId,
 		VideoID: req.VideoId,
 	})
