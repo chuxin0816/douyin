@@ -35,6 +35,7 @@ func Init() {
 	initCommentMQ()
 	initFavoriteMQ()
 	initMessageMQ()
+	initRelationMQ()
 	initUserMQ()
 	initVideoMQ()
 }

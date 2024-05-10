@@ -77,7 +77,7 @@ func (mq *relationMQ) consumeRelation(ctx context.Context) {
 func Relation(ctx context.Context, relation *model.Relation) error {
 	ctx, span := tracing.Tracer.Start(ctx, "kafka.Relation")
 	defer span.End()
-	
+
 	data, err := json.Marshal(relation)
 	if err != nil {
 		span.RecordError(err)
