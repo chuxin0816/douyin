@@ -68,11 +68,13 @@ func (r *relation) updateTableName(table string) *relation {
 	return r
 }
 
-func (r *relation) WithContext(ctx context.Context) *relationDo { return r.relationDo.WithContext(ctx) }
+func (r *relation) WithContext(ctx context.Context) IRelationDo { return r.relationDo.WithContext(ctx) }
 
 func (r relation) TableName() string { return r.relationDo.TableName() }
 
 func (r relation) Alias() string { return r.relationDo.Alias() }
+
+func (r relation) Columns(cols ...field.Expr) gen.Columns { return r.relationDo.Columns(cols...) }
 
 func (r *relation) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 	_f, ok := r.fieldMap[fieldName]
@@ -102,99 +104,156 @@ func (r relation) replaceDB(db *gorm.DB) relation {
 
 type relationDo struct{ gen.DO }
 
-func (r relationDo) Debug() *relationDo {
+type IRelationDo interface {
+	gen.SubQuery
+	Debug() IRelationDo
+	WithContext(ctx context.Context) IRelationDo
+	WithResult(fc func(tx gen.Dao)) gen.ResultInfo
+	ReplaceDB(db *gorm.DB)
+	ReadDB() IRelationDo
+	WriteDB() IRelationDo
+	As(alias string) gen.Dao
+	Session(config *gorm.Session) IRelationDo
+	Columns(cols ...field.Expr) gen.Columns
+	Clauses(conds ...clause.Expression) IRelationDo
+	Not(conds ...gen.Condition) IRelationDo
+	Or(conds ...gen.Condition) IRelationDo
+	Select(conds ...field.Expr) IRelationDo
+	Where(conds ...gen.Condition) IRelationDo
+	Order(conds ...field.Expr) IRelationDo
+	Distinct(cols ...field.Expr) IRelationDo
+	Omit(cols ...field.Expr) IRelationDo
+	Join(table schema.Tabler, on ...field.Expr) IRelationDo
+	LeftJoin(table schema.Tabler, on ...field.Expr) IRelationDo
+	RightJoin(table schema.Tabler, on ...field.Expr) IRelationDo
+	Group(cols ...field.Expr) IRelationDo
+	Having(conds ...gen.Condition) IRelationDo
+	Limit(limit int) IRelationDo
+	Offset(offset int) IRelationDo
+	Count() (count int64, err error)
+	Scopes(funcs ...func(gen.Dao) gen.Dao) IRelationDo
+	Unscoped() IRelationDo
+	Create(values ...*model.Relation) error
+	CreateInBatches(values []*model.Relation, batchSize int) error
+	Save(values ...*model.Relation) error
+	First() (*model.Relation, error)
+	Take() (*model.Relation, error)
+	Last() (*model.Relation, error)
+	Find() ([]*model.Relation, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.Relation, err error)
+	FindInBatches(result *[]*model.Relation, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Pluck(column field.Expr, dest interface{}) error
+	Delete(...*model.Relation) (info gen.ResultInfo, err error)
+	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
+	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
+	Updates(value interface{}) (info gen.ResultInfo, err error)
+	UpdateColumn(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
+	UpdateColumnSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
+	UpdateColumns(value interface{}) (info gen.ResultInfo, err error)
+	UpdateFrom(q gen.SubQuery) gen.Dao
+	Attrs(attrs ...field.AssignExpr) IRelationDo
+	Assign(attrs ...field.AssignExpr) IRelationDo
+	Joins(fields ...field.RelationField) IRelationDo
+	Preload(fields ...field.RelationField) IRelationDo
+	FirstOrInit() (*model.Relation, error)
+	FirstOrCreate() (*model.Relation, error)
+	FindByPage(offset int, limit int) (result []*model.Relation, count int64, err error)
+	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
+	Scan(result interface{}) (err error)
+	Returning(value interface{}, columns ...string) IRelationDo
+	UnderlyingDB() *gorm.DB
+	schema.Tabler
+}
+
+func (r relationDo) Debug() IRelationDo {
 	return r.withDO(r.DO.Debug())
 }
 
-func (r relationDo) WithContext(ctx context.Context) *relationDo {
+func (r relationDo) WithContext(ctx context.Context) IRelationDo {
 	return r.withDO(r.DO.WithContext(ctx))
 }
 
-func (r relationDo) ReadDB() *relationDo {
+func (r relationDo) ReadDB() IRelationDo {
 	return r.Clauses(dbresolver.Read)
 }
 
-func (r relationDo) WriteDB() *relationDo {
+func (r relationDo) WriteDB() IRelationDo {
 	return r.Clauses(dbresolver.Write)
 }
 
-func (r relationDo) Session(config *gorm.Session) *relationDo {
+func (r relationDo) Session(config *gorm.Session) IRelationDo {
 	return r.withDO(r.DO.Session(config))
 }
 
-func (r relationDo) Clauses(conds ...clause.Expression) *relationDo {
+func (r relationDo) Clauses(conds ...clause.Expression) IRelationDo {
 	return r.withDO(r.DO.Clauses(conds...))
 }
 
-func (r relationDo) Returning(value interface{}, columns ...string) *relationDo {
+func (r relationDo) Returning(value interface{}, columns ...string) IRelationDo {
 	return r.withDO(r.DO.Returning(value, columns...))
 }
 
-func (r relationDo) Not(conds ...gen.Condition) *relationDo {
+func (r relationDo) Not(conds ...gen.Condition) IRelationDo {
 	return r.withDO(r.DO.Not(conds...))
 }
 
-func (r relationDo) Or(conds ...gen.Condition) *relationDo {
+func (r relationDo) Or(conds ...gen.Condition) IRelationDo {
 	return r.withDO(r.DO.Or(conds...))
 }
 
-func (r relationDo) Select(conds ...field.Expr) *relationDo {
+func (r relationDo) Select(conds ...field.Expr) IRelationDo {
 	return r.withDO(r.DO.Select(conds...))
 }
 
-func (r relationDo) Where(conds ...gen.Condition) *relationDo {
+func (r relationDo) Where(conds ...gen.Condition) IRelationDo {
 	return r.withDO(r.DO.Where(conds...))
 }
 
-func (r relationDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *relationDo {
-	return r.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
-func (r relationDo) Order(conds ...field.Expr) *relationDo {
+func (r relationDo) Order(conds ...field.Expr) IRelationDo {
 	return r.withDO(r.DO.Order(conds...))
 }
 
-func (r relationDo) Distinct(cols ...field.Expr) *relationDo {
+func (r relationDo) Distinct(cols ...field.Expr) IRelationDo {
 	return r.withDO(r.DO.Distinct(cols...))
 }
 
-func (r relationDo) Omit(cols ...field.Expr) *relationDo {
+func (r relationDo) Omit(cols ...field.Expr) IRelationDo {
 	return r.withDO(r.DO.Omit(cols...))
 }
 
-func (r relationDo) Join(table schema.Tabler, on ...field.Expr) *relationDo {
+func (r relationDo) Join(table schema.Tabler, on ...field.Expr) IRelationDo {
 	return r.withDO(r.DO.Join(table, on...))
 }
 
-func (r relationDo) LeftJoin(table schema.Tabler, on ...field.Expr) *relationDo {
+func (r relationDo) LeftJoin(table schema.Tabler, on ...field.Expr) IRelationDo {
 	return r.withDO(r.DO.LeftJoin(table, on...))
 }
 
-func (r relationDo) RightJoin(table schema.Tabler, on ...field.Expr) *relationDo {
+func (r relationDo) RightJoin(table schema.Tabler, on ...field.Expr) IRelationDo {
 	return r.withDO(r.DO.RightJoin(table, on...))
 }
 
-func (r relationDo) Group(cols ...field.Expr) *relationDo {
+func (r relationDo) Group(cols ...field.Expr) IRelationDo {
 	return r.withDO(r.DO.Group(cols...))
 }
 
-func (r relationDo) Having(conds ...gen.Condition) *relationDo {
+func (r relationDo) Having(conds ...gen.Condition) IRelationDo {
 	return r.withDO(r.DO.Having(conds...))
 }
 
-func (r relationDo) Limit(limit int) *relationDo {
+func (r relationDo) Limit(limit int) IRelationDo {
 	return r.withDO(r.DO.Limit(limit))
 }
 
-func (r relationDo) Offset(offset int) *relationDo {
+func (r relationDo) Offset(offset int) IRelationDo {
 	return r.withDO(r.DO.Offset(offset))
 }
 
-func (r relationDo) Scopes(funcs ...func(gen.Dao) gen.Dao) *relationDo {
+func (r relationDo) Scopes(funcs ...func(gen.Dao) gen.Dao) IRelationDo {
 	return r.withDO(r.DO.Scopes(funcs...))
 }
 
-func (r relationDo) Unscoped() *relationDo {
+func (r relationDo) Unscoped() IRelationDo {
 	return r.withDO(r.DO.Unscoped())
 }
 
@@ -260,22 +319,22 @@ func (r relationDo) FindInBatches(result *[]*model.Relation, batchSize int, fc f
 	return r.DO.FindInBatches(result, batchSize, fc)
 }
 
-func (r relationDo) Attrs(attrs ...field.AssignExpr) *relationDo {
+func (r relationDo) Attrs(attrs ...field.AssignExpr) IRelationDo {
 	return r.withDO(r.DO.Attrs(attrs...))
 }
 
-func (r relationDo) Assign(attrs ...field.AssignExpr) *relationDo {
+func (r relationDo) Assign(attrs ...field.AssignExpr) IRelationDo {
 	return r.withDO(r.DO.Assign(attrs...))
 }
 
-func (r relationDo) Joins(fields ...field.RelationField) *relationDo {
+func (r relationDo) Joins(fields ...field.RelationField) IRelationDo {
 	for _, _f := range fields {
 		r = *r.withDO(r.DO.Joins(_f))
 	}
 	return &r
 }
 
-func (r relationDo) Preload(fields ...field.RelationField) *relationDo {
+func (r relationDo) Preload(fields ...field.RelationField) IRelationDo {
 	for _, _f := range fields {
 		r = *r.withDO(r.DO.Preload(_f))
 	}
