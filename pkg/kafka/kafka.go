@@ -12,8 +12,6 @@ const (
 	topicFavorite = "favorite"
 	topicRelation = "relation"
 	topicMessage  = "message"
-	topicVideo    = "video"
-	topicUser     = "user"
 	groupID       = "backend"
 )
 
@@ -36,8 +34,6 @@ func Init() {
 	initFavoriteMQ()
 	initMessageMQ()
 	initRelationMQ()
-	initUserMQ()
-	initVideoMQ()
 }
 
 func NewWriter(topic string) *kafka.Writer {
