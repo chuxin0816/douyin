@@ -15,6 +15,9 @@
 ```shell
 . #篇幅有限，只展示部分目录
 ├── api            HTTP服务
+├── cmd
+│   ├── docker     
+│   └── gen        Gorm/Gen
 ├── config         
 ├── dal            访问数据库代码(MySQL, MongoDB, Redis)
 ├── docker
@@ -44,13 +47,13 @@
 - 中间件：采用**令牌桶**作为限流中间件，**JWT** 作为用户认证中间件，使用 **Kafka** 作为消息队列，实现对高频的点赞和评论操作削峰、配合 **Canal** 删除缓存、同步布隆过滤器等操作
 - 云原生：通过 **OpenTelemetry** + **Jaeger** 实现分布式链路追踪，使用 **Docker Compose** 快速部署项目
 - 其他：使用 **Snowflake** 算法生成全局唯一ID，使用 **ffmpeg** 截取视频第5帧作为封面，使用 **OSS** 存储视频和视频封面
-## kitex代码生成示例:
+## 代码生成示例:
 ```shell
-1. gorm/gen生成
-cwgo model --db_type mysql --dsn "root:123456@tcp(127.0.0.1:3306)/douyin?charset=utf8&parseTime=True&loc=Local" --out_dir ./dal/query
-2. kitex生成
-cd rpc/service/feed 
-cwgo fallback kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
+1. Gorm/Gen代码生成
+go run cmd/gen/generator.go
+2. Kitex代码生成
+cd rpc/service/feed
+kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
 ```
 ## 未来更新:
 * 使用ElasticSearch对用户消息和系统日志进行索引存储
