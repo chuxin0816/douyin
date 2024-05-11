@@ -1,20 +1,14 @@
+name: douyin
 services:
   api:
     build:
       context: ../..
       dockerfile: cmd/docker/api/dockerfile
-    depends_on:
-      - mysql
-      - redis
-      - kafka-0
-      - kafka-1
-      - kafka-2
-      - canal
     ports:
       - "8888:8888"
     sysctls:
       net.ipv4.ip_local_port_range: "15000 65000"
-    container_name: Api-douyin
+    container_name: Api
 
   feed:
     build: 
@@ -22,7 +16,20 @@ services:
       dockerfile: cmd/docker/feed/dockerfile
     ports:
       - "8890:8890"
-    container_name: Feed-douyin
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Feed
 
   user:
     build:
@@ -30,7 +37,20 @@ services:
       dockerfile: cmd/docker/user/dockerfile
     ports:
       - "8891:8891"
-    container_name: User-douyin
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: User
 
   favorite:
     build:
@@ -38,7 +58,20 @@ services:
       dockerfile: cmd/docker/favorite/dockerfile
     ports:
       - "8892:8892"
-    container_name: Favorite-douyin
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Favorite
 
   comment:
     build:
@@ -46,7 +79,20 @@ services:
       dockerfile: cmd/docker/comment/dockerfile
     ports:
       - "8893:8893"
-    container_name: Comment-douyin
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Comment
 
   publish:
     build:
@@ -54,7 +100,20 @@ services:
       dockerfile: cmd/docker/publish/dockerfile
     ports:
       - "8894:8894"
-    container_name: Publish-douyin
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Publish
 
   relation:
     build:
@@ -62,7 +121,20 @@ services:
       dockerfile: cmd/docker/relation/dockerfile
     ports:
       - "8895:8895"
-    container_name: Relation-douyin
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Relation
 
   message:
     build:
@@ -70,7 +142,20 @@ services:
       dockerfile: cmd/docker/message/dockerfile
     ports:
       - "8896:8896"
-    container_name: Message-douyin
+    depends_on:
+      consul:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Message
 
   mysql:
     image: mysql:latest
@@ -79,19 +164,34 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: '123456'
       MYSQL_DATABASE: douyin
-    container_name: Mysql-douyin
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: MySQL
 
   redis:
     image: redis:latest
     ports:
       - "6379:6379"
-    container_name: Redis-douyin
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Redis
 
   mongo:
     image: mongo:latest
     ports:
       - "27017:27017"
-    container_name: Mongo-douyin
+    healthcheck:
+      test: ["CMD", "echo", "db.runCommand(\"ping\").ok", "|", "mongosh", "localhost:27017/test", "--quiet"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Mongo
 
   kafka-0:
     image: bitnami/kafka:latest
@@ -113,7 +213,12 @@ services:
       - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
-    container_name: Kafka-0-douyin
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Kafka-0
   kafka-1:
     image: bitnami/kafka:latest
     ports:
@@ -134,7 +239,12 @@ services:
       - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
-    container_name: Kafka-1-douyin
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Kafka-1
   kafka-2:
     image: bitnami/kafka:latest
     ports:
@@ -155,7 +265,12 @@ services:
       - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
-    container_name: Kafka-2-douyin
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Kafka-2
 
   kafka-ui:
     image: provectuslabs/kafka-ui:master
@@ -165,10 +280,18 @@ services:
       - KAFKA_CLUSTERS_0_NAME=local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka-0:9092,kafka-1:9092,kafka-2:9092
     depends_on:
-      - kafka-0
-      - kafka-1
-      - kafka-2
-    container_name: Kafka-ui-douyin
+      kafka-0:
+        condition: service_healthy
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080 || exit 1"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Kafka-ui
 
   canal:
     image: canal/canal-server:latest
@@ -181,17 +304,32 @@ services:
       - canal.instance.tsdb.dbUsername=canal
       - canal.instance.tsdb.dbPassword=canal
       - canal.instance.tsdb.enable=true
-    container_name: Canal-douyin
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:11111 || exit 1"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Canal
   
   consul:
     image: consul:1.15.4
     ports:
       - "8500:8500"
-    container_name: Consul-douyin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/status/leader"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Consul
   
   jaeger:
     image: jaegertracing/all-in-one:latest
     ports:
       - "16686:16686"
       - "4318:4318"
-    container_name: Jaeger-douyin
+    healthcheck:
+      test: ["CMD", "wget -q --spider http://localhost:16686/search || exit 1"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Jaeger
