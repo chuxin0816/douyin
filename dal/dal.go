@@ -110,9 +110,9 @@ func InitMySQL() {
 		panic(err)
 	}
 	sqlDB.SetMaxIdleConns(100)
-	sqlDB.SetMaxOpenConns(200)
-	sqlDB.SetConnMaxLifetime(24 * time.Hour)
-	sqlDB.SetConnMaxIdleTime(time.Hour)
+	sqlDB.SetMaxOpenConns(500)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB.SetConnMaxIdleTime(time.Minute * 30)
 
 	query.SetDefault(db)
 	qComment = query.Comment
