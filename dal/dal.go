@@ -59,14 +59,12 @@ var (
 	Mu                sync.Mutex
 )
 
-// nil值，用于占位，于Init函数中初始化
 var (
-	q         *query.Query
-	qComment  = q.Comment
-	qFavorite = q.Favorite
-	qRelation = q.Relation
-	qUser     = q.User
-	qVideo    = q.Video
+	qComment  = query.Q.Comment
+	qFavorite = query.Q.Favorite
+	qRelation = query.Q.Relation
+	qUser     = query.Q.User
+	qVideo    = query.Q.Video
 )
 
 func Init() {
@@ -106,6 +104,8 @@ func InitMySQL() {
 		panic(err)
 	}
 
+	query.SetDefault(db)
+
 	sqlDB, err := db.DB()
 	if err != nil {
 		panic(err)
@@ -114,13 +114,6 @@ func InitMySQL() {
 	sqlDB.SetMaxOpenConns(500)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	sqlDB.SetConnMaxIdleTime(time.Minute * 30)
-
-	q = query.Use(db)
-	qComment = q.Comment
-	qFavorite = q.Favorite
-	qRelation = q.Relation
-	qUser = q.User
-	qVideo = q.Video
 }
 
 func InitRedis() {
