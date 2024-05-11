@@ -1,9 +1,7 @@
 name: douyin
 services:
   api:
-    build:
-      context: ../..
-      dockerfile: cmd/docker/api/dockerfile
+    image: chuxin0816/douyin:api
     ports:
       - "8888:8888"
     sysctls:
@@ -12,7 +10,6 @@ services:
 
   feed:
     build: 
-      context: ../..
       dockerfile: cmd/docker/feed/dockerfile
     ports:
       - "8890:8890"
@@ -33,7 +30,6 @@ services:
 
   user:
     build:
-      context: ../..
       dockerfile: cmd/docker/user/dockerfile
     ports:
       - "8891:8891"
@@ -54,7 +50,6 @@ services:
 
   favorite:
     build:
-      context: ../..
       dockerfile: cmd/docker/favorite/dockerfile
     ports:
       - "8892:8892"
@@ -75,7 +70,6 @@ services:
 
   comment:
     build:
-      context: ../..
       dockerfile: cmd/docker/comment/dockerfile
     ports:
       - "8893:8893"
@@ -96,7 +90,6 @@ services:
 
   publish:
     build:
-      context: ../..
       dockerfile: cmd/docker/publish/dockerfile
     ports:
       - "8894:8894"
@@ -117,7 +110,6 @@ services:
 
   relation:
     build:
-      context: ../..
       dockerfile: cmd/docker/relation/dockerfile
     ports:
       - "8895:8895"
@@ -138,7 +130,6 @@ services:
 
   message:
     build:
-      context: ../..
       dockerfile: cmd/docker/message/dockerfile
     ports:
       - "8896:8896"
