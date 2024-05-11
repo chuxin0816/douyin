@@ -155,6 +155,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: '123456'
       MYSQL_DATABASE: douyin
+    volumes:
+      - ./config/my.cnf:/etc/my.cnf
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
       interval: 10s
@@ -288,13 +290,9 @@ services:
     image: canal/canal-server:latest
     ports:
       - "11111:11111"
-    environment:
-      - canal.instance.mysql.slaveId=11
-      - canal.auto.scan=true
-      - canal.instance.master.address=mysql:3306
-      - canal.instance.tsdb.dbUsername=canal
-      - canal.instance.tsdb.dbPassword=canal
-      - canal.instance.tsdb.enable=true
+    volumes:
+      - ./config/instance.properties:/home/admin/canal-server/conf/example/instance.properties
+      - ./config/canal.properties:/home/admin/canal-server/conf/canal.properties
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:11111 || exit 1"]
       interval: 10s
@@ -306,6 +304,15 @@ services:
     image: consul:1.15.4
     ports:
       - "8500:8500"
+    volumes:
+      - ./config/config.yaml:/config.yaml
+    command: >
+      /bin/sh -c "
+        docker-entrypoint.sh agent -dev -client=0.0.0.0 &  # 启动 Consul 服务
+        while ! nc -z localhost 8500; do sleep 1; done;  # 等待 Consul 服务开始监听端口 8500
+        curl -X PUT --data-binary @/config.yaml http://localhost:8500/v1/kv/config  # 将 config.yaml 文件的内容上传到 Consul
+        wait %1  # 等待后台的 Consul 服务
+      "
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8500/v1/status/leader"]
       interval: 10s

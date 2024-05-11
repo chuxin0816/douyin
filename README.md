@@ -9,17 +9,22 @@
 
 接口文档: [Apifox](https://apifox.com/apidoc/shared-0c80e0c6-daca-4b12-96a4-01ca8c2b6cd1) ｜ 项目演示地址：http://chuxin0816.com:8888/ (已关闭)
 ## 项目部署
-`cd cmd/docker && docker-compose up -d `
-> 初次启动需要在MySQL创建canal用户，配置canal(投递到kafka)并参考config/config.yaml配置文件修改配置上传到consul， 将douyin.sql导入MySQL数据库，将message.js导入MongoDB数据库
+`docker-compose up -d`
+> 启动后请修改consul的配置信息(默认挂载上传config/config.yaml)，将message.js导入MongoDB数据库，将douyin.sql导入MySQL数据库并添加canal用户授权
+```shell
+CREATE USER canal IDENTIFIED BY 'canal';  
+GRANT SELECT, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'canal'@'%';
+FLUSH PRIVILEGES;
+```
 ## 项目结构：
 ```shell
 . #篇幅有限，只展示部分目录
-├── api            HTTP服务
+├── api                 HTTP服务
 ├── cmd
 │   ├── docker     
-│   └── gen        Gorm/Gen
+│   └── gen             Gorm/Gen
 ├── config         
-├── dal            访问数据库代码(MySQL, MongoDB, Redis)
+├── dal                 访问数据库代码(MySQL, MongoDB, Redis)
 ├── logger         
 ├── pkg
 │   ├── jwt
@@ -28,12 +33,13 @@
 │   ├── snowflake
 │   └── tracing
 ├── rpc
-│   ├── client     RPC客户端
+│   ├── client          RPC客户端
 │   ├── idl        
 │   ├── kitex_gen
-│   └── service    RPC服务端
-├── douyin.sql     MySQL表结构
-└── message.js     MongoDB表结构
+│   └── service         RPC服务端
+├── docker-compose.yml    
+├── douyin.sql          MySQL表结构
+└── message.js          MongoDB表结构
 ```
 > 请求链路: http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ##  性能测试
