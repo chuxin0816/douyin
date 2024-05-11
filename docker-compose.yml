@@ -9,8 +9,7 @@ services:
     container_name: Api
 
   feed:
-    build: 
-      dockerfile: cmd/docker/feed/dockerfile
+    image: chuxin0816/douyin:feed
     ports:
       - "8890:8890"
     depends_on:
@@ -29,8 +28,7 @@ services:
     container_name: Feed
 
   user:
-    build:
-      dockerfile: cmd/docker/user/dockerfile
+    image: chuxin0816/douyin:user
     ports:
       - "8891:8891"
     depends_on:
@@ -49,8 +47,7 @@ services:
     container_name: User
 
   favorite:
-    build:
-      dockerfile: cmd/docker/favorite/dockerfile
+    image: chuxin0816/douyin:favorite
     ports:
       - "8892:8892"
     depends_on:
@@ -69,8 +66,7 @@ services:
     container_name: Favorite
 
   comment:
-    build:
-      dockerfile: cmd/docker/comment/dockerfile
+    image: chuxin0816/douyin:comment
     ports:
       - "8893:8893"
     depends_on:
@@ -89,8 +85,7 @@ services:
     container_name: Comment
 
   publish:
-    build:
-      dockerfile: cmd/docker/publish/dockerfile
+    image: chuxin0816/douyin:publish
     ports:
       - "8894:8894"
     depends_on:
@@ -109,8 +104,7 @@ services:
     container_name: Publish
 
   relation:
-    build:
-      dockerfile: cmd/docker/relation/dockerfile
+    image: chuxin0816/douyin:relation
     ports:
       - "8895:8895"
     depends_on:
@@ -129,8 +123,7 @@ services:
     container_name: Relation
 
   message:
-    build:
-      dockerfile: cmd/docker/message/dockerfile
+    image: chuxin0816/douyin:message
     ports:
       - "8896:8896"
     depends_on:
