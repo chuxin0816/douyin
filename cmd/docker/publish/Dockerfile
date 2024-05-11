@@ -18,6 +18,8 @@ RUN cd rpc/service/publish && sh build.sh
 
 FROM ubuntu:jammy
 
+RUN sed -i 's/ports.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list
+
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends --fix-missing \

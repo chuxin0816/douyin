@@ -1,0 +1,333 @@
+name: douyin
+services:
+  api:
+    image: chuxin0816/douyin:api
+    ports:
+      - "8888:8888"
+    sysctls:
+      net.ipv4.ip_local_port_range: "15000 65000"
+    container_name: Api
+
+  feed:
+    build: 
+      dockerfile: cmd/docker/feed/dockerfile
+    ports:
+      - "8890:8890"
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Feed
+
+  user:
+    build:
+      dockerfile: cmd/docker/user/dockerfile
+    ports:
+      - "8891:8891"
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: User
+
+  favorite:
+    build:
+      dockerfile: cmd/docker/favorite/dockerfile
+    ports:
+      - "8892:8892"
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Favorite
+
+  comment:
+    build:
+      dockerfile: cmd/docker/comment/dockerfile
+    ports:
+      - "8893:8893"
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Comment
+
+  publish:
+    build:
+      dockerfile: cmd/docker/publish/dockerfile
+    ports:
+      - "8894:8894"
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Publish
+
+  relation:
+    build:
+      dockerfile: cmd/docker/relation/dockerfile
+    ports:
+      - "8895:8895"
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Relation
+
+  message:
+    build:
+      dockerfile: cmd/docker/message/dockerfile
+    ports:
+      - "8896:8896"
+    depends_on:
+      consul:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      canal:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Message
+
+  mysql:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: '123456'
+      MYSQL_DATABASE: douyin
+    volumes:
+      - ./config/my.cnf:/etc/my.cnf
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: MySQL
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Redis
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "echo", "db.runCommand(\"ping\").ok", "|", "mongosh", "localhost:27017/test", "--quiet"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Mongo
+
+  kafka-0:
+    image: bitnami/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      # KRaft settings
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+      - KAFKA_KRAFT_CLUSTER_ID=abcdefghijklmnopqrstuv
+      # Listeners
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-0:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      # Clustering
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Kafka-0
+  kafka-1:
+    image: bitnami/kafka:latest
+    ports:
+      - "9093:9092"
+    environment:
+      # KRaft settings
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+      - KAFKA_KRAFT_CLUSTER_ID=abcdefghijklmnopqrstuv
+      # Listeners
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-1:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      # Clustering
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Kafka-1
+  kafka-2:
+    image: bitnami/kafka:latest
+    ports:
+      - "9094:9092"
+    environment:
+      # KRaft settings
+      - KAFKA_CFG_NODE_ID=2
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+      - KAFKA_KRAFT_CLUSTER_ID=abcdefghijklmnopqrstuv
+      # Listeners
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-2:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      # Clustering
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Kafka-2
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:master
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka-0:9092,kafka-1:9092,kafka-2:9092
+    depends_on:
+      kafka-0:
+        condition: service_healthy
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080 || exit 1"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Kafka-ui
+
+  canal:
+    image: canal/canal-server:latest
+    ports:
+      - "11111:11111"
+    volumes:
+      - ./config/instance.properties:/home/admin/canal-server/conf/example/instance.properties
+      - ./config/canal.properties:/home/admin/canal-server/conf/canal.properties
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:11111 || exit 1"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Canal
+  
+  consul:
+    image: consul:1.15.4
+    ports:
+      - "8500:8500"
+    volumes:
+      - ./config/config.yaml:/config.yaml
+    command: >
+      /bin/sh -c "
+        docker-entrypoint.sh agent -dev -client=0.0.0.0 &  # 启动 Consul 服务
+        while ! nc -z localhost 8500; do sleep 1; done;  # 等待 Consul 服务开始监听端口 8500
+        curl -X PUT --data-binary @/config.yaml http://localhost:8500/v1/kv/config  # 将 config.yaml 文件的内容上传到 Consul
+        wait %1  # 等待后台的 Consul 服务
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/status/leader"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Consul
+  
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "4318:4318"
+    healthcheck:
+      test: ["CMD", "wget -q --spider http://localhost:16686/search || exit 1"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Jaeger
