@@ -307,7 +307,7 @@ services:
         wait %1  # 等待后台的 Consul 服务
       "
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/status/leader"]
+      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/status/leader || exit 1"]
       interval: 10s
       timeout: 2s
       retries: 3

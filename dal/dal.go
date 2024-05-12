@@ -60,11 +60,12 @@ var (
 )
 
 var (
-	qComment  = query.Q.Comment
-	qFavorite = query.Q.Favorite
-	qRelation = query.Q.Relation
-	qUser     = query.Q.User
-	qVideo    = query.Q.Video
+	q         *query.Query
+	qComment  = q.Comment
+	qFavorite = q.Favorite
+	qRelation = q.Relation
+	qUser     = q.User
+	qVideo    = q.Video
 )
 
 func Init() {
@@ -104,7 +105,12 @@ func InitMySQL() {
 		panic(err)
 	}
 
-	query.SetDefault(db)
+	q = query.Use(db)
+	qComment = q.Comment
+	qFavorite = q.Favorite
+	qRelation = q.Relation
+	qUser = q.User
+	qVideo = q.Video
 
 	sqlDB, err := db.DB()
 	if err != nil {
