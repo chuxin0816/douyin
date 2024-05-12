@@ -9,8 +9,11 @@ on:
     paths-ignore: ['README.md', 'douyin.sql', 'message.js', 'LICENSE']
 
 jobs:
-  setup:
+  build-push-image:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [api, comment, favorite, feed, message, publish, relation, user]
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -22,14 +25,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
-
-  build-push:
-    needs: setup
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        component: [api, comment, favorite, feed, message, publish, relation, user]
-    steps:
       - name: Build and push ${{ matrix.component }} image
         uses: docker/build-push-action@v5
         with:
