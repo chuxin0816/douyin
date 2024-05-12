@@ -28,45 +28,53 @@ jobs:
           file: ./cmd/docker/api/Dockerfile
           push: true
           tags: ghcr.io/chuxin0816/douyin:api
+          platforms: linux/amd64,linux/arm64
       - name: Build and push comment image
         uses: docker/build-push-action@v5
         with:
           file: ./cmd/docker/comment/Dockerfile
           push: true
           tags: ghcr.io/chuxin0816/douyin:comment
+          platforms: linux/amd64,linux/arm64
       - name: Build and push favorite image
         uses: docker/build-push-action@v5
         with:
           file: ./cmd/docker/favorite/Dockerfile
           push: true
           tags: ghcr.io/chuxin0816/douyin:favorite
+          platforms: linux/amd64,linux/arm64
       - name: Build and push feed image
         uses: docker/build-push-action@v5
         with:
           file: ./cmd/docker/feed/Dockerfile
           push: true
           tags: ghcr.io/chuxin0816/douyin:feed
+          platforms: linux/amd64,linux/arm64
       - name: Build and push message image
         uses: docker/build-push-action@v5
         with:
           file: ./cmd/docker/message/Dockerfile
           push: true
           tags: ghcr.io/chuxin0816/douyin:message
+          platforms: linux/amd64,linux/arm64
       - name: Build and push publish image
         uses: docker/build-push-action@v5
         with:
           file: ./cmd/docker/publish/Dockerfile
           push: true
           tags: ghcr.io/chuxin0816/douyin:publish
+          platforms: linux/amd64,linux/arm64
       - name: Build and push relation image
         uses: docker/build-push-action@v5
         with:
           file: ./cmd/docker/relation/Dockerfile
           push: true
           tags: ghcr.io/chuxin0816/douyin:relation
+          platforms: linux/amd64,linux/arm64
       - name: Build and push user image
         uses: docker/build-push-action@v5
         with:
           file: ./cmd/docker/user/Dockerfile
           push: true
           tags: ghcr.io/chuxin0816/douyin:user
+          platforms: linux/amd64,linux/arm64
