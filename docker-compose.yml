@@ -6,6 +6,9 @@ services:
       - "8888:8888"
     sysctls:
       net.ipv4.ip_local_port_range: "15000 65000"
+    depends_on:
+      consul:
+        condition: service_healthy
     container_name: Api
 
   feed:
@@ -18,8 +21,6 @@ services:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      canal:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -38,8 +39,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      canal:
-        condition: service_healthy
       kafka-ui:
         condition: service_healthy
       jaeger:
@@ -56,8 +55,6 @@ services:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      canal:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -76,8 +73,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      canal:
-        condition: service_healthy
       kafka-ui:
         condition: service_healthy
       jaeger:
@@ -94,8 +89,6 @@ services:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      canal:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -114,8 +107,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      canal:
-        condition: service_healthy
       kafka-ui:
         condition: service_healthy
       jaeger:
@@ -132,8 +123,6 @@ services:
       mongo:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      canal:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -273,7 +262,7 @@ services:
       kafka-2:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080 || exit 1"]
+      test: ["CMD", "nc", "-z", "localhost", "8080"]
       interval: 10s
       timeout: 2s
       retries: 3
@@ -286,11 +275,6 @@ services:
     volumes:
       - ./config/instance.properties:/home/admin/canal-server/conf/example/instance.properties
       - ./config/canal.properties:/home/admin/canal-server/conf/canal.properties
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:11111 || exit 1"]
-      interval: 10s
-      timeout: 2s
-      retries: 3
     container_name: Canal
   
   consul:
@@ -307,7 +291,7 @@ services:
         wait %1  # 等待后台的 Consul 服务
       "
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/status/leader || exit 1"]
+      test: ["CMD", "nc", "-z", "localhost", "8500"]
       interval: 10s
       timeout: 2s
       retries: 3
@@ -319,7 +303,7 @@ services:
       - "16686:16686"
       - "4318:4318"
     healthcheck:
-      test: ["CMD", "wget -q --spider http://localhost:16686/search || exit 1"]
+      test: ["CMD", "nc", "-z", "localhost", "16686"]
       interval: 10s
       timeout: 2s
       retries: 3
