@@ -60,7 +60,7 @@ var (
 )
 
 var (
-	q         *query.Query
+	q         = new(query.Query)
 	qComment  = q.Comment
 	qFavorite = q.Favorite
 	qRelation = q.Relation
