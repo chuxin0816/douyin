@@ -12,6 +12,8 @@ RUN cd rpc/service/publish && sh build.sh
 
 FROM alpine:latest
 
+ENV TZ=Asia/Shanghai
+
 RUN set -eux; \
     apk update; \
     apk add --no-cache ffmpeg

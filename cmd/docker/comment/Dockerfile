@@ -12,6 +12,8 @@ RUN cd rpc/service/comment && sh build.sh
 
 FROM scratch
 
+ENV TZ=Asia/Shanghai
+
 COPY --from=builder /douyin/rpc/service/comment/output/bin/comment /
 
 ENTRYPOINT ["/comment"]

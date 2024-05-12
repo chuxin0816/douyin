@@ -12,6 +12,8 @@ RUN cd rpc/service/feed && sh build.sh
 
 FROM scratch
 
+ENV TZ=Asia/Shanghai
+
 COPY --from=builder /douyin/rpc/service/feed/output/bin/feed /
 
 ENTRYPOINT ["/feed"]

@@ -12,6 +12,8 @@ RUN cd rpc/service/user && sh build.sh
 
 FROM scratch
 
+ENV TZ=Asia/Shanghai
+
 COPY --from=builder /douyin/rpc/service/user/output/bin/user /
 
 ENTRYPOINT ["/user"]

@@ -12,6 +12,8 @@ RUN cd rpc/service/message && sh build.sh
 
 FROM scratch
 
+ENV TZ=Asia/Shanghai
+
 COPY --from=builder /douyin/rpc/service/message/output/bin/message /
 
 ENTRYPOINT ["/message"]

@@ -12,6 +12,8 @@ RUN cd rpc/service/relation && sh build.sh
 
 FROM scratch
 
+ENV TZ=Asia/Shanghai
+
 COPY --from=builder /douyin/rpc/service/relation/output/bin/relation /
 
 ENTRYPOINT ["/relation"]

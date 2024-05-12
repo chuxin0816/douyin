@@ -12,6 +12,8 @@ RUN go build -o app api/main.go
 
 FROM scratch
 
+ENV TZ=Asia/Shanghai
+
 COPY --from=builder /douyin/app /
 
 ENTRYPOINT ["/app"]

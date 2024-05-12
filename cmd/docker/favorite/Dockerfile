@@ -12,6 +12,8 @@ RUN cd rpc/service/favorite && sh build.sh
 
 FROM scratch
 
+ENV TZ=Asia/Shanghai
+
 COPY --from=builder /douyin/rpc/service/favorite/output/bin/favorite /
 
 ENTRYPOINT ["/favorite"]
