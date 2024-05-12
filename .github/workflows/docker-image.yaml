@@ -2,14 +2,14 @@ name: Docker Image CI
 
 on:
   push:
-    branches:
-      - 'main'
+    branches: ['main']
+    paths-ignore: ['README.md', 'douyin.sql', 'message.js', 'LICENSE']
   pull_request:
-    branches:
-      - 'main'
+    branches: ['main']
+    paths-ignore: ['README.md', 'douyin.sql', 'message.js', 'LICENSE']
 
 jobs:
-  docker:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
@@ -22,59 +22,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
-      - name: Build and push api image
+
+  build-push:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [api, comment, favorite, feed, message, publish, relation, user]
+    steps:
+      - name: Build and push ${{ matrix.component }} image
         uses: docker/build-push-action@v5
         with:
-          file: ./cmd/docker/api/Dockerfile
+          file: ./cmd/docker/${{ matrix.component }}/Dockerfile
           push: true
-          tags: ghcr.io/chuxin0816/douyin:api
-          platforms: linux/amd64,linux/arm64
-      - name: Build and push comment image
-        uses: docker/build-push-action@v5
-        with:
-          file: ./cmd/docker/comment/Dockerfile
-          push: true
-          tags: ghcr.io/chuxin0816/douyin:comment
-          platforms: linux/amd64,linux/arm64
-      - name: Build and push favorite image
-        uses: docker/build-push-action@v5
-        with:
-          file: ./cmd/docker/favorite/Dockerfile
-          push: true
-          tags: ghcr.io/chuxin0816/douyin:favorite
-          platforms: linux/amd64,linux/arm64
-      - name: Build and push feed image
-        uses: docker/build-push-action@v5
-        with:
-          file: ./cmd/docker/feed/Dockerfile
-          push: true
-          tags: ghcr.io/chuxin0816/douyin:feed
-          platforms: linux/amd64,linux/arm64
-      - name: Build and push message image
-        uses: docker/build-push-action@v5
-        with:
-          file: ./cmd/docker/message/Dockerfile
-          push: true
-          tags: ghcr.io/chuxin0816/douyin:message
-          platforms: linux/amd64,linux/arm64
-      - name: Build and push publish image
-        uses: docker/build-push-action@v5
-        with:
-          file: ./cmd/docker/publish/Dockerfile
-          push: true
-          tags: ghcr.io/chuxin0816/douyin:publish
-          platforms: linux/amd64,linux/arm64
-      - name: Build and push relation image
-        uses: docker/build-push-action@v5
-        with:
-          file: ./cmd/docker/relation/Dockerfile
-          push: true
-          tags: ghcr.io/chuxin0816/douyin:relation
-          platforms: linux/amd64,linux/arm64
-      - name: Build and push user image
-        uses: docker/build-push-action@v5
-        with:
-          file: ./cmd/docker/user/Dockerfile
-          push: true
-          tags: ghcr.io/chuxin0816/douyin:user
+          tags: ghcr.io/chuxin0816/douyin:${{ matrix.component }}
           platforms: linux/amd64,linux/arm64
