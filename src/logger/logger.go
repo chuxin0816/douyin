@@ -23,7 +23,7 @@ func Init() {
 	}
 
 	// 将文件名设置为日期
-	logFileName := time.Now().Format("2006-01-02") + ".log"
+	logFileName := time.Now().Format(time.DateOnly) + ".log"
 	fileName := path.Join(logFilePath, logFileName)
 
 	// 如果文件不存在，则创建一个新文件
@@ -43,9 +43,9 @@ func Init() {
 	}
 
 	hlog.SetLogger(hertzzap.NewLogger())
-	hlog.SetLevel(hlog.LevelDebug)
+	hlog.SetLevel(hlog.LevelWarn)
 	hlog.SetOutput(lumberjackLogger)
 	klog.SetLogger(kitexzap.NewLogger())
-	klog.SetLevel(klog.LevelDebug)
+	klog.SetLevel(klog.LevelWarn)
 	klog.SetOutput(lumberjackLogger)
 }
