@@ -18,7 +18,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql:
+      mysql-slave:
+        condition: service_healthy
+      mysql-master:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -35,7 +37,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql:
+      mysql-master:
+        condition: service_healthy
+      mysql-slave:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -52,7 +56,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql:
+      mysql-master:
+        condition: service_healthy
+      mysql-slave:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -69,7 +75,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql:
+      mysql-master:
+        condition: service_healthy
+      mysql-slave:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -86,7 +94,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql:
+      mysql-master:
+        condition: service_healthy
+      mysql-slave:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -103,7 +113,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql:
+      mysql-master:
+        condition: service_healthy
+      mysql-slave:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -130,24 +142,51 @@ services:
         condition: service_healthy
     container_name: Message
 
-  mysql:
-    image: mysql:latest
+  mysql-master:
+    image: mysql:8.0.37
     ports:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: '123456'
       MYSQL_DATABASE: douyin
     volumes:
-      - ./etc/my.cnf:/etc/my.cnf
+      - ./etc/my_master.cnf:/etc/my.cnf
       - ./etc/douyin.sql:/docker-entrypoint-initdb.d/douyin.sql
-      - ./etc/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./etc/init_master.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
       interval: 10s
       timeout: 2s
       retries: 3
-    container_name: MySQL
-
+    container_name: MySQL-master
+  
+  mysql-slave:
+    image: mysql:8.0.37
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: '123456'
+      MYSQL_DATABASE: douyin
+    volumes:
+      - ./etc/my_slave.cnf:/etc/my.cnf
+      - ./etc/douyin.sql:/docker-entrypoint-initdb.d/douyin.sql
+      - ./etc/init_slave.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: MySQL-slave
+  
+  canal:
+    image: canal/canal-server:latest
+    ports:
+      - "11111:11111"
+    volumes:
+      - ./etc/instance.properties:/home/admin/canal-server/conf/example/instance.properties
+      - ./etc/canal.properties:/home/admin/canal-server/conf/canal.properties
+    container_name: Canal
+  
   redis:
     image: redis:latest
     ports:
@@ -275,15 +314,6 @@ services:
       retries: 3
     container_name: Kafka-ui
 
-  canal:
-    image: canal/canal-server:latest
-    ports:
-      - "11111:11111"
-    volumes:
-      - ./etc/instance.properties:/home/admin/canal-server/conf/example/instance.properties
-      - ./etc/canal.properties:/home/admin/canal-server/conf/canal.properties
-    container_name: Canal
-  
   consul:
     image: consul:1.15.4
     ports:
