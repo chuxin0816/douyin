@@ -15,11 +15,11 @@
 . #篇幅有限，只展示部分目录
 ├── api                 HTTP服务
 ├── cmd
-│   ├── docker     
+│   ├── docker          Dockerfile
 │   └── gen             Gorm/Gen
 ├── config         
 ├── dal                 访问数据库代码(MySQL, MongoDB, Redis)
-├── logger         
+├── logger              日志及其配置
 ├── pkg
 │   ├── jwt
 │   ├── kafka
