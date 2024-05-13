@@ -139,6 +139,8 @@ services:
       MYSQL_DATABASE: douyin
     volumes:
       - ./config/my.cnf:/etc/my.cnf
+      - ./config/douyin.sql:/docker-entrypoint-initdb.d/douyin.sql
+      - ./config/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
       interval: 10s
@@ -161,6 +163,8 @@ services:
     image: mongo:latest
     ports:
       - "27017:27017"
+    volumes:
+      - ./config/message.js:/docker-entrypoint-initdb.d/message.js
     healthcheck:
       test: ["CMD", "echo", "db.runCommand(\"ping\").ok", "|", "mongosh", "localhost:27017/test", "--quiet"]
       interval: 10s

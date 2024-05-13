@@ -10,12 +10,6 @@
 接口文档: [Apifox](https://apifox.com/apidoc/shared-0c80e0c6-daca-4b12-96a4-01ca8c2b6cd1) ｜ 项目演示地址：http://chuxin0816.com:8888/ (已关闭)
 ## 项目部署
 `docker-compose up -d`
-> 启动后请修改consul的配置信息(默认挂载上传config/config.yaml)，将message.js导入MongoDB数据库，将douyin.sql导入MySQL数据库并添加canal用户授权
-```shell
-CREATE USER canal IDENTIFIED BY 'canal';  
-GRANT SELECT, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'canal'@'%';
-FLUSH PRIVILEGES;
-```
 ## 项目结构：
 ```shell
 . #篇幅有限，只展示部分目录
