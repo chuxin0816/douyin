@@ -48,7 +48,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 
 	// 检查评论字数
 	if len(req.CommentText) > 500 {
-		Error(ctx, CodeCommentLengthLimit)
+		Error(ctx, codeLengthLimit)
 		hlog.Warn("评论字数超过限制")
 		return
 	}

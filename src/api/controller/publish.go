@@ -47,7 +47,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 
 	// 检查标题字数
 	if len(req.Title) > 30 {
-		Error(ctx, CodeTitleLengthLimit)
+		Error(ctx, codeLengthLimit)
 		hlog.Warn("标题字数超过限制")
 		return
 	}
