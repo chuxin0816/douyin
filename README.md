@@ -31,9 +31,7 @@
 │   ├── idl        
 │   ├── kitex_gen
 │   └── service         RPC服务端
-├── docker-compose.yml    
-├── douyin.sql          MySQL表结构
-└── message.js          MongoDB表结构
+└── docker-compose.yml
 ```
 > 请求链路: http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ##  性能测试
