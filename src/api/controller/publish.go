@@ -14,6 +14,11 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
+const(
+	minFileSize = 1 * 1024 * 1024 // 1MB
+	maxFileSize = 500 * 1024 * 1024 // 500MB
+)
+
 type PublishController struct{}
 
 type PublishActionRequest struct {
@@ -53,7 +58,12 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	}
 
 	// 验证大小
-	if req.Data.Size > 1024*1024*100 {
+	if req.Data.Size < minFileSize {
+		Error(ctx, CodeFileTooSmall)
+		hlog.Warn("文件太小")
+		return
+	}
+	if req.Data.Size > maxFileSize {
 		Error(ctx, CodeFileTooLarge)
 		hlog.Warn("文件太大")
 		return

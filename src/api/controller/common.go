@@ -17,6 +17,7 @@ const (
 	CodeUserExist
 	CodeUserNotExist
 	CodeInvalidPassword
+	CodeFileTooSmall
 	CodeFileTooLarge
 	codeLengthLimit
 	CodeAlreadyFavorite
@@ -36,6 +37,7 @@ var codeMsgMap = map[int32]string{
 	CodeUserExist:       "用户名已存在",
 	CodeUserNotExist:    "用户名不存在",
 	CodeInvalidPassword: "密码错误",
+	CodeFileTooSmall:    "文件太小",
 	CodeFileTooLarge:    "文件太大",
 	codeLengthLimit:     "字数超过限制",
 	CodeAlreadyFavorite: "已经点赞过了",
