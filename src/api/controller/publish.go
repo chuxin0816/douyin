@@ -2,8 +2,8 @@ package controller
 
 import (
 	"context"
-	"io"
 	"mime/multipart"
+	"net/http"
 
 	"douyin/src/pkg/jwt"
 	"douyin/src/pkg/tracing"
@@ -14,8 +14,8 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
-const(
-	minFileSize = 1 * 1024 * 1024 // 1MB
+const (
+	minFileSize = 1 * 1024 * 1024   // 1MB
 	maxFileSize = 500 * 1024 * 1024 // 500MB
 )
 
@@ -69,10 +69,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 		return
 	}
 
-	// 从认证中间件中获取userID
-	userID := ctx.MustGet(CtxUserIDKey).(int64)
-
-	// 将文件转换为[]byte
+	// 打开文件
 	file, err := req.Data.Open()
 	if err != nil {
 		Error(ctx, CodeServerBusy)
@@ -83,8 +80,9 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	}
 	defer file.Close()
 
-	data, err := io.ReadAll(file)
-	if err != nil {
+	// 将文件转换为[]byte
+	buf := make([]byte, req.Data.Size)
+	if _, err := file.Read(buf); err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "文件读取失败")
@@ -92,8 +90,19 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 		return
 	}
 
+	// 判断文件MIME类型是否是视频
+	contentType := http.DetectContentType(buf)
+	if contentType[:5] != "video" {
+		Error(ctx, CodeInvalidParam)
+		hlog.Warn("文件类型不是视频")
+		return
+	}
+
+	// 从认证中间件中获取userID
+	userID := ctx.MustGet(CtxUserIDKey).(int64)
+
 	// 业务逻辑处理
-	resp, err := client.PublishAction(c, userID, data, req.Title)
+	resp, err := client.PublishAction(c, userID, buf, req.Title)
 	if err != nil {
 		Error(ctx, CodeServerBusy)
 		span.RecordError(err)
