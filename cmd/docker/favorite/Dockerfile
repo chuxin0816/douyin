@@ -14,6 +14,6 @@ FROM scratch
 
 ENV TZ=Asia/Shanghai
 
-COPY --from=builder /douyin/rpc/service/favorite/output/bin/favorite /
+COPY --from=builder /douyin/src/rpc/service/favorite/output/bin/favorite /
 
 ENTRYPOINT ["/favorite"]

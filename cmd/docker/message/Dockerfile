@@ -14,6 +14,6 @@ FROM scratch
 
 ENV TZ=Asia/Shanghai
 
-COPY --from=builder /douyin/rpc/service/message/output/bin/message /
+COPY --from=builder /douyin/src/rpc/service/message/output/bin/message /
 
 ENTRYPOINT ["/message"]

@@ -18,6 +18,6 @@ RUN set -eux; \
     apk update; \
     apk add --no-cache ffmpeg
 
-COPY --from=builder /douyin/rpc/service/publish/output/bin/publish /
+COPY --from=builder /douyin/src/rpc/service/publish/output/bin/publish /
 
 ENTRYPOINT ["/publish"]
