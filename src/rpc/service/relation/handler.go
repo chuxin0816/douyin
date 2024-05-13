@@ -80,7 +80,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 
 	// 通过kafka更新数据库
 	err = kafka.Relation(ctx, &model.Relation{
-		UserID:     req.ToUserId,
+		AuthorID:     req.ToUserId,
 		FollowerID: req.UserId,
 	})
 	if err != nil {

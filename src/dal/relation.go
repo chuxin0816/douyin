@@ -26,7 +26,7 @@ func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, erro
 		}
 
 		// 缓存未命中, 查询数据库
-		relation, err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).
+		relation, err := qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).
 			Select(qRelation.ID).First()
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {
@@ -56,14 +56,14 @@ func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, erro
 func Follow(ctx context.Context, userID, toUserID int64) error {
 	relation := &model.Relation{
 		ID:         snowflake.GenerateID(),
-		UserID:     toUserID,
+		AuthorID:   toUserID,
 		FollowerID: userID,
 	}
 	return qRelation.WithContext(ctx).Create(relation)
 }
 
 func UnFollow(ctx context.Context, userID, toUserID int64) error {
-	_, err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).Delete()
+	_, err := qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).Delete()
 	return err
 }
 
@@ -80,7 +80,7 @@ func FollowList(ctx context.Context, userID int64) (followList []int64, err erro
 		userIDs, err := RDB.SMembers(ctx, key).Result()
 		if err == redis.Nil {
 			// 缓存未命中, 查询数据库
-			if err := qRelation.WithContext(ctx).Where(qRelation.FollowerID.Eq(userID)).Select(qRelation.UserID).Scan(&followList); err != nil {
+			if err := qRelation.WithContext(ctx).Where(qRelation.FollowerID.Eq(userID)).Select(qRelation.AuthorID).Scan(&followList); err != nil {
 				return nil, err
 			}
 
@@ -125,7 +125,7 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 		userIDs, err := RDB.SMembers(ctx, key).Result()
 		if err == redis.Nil {
 			// 缓存未命中，查询mysql
-			if err := qRelation.WithContext(ctx).Where(qRelation.UserID.Eq(userID)).Select(qRelation.FollowerID).Scan(&followerList); err != nil {
+			if err := qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(userID)).Select(qRelation.FollowerID).Scan(&followerList); err != nil {
 				return nil, err
 			}
 
