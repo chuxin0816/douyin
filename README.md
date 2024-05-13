@@ -12,25 +12,27 @@
 `docker-compose up -d`
 ## 项目结构：
 ```shell
-. #篇幅有限，只展示部分目录
-├── api                 HTTP服务
+. #篇幅有限，只展示主要部分
 ├── cmd
-│   ├── docker          Dockerfile
-│   └── gen             Gorm/Gen
-├── config         
-├── dal                 访问数据库代码(MySQL, MongoDB, Redis)
-├── logger              日志及其配置
-├── pkg
-│   ├── jwt
-│   ├── kafka
-│   ├── oss
-│   ├── snowflake
-│   └── tracing
-├── rpc
-│   ├── client          RPC客户端
-│   ├── idl        
-│   ├── kitex_gen
-│   └── service         RPC服务端
+│   ├── docker              Dockerfile
+│   └── gen                 Gorm/Gen
+├── etc                     配置文件
+├── src
+│   ├── api                 HTTP服务
+│   ├── config
+│   ├── dal                 访问数据库(MySQL, MongoDB, Redis)
+│   ├── logger              日志及其配置
+│   ├── pkg
+│   │   ├── jwt
+│   │   ├── kafka
+│   │   ├── oss
+│   │   ├── snowflake
+│   │   └── tracing
+│   └── rpc
+│       ├── client          RPC客户端
+│       ├── idl
+│       ├── kitex_gen
+│       └── service         RPC服务端
 └── docker-compose.yml
 ```
 > 请求链路: http请求->api/router->api/controller->rpc/client->rpc/service->dal
@@ -49,7 +51,7 @@
 1. Gorm/Gen代码生成
 go run cmd/gen/generator.go
 2. Kitex代码生成
-cd rpc/service/feed
+cd src/rpc/service/feed
 kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
 ```
 ## 未来更新:
