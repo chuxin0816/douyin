@@ -26,7 +26,7 @@ CREATE TABLE `favorite` (
   `video_id` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `idx_video_id` (`video_id`),
-  KEY `idx_user_video` (`user_id`,`video_id`)
+  UNIQUE KEY `idx_user_video` (`user_id`,`video_id`) USING BTREE,
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
@@ -39,7 +39,7 @@ CREATE TABLE `relation` (
   `user_id` bigint NOT NULL DEFAULT '0',
   `follower_id` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `idx_user_follower` (`user_id`,`follower_id`),
+  UNIQUE KEY `idx_user_follower` (`user_id`,`follower_id`) USING BTREE,
   KEY `idx_follower_id` (`follower_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
