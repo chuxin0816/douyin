@@ -268,23 +268,6 @@ func syncVideo(ctx context.Context) {
 	}
 }
 
-func RemoveFavoriteCache(ctx context.Context, userID, videoID string) error {
-	key := GetRedisKey(KeyUserFavoritePF + userID)
-	return RDB.SRem(ctx, key, videoID).Err()
-}
-
-func RemoveRelationCache(ctx context.Context, userID, toUserID string) error {
-	keyFollowPF := GetRedisKey(KeyUserFollowPF + userID)
-	keyFollower := GetRedisKey(KeyUserFollowerPF + toUserID)
-
-	pipe := RDB.Pipeline()
-	pipe.SRem(ctx, keyFollowPF, toUserID)
-	pipe.SRem(ctx, keyFollower, userID)
-	_, err := pipe.Exec(ctx)
-
-	return err
-}
-
 // GetRandomTime 获取0-30min随机时间
 func GetRandomTime() time.Duration {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))

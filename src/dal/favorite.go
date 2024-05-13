@@ -108,3 +108,8 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 	
 	return
 }
+
+func RemoveFavoriteCache(ctx context.Context, userID, videoID string) error {
+	key := GetRedisKey(KeyUserFavoritePF + userID)
+	return RDB.SRem(ctx, key, videoID).Err()
+}

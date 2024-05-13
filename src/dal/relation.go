@@ -157,3 +157,15 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 
 	return
 }
+
+func RemoveRelationCache(ctx context.Context, userID, toUserID string) error {
+	keyFollowPF := GetRedisKey(KeyUserFollowPF + userID)
+	keyFollower := GetRedisKey(KeyUserFollowerPF + toUserID)
+
+	pipe := RDB.Pipeline()
+	pipe.SRem(ctx, keyFollowPF, toUserID)
+	pipe.SRem(ctx, keyFollower, userID)
+	_, err := pipe.Exec(ctx)
+
+	return err
+}
