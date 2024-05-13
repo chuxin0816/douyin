@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN cd rpc/service/relation && sh build.sh
+RUN cd src/rpc/service/relation && sh build.sh
 
 FROM scratch
 

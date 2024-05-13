@@ -3,10 +3,10 @@ name: Docker Image CI
 on:
   push:
     branches: ['main']
-    paths-ignore: ['README.md', 'LICENSE', 'docker-compose.yml', '.gitignore', '.github/**']
+    paths: ['cmd/docker/**', 'src/**']
   pull_request:
     branches: ['main']
-    paths-ignore: ['README.md', 'LICENSE', 'docker-compose.yml', '.gitignore', '.github/**']
+    paths: ['cmd/docker/**', 'src/**']
 
 jobs:
   build-push-image:

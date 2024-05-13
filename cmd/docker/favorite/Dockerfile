@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN cd rpc/service/favorite && sh build.sh
+RUN cd src/rpc/service/favorite && sh build.sh
 
 FROM scratch
 

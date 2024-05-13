@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o app api/main.go
+RUN go build -o app src/api/main.go
 
 FROM scratch
 

@@ -138,9 +138,9 @@ services:
       MYSQL_ROOT_PASSWORD: '123456'
       MYSQL_DATABASE: douyin
     volumes:
-      - ./config/my.cnf:/etc/my.cnf
-      - ./config/douyin.sql:/docker-entrypoint-initdb.d/douyin.sql
-      - ./config/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./etc/my.cnf:/etc/my.cnf
+      - ./etc/douyin.sql:/docker-entrypoint-initdb.d/douyin.sql
+      - ./etc/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
       interval: 10s
@@ -154,7 +154,7 @@ services:
       - "6379:6379"
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
-      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./etc/redis.conf:/usr/local/etc/redis/redis.conf
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -167,7 +167,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./config/message.js:/docker-entrypoint-initdb.d/message.js
+      - ./etc/message.js:/docker-entrypoint-initdb.d/message.js
     healthcheck:
       test: ["CMD", "echo", "db.runCommand(\"ping\").ok", "|", "mongosh", "localhost:27017/test", "--quiet"]
       interval: 10s
@@ -280,8 +280,8 @@ services:
     ports:
       - "11111:11111"
     volumes:
-      - ./config/instance.properties:/home/admin/canal-server/conf/example/instance.properties
-      - ./config/canal.properties:/home/admin/canal-server/conf/canal.properties
+      - ./etc/instance.properties:/home/admin/canal-server/conf/example/instance.properties
+      - ./etc/canal.properties:/home/admin/canal-server/conf/canal.properties
     container_name: Canal
   
   consul:
@@ -289,7 +289,7 @@ services:
     ports:
       - "8500:8500"
     volumes:
-      - ./config/config.yaml:/config.yaml
+      - ./etc/config.yaml:/config.yaml
     command: >
       /bin/sh -c "
         docker-entrypoint.sh agent -dev -client=0.0.0.0 &  # 启动 Consul 服务

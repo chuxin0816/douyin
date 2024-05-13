@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN cd rpc/service/publish && sh build.sh
+RUN cd src/rpc/service/publish && sh build.sh
 
 FROM alpine:latest
 
