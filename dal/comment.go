@@ -21,12 +21,9 @@ func DeleteComment(ctx context.Context, commentID int64) (err error) {
 	return
 }
 
-func GetCommentCount(ctx context.Context, videoID int64) (int64, error) {
-	count, err := qComment.WithContext(ctx).Where(qComment.VideoID.Eq(videoID)).Count()
-	if err != nil {
-		return 0, err
-	}
-	return count, nil
+func GetCommentCount(ctx context.Context, videoID int64) (count int64, err error) {
+	err = qVideo.WithContext(ctx).Select(qVideo.CommentCount).Where(qVideo.ID.Eq(videoID)).Scan(&count)
+	return
 }
 
 func GetCommentByID(ctx context.Context, commentID int64) (*model.Comment, error) {
