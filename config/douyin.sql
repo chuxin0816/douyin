@@ -6,11 +6,11 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment` (
-  `id` bigint unsigned NOT NULL COMMENT '主键',
-  `video_id` bigint NOT NULL DEFAULT '0',
-  `user_id` bigint NOT NULL DEFAULT '0',
-  `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id` bigint unsigned NOT NULL,
+  `video_id` bigint NOT NULL DEFAULT '0' COMMENT '视频ID',
+  `user_id` bigint NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '评论内容',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_video_id` (`video_id`),
   KEY `idx_user_id` (`user_id`)
@@ -22,13 +22,12 @@ CREATE TABLE `comment` (
 DROP TABLE IF EXISTS `favorite`;
 CREATE TABLE `favorite` (
   `id` bigint unsigned NOT NULL,
-  `user_id` bigint NOT NULL DEFAULT '0',
-  `video_id` bigint NOT NULL DEFAULT '0',
+  `user_id` bigint NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `video_id` bigint NOT NULL DEFAULT '0' COMMENT '视频ID',
   PRIMARY KEY (`id`),
-  KEY `idx_video_id` (`video_id`),
   UNIQUE KEY `idx_user_video` (`user_id`,`video_id`) USING BTREE,
+  KEY `idx_video_id` (`video_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 
 -- ----------------------------
 -- Table structure for relation
@@ -36,11 +35,11 @@ CREATE TABLE `favorite` (
 DROP TABLE IF EXISTS `relation`;
 CREATE TABLE `relation` (
   `id` bigint unsigned NOT NULL,
-  `user_id` bigint NOT NULL DEFAULT '0',
-  `follower_id` bigint NOT NULL DEFAULT '0',
+  `author_id` bigint NOT NULL DEFAULT '0' COMMENT '作者ID',
+  `follower_id` bigint NOT NULL DEFAULT '0' COMMENT '粉丝ID',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_user_follower` (`user_id`,`follower_id`) USING BTREE,
-  KEY `idx_follower_id` (`follower_id`)
+  KEY `idx_follower_id` (`follower_id`),
+  KEY `idx_author_follower` (`author_id`,`follower_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
@@ -48,21 +47,34 @@ CREATE TABLE `relation` (
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
-  `id` bigint unsigned NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
-  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
-  `background_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
-  `total_favorited` bigint NOT NULL DEFAULT '0',
-  `favorite_count` bigint NOT NULL DEFAULT '0',
-  `follow_count` bigint NOT NULL DEFAULT '0',
-  `follower_count` bigint NOT NULL DEFAULT '0',
-  `work_count` bigint NOT NULL DEFAULT '0',
-  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
-  `signature` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id` bigint unsigned NOT NULL COMMENT '用户ID',
+  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '用户名',
+  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '头像地址',
+  `background_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '背景图地址',
+  `total_favorited` bigint NOT NULL DEFAULT '0' COMMENT '获赞数',
+  `favorite_count` bigint NOT NULL DEFAULT '0' COMMENT '喜欢数',
+  `follow_count` bigint NOT NULL DEFAULT '0' COMMENT '关注数',
+  `follower_count` bigint NOT NULL DEFAULT '0' COMMENT '粉丝数',
+  `work_count` bigint NOT NULL DEFAULT '0' COMMENT '作品数',
+  `signature` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '个性签名',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_name` (`name`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ----------------------------
+-- Table structure for user_login
+-- ----------------------------
+DROP TABLE IF EXISTS `user_login`;
+CREATE TABLE `user_login` (
+  `id` bigint unsigned NOT NULL COMMENT '用户ID',
+  `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户名',
+  `password` char(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '加密密码',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_name` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
@@ -70,14 +82,14 @@ CREATE TABLE `user` (
 -- ----------------------------
 DROP TABLE IF EXISTS `video`;
 CREATE TABLE `video` (
-  `id` bigint unsigned NOT NULL,
-  `author_id` bigint NOT NULL DEFAULT '0',
-  `play_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
-  `cover_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
-  `upload_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `favorite_count` bigint NOT NULL DEFAULT '0',
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
-  `comment_count` bigint NOT NULL DEFAULT '0',
+  `id` bigint unsigned NOT NULL COMMENT '视频ID',
+  `author_id` bigint NOT NULL DEFAULT '0' COMMENT '作者ID',
+  `play_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '视频地址',
+  `cover_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '封面地址',
+  `upload_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间',
+  `favorite_count` bigint NOT NULL DEFAULT '0' COMMENT '点赞数',
+  `title` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '标题',
+  `comment_count` bigint NOT NULL DEFAULT '0' COMMENT '评论数',
   PRIMARY KEY (`id`),
   KEY `idx_author_id` (`author_id`),
   KEY `idx_upload_time` (`upload_time` DESC)
