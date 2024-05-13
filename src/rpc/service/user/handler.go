@@ -25,7 +25,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 	defer span.End()
 
 	// 查询用户是否已存在
-	mUser := dal.GetUserByName(ctx, req.Username)
+	mUser := dal.GetUserLoginByName(ctx, req.Username)
 	if mUser != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "用户已存在")
@@ -72,7 +72,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 	defer span.End()
 
 	// 查询用户是否存在
-	mUser := dal.GetUserByName(ctx, req.Username)
+	mUser := dal.GetUserLoginByName(ctx, req.Username)
 	if mUser == nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "用户不存在")

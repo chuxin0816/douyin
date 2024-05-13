@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"douyin/src/dal/model"
+	"douyin/src/dal/query"
 	"douyin/src/pkg/snowflake"
 	"douyin/src/rpc/kitex_gen/user"
 
@@ -59,14 +60,15 @@ func GetUserByIDs(ctx context.Context, authorIDs []int64) ([]*model.User, error)
 	return users, nil
 }
 
-// GetUserByName 根据用户名查询用户信息, 如果用户不存在则返回nil
-func GetUserByName(ctx context.Context, username string) *model.User {
+// GetUserByName 根据用户名查询用户密码, 如果用户不存在则返回nil
+func GetUserLoginByName(ctx context.Context, username string) *model.UserLogin {
 	// 先判断布隆过滤器中是否存在
 	if !bloomFilter.Test([]byte(username)) {
 		return nil
 	}
 
-	user, err := qUser.WithContext(ctx).Where(qUser.Name.Eq(username)).Select(qUser.ID, qUser.Password).First()
+	// user, err := qUser.WithContext(ctx).Where(qUser.Name.Eq(username)).Select(qUser.ID, qUser.Password).First()
+	user, err := qUserLogin.WithContext(ctx).Select(qUserLogin.ID, qUserLogin.Password).Where(qUserLogin.Username.Eq(username)).First()
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil
@@ -85,14 +87,26 @@ func CreateUser(ctx context.Context, username, password string) (userID int64, e
 	bloomFilter.Add([]byte(username))
 
 	user := &model.User{
+		ID:   userID,
+		Name: username,
+	}
+	userLogin := &model.UserLogin{
 		ID:       userID,
-		Name:     username,
+		Username: username,
 		Password: password,
 	}
-	if err := qUser.WithContext(ctx).Create(user); err != nil {
-		return 0, err
-	}
-	return userID, nil
+
+	err = q.Transaction(func(tx *query.Query) error {
+		if err := tx.User.WithContext(ctx).Create(user); err != nil {
+			return err
+		}
+		if err := tx.UserLogin.WithContext(ctx).Create(userLogin); err != nil {
+			return err
+		}
+		return nil
+	})
+
+	return
 }
 
 func GetUserFavoriteCount(ctx context.Context, userID int64) (int64, error) {

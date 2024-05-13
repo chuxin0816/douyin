@@ -60,12 +60,13 @@ var (
 )
 
 var (
-	q         = new(query.Query)
-	qComment  = q.Comment
-	qFavorite = q.Favorite
-	qRelation = q.Relation
-	qUser     = q.User
-	qVideo    = q.Video
+	q          = new(query.Query)
+	qComment   = q.Comment
+	qFavorite  = q.Favorite
+	qRelation  = q.Relation
+	qUser      = q.User
+	qUserLogin = q.UserLogin
+	qVideo     = q.Video
 )
 
 func Init() {
@@ -110,6 +111,7 @@ func InitMySQL() {
 	qFavorite = q.Favorite
 	qRelation = q.Relation
 	qUser = q.User
+	qUserLogin = q.UserLogin
 	qVideo = q.Video
 
 	sqlDB, err := db.DB()
