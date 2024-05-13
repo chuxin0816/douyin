@@ -80,7 +80,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 
 	// 通过kafka更新数据库
 	err = kafka.Relation(ctx, &model.Relation{
-		AuthorID:     req.ToUserId,
+		AuthorID:   req.ToUserId,
 		FollowerID: req.UserId,
 	})
 	if err != nil {
@@ -91,44 +91,42 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 	}
 
 	// 更新缓存相关字段
-	go func() {
-		keyUserFollowerCnt := dal.GetRedisKey(dal.KeyUserFollowerCountPF + strconv.FormatInt(req.ToUserId, 10))
-		// 检查key是否存在
-		if exist, err := dal.RDB.Exists(ctx, keyUserFollowerCnt).Result(); err != nil {
+	keyUserFollowerCnt := dal.GetRedisKey(dal.KeyUserFollowerCountPF + strconv.FormatInt(req.ToUserId, 10))
+	// 检查key是否存在
+	if exist, err := dal.RDB.Exists(ctx, keyUserFollowerCnt).Result(); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "检查key是否存在失败")
+		klog.Error("检查key是否存在失败, err: ", err)
+		return nil, err
+	} else if exist == 0 {
+		// 缓存不存在，查询数据库写入缓存
+		cnt, err := dal.GetUserFollowerCount(ctx, req.ToUserId)
+		if err != nil {
 			span.RecordError(err)
-			span.SetStatus(codes.Error, "检查key是否存在失败")
-			klog.Error("检查key是否存在失败, err: ", err)
-			return
-		} else if exist == 0 {
-			// 缓存不存在，查询数据库写入缓存
-			cnt, err := dal.GetUserFollowerCount(ctx, req.ToUserId)
-			if err != nil {
-				span.RecordError(err)
-				span.SetStatus(codes.Error, "查询数据库失败")
-				klog.Error("查询数据库失败, err: ", err)
-				return
-			}
-			if err = dal.RDB.Set(ctx, keyUserFollowerCnt, cnt, redis.KeepTTL).Err(); err != nil {
-				span.RecordError(err)
-				span.SetStatus(codes.Error, "写入缓存失败")
-				klog.Error("写入缓存失败, err: ", err)
-				return
-			}
+			span.SetStatus(codes.Error, "查询数据库失败")
+			klog.Error("查询数据库失败, err: ", err)
+			return nil, err
 		}
+		if err = dal.RDB.Set(ctx, keyUserFollowerCnt, cnt, redis.KeepTTL).Err(); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "写入缓存失败")
+			klog.Error("写入缓存失败, err: ", err)
+			return nil, err
+		}
+	}
 
-		if err := dal.RDB.IncrBy(ctx, keyUserFollowCnt, req.ActionType).Err(); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "更新user的follow_count字段失败")
-			klog.Error("更新user的follow_count字段失败, err: ", err)
-			return
-		}
-		if err := dal.RDB.IncrBy(ctx, keyUserFollowerCnt, req.ActionType).Err(); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "更新user的follower_count字段失败")
-			klog.Error("更新user的follower_count字段失败, err: ", err)
-			return
-		}
-		// 写入待同步切片
+	pipe := dal.RDB.TxPipeline()
+	pipe.IncrBy(ctx, keyUserFollowCnt, req.ActionType)
+	pipe.IncrBy(ctx, keyUserFollowerCnt, req.ActionType)
+	if _, err := pipe.Exec(ctx); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "更新缓存失败")
+		klog.Error("更新缓存失败, err: ", err)
+		return nil, err
+	}
+
+	// 写入待同步切片
+	go func() {
 		dal.Mu.Lock()
 		dal.CacheUserID[req.UserId] = struct{}{}
 		dal.CacheUserID[req.ToUserId] = struct{}{}

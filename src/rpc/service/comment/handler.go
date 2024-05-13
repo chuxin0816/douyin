@@ -82,38 +82,39 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 	}
 
 	// 更新video的comment_count字段
-	go func() {
-		key := dal.GetRedisKey(dal.KeyVideoCommentCountPF + strconv.FormatInt(req.VideoId, 10))
-		// 检查缓存是否存在
-		if exist, err := dal.RDB.Exists(ctx, key).Result(); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "查询缓存失败")
-			klog.Error("查询缓存失败, err: ", err)
-			return
-		} else if exist == 0 {
-			// 缓存不存在，查询数据库写入缓存
-			cnt, err := dal.GetCommentCount(ctx, req.VideoId)
-			if err != nil {
-				span.RecordError(err)
-				span.SetStatus(codes.Error, "查询评论数量失败")
-				klog.Error("查询评论数量失败, err: ", err)
-				return
-			}
-			if err := dal.RDB.Set(ctx, key, cnt, redis.KeepTTL).Err(); err != nil {
-				span.RecordError(err)
-				span.SetStatus(codes.Error, "写入缓存失败")
-				klog.Error("写入缓存失败, err: ", err)
-				return
-			}
-		}
-		if err := dal.RDB.IncrBy(ctx, key, req.ActionType).Err(); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "更新video的comment_count字段失败")
-			klog.Error("更新video的comment_count字段失败, err: ", err)
-			return
-		}
+	key := dal.GetRedisKey(dal.KeyVideoCommentCountPF + strconv.FormatInt(req.VideoId, 10))
 
-		// 写入待同步切片
+	// 检查缓存是否存在
+	if exist, err := dal.RDB.Exists(ctx, key).Result(); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "查询缓存失败")
+		klog.Error("查询缓存失败, err: ", err)
+		return nil, err
+	} else if exist == 0 {
+		// 缓存不存在，查询数据库写入缓存
+		cnt, err := dal.GetCommentCount(ctx, req.VideoId)
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "查询评论数量失败")
+			klog.Error("查询评论数量失败, err: ", err)
+			return nil, err
+		}
+		if err := dal.RDB.Set(ctx, key, cnt, redis.KeepTTL).Err(); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "写入缓存失败")
+			klog.Error("写入缓存失败, err: ", err)
+			return nil, err
+		}
+	}
+	if err := dal.RDB.IncrBy(ctx, key, req.ActionType).Err(); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "更新video的comment_count字段失败")
+		klog.Error("更新video的comment_count字段失败, err: ", err)
+		return nil, err
+	}
+
+	// 写入待同步切片
+	go func() {
 		dal.Mu.Lock()
 		dal.CacheVideoID[req.VideoId] = struct{}{}
 		dal.Mu.Unlock()

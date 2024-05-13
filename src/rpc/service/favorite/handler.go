@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"sync"
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
@@ -78,78 +79,115 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 		return nil, err
 	}
 
-	// 更新缓存相关字段
+	keyVideoFavoriteCnt := dal.GetRedisKey(dal.KeyVideoFavoriteCountPF + strconv.FormatInt(req.VideoId, 10))
+	keyUserFavoriteCnt := dal.GetRedisKey(dal.KeyUserFavoriteCountPF + strconv.FormatInt(req.UserId, 10))
+	keyUserTotalFavorited := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF + strconv.FormatInt(authorID, 10))
+
+	// 检查相关字段是否存在缓存
+	var wg sync.WaitGroup
+	var errExist error
+	wg.Add(3)
 	go func() {
-		keyVideoFavoriteCnt := dal.GetRedisKey(dal.KeyVideoFavoriteCountPF + strconv.FormatInt(req.VideoId, 10))
-		keyUserFavoriteCnt := dal.GetRedisKey(dal.KeyUserFavoriteCountPF + strconv.FormatInt(req.UserId, 10))
-		keyUserTotalFavorited := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF + strconv.FormatInt(authorID, 10))
-		// 检查key是否存在
-		if exist, err := dal.RDB.Exists(ctx, keyVideoFavoriteCnt, keyUserFavoriteCnt, keyUserTotalFavorited).Result(); err != nil {
+		defer wg.Done()
+		if exist, err := dal.RDB.Exists(ctx, keyVideoFavoriteCnt).Result(); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "检查key是否存在失败")
 			klog.Error("检查key是否存在失败, err: ", err)
+			errExist = err
 			return
-		} else if exist != 3 {
+		} else if exist == 0 {
 			// 缓存不存在，查询数据库写入缓存
 			cnt, err := dal.GetVideoFavoriteCount(ctx, req.VideoId)
 			if err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "查询视频点赞数失败")
 				klog.Error("查询数据库失败, err: ", err)
+				errExist = err
 				return
 			}
 			if err := dal.RDB.Set(ctx, keyVideoFavoriteCnt, cnt, redis.KeepTTL).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)
+				errExist = err
 				return
 			}
-			cnt, err = dal.GetUserFavoriteCount(ctx, req.UserId)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		if exist, err := dal.RDB.Exists(ctx, keyUserFavoriteCnt).Result(); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "检查key是否存在失败")
+			klog.Error("检查key是否存在失败, err: ", err)
+			errExist = err
+			return
+		} else if exist == 0 {
+			// 缓存不存在，查询数据库写入缓存
+			cnt, err := dal.GetUserFavoriteCount(ctx, req.UserId)
 			if err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "查询用户点赞数失败")
 				klog.Error("查询数据库失败, err: ", err)
+				errExist = err
 				return
 			}
 			if err := dal.RDB.Set(ctx, keyUserFavoriteCnt, cnt, redis.KeepTTL).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)
+				errExist = err
 				return
 			}
-			cnt, err = dal.GetUserTotalFavorited(ctx, authorID)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		if exist, err := dal.RDB.Exists(ctx, keyUserTotalFavorited).Result(); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "检查key是否存在失败")
+			klog.Error("检查key是否存在失败, err: ", err)
+			errExist = err
+			return
+		} else if exist == 0 {
+			// 缓存不存在，查询数据库写入缓存
+			cnt, err := dal.GetUserTotalFavorited(ctx, authorID)
 			if err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "查询用户总点赞数失败")
 				klog.Error("查询数据库失败, err: ", err)
+				errExist = err
 				return
 			}
 			if err := dal.RDB.Set(ctx, keyUserTotalFavorited, cnt, redis.KeepTTL).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)
+				errExist = err
 				return
 			}
 		}
+	}()
+	wg.Wait()
 
-		pipe := dal.RDB.Pipeline()
-		// 更新video的favorite_count字段
-		pipe.IncrBy(ctx, keyVideoFavoriteCnt, req.ActionType)
+	if errExist != nil {
+		return nil, errExist
+	}
 
-		// 更新user当前用户的favorite_count字段
-		pipe.IncrBy(ctx, keyUserFavoriteCnt, req.ActionType)
+	// 更新缓存
+	pipe := dal.RDB.Pipeline()
+	pipe.IncrBy(ctx, keyVideoFavoriteCnt, req.ActionType)
+	pipe.IncrBy(ctx, keyUserFavoriteCnt, req.ActionType)
+	pipe.IncrBy(ctx, keyUserTotalFavorited, req.ActionType)
+	if _, err = pipe.Exec(ctx); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "更新缓存相关字段失败")
+		klog.Error("更新缓存相关字段失败, err: ", err)
+		return nil, err
+	}
 
-		// 更新user作者的total_favorited字段
-		pipe.IncrBy(ctx, keyUserTotalFavorited, req.ActionType)
-
-		if _, err := pipe.Exec(ctx); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "更新缓存相关字段失败")
-			klog.Error("更新缓存相关字段失败, err: ", err)
-			return
-		}
-
-		// 写入待同步切片
+	// 写入待同步切片
+	go func() {
 		dal.Mu.Lock()
 		dal.CacheUserID[req.UserId] = struct{}{}
 		dal.CacheUserID[authorID] = struct{}{}
