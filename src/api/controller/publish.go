@@ -45,11 +45,17 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 		return
 	}
 
+	// 检查标题字数
+	if len(req.Title) > 30 {
+		Error(ctx, CodeTitleLengthLimit)
+		hlog.Warn("标题字数超过限制")
+		return
+	}
+
 	// 验证大小
 	if req.Data.Size > 1024*1024*100 {
 		Error(ctx, CodeFileTooLarge)
-		span.SetStatus(codes.Error, "文件太大")
-		hlog.Error("文件太大")
+		hlog.Warn("文件太大")
 		return
 	}
 

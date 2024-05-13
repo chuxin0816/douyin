@@ -18,10 +18,12 @@ const (
 	CodeUserNotExist
 	CodeInvalidPassword
 	CodeFileTooLarge
+	CodeTitleLengthLimit
 	CodeAlreadyFavorite
 	CodeNotFavorite
 	CodeVideoNotExist
 	CodeCommentNotExist
+	CodeCommentLengthLimit
 	CodeAlreadyFollow
 	CodeNotFollow
 	CodeFollowLimit
@@ -29,21 +31,23 @@ const (
 )
 
 var codeMsgMap = map[int32]string{
-	CodeSuccess:         "请求成功",
-	CodeNoAuthority:     "权限不足",
-	CodeInvalidParam:    "请求参数错误",
-	CodeUserExist:       "用户名已存在",
-	CodeUserNotExist:    "用户名不存在",
-	CodeInvalidPassword: "密码错误",
-	CodeFileTooLarge:    "文件太大",
-	CodeAlreadyFavorite: "已经点赞过了",
-	CodeNotFavorite:     "还没有点赞过",
-	CodeVideoNotExist:   "视频不存在",
-	CodeCommentNotExist: "评论不存在",
-	CodeAlreadyFollow:   "已经关注过了",
-	CodeNotFollow:       "还没有关注过",
-	CodeFollowLimit:     "关注数超过限制",
-	CodeServerBusy:      "服务器繁忙",
+	CodeSuccess:            "请求成功",
+	CodeNoAuthority:        "权限不足",
+	CodeInvalidParam:       "请求参数错误",
+	CodeUserExist:          "用户名已存在",
+	CodeUserNotExist:       "用户名不存在",
+	CodeInvalidPassword:    "密码错误",
+	CodeFileTooLarge:       "文件太大",
+	CodeTitleLengthLimit:   "标题字数超过限制",
+	CodeAlreadyFavorite:    "已经点赞过了",
+	CodeNotFavorite:        "还没有点赞过",
+	CodeVideoNotExist:      "视频不存在",
+	CodeCommentNotExist:    "评论不存在",
+	CodeCommentLengthLimit: "字数超过限制",
+	CodeAlreadyFollow:      "已经关注过了",
+	CodeNotFollow:          "还没有关注过",
+	CodeFollowLimit:        "关注数超过限制",
+	CodeServerBusy:         "服务器繁忙",
 }
 
 type Response struct {

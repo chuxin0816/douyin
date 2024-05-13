@@ -46,6 +46,13 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 		return
 	}
 
+	// 检查评论字数
+	if len(req.CommentText) > 500 {
+		Error(ctx, CodeCommentLengthLimit)
+		hlog.Warn("评论字数超过限制")
+		return
+	}
+
 	// 解析视频评论类型
 	if req.ActionType == 2 {
 		req.ActionType = -1
