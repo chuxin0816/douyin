@@ -40,17 +40,17 @@ func (mq *cacheMQ) removeCache(ctx context.Context) {
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
-		if msg.Type != "DELETE" {
-			continue
-		}
-		switch msg.Table {
-		case "favorite":
-			if err := dal.RemoveFavoriteCache(ctx, msg.Data[0]["user_id"], msg.Data[0]["video_id"]); err != nil {
-				klog.Error("failed to remove favorite cache:", err)
-			}
-		case "relation":
-			if err := dal.RemoveRelationCache(ctx, msg.Data[0]["follower_id"], msg.Data[0]["user_id"]); err != nil {
-				klog.Error("failed to remove relation cache:", err)
+		
+		if msg.Type == "DELETE" {
+			switch msg.Table {
+			case "favorite":
+				if err := dal.RemoveFavoriteCache(ctx, msg.Data[0]["user_id"], msg.Data[0]["video_id"]); err != nil {
+					klog.Error("failed to remove favorite cache:", err)
+				}
+			case "relation":
+				if err := dal.RemoveRelationCache(ctx, msg.Data[0]["follower_id"], msg.Data[0]["user_id"]); err != nil {
+					klog.Error("failed to remove relation cache:", err)
+				}
 			}
 		}
 	}
