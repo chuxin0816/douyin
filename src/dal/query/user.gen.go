@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"douyin/dal/model"
+	"douyin/src/dal/model"
 )
 
 func newUser(db *gorm.DB, opts ...gen.DOOption) user {
@@ -36,7 +36,6 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.FollowCount = field.NewInt64(tableName, "follow_count")
 	_user.FollowerCount = field.NewInt64(tableName, "follower_count")
 	_user.WorkCount = field.NewInt64(tableName, "work_count")
-	_user.Password = field.NewString(tableName, "password")
 	_user.Signature = field.NewString(tableName, "signature")
 	_user.CreateTime = field.NewTime(tableName, "create_time")
 	_user.UpdateTime = field.NewTime(tableName, "update_time")
@@ -50,19 +49,18 @@ type user struct {
 	userDo userDo
 
 	ALL             field.Asterisk
-	ID              field.Int64
-	Name            field.String
-	Avatar          field.String
-	BackgroundImage field.String
-	TotalFavorited  field.Int64
-	FavoriteCount   field.Int64
-	FollowCount     field.Int64
-	FollowerCount   field.Int64
-	WorkCount       field.Int64
-	Password        field.String
-	Signature       field.String
-	CreateTime      field.Time
-	UpdateTime      field.Time
+	ID              field.Int64  // 用户ID
+	Name            field.String // 用户名
+	Avatar          field.String // 头像地址
+	BackgroundImage field.String // 背景图地址
+	TotalFavorited  field.Int64  // 获赞数
+	FavoriteCount   field.Int64  // 喜欢数
+	FollowCount     field.Int64  // 关注数
+	FollowerCount   field.Int64  // 粉丝数
+	WorkCount       field.Int64  // 作品数
+	Signature       field.String // 个性签名
+	CreateTime      field.Time   // 创建时间
+	UpdateTime      field.Time   // 更新时间
 
 	fieldMap map[string]field.Expr
 }
@@ -88,7 +86,6 @@ func (u *user) updateTableName(table string) *user {
 	u.FollowCount = field.NewInt64(table, "follow_count")
 	u.FollowerCount = field.NewInt64(table, "follower_count")
 	u.WorkCount = field.NewInt64(table, "work_count")
-	u.Password = field.NewString(table, "password")
 	u.Signature = field.NewString(table, "signature")
 	u.CreateTime = field.NewTime(table, "create_time")
 	u.UpdateTime = field.NewTime(table, "update_time")
@@ -116,7 +113,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 13)
+	u.fieldMap = make(map[string]field.Expr, 12)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["name"] = u.Name
 	u.fieldMap["avatar"] = u.Avatar
@@ -126,7 +123,6 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["follow_count"] = u.FollowCount
 	u.fieldMap["follower_count"] = u.FollowerCount
 	u.fieldMap["work_count"] = u.WorkCount
-	u.fieldMap["password"] = u.Password
 	u.fieldMap["signature"] = u.Signature
 	u.fieldMap["create_time"] = u.CreateTime
 	u.fieldMap["update_time"] = u.UpdateTime

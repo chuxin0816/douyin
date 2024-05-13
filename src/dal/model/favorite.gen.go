@@ -9,8 +9,8 @@ const TableNameFavorite = "favorite"
 // Favorite mapped from table <favorite>
 type Favorite struct {
 	ID      int64 `gorm:"column:id;primaryKey" json:"id"`
-	UserID  int64 `gorm:"column:user_id;not null" json:"user_id"`
-	VideoID int64 `gorm:"column:video_id;not null" json:"video_id"`
+	UserID  int64 `gorm:"column:user_id;not null;comment:用户ID" json:"user_id"`   // 用户ID
+	VideoID int64 `gorm:"column:video_id;not null;comment:视频ID" json:"video_id"` // 视频ID
 }
 
 // TableName Favorite's table name

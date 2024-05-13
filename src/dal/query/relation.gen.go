@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"douyin/dal/model"
+	"douyin/src/dal/model"
 )
 
 func newRelation(db *gorm.DB, opts ...gen.DOOption) relation {
@@ -28,7 +28,7 @@ func newRelation(db *gorm.DB, opts ...gen.DOOption) relation {
 	tableName := _relation.relationDo.TableName()
 	_relation.ALL = field.NewAsterisk(tableName)
 	_relation.ID = field.NewInt64(tableName, "id")
-	_relation.UserID = field.NewInt64(tableName, "user_id")
+	_relation.AuthorID = field.NewInt64(tableName, "author_id")
 	_relation.FollowerID = field.NewInt64(tableName, "follower_id")
 
 	_relation.fillFieldMap()
@@ -41,8 +41,8 @@ type relation struct {
 
 	ALL        field.Asterisk
 	ID         field.Int64
-	UserID     field.Int64
-	FollowerID field.Int64
+	AuthorID   field.Int64 // 作者ID
+	FollowerID field.Int64 // 粉丝ID
 
 	fieldMap map[string]field.Expr
 }
@@ -60,7 +60,7 @@ func (r relation) As(alias string) *relation {
 func (r *relation) updateTableName(table string) *relation {
 	r.ALL = field.NewAsterisk(table)
 	r.ID = field.NewInt64(table, "id")
-	r.UserID = field.NewInt64(table, "user_id")
+	r.AuthorID = field.NewInt64(table, "author_id")
 	r.FollowerID = field.NewInt64(table, "follower_id")
 
 	r.fillFieldMap()
@@ -88,7 +88,7 @@ func (r *relation) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (r *relation) fillFieldMap() {
 	r.fieldMap = make(map[string]field.Expr, 3)
 	r.fieldMap["id"] = r.ID
-	r.fieldMap["user_id"] = r.UserID
+	r.fieldMap["author_id"] = r.AuthorID
 	r.fieldMap["follower_id"] = r.FollowerID
 }
 

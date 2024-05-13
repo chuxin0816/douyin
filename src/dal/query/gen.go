@@ -17,35 +17,38 @@ import (
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:       db,
-		Comment:  newComment(db, opts...),
-		Favorite: newFavorite(db, opts...),
-		Relation: newRelation(db, opts...),
-		User:     newUser(db, opts...),
-		Video:    newVideo(db, opts...),
+		db:        db,
+		Comment:   newComment(db, opts...),
+		Favorite:  newFavorite(db, opts...),
+		Relation:  newRelation(db, opts...),
+		User:      newUser(db, opts...),
+		UserLogin: newUserLogin(db, opts...),
+		Video:     newVideo(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Comment  comment
-	Favorite favorite
-	Relation relation
-	User     user
-	Video    video
+	Comment   comment
+	Favorite  favorite
+	Relation  relation
+	User      user
+	UserLogin userLogin
+	Video     video
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:       db,
-		Comment:  q.Comment.clone(db),
-		Favorite: q.Favorite.clone(db),
-		Relation: q.Relation.clone(db),
-		User:     q.User.clone(db),
-		Video:    q.Video.clone(db),
+		db:        db,
+		Comment:   q.Comment.clone(db),
+		Favorite:  q.Favorite.clone(db),
+		Relation:  q.Relation.clone(db),
+		User:      q.User.clone(db),
+		UserLogin: q.UserLogin.clone(db),
+		Video:     q.Video.clone(db),
 	}
 }
 
@@ -59,30 +62,33 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:       db,
-		Comment:  q.Comment.replaceDB(db),
-		Favorite: q.Favorite.replaceDB(db),
-		Relation: q.Relation.replaceDB(db),
-		User:     q.User.replaceDB(db),
-		Video:    q.Video.replaceDB(db),
+		db:        db,
+		Comment:   q.Comment.replaceDB(db),
+		Favorite:  q.Favorite.replaceDB(db),
+		Relation:  q.Relation.replaceDB(db),
+		User:      q.User.replaceDB(db),
+		UserLogin: q.UserLogin.replaceDB(db),
+		Video:     q.Video.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Comment  *commentDo
-	Favorite *favoriteDo
-	Relation *relationDo
-	User     *userDo
-	Video    *videoDo
+	Comment   *commentDo
+	Favorite  *favoriteDo
+	Relation  *relationDo
+	User      *userDo
+	UserLogin *userLoginDo
+	Video     *videoDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Comment:  q.Comment.WithContext(ctx),
-		Favorite: q.Favorite.WithContext(ctx),
-		Relation: q.Relation.WithContext(ctx),
-		User:     q.User.WithContext(ctx),
-		Video:    q.Video.WithContext(ctx),
+		Comment:   q.Comment.WithContext(ctx),
+		Favorite:  q.Favorite.WithContext(ctx),
+		Relation:  q.Relation.WithContext(ctx),
+		User:      q.User.WithContext(ctx),
+		UserLogin: q.UserLogin.WithContext(ctx),
+		Video:     q.Video.WithContext(ctx),
 	}
 }
 

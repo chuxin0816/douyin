@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"douyin/dal/model"
+	"douyin/src/dal/model"
 )
 
 func newVideo(db *gorm.DB, opts ...gen.DOOption) video {
@@ -45,14 +45,14 @@ type video struct {
 	videoDo videoDo
 
 	ALL           field.Asterisk
-	ID            field.Int64
-	AuthorID      field.Int64
-	PlayURL       field.String
-	CoverURL      field.String
-	UploadTime    field.Time
-	FavoriteCount field.Int64
-	Title         field.String
-	CommentCount  field.Int64
+	ID            field.Int64  // 视频ID
+	AuthorID      field.Int64  // 作者ID
+	PlayURL       field.String // 视频地址
+	CoverURL      field.String // 封面地址
+	UploadTime    field.Time   // 上传时间
+	FavoriteCount field.Int64  // 点赞数
+	Title         field.String // 标题
+	CommentCount  field.Int64  // 评论数
 
 	fieldMap map[string]field.Expr
 }

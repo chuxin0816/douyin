@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"douyin/dal/model"
+	"douyin/src/dal/model"
 )
 
 func newComment(db *gorm.DB, opts ...gen.DOOption) comment {
@@ -42,11 +42,11 @@ type comment struct {
 	commentDo commentDo
 
 	ALL        field.Asterisk
-	ID         field.Int64 // 主键
-	VideoID    field.Int64
-	UserID     field.Int64
-	Content    field.String
-	CreateTime field.Time
+	ID         field.Int64
+	VideoID    field.Int64  // 视频ID
+	UserID     field.Int64  // 用户ID
+	Content    field.String // 评论内容
+	CreateTime field.Time   // 创建时间
 
 	fieldMap map[string]field.Expr
 }

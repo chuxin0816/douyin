@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"douyin/dal/model"
+	"douyin/src/dal/model"
 )
 
 func newFavorite(db *gorm.DB, opts ...gen.DOOption) favorite {
@@ -41,8 +41,8 @@ type favorite struct {
 
 	ALL     field.Asterisk
 	ID      field.Int64
-	UserID  field.Int64
-	VideoID field.Int64
+	UserID  field.Int64 // 用户ID
+	VideoID field.Int64 // 视频ID
 
 	fieldMap map[string]field.Expr
 }
