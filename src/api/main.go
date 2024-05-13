@@ -1,12 +1,12 @@
 package main
 
 import (
-	"douyin/api/router"
-	"douyin/config"
-	"douyin/logger"
-	"douyin/pkg/jwt"
-	"douyin/pkg/tracing"
-	"douyin/rpc/client"
+	"douyin/src/api/router"
+	"douyin/src/config"
+	"douyin/src/logger"
+	"douyin/src/pkg/jwt"
+	"douyin/src/pkg/tracing"
+	"douyin/src/rpc/client"
 )
 
 func main() {

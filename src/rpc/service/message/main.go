@@ -3,13 +3,13 @@ package main
 import (
 	"net"
 
-	"douyin/config"
-	"douyin/dal"
-	"douyin/logger"
-	"douyin/pkg/kafka"
-	"douyin/pkg/snowflake"
-	"douyin/pkg/tracing"
-	message "douyin/rpc/kitex_gen/message/messageservice"
+	"douyin/src/config"
+	"douyin/src/dal"
+	"douyin/src/logger"
+	"douyin/src/pkg/kafka"
+	"douyin/src/pkg/snowflake"
+	"douyin/src/pkg/tracing"
+	message "douyin/src/rpc/kitex_gen/message/messageservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

@@ -3,8 +3,8 @@ package controller
 import (
 	"context"
 
-	"douyin/pkg/tracing"
-	"douyin/rpc/client"
+	"douyin/src/pkg/tracing"
+	"douyin/src/rpc/client"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"

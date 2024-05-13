@@ -2,7 +2,7 @@
 package messageservice
 
 import (
-	message "douyin/rpc/kitex_gen/message"
+	message "douyin/src/rpc/kitex_gen/message"
 	server "github.com/cloudwego/kitex/server"
 )
 

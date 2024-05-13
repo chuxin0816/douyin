@@ -4,7 +4,7 @@ package favoriteservice
 
 import (
 	"context"
-	favorite "douyin/rpc/kitex_gen/favorite"
+	favorite "douyin/src/rpc/kitex_gen/favorite"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 )

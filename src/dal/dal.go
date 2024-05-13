@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"douyin/config"
-	"douyin/dal/model"
-	"douyin/dal/query"
-	"douyin/pkg/tracing"
+	"douyin/src/config"
+	"douyin/src/dal/model"
+	"douyin/src/dal/query"
+	"douyin/src/pkg/tracing"
 
 	"github.com/bits-and-blooms/bloom/v3"
 	"github.com/cloudwego/kitex/pkg/klog"

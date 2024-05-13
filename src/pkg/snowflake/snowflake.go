@@ -3,7 +3,7 @@ package snowflake
 import (
 	"time"
 
-	"douyin/config"
+	"douyin/src/config"
 
 	"github.com/bwmarrin/snowflake"
 )

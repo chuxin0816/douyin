@@ -3,9 +3,9 @@ package client
 import (
 	"context"
 
-	"douyin/config"
-	"douyin/rpc/kitex_gen/feed"
-	"douyin/rpc/kitex_gen/feed/feedservice"
+	"douyin/src/config"
+	"douyin/src/rpc/kitex_gen/feed"
+	"douyin/src/rpc/kitex_gen/feed/feedservice"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

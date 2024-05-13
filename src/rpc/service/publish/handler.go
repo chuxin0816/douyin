@@ -5,10 +5,10 @@ import (
 	"os"
 	"strconv"
 
-	"douyin/dal"
-	"douyin/pkg/oss"
-	"douyin/pkg/tracing"
-	publish "douyin/rpc/kitex_gen/publish"
+	"douyin/src/dal"
+	"douyin/src/pkg/oss"
+	"douyin/src/pkg/tracing"
+	publish "douyin/src/rpc/kitex_gen/publish"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"

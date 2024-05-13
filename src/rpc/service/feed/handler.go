@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"douyin/dal"
-	"douyin/pkg/tracing"
-	feed "douyin/rpc/kitex_gen/feed"
+	"douyin/src/dal"
+	"douyin/src/pkg/tracing"
+	feed "douyin/src/rpc/kitex_gen/feed"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"

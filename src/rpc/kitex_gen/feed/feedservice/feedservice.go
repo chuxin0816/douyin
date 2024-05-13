@@ -4,7 +4,7 @@ package feedservice
 
 import (
 	"context"
-	feed "douyin/rpc/kitex_gen/feed"
+	feed "douyin/src/rpc/kitex_gen/feed"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 )

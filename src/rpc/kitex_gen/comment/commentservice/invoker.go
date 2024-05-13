@@ -3,7 +3,7 @@
 package commentservice
 
 import (
-	comment "douyin/rpc/kitex_gen/comment"
+	comment "douyin/src/rpc/kitex_gen/comment"
 	server "github.com/cloudwego/kitex/server"
 )
 

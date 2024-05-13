@@ -1,7 +1,7 @@
 package kafka
 
 import (
-	"douyin/config"
+	"douyin/src/config"
 
 	"github.com/segmentio/kafka-go"
 )

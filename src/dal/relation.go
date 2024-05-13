@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"douyin/dal/model"
-	"douyin/pkg/snowflake"
+	"douyin/src/dal/model"
+	"douyin/src/pkg/snowflake"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"

@@ -4,7 +4,7 @@ package commentservice
 
 import (
 	"context"
-	comment "douyin/rpc/kitex_gen/comment"
+	comment "douyin/src/rpc/kitex_gen/comment"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
 )

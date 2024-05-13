@@ -2,7 +2,7 @@
 package feedservice
 
 import (
-	feed "douyin/rpc/kitex_gen/feed"
+	feed "douyin/src/rpc/kitex_gen/feed"
 	server "github.com/cloudwego/kitex/server"
 )
 

@@ -3,7 +3,7 @@
 package userservice
 
 import (
-	user "douyin/rpc/kitex_gen/user"
+	user "douyin/src/rpc/kitex_gen/user"
 	server "github.com/cloudwego/kitex/server"
 )
 

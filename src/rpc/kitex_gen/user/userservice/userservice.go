@@ -4,7 +4,7 @@ package userservice
 
 import (
 	"context"
-	user "douyin/rpc/kitex_gen/user"
+	user "douyin/src/rpc/kitex_gen/user"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 )

@@ -12,7 +12,7 @@ import (
 
 	"github.com/cloudwego/kitex/pkg/protocol/bthrift"
 
-	"douyin/rpc/kitex_gen/feed"
+	"douyin/src/rpc/kitex_gen/feed"
 )
 
 // unused protection

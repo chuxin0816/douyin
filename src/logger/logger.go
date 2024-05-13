@@ -5,7 +5,7 @@ import (
 	"path"
 	"time"
 
-	"douyin/config"
+	"douyin/src/config"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/kitex/pkg/klog"

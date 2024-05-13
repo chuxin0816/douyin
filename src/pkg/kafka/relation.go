@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	"douyin/dal"
-	"douyin/dal/model"
-	"douyin/pkg/tracing"
+	"douyin/src/dal"
+	"douyin/src/dal/model"
+	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"

@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"sync"
 
-	"douyin/dal"
-	"douyin/dal/model"
-	"douyin/pkg/kafka"
-	"douyin/pkg/tracing"
-	relation "douyin/rpc/kitex_gen/relation"
-	"douyin/rpc/kitex_gen/user"
+	"douyin/src/dal"
+	"douyin/src/dal/model"
+	"douyin/src/pkg/kafka"
+	"douyin/src/pkg/tracing"
+	relation "douyin/src/rpc/kitex_gen/relation"
+	"douyin/src/rpc/kitex_gen/user"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"

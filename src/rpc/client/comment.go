@@ -3,9 +3,9 @@ package client
 import (
 	"context"
 
-	"douyin/config"
-	"douyin/rpc/kitex_gen/comment"
-	"douyin/rpc/kitex_gen/comment/commentservice"
+	"douyin/src/config"
+	"douyin/src/rpc/kitex_gen/comment"
+	"douyin/src/rpc/kitex_gen/comment/commentservice"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

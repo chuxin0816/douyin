@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"douyin/pkg/jwt"
-	"douyin/pkg/tracing"
-	"douyin/rpc/client"
+	"douyin/src/pkg/jwt"
+	"douyin/src/pkg/tracing"
+	"douyin/src/rpc/client"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"douyin/dal"
-	"douyin/dal/model"
-	"douyin/pkg/kafka"
-	"douyin/pkg/tracing"
-	message "douyin/rpc/kitex_gen/message"
+	"douyin/src/dal"
+	"douyin/src/dal/model"
+	"douyin/src/pkg/kafka"
+	"douyin/src/pkg/tracing"
+	message "douyin/src/rpc/kitex_gen/message"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"

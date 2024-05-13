@@ -4,7 +4,7 @@ package publishservice
 
 import (
 	"context"
-	publish "douyin/rpc/kitex_gen/publish"
+	publish "douyin/src/rpc/kitex_gen/publish"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 )

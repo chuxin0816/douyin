@@ -3,14 +3,14 @@ package main
 import (
 	"net"
 
-	"douyin/config"
-	"douyin/dal"
-	"douyin/logger"
-	"douyin/pkg/kafka"
-	"douyin/pkg/oss"
-	"douyin/pkg/snowflake"
-	"douyin/pkg/tracing"
-	publish "douyin/rpc/kitex_gen/publish/publishservice"
+	"douyin/src/config"
+	"douyin/src/dal"
+	"douyin/src/logger"
+	"douyin/src/pkg/kafka"
+	"douyin/src/pkg/oss"
+	"douyin/src/pkg/snowflake"
+	"douyin/src/pkg/tracing"
+	publish "douyin/src/rpc/kitex_gen/publish/publishservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

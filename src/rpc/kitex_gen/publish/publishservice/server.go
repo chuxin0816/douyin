@@ -2,7 +2,7 @@
 package publishservice
 
 import (
-	publish "douyin/rpc/kitex_gen/publish"
+	publish "douyin/src/rpc/kitex_gen/publish"
 	server "github.com/cloudwego/kitex/server"
 )
 

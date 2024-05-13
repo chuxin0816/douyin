@@ -8,8 +8,8 @@ import (
 	"path"
 	"sync"
 
-	"douyin/config"
-	"douyin/pkg/tracing"
+	"douyin/src/config"
+	"douyin/src/pkg/tracing"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/cloudwego/kitex/pkg/klog"

@@ -3,7 +3,7 @@ package jwt
 import (
 	"time"
 
-	"douyin/config"
+	"douyin/src/config"
 
 	"github.com/golang-jwt/jwt"
 )

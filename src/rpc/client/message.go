@@ -3,9 +3,9 @@ package client
 import (
 	"context"
 
-	"douyin/config"
-	"douyin/rpc/kitex_gen/message"
-	"douyin/rpc/kitex_gen/message/messageservice"
+	"douyin/src/config"
+	"douyin/src/rpc/kitex_gen/message"
+	"douyin/src/rpc/kitex_gen/message/messageservice"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

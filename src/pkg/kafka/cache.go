@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"douyin/dal"
+	"douyin/src/dal"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 )

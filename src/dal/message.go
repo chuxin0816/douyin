@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"douyin/dal/model"
-	"douyin/pkg/snowflake"
-	"douyin/rpc/kitex_gen/message"
+	"douyin/src/dal/model"
+	"douyin/src/pkg/snowflake"
+	"douyin/src/rpc/kitex_gen/message"
 
 	"go.mongodb.org/mongo-driver/bson"
 )

@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"douyin/dal"
-	"douyin/pkg/jwt"
-	"douyin/pkg/tracing"
-	user "douyin/rpc/kitex_gen/user"
+	"douyin/src/dal"
+	"douyin/src/pkg/jwt"
+	"douyin/src/pkg/tracing"
+	user "douyin/src/rpc/kitex_gen/user"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"

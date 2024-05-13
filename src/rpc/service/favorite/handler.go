@@ -5,11 +5,11 @@ import (
 	"errors"
 	"strconv"
 
-	"douyin/dal"
-	"douyin/dal/model"
-	"douyin/pkg/kafka"
-	"douyin/pkg/tracing"
-	favorite "douyin/rpc/kitex_gen/favorite"
+	"douyin/src/dal"
+	"douyin/src/dal/model"
+	"douyin/src/pkg/kafka"
+	"douyin/src/pkg/tracing"
+	favorite "douyin/src/rpc/kitex_gen/favorite"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"

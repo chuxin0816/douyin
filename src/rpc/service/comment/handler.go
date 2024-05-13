@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"douyin/dal"
-	"douyin/dal/model"
-	"douyin/pkg/kafka"
-	"douyin/pkg/tracing"
-	comment "douyin/rpc/kitex_gen/comment"
+	"douyin/src/dal"
+	"douyin/src/dal/model"
+	"douyin/src/pkg/kafka"
+	"douyin/src/pkg/tracing"
+	comment "douyin/src/rpc/kitex_gen/comment"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"

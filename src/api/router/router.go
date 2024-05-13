@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"douyin/api/controller"
-	"douyin/api/middleware"
-	"douyin/config"
+	"douyin/src/api/controller"
+	"douyin/src/api/middleware"
+	"douyin/src/config"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"

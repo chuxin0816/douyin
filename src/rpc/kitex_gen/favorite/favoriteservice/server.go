@@ -2,7 +2,7 @@
 package favoriteservice
 
 import (
-	favorite "douyin/rpc/kitex_gen/favorite"
+	favorite "douyin/src/rpc/kitex_gen/favorite"
 	server "github.com/cloudwego/kitex/server"
 )
 

@@ -3,9 +3,9 @@ package client
 import (
 	"context"
 
-	"douyin/config"
-	"douyin/rpc/kitex_gen/favorite"
-	"douyin/rpc/kitex_gen/favorite/favoriteservice"
+	"douyin/src/config"
+	"douyin/src/rpc/kitex_gen/favorite"
+	"douyin/src/rpc/kitex_gen/favorite/favoriteservice"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

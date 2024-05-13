@@ -4,9 +4,9 @@ import (
 	"context"
 	"strconv"
 
-	"douyin/dal/model"
-	"douyin/pkg/snowflake"
-	"douyin/rpc/kitex_gen/user"
+	"douyin/src/dal/model"
+	"douyin/src/pkg/snowflake"
+	"douyin/src/rpc/kitex_gen/user"
 
 	"gorm.io/gorm"
 )
