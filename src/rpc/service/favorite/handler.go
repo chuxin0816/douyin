@@ -13,7 +13,6 @@ import (
 	favorite "douyin/src/rpc/kitex_gen/favorite"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -105,7 +104,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 				errExist = err
 				return
 			}
-			if err := dal.RDB.Set(ctx, keyVideoFavoriteCnt, cnt, redis.KeepTTL).Err(); err != nil {
+			if err := dal.RDB.Set(ctx, keyVideoFavoriteCnt, cnt, 0).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)
@@ -132,7 +131,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 				errExist = err
 				return
 			}
-			if err := dal.RDB.Set(ctx, keyUserFavoriteCnt, cnt, redis.KeepTTL).Err(); err != nil {
+			if err := dal.RDB.Set(ctx, keyUserFavoriteCnt, cnt, 0).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)
@@ -159,7 +158,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 				errExist = err
 				return
 			}
-			if err := dal.RDB.Set(ctx, keyUserTotalFavorited, cnt, redis.KeepTTL).Err(); err != nil {
+			if err := dal.RDB.Set(ctx, keyUserTotalFavorited, cnt, 0).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)

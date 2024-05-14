@@ -53,7 +53,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 			klog.Error("查询数据库失败, err: ", err)
 			return nil, err
 		}
-		if err = dal.RDB.Set(ctx, keyUserFollowCnt, followCnt, redis.KeepTTL).Err(); err != nil {
+		if err = dal.RDB.Set(ctx, keyUserFollowCnt, followCnt, 0).Err(); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "写入缓存失败")
 			klog.Error("写入缓存失败, err: ", err)
@@ -107,7 +107,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 			klog.Error("查询数据库失败, err: ", err)
 			return nil, err
 		}
-		if err = dal.RDB.Set(ctx, keyUserFollowerCnt, cnt, redis.KeepTTL).Err(); err != nil {
+		if err = dal.RDB.Set(ctx, keyUserFollowerCnt, cnt, 0).Err(); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "写入缓存失败")
 			klog.Error("写入缓存失败, err: ", err)

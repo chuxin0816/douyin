@@ -14,7 +14,6 @@ import (
 	comment "douyin/src/rpc/kitex_gen/comment"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -99,7 +98,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 			klog.Error("查询评论数量失败, err: ", err)
 			return nil, err
 		}
-		if err := dal.RDB.Set(ctx, key, cnt, redis.KeepTTL).Err(); err != nil {
+		if err := dal.RDB.Set(ctx, key, cnt, 0).Err(); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "写入缓存失败")
 			klog.Error("写入缓存失败, err: ", err)
