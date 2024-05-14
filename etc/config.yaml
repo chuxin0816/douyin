@@ -24,7 +24,6 @@ database:
   mysql-master:
     user: root
     password: 123456
-    # host: 127.0.0.1
     host: mysql-master
     port: 3306
     dbname: douyin
@@ -37,10 +36,13 @@ database:
       dbname: douyin
 
   redis:
-    # Addr: 127.0.0.1:6379
-    Addr: redis:6379
+    master_name: mymaster
+    sentinel_addrs:
+      - redis-sentinel1:26379
+      - redis-sentinel2:26379
+      - redis-sentinel3:26379
     password:
-    db: 1
+    db: 0
 
   mongo:
     host: mongo
@@ -48,14 +50,6 @@ database:
     dbname: douyin
 
 consul:
-  # consul_addr: 127.0.0.1:8500
-  # feed_addr: 127.0.0.1:8890
-  # user_addr: 127.0.0.1:8891
-  # favorite_addr: 127.0.0.1:8892
-  # comment_addr: 127.0.0.1:8893
-  # publish_addr: 127.0.0.1:8894
-  # relation_addr: 127.0.0.1:8895
-  # message_addr: 127.0.0.1:8896
   consul_addr: consul:8500
   feed_addr: feed:8890
   user_addr: user:8891
@@ -67,9 +61,6 @@ consul:
 
 kafka:
   brokers:
-    # - "127.0.0.1:9092"
-    # - "127.0.0.1:9093"
-    # - "127.0.0.1:9094"
     - "kafka-0:9092"
     - "kafka-1:9092"
     - "kafka-2:9092"

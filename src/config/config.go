@@ -80,9 +80,10 @@ type MySQLConfig struct {
 }
 
 type RedisConfig struct {
-	Addr     string `mapstructure:"addr"`
-	Password string `mapstructure:"password"`
-	DB       int    `mapstructure:"db"`
+	MasterName    string   `mapstructure:"master_name"`
+	SentinelAddrs []string `mapstructure:"sentinel_addrs"`
+	Password      string   `mapstructure:"password"`
+	DB            int      `mapstructure:"db"`
 }
 
 type MongoConfig struct {

@@ -51,7 +51,7 @@ var (
 
 var (
 	db                *gorm.DB
-	RDB               *redis.Client
+	RDB               *redis.ClusterClient
 	collectionMessage *mongo.Collection
 	g                 = &singleflight.Group{}
 	bloomFilter       *bloom.BloomFilter
@@ -146,16 +146,17 @@ func InitMySQL() {
 }
 
 func InitRedis() {
-	RDB = redis.NewClient(&redis.Options{
-		Addr:     config.Conf.DatabaseConfig.Redis.Addr,
-		Password: config.Conf.DatabaseConfig.Redis.Password,
-		DB:       config.Conf.DatabaseConfig.Redis.DB,
+	RDB = redis.NewFailoverClusterClient(&redis.FailoverOptions{
+		MasterName:    config.Conf.DatabaseConfig.Redis.MasterName,
+		SentinelAddrs: config.Conf.DatabaseConfig.Redis.SentinelAddrs,
+		Password:      config.Conf.DatabaseConfig.Redis.Password,
+		DB:            config.Conf.DatabaseConfig.Redis.DB,
 	})
-	if err := redisotel.InstrumentTracing(RDB); err != nil {
+	if err := RDB.Ping(context.Background()).Err(); err != nil {
 		panic(err)
 	}
 
-	if err := RDB.Ping(context.Background()).Err(); err != nil {
+	if err := redisotel.InstrumentTracing(RDB); err != nil {
 		panic(err)
 	}
 }
