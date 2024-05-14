@@ -25,6 +25,7 @@ import (
 	"golang.org/x/sync/singleflight"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/plugin/dbresolver"
 	gormTracing "gorm.io/plugin/opentelemetry/tracing"
 )
 
@@ -90,18 +91,47 @@ func Init() {
 
 func InitMySQL() {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		config.Conf.DatabaseConfig.MySQLConfig.User,
-		config.Conf.DatabaseConfig.MySQLConfig.Password,
-		config.Conf.DatabaseConfig.MySQLConfig.Host,
-		config.Conf.DatabaseConfig.MySQLConfig.Port,
-		config.Conf.DatabaseConfig.MySQLConfig.DBName,
+		config.Conf.DatabaseConfig.MySQLMaster.User,
+		config.Conf.DatabaseConfig.MySQLMaster.Password,
+		config.Conf.DatabaseConfig.MySQLMaster.Host,
+		config.Conf.DatabaseConfig.MySQLMaster.Port,
+		config.Conf.DatabaseConfig.MySQLMaster.DBName,
 	)
 
+	// 连接主库
 	var err error
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
+
+	// 连接从库
+	replicas := make([]gorm.Dialector, len(config.Conf.DatabaseConfig.MySQLSlaves))
+	for i, slave := range config.Conf.DatabaseConfig.MySQLSlaves {
+		replicas[i] = mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+			slave.User,
+			slave.Password,
+			slave.Host,
+			slave.Port,
+			slave.DBName,
+		))
+	}
+	err = db.Use(
+		dbresolver.Register(dbresolver.Config{
+			Replicas: replicas,
+			Policy:   dbresolver.RandomPolicy{},
+		}).
+			// 设置连接池
+			SetConnMaxIdleTime(time.Minute * 30).
+			SetConnMaxLifetime(time.Hour).
+			SetMaxIdleConns(100).
+			SetMaxOpenConns(500),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	// 链路追踪插件
 	if err := db.Use(gormTracing.NewPlugin(gormTracing.WithoutMetrics())); err != nil {
 		panic(err)
 	}
@@ -113,22 +143,13 @@ func InitMySQL() {
 	qUser = q.User
 	qUserLogin = q.UserLogin
 	qVideo = q.Video
-
-	sqlDB, err := db.DB()
-	if err != nil {
-		panic(err)
-	}
-	sqlDB.SetMaxIdleConns(100)
-	sqlDB.SetMaxOpenConns(500)
-	sqlDB.SetConnMaxLifetime(time.Hour)
-	sqlDB.SetConnMaxIdleTime(time.Minute * 30)
 }
 
 func InitRedis() {
 	RDB = redis.NewClient(&redis.Options{
-		Addr:     config.Conf.DatabaseConfig.RedisConfig.Addr,
-		Password: config.Conf.DatabaseConfig.RedisConfig.Password,
-		DB:       config.Conf.DatabaseConfig.RedisConfig.DB,
+		Addr:     config.Conf.DatabaseConfig.Redis.Addr,
+		Password: config.Conf.DatabaseConfig.Redis.Password,
+		DB:       config.Conf.DatabaseConfig.Redis.DB,
 	})
 	if err := redisotel.InstrumentTracing(RDB); err != nil {
 		panic(err)
@@ -140,7 +161,7 @@ func InitRedis() {
 }
 
 func InitMongo() {
-	uri := fmt.Sprintf("mongodb://%s:%d", config.Conf.MongoConfig.Host, config.Conf.MongoConfig.Port)
+	uri := fmt.Sprintf("mongodb://%s:%d", config.Conf.Mongo.Host, config.Conf.Mongo.Port)
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
 	if err != nil {
 		panic(err)
@@ -150,7 +171,7 @@ func InitMongo() {
 		panic(err)
 	}
 
-	collectionMessage = client.Database(config.Conf.MongoConfig.DBName).Collection("message")
+	collectionMessage = client.Database(config.Conf.Mongo.DBName).Collection("message")
 }
 
 func Close() {

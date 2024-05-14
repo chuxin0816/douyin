@@ -21,20 +21,27 @@ log:
   max_age: 30
 
 database:
-  mysql:
+  mysql-master:
     user: root
     password: 123456
     # host: 127.0.0.1
-    host: mysql
+    host: mysql-master
     port: 3306
     dbname: douyin
+
+  mysql-slaves:
+    - user: root
+      password: 123456
+      host: mysql-slave
+      port: 3306
+      dbname: douyin
 
   redis:
     # Addr: 127.0.0.1:6379
     Addr: redis:6379
-    password: 
+    password:
     db: 1
-  
+
   mongo:
     host: mongo
     port: 27017

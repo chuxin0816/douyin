@@ -65,9 +65,10 @@ type LogConfig struct {
 }
 
 type DatabaseConfig struct {
-	*MySQLConfig `mapstructure:"mysql"`
-	*RedisConfig `mapstructure:"redis"`
-	*MongoConfig `mapstructure:"mongo"`
+	MySQLMaster *MySQLConfig   `mapstructure:"mysql-master"`
+	MySQLSlaves []*MySQLConfig `mapstructure:"mysql-slaves"`
+	Redis       *RedisConfig   `mapstructure:"redis"`
+	Mongo       *MongoConfig   `mapstructure:"mongo"`
 }
 
 type MySQLConfig struct {
@@ -172,16 +173,20 @@ func Init() {
 			}
 
 			if !reflect.DeepEqual(Conf.DatabaseConfig, newConf.DatabaseConfig) {
-				if !reflect.DeepEqual(Conf.DatabaseConfig.MySQLConfig, newConf.DatabaseConfig.MySQLConfig) {
-					Conf.DatabaseConfig.MySQLConfig = newConf.DatabaseConfig.MySQLConfig
+				if !reflect.DeepEqual(Conf.DatabaseConfig.MySQLMaster, newConf.DatabaseConfig.MySQLMaster) {
+					Conf.DatabaseConfig.MySQLMaster = newConf.DatabaseConfig.MySQLMaster
 					NoticeMySQL <- struct{}{}
 				}
-				if !reflect.DeepEqual(Conf.DatabaseConfig.RedisConfig, newConf.DatabaseConfig.RedisConfig) {
-					Conf.DatabaseConfig.RedisConfig = newConf.DatabaseConfig.RedisConfig
+				if !reflect.DeepEqual(Conf.DatabaseConfig.MySQLSlaves, newConf.DatabaseConfig.MySQLSlaves) {
+					Conf.DatabaseConfig.MySQLSlaves = newConf.DatabaseConfig.MySQLSlaves
+					NoticeMySQL <- struct{}{}
+				}
+				if !reflect.DeepEqual(Conf.DatabaseConfig.Redis, newConf.DatabaseConfig.Redis) {
+					Conf.DatabaseConfig.Redis = newConf.DatabaseConfig.Redis
 					NoticeRedis <- struct{}{}
 				}
-				if !reflect.DeepEqual(Conf.DatabaseConfig.MongoConfig, newConf.DatabaseConfig.MongoConfig) {
-					Conf.DatabaseConfig.MongoConfig = newConf.DatabaseConfig.MongoConfig
+				if !reflect.DeepEqual(Conf.DatabaseConfig.Mongo, newConf.DatabaseConfig.Mongo) {
+					Conf.DatabaseConfig.Mongo = newConf.DatabaseConfig.Mongo
 					NoticeMongo <- struct{}{}
 				}
 			}
