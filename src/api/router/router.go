@@ -19,7 +19,8 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	tracer, cfg := hertztracing.NewServerTracer()
 	h := server.Default(
 		server.WithHostPorts(fmt.Sprintf("%s:%d", conf.Host, conf.Port)),
-		server.WithMaxRequestBodySize(1024*1024*128),
+		server.WithMaxRequestBodySize(512*1024*1024),
+		server.WithStreamBody(true),
 		tracer,
 	)
 	h.Use(hertztracing.ServerMiddleware(cfg))
