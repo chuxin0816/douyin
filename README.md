@@ -18,24 +18,28 @@
 │   └── gen                 Gorm/Gen
 ├── etc                     配置文件
 ├── src
-│   ├── api                 HTTP服务
 │   ├── config
 │   ├── dal                 访问数据库(MySQL, MongoDB, Redis)
+│   ├── idl
+│   ├── kitex_gen
 │   ├── logger              日志及其配置
 │   ├── pkg
-│   │   ├── jwt
-│   │   ├── kafka
-│   │   ├── oss
-│   │   ├── snowflake
-│   │   └── tracing
-│   └── rpc
-│       ├── client          RPC客户端
-│       ├── idl
-│       ├── kitex_gen
-│       └── service         RPC服务端
+│   │   ├── jwt             JWT认证
+│   │   ├── kafka           Kafka消息队列
+│   │   ├── oss             阿里云OSS
+│   │   ├── snowflake       雪花算法
+│   │   └── tracing         链路追踪
+│   └── service
+│       ├── api             HTTP服务端
+│       ├── comment         评论服务
+│       ├── favorite        点赞服务 
+│       ├── feed            视频流服务
+│       ├── message         消息服务
+│       ├── publish         视频发布服务
+│       ├── relation        关注服务
+│       └── user            用户服务
 └── docker-compose.yml
 ```
-> 请求链路: http请求->api/router->api/controller->rpc/client->rpc/service->dal
 ##  性能测试
 使用wrk进行性能测试，400个连接，16个线程，压力测试30s：读接口QPS 3500+，写接口QPS 2800+，压测过程全链路无错误
 ## 技术选型：
@@ -51,7 +55,7 @@
 1. Gorm/Gen代码生成
 go run cmd/gen/generator.go
 2. Kitex代码生成
-cd src/rpc/service/feed
+cd src/service/feed
 kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
 ```
 ## 未来更新:

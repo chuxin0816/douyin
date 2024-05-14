@@ -6,8 +6,8 @@ import (
 
 	"douyin/src/dal/model"
 	"douyin/src/dal/query"
+	"douyin/src/kitex_gen/user"
 	"douyin/src/pkg/snowflake"
-	"douyin/src/rpc/kitex_gen/user"
 
 	"gorm.io/gorm"
 )

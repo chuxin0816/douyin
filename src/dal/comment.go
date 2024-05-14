@@ -6,7 +6,7 @@ import (
 
 	"douyin/src/dal/model"
 	"douyin/src/pkg/snowflake"
-	"douyin/src/rpc/kitex_gen/comment"
+	"douyin/src/kitex_gen/comment"
 
 	"gorm.io/gorm"
 )

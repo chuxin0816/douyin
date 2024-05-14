@@ -8,7 +8,7 @@ import (
 
 	"douyin/src/dal/model"
 	"douyin/src/pkg/snowflake"
-	"douyin/src/rpc/kitex_gen/feed"
+	"douyin/src/kitex_gen/feed"
 )
 
 const (
