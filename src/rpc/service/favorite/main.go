@@ -46,6 +46,7 @@ func main() {
 		server.WithRegistry(r),
 		server.WithSuite(kitexTracing.NewServerSuite()),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.FavoriteName}),
+		server.WithMuxTransport(),
 	)
 	err = svr.Run()
 	if err != nil {

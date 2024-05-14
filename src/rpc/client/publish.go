@@ -22,10 +22,12 @@ func initPublishClient() {
 		panic(err)
 	}
 
-	publishClient, err = publishservice.NewClient(config.Conf.OpenTelemetryConfig.PublishName,
+	publishClient, err = publishservice.NewClient(
+		config.Conf.OpenTelemetryConfig.PublishName,
 		client.WithResolver(r),
 		client.WithSuite(tracing.NewClientSuite()),
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),
+		client.WithMuxConnection(2),
 	)
 	if err != nil {
 		panic(err)
