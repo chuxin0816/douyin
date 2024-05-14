@@ -16,6 +16,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/hertz-contrib/cache"
 	"github.com/hertz-contrib/cache/persist"
+	"github.com/hertz-contrib/http2/factory"
 	hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
 )
 
@@ -25,8 +26,13 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 		server.WithHostPorts(fmt.Sprintf("%s:%d", conf.Host, conf.Port)),
 		server.WithMaxRequestBodySize(512*1024*1024),
 		server.WithStreamBody(true),
+		server.WithH2C(true),
+		server.WithALPN(true),
 		tracer,
 	)
+	// HTTP2
+	h.AddProtocol("h2", factory.NewServerFactory())
+
 	// 链路追踪中间件
 	h.Use(hertztracing.ServerMiddleware(cfg))
 
