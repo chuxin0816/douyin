@@ -3,15 +3,19 @@ package router
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"douyin/src/api/controller"
 	"douyin/src/api/middleware"
 	"douyin/src/config"
+	"douyin/src/dal"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"github.com/hertz-contrib/cache"
+	"github.com/hertz-contrib/cache/persist"
 	hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
 )
 
@@ -23,8 +27,18 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 		server.WithStreamBody(true),
 		tracer,
 	)
+	// 链路追踪中间件
 	h.Use(hertztracing.ServerMiddleware(cfg))
 
+	// 缓存中间件
+	memoryStore := persist.NewMemoryStore(10 * time.Second)
+	h.Use(cache.NewCacheByRequestURI(
+		memoryStore,
+		2*time.Second,
+		cache.WithPrefixKey(dal.Prefix),
+	))
+
+	// 限流中间件
 	h.Use(middleware.RatelimitMiddleware(3000))
 
 	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
