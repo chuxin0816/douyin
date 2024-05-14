@@ -5,9 +5,8 @@ import (
 	"time"
 
 	"douyin/src/dal"
-	comment "douyin/src/kitex_gen/comment"
+	feed "douyin/src/kitex_gen/feed"
 	"douyin/src/pkg/tracing"
-	feed "douyin/src/rpc/kitex_gen/feed"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"
@@ -42,17 +41,5 @@ func (s *FeedServiceImpl) Feed(ctx context.Context, req *feed.FeedRequest) (resp
 	// 返回响应
 	resp = &feed.FeedResponse{VideoList: videoList, NextTime: nextTime}
 
-	return
-}
-
-// CommentAction implements the CommentServiceImpl interface.
-func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.CommentActionRequest) (resp *comment.CommentActionResponse, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// CommentList implements the CommentServiceImpl interface.
-func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.CommentListRequest) (resp *comment.CommentListResponse, err error) {
-	// TODO: Your code here...
 	return
 }

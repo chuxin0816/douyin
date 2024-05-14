@@ -7,10 +7,10 @@ import (
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
+	relation "douyin/src/kitex_gen/relation"
+	"douyin/src/kitex_gen/user"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
-	relation "douyin/src/rpc/kitex_gen/relation"
-	"douyin/src/rpc/kitex_gen/user"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"

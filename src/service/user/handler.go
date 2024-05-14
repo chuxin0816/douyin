@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	"douyin/src/dal"
+	user "douyin/src/kitex_gen/user"
 	"douyin/src/pkg/jwt"
 	"douyin/src/pkg/tracing"
-	user "douyin/src/rpc/kitex_gen/user"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"

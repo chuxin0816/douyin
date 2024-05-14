@@ -5,11 +5,11 @@ import (
 
 	"douyin/src/config"
 	"douyin/src/dal"
+	comment "douyin/src/kitex_gen/comment/commentservice"
 	"douyin/src/logger"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/snowflake"
 	"douyin/src/pkg/tracing"
-	comment "douyin/src/rpc/kitex_gen/comment/commentservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

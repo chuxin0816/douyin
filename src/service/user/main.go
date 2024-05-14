@@ -5,11 +5,11 @@ import (
 
 	"douyin/src/config"
 	"douyin/src/dal"
+	user "douyin/src/kitex_gen/user/userservice"
 	"douyin/src/logger"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/snowflake"
 	"douyin/src/pkg/tracing"
-	user "douyin/src/rpc/kitex_gen/user/userservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

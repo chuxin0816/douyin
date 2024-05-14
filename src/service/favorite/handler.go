@@ -8,9 +8,9 @@ import (
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
+	favorite "douyin/src/kitex_gen/favorite"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
-	favorite "douyin/src/rpc/kitex_gen/favorite"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"

@@ -8,12 +8,12 @@ RUN go mod download
 
 COPY . .
 
-RUN cd src/rpc/service/feed && sh build.sh
+RUN cd src/service/feed && sh build.sh
 
 FROM scratch
 
 ENV TZ=Asia/Shanghai
 
-COPY --from=builder /douyin/src/rpc/service/feed/output/bin/feed /
+COPY --from=builder /douyin/src/service/feed/output/bin/feed /
 
 ENTRYPOINT ["/feed"]

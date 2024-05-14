@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN cd src/rpc/service/publish && sh build.sh
+RUN cd src/service/publish && sh build.sh
 
 FROM alpine:latest
 
@@ -18,6 +18,6 @@ RUN set -eux; \
     apk update; \
     apk add --no-cache ffmpeg
 
-COPY --from=builder /douyin/src/rpc/service/publish/output/bin/publish /
+COPY --from=builder /douyin/src/service/publish/output/bin/publish /
 
 ENTRYPOINT ["/publish"]

@@ -6,11 +6,11 @@ import (
 
 	"douyin/src/config"
 	"douyin/src/dal"
+	favorite "douyin/src/kitex_gen/favorite/favoriteservice"
 	"douyin/src/logger"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/snowflake"
 	"douyin/src/pkg/tracing"
-	favorite "douyin/src/rpc/kitex_gen/favorite/favoriteservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

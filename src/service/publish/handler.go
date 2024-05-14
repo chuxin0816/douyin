@@ -6,9 +6,9 @@ import (
 	"strconv"
 
 	"douyin/src/dal"
+	publish "douyin/src/kitex_gen/publish"
 	"douyin/src/pkg/oss"
 	"douyin/src/pkg/tracing"
-	publish "douyin/src/rpc/kitex_gen/publish"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"

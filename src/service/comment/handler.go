@@ -11,7 +11,7 @@ import (
 	"douyin/src/dal/model"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
-	comment "douyin/src/rpc/kitex_gen/comment"
+	comment "douyin/src/kitex_gen/comment"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"

@@ -7,9 +7,9 @@ import (
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
+	message "douyin/src/kitex_gen/message"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
-	message "douyin/src/rpc/kitex_gen/message"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"

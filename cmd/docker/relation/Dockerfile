@@ -8,12 +8,12 @@ RUN go mod download
 
 COPY . .
 
-RUN cd src/rpc/service/relation && sh build.sh
+RUN cd src/service/relation && sh build.sh
 
 FROM scratch
 
 ENV TZ=Asia/Shanghai
 
-COPY --from=builder /douyin/src/rpc/service/relation/output/bin/relation /
+COPY --from=builder /douyin/src/service/relation/output/bin/relation /
 
 ENTRYPOINT ["/relation"]

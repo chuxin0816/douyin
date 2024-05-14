@@ -5,11 +5,11 @@ import (
 
 	"douyin/src/config"
 	"douyin/src/dal"
+	relation "douyin/src/kitex_gen/relation/relationservice"
 	"douyin/src/logger"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/snowflake"
 	"douyin/src/pkg/tracing"
-	relation "douyin/src/rpc/kitex_gen/relation/relationservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -58,7 +58,7 @@ func watchConfig() {
 		select {
 		case <-config.NoticeOpenTelemetry:
 			tracing.Init(config.Conf.OpenTelemetryConfig.RelationName)
-		
+
 		case <-config.NoticeLog:
 			logger.Init()
 

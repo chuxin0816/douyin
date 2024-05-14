@@ -8,12 +8,12 @@ RUN go mod download
 
 COPY . .
 
-RUN cd src/rpc/service/user && sh build.sh
+RUN cd src/service/user && sh build.sh
 
 FROM scratch
 
 ENV TZ=Asia/Shanghai
 
-COPY --from=builder /douyin/src/rpc/service/user/output/bin/user /
+COPY --from=builder /douyin/src/service/user/output/bin/user /
 
 ENTRYPOINT ["/user"]

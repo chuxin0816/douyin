@@ -8,12 +8,12 @@ RUN go mod download
 
 COPY . .
 
-RUN cd src/rpc/service/message && sh build.sh
+RUN cd src/service/message && sh build.sh
 
 FROM scratch
 
 ENV TZ=Asia/Shanghai
 
-COPY --from=builder /douyin/src/rpc/service/message/output/bin/message /
+COPY --from=builder /douyin/src/service/message/output/bin/message /
 
 ENTRYPOINT ["/message"]

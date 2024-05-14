@@ -8,12 +8,12 @@ RUN go mod download
 
 COPY . .
 
-RUN cd src/rpc/service/comment && sh build.sh
+RUN cd src/service/comment && sh build.sh
 
 FROM scratch
 
 ENV TZ=Asia/Shanghai
 
-COPY --from=builder /douyin/src/rpc/service/comment/output/bin/comment /
+COPY --from=builder /douyin/src/service/comment/output/bin/comment /
 
 ENTRYPOINT ["/comment"]

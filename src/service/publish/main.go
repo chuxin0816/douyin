@@ -5,12 +5,12 @@ import (
 
 	"douyin/src/config"
 	"douyin/src/dal"
+	publish "douyin/src/kitex_gen/publish/publishservice"
 	"douyin/src/logger"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/oss"
 	"douyin/src/pkg/snowflake"
 	"douyin/src/pkg/tracing"
-	publish "douyin/src/rpc/kitex_gen/publish/publishservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
