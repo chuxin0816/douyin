@@ -22,7 +22,7 @@ services:
         condition: service_healthy
       mysql-master:
         condition: service_healthy
-      redis:
+      redis-slave:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -41,7 +41,7 @@ services:
         condition: service_healthy
       mysql-slave:
         condition: service_healthy
-      redis:
+      redis-slave:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -60,7 +60,7 @@ services:
         condition: service_healthy
       mysql-slave:
         condition: service_healthy
-      redis:
+      redis-slave:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -79,7 +79,7 @@ services:
         condition: service_healthy
       mysql-slave:
         condition: service_healthy
-      redis:
+      redis-slave:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -98,7 +98,7 @@ services:
         condition: service_healthy
       mysql-slave:
         condition: service_healthy
-      redis:
+      redis-slave:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -117,7 +117,7 @@ services:
         condition: service_healthy
       mysql-slave:
         condition: service_healthy
-      redis:
+      redis-slave:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -134,7 +134,7 @@ services:
         condition: service_healthy
       mongo:
         condition: service_healthy
-      redis:
+      redis-slave:
         condition: service_healthy
       kafka-ui:
         condition: service_healthy
@@ -187,19 +187,36 @@ services:
       - ./etc/canal.properties:/home/admin/canal-server/conf/canal.properties
     container_name: Canal
   
-  redis:
+  redis-master:
     image: redis:latest
     ports:
       - "6379:6379"
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
-      - ./etc/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./etc/redis_master.conf:/usr/local/etc/redis/redis.conf
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 2s
       retries: 3
-    container_name: Redis
+    container_name: Redis-master
+
+  redis-slave:
+    image: redis:latest
+    ports:
+      - "6380:6379"
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./etc/redis_slave.conf:/usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    container_name: Redis-slave
 
   mongo:
     image: mongo:latest
