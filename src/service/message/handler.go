@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"douyin/src/dal"
@@ -24,13 +25,25 @@ func (s *MessageServiceImpl) MessageChat(ctx context.Context, req *message.Messa
 	defer span.End()
 
 	// 操作数据库
-	messageList, err := dal.MessageList(ctx, req.UserId, req.ToUserId, req.LastTime)
+	mMessageList, err := dal.MessageList(ctx, req.UserId, req.ToUserId, req.LastTime)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "操作数据库失败")
 		klog.Error("操作数据库失败, err: ", err)
 		return nil, err
 	}
+
+	// 将model.Message转换为message.Message
+	var wg sync.WaitGroup
+	wg.Add(len(mMessageList))
+	messageList := make([]*message.Message, len(mMessageList))
+	for i, m := range mMessageList {
+		go func(i int, m *model.Message) {
+			defer wg.Done()
+			messageList[i] = dal.ToMessageResponse(m)
+		}(i, m)
+	}
+	wg.Wait()
 
 	// 返回响应
 	resp = &message.MessageChatResponse{MessageList: messageList}

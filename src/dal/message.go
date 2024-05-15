@@ -3,12 +3,11 @@ package dal
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"douyin/src/dal/model"
-	"douyin/src/pkg/snowflake"
 	"douyin/src/kitex_gen/message"
+	"douyin/src/pkg/snowflake"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -25,7 +24,7 @@ func MessageAction(ctx context.Context, message *model.Message) error {
 	return nil
 }
 
-func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*message.Message, error) {
+func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*model.Message, error) {
 	var convertID string
 	if userID < toUserID {
 		convertID = fmt.Sprintf("%d_%d", userID, toUserID)
@@ -48,28 +47,17 @@ func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*mess
 	}
 	defer cursor.Close(ctx)
 
-	mMessageList := make([]*model.Message, 0)
+	messageList := make([]*model.Message, 0)
 	for cursor.Next(ctx) {
 		var m model.Message
 		if err := cursor.Decode(&m); err != nil {
 			return nil, err
 		}
-		mMessageList = append(mMessageList, &m)
+		messageList = append(messageList, &m)
 	}
 	if err := cursor.Err(); err != nil {
 		return nil, err
 	}
-
-	var wgMessageList sync.WaitGroup
-	wgMessageList.Add(len(mMessageList))
-	messageList := make([]*message.Message, len(mMessageList))
-	for i, m := range mMessageList {
-		go func(i int, m *model.Message) {
-			defer wgMessageList.Done()
-			messageList[i] = ToMessageResponse(m)
-		}(i, m)
-	}
-	wgMessageList.Wait()
 
 	return messageList, nil
 }

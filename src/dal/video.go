@@ -226,23 +226,12 @@ func GetPublishList(ctx context.Context, authorID int64) ([]*model.Video, error)
 
 func GetVideoList(ctx context.Context, videoIDs []int64) ([]*model.Video, error) {
 	videoList := make([]*model.Video, len(videoIDs))
-	var wg sync.WaitGroup
-	var wgErr error
-	wg.Add(len(videoIDs))
 	for i, videoID := range videoIDs {
-		go func(i int, videoID int64) {
-			defer wg.Done()
-			video, err := GetVideoByID(ctx, videoID)
-			if err != nil {
-				wgErr = err
-				return
-			}
-			videoList[i] = video
-		}(i, videoID)
-	}
-	wg.Wait()
-	if wgErr != nil {
-		return nil, wgErr
+		video, err := GetVideoByID(ctx, videoID)
+		if err != nil {
+			return nil, err
+		}
+		videoList[i] = video
 	}
 
 	return videoList, nil

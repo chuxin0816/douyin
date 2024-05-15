@@ -9,9 +9,9 @@ import (
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
+	comment "douyin/src/kitex_gen/comment"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
-	comment "douyin/src/kitex_gen/comment"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"go.opentelemetry.io/otel/codes"
@@ -163,7 +163,7 @@ func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.Comme
 		return nil, err
 	}
 
-	// 将用户信息与评论列表进行关联
+	// 将model.Comment转换为comment.Comment
 	var wgCommentList sync.WaitGroup
 	wgCommentList.Add(len(mCommentList))
 	commentList := make([]*comment.Comment, len(mCommentList))

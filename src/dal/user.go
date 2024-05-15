@@ -67,23 +67,15 @@ func GetUserByID(ctx context.Context, authorID int64) (user *model.User, err err
 func GetUserByIDs(ctx context.Context, authorIDs []int64) ([]*model.User, error) {
 	users := make([]*model.User, len(authorIDs))
 
-	var wg sync.WaitGroup
-	var wgErr error
-	wg.Add(len(authorIDs))
 	for i, authorID := range authorIDs {
-		go func(i int, authorID int64) {
-			defer wg.Done()
-			user, err := GetUserByID(ctx, authorID)
-			if err != nil {
-				wgErr = err
-				return
-			}
-			users[i] = user
-		}(i, authorID)
+		user, err := GetUserByID(ctx, authorID)
+		if err != nil {
+			return nil, err
+		}
+		users[i] = user
 	}
-	wg.Wait()
 
-	return users, wgErr
+	return users, nil
 }
 
 // GetUserLoginByName 根据用户名查询用户密码, 如果用户不存在则返回nil
