@@ -15,42 +15,29 @@ import (
 // CheckRelationExist 检查userID是否关注了toUserID
 func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, error) {
 	key := GetRedisKey(KeyUserFollowerPF + strconv.FormatInt(toUserID, 10))
-	// 使用singleflight避免缓存击穿和减少缓存压力
-	exist, err, _ := g.Do(key, func() (interface{}, error) {
-		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
-		}()
-		if RDB.SIsMember(ctx, key, userID).Val() {
-			return true, nil
-		}
+	if RDB.SIsMember(ctx, key, userID).Val() {
+		return true, nil
+	}
 
-		// 缓存未命中, 查询数据库
-		relation, err := qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).
-			Select(qRelation.ID).First()
-		if err != nil {
-			if err == gorm.ErrRecordNotFound {
-				return false, nil
-			}
-			return false, err
-		}
-
-		if relation.ID != 0 {
-			// 写入redis缓存
-			go func() {
-				RDB.SAdd(ctx, key, userID)
-				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
-			}()
-			return true, nil
-		}
-
-		return false, nil
-	})
+	// 缓存未命中, 查询数据库
+	relation, err := qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).
+		Select(qRelation.ID).First()
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
 		return false, err
 	}
 
-	return exist.(bool), nil
+	if relation.ID != 0 {
+		// 写入redis缓存
+		RDB.SAdd(ctx, key, userID)
+		RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
+
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func Follow(ctx context.Context, userID, toUserID int64) error {
@@ -86,15 +73,13 @@ func FollowList(ctx context.Context, userID int64) (followList []int64, err erro
 
 			// 写入redis缓存
 			if len(followList) > 0 {
-				go func() {
-					pipe := RDB.Pipeline()
-					pipe.SAdd(ctx, key, followList)
-					pipe.Expire(ctx, key, ExpireTime+GetRandomTime())
-					_, _ = pipe.Exec(ctx)
-				}()
+				pipe := RDB.Pipeline()
+				pipe.SAdd(ctx, key, followList)
+				pipe.Expire(ctx, key, ExpireTime+GetRandomTime())
+				_, err = pipe.Exec(ctx)
 			}
 
-			return nil, nil
+			return nil, err
 		} else if err != nil {
 			return nil, err
 		} else {
@@ -131,14 +116,12 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 
 			// 写入redis缓存
 			if len(followerList) > 0 {
-				go func() {
-					pipeline := RDB.Pipeline()
-					pipeline.SAdd(ctx, key, followerList)
-					pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
-					_, _ = pipeline.Exec(ctx)
-				}()
+				pipeline := RDB.Pipeline()
+				pipeline.SAdd(ctx, key, followerList)
+				pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
+				_, err = pipeline.Exec(ctx)
 			}
-			return nil, nil
+			return nil, err
 		} else if err != nil {
 			return nil, err
 		} else {

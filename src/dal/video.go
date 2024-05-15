@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"douyin/src/dal/model"
-	"douyin/src/pkg/snowflake"
 	"douyin/src/kitex_gen/feed"
+	"douyin/src/pkg/snowflake"
 )
 
 const (
@@ -150,35 +150,12 @@ func ToVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video, au
 		return video
 	}
 
-	// 使用singleflight避免缓存击穿和减少缓存压力
 	// 查询缓存判断是否点赞
-	key := GetRedisKey(KeyUserFavoritePF + strconv.FormatInt(*userID, 10))
-	_, _, _ = g.Do(key, func() (interface{}, error) {
-		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
-		}()
-		if RDB.SIsMember(ctx, key, mVideo.ID).Val() {
-			video.IsFavorite = true
-			return nil, nil
-		}
-
-		// 缓存未命中, 查询数据库
-		favorite, err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(*userID), qFavorite.VideoID.Eq(mVideo.ID)).
-			Select(qFavorite.ID).First()
-		if err != nil {
-			return nil, err
-		}
-		if favorite.ID != 0 {
-			video.IsFavorite = true
-			// 写入缓存
-			go func() {
-				RDB.SAdd(ctx, key, mVideo.ID)
-				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
-			}()
-		}
-		return nil, nil
-	})
+	exist, err := CheckFavoriteExist(ctx, *userID, mVideo.ID)
+	if err != nil {
+		return video
+	}
+	video.IsFavorite = exist
 
 	return video
 }

@@ -15,37 +15,28 @@ import (
 func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool, error) {
 	// 查看是否已经点赞
 	key := GetRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
-	// 使用singleflight避免缓存击穿和减少缓存压力
-	exist, err, _ := g.Do(key, func() (interface{}, error) {
-		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
-		}()
-		exist := RDB.SIsMember(ctx, key, videoID).Val()
-		if exist {
-			return true, nil
-		}
-		// 缓存未命中，查询mysql中是否有记录
-		var id int64
-		if err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Select(qFavorite.ID).Scan(&id); err != nil {
-			if err == gorm.ErrRecordNotFound {
-				return false, nil
-			}
-			return false, err
-		}
-		if id != 0 {
-			// 写入redis缓存
-			go func() {
-				RDB.SAdd(ctx, key, videoID)
-				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
-			}()
-			return true, nil
-		}
+	exist := RDB.SIsMember(ctx, key, videoID).Val()
+	if exist {
+		return true, nil
+	}
 
-		return false, nil
-	})
+	// 缓存未命中，查询mysql中是否有记录
+	var id int64
+	if err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Select(qFavorite.ID).Scan(&id); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	if id != 0 {
+		// 写入redis缓存
+		RDB.SAdd(ctx, key, videoID)
+		RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
 
-	return exist.(bool), err
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func CreateFavorite(ctx context.Context, userID, videoID int64) error {
@@ -81,15 +72,13 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 
 			// 写入redis缓存
 			if len(videoIDs) > 0 {
-				go func() {
-					pipeline := RDB.Pipeline()
-					pipeline.SAdd(ctx, key, videoIDs)
-					pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
-					_, _ = pipeline.Exec(ctx)
-				}()
+				pipeline := RDB.Pipeline()
+				pipeline.SAdd(ctx, key, videoIDs)
+				pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
+				_, err = pipeline.Exec(ctx)
 			}
 
-			return nil, nil
+			return nil, err
 		} else if err != nil {
 			return nil, err
 		} else {
@@ -105,7 +94,7 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 			return nil, nil
 		}
 	})
-	
+
 	return
 }
 
