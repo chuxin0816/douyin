@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"encoding/json"
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
+	"github.com/vmihailenco/msgpack/v5"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -41,7 +41,7 @@ func (mq *relationMQ) consumeRelation(ctx context.Context) {
 		}
 
 		relation := &model.Relation{}
-		if err := json.Unmarshal(m.Value, relation); err != nil {
+		if err := msgpack.Unmarshal(m.Value, relation); err != nil {
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
@@ -78,7 +78,7 @@ func Relation(ctx context.Context, relation *model.Relation) error {
 	ctx, span := tracing.Tracer.Start(ctx, "kafka.Relation")
 	defer span.End()
 
-	data, err := json.Marshal(relation)
+	data, err := msgpack.Marshal(relation)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "failed to marshal message")

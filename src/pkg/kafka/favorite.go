@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"encoding/json"
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
+	"github.com/vmihailenco/msgpack/v5"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -41,7 +41,7 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 		}
 
 		favorite := &model.Favorite{}
-		if err := json.Unmarshal(m.Value, favorite); err != nil {
+		if err := msgpack.Unmarshal(m.Value, favorite); err != nil {
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
@@ -71,7 +71,7 @@ func Favorite(ctx context.Context, favorite *model.Favorite) error {
 	ctx, span := tracing.Tracer.Start(ctx, "kafka.Favorite")
 	defer span.End()
 
-	data, err := json.Marshal(favorite)
+	data, err := msgpack.Marshal(favorite)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "failed to marshal message")

@@ -2,7 +2,6 @@ package dal
 
 import (
 	"context"
-	"encoding/json"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -13,6 +12,7 @@ import (
 	"douyin/src/pkg/snowflake"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/vmihailenco/msgpack/v5"
 	"gorm.io/gorm"
 )
 
@@ -44,7 +44,7 @@ func GetVideoByID(ctx context.Context, videoID int64) (video *model.Video, err e
 			}
 
 			// 写入redis缓存
-			videoInfo, err := json.Marshal(video)
+			videoInfo, err := msgpack.Marshal(video)
 			if err != nil {
 				return nil, err
 			}
@@ -55,7 +55,7 @@ func GetVideoByID(ctx context.Context, videoID int64) (video *model.Video, err e
 			return nil, err
 		} else {
 			// 缓存命中
-			err = json.Unmarshal(videoInfo, video)
+			err = msgpack.Unmarshal(videoInfo, video)
 			return nil, err
 		}
 	})

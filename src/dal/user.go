@@ -2,7 +2,6 @@ package dal
 
 import (
 	"context"
-	"encoding/json"
 	"strconv"
 	"sync"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"douyin/src/pkg/snowflake"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/vmihailenco/msgpack/v5"
 	"gorm.io/gorm"
 )
 
@@ -44,7 +44,7 @@ func GetUserByID(ctx context.Context, authorID int64) (user *model.User, err err
 			}
 
 			// 写入redis缓存
-			b, err := json.Marshal(user)
+			b, err := msgpack.Marshal(user)
 			if err != nil {
 				return nil, err
 			}
@@ -55,7 +55,7 @@ func GetUserByID(ctx context.Context, authorID int64) (user *model.User, err err
 			return nil, err
 		} else {
 			// 缓存命中
-			err = json.Unmarshal([]byte(userInfo), user)
+			err = msgpack.Unmarshal([]byte(userInfo), user)
 			return nil, err
 		}
 	})
@@ -134,7 +134,6 @@ func CreateUser(ctx context.Context, username, password string) (userID int64, e
 
 	return
 }
-
 
 func ToUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *user.User {
 	userResponse := &user.User{
