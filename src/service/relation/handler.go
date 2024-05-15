@@ -217,26 +217,18 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 		return nil, err
 	}
 
-	// 获取粉丝列表
-	followerList, err := dal.FollowerList(ctx, req.ToUserId)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "获取粉丝列表失败")
-		klog.Error("获取粉丝列表失败, err: ", err)
-		return nil, err
-	}
-
 	// 获取好友列表
-	size := min(len(followList), len(followerList))
-	friendList := make([]int64, 0, size)
-	mp := make(map[int64]struct{}, len(followList))
-	for _, userID := range followList {
-		mp[userID] = struct{}{}
-	}
-
-	for _, userID := range followerList {
-		if _, ok := mp[userID]; ok {
-			friendList = append(friendList, userID)
+	friendList := make([]int64, 0, len(followList))
+	for _, id := range followList {
+		exist, err := dal.CheckRelationExist(ctx, id, req.ToUserId)
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "检查是否关注失败")
+			klog.Error("检查是否关注失败, err: ", err)
+			return nil, err
+		}
+		if exist {
+			friendList = append(friendList, id)
 		}
 	}
 
