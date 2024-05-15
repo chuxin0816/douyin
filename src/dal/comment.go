@@ -34,7 +34,7 @@ func GetCommentByID(ctx context.Context, commentID int64) (*model.Comment, error
 }
 
 func GetCommentList(ctx context.Context, videoID int64) ([]*model.Comment, error) {
-	commentList, err := qComment.WithContext(ctx).Where(qComment.VideoID.Eq(videoID)).Find()
+	commentList, err := qComment.WithContext(ctx).Where(qComment.VideoID.Eq(videoID)).Limit(30).Find()
 	if err != nil {
 		return nil, err
 	}
