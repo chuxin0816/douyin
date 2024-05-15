@@ -78,6 +78,15 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 		return nil, dal.ErrFollowLimit
 	}
 
+	// 添加缓存避免重复操作
+	keyUserFollow := dal.GetRedisKey(dal.KeyUserFollowPF + strconv.FormatInt(req.UserId, 10))
+	if req.ActionType == 1 {
+		dal.RDB.SAdd(ctx, keyUserFollow, req.ToUserId)
+		dal.RDB.Expire(ctx, keyUserFollow, dal.ExpireTime+dal.GetRandomTime())
+	} else {
+		dal.RDB.SRem(ctx, keyUserFollow, req.ToUserId)
+	}
+
 	// 通过kafka更新数据库
 	err = kafka.Relation(ctx, &model.Relation{
 		AuthorID:   req.ToUserId,

@@ -14,8 +14,8 @@ import (
 
 // CheckRelationExist 检查userID是否关注了toUserID
 func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, error) {
-	key := GetRedisKey(KeyUserFollowerPF + strconv.FormatInt(toUserID, 10))
-	if RDB.SIsMember(ctx, key, userID).Val() {
+	key := GetRedisKey(KeyUserFollowPF + strconv.FormatInt(userID, 10))
+	if RDB.SIsMember(ctx, key, toUserID).Val() {
 		return true, nil
 	}
 
@@ -110,14 +110,14 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 		userIDs, err := RDB.SMembers(ctx, key).Result()
 		if err == redis.Nil {
 			// 缓存未命中，查询mysql
-			if err := qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(userID)).Select(qRelation.FollowerID).Scan(&followerList); err != nil {
+			if err := qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(userID)).Select(qRelation.FollowerID).Limit(50).Scan(&followerList); err != nil {
 				return nil, err
 			}
 
 			// 写入redis缓存
 			if len(followerList) > 0 {
 				pipeline := RDB.Pipeline()
-				pipeline.SAdd(ctx, key, followerList)
+				pipeline.SAdd(ctx, key, followerList[:min(len(followerList), 50)])
 				pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
 				_, err = pipeline.Exec(ctx)
 			}

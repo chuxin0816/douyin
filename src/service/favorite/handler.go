@@ -65,6 +65,15 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 		return nil, dal.ErrNotFavorite
 	}
 
+	// 添加缓存避免重复操作
+	keyUserFavorite := dal.GetRedisKey(dal.KeyUserFavoritePF + strconv.FormatInt(req.UserId, 10))
+	if req.ActionType == 1 {
+		dal.RDB.SAdd(ctx, keyUserFavorite, req.VideoId)
+		dal.RDB.Expire(ctx, keyUserFavorite, dal.ExpireTime+dal.GetRandomTime())
+	} else {
+		dal.RDB.SRem(ctx, keyUserFavorite, req.VideoId)
+	}
+
 	// 通过kafka更新favorite表
 	err = kafka.Favorite(ctx, &model.Favorite{
 		ID:      req.ActionType,
