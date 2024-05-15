@@ -18,7 +18,7 @@ const (
 
 // GetVideoList 获取视频Feed流
 func GetFeedList(ctx context.Context, userID *int64, latestTime time.Time, count int) (videoList []*feed.Video, nextTime *int64, err error) {
-	// 查询数据库
+	// 查询视频信息
 	mVideoList, err := qVideo.WithContext(ctx).Where(qVideo.UploadTime.Lte(latestTime)).
 		Order(qVideo.UploadTime.Desc()).Limit(count).Find()
 	if err != nil {
