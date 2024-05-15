@@ -81,6 +81,13 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	// 从认证中间件中获取userID
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
+	// 不能关注自己
+	if userID == req.ToUserID {
+		Error(ctx, CodeInvalidParam)
+		hlog.Warn("不能关注自己")
+		return
+	}
+
 	// 业务逻辑处理
 	resp, err := relationClient.RelationAction(c, &relation.RelationActionRequest{
 		UserId:     userID,
