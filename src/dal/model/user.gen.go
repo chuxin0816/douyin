@@ -16,11 +16,6 @@ type User struct {
 	Name            string    `gorm:"column:name;not null;comment:用户名" json:"name"`                                          // 用户名
 	Avatar          string    `gorm:"column:avatar;not null;comment:头像地址" json:"avatar"`                                     // 头像地址
 	BackgroundImage string    `gorm:"column:background_image;not null;comment:背景图地址" json:"background_image"`                // 背景图地址
-	TotalFavorited  int64     `gorm:"column:total_favorited;not null;comment:获赞数" json:"total_favorited"`                    // 获赞数
-	FavoriteCount   int64     `gorm:"column:favorite_count;not null;comment:喜欢数" json:"favorite_count"`                      // 喜欢数
-	FollowCount     int64     `gorm:"column:follow_count;not null;comment:关注数" json:"follow_count"`                          // 关注数
-	FollowerCount   int64     `gorm:"column:follower_count;not null;comment:粉丝数" json:"follower_count"`                      // 粉丝数
-	WorkCount       int64     `gorm:"column:work_count;not null;comment:作品数" json:"work_count"`                              // 作品数
 	Signature       string    `gorm:"column:signature;not null;comment:个性签名" json:"signature"`                               // 个性签名
 	CreateTime      time.Time `gorm:"column:create_time;not null;default:CURRENT_TIMESTAMP;comment:创建时间" json:"create_time"` // 创建时间
 	UpdateTime      time.Time `gorm:"column:update_time;not null;default:CURRENT_TIMESTAMP;comment:更新时间" json:"update_time"` // 更新时间

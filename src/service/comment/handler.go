@@ -91,7 +91,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 		return nil, err
 	} else if exist == 0 {
 		// 缓存不存在，查询数据库写入缓存
-		cnt, err := dal.GetCommentCount(ctx, req.VideoId)
+		cnt, err := dal.GetVideoCommentCount(ctx, req.VideoId)
 		if err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "查询评论数量失败")

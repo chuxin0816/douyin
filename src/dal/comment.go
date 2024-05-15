@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"douyin/src/dal/model"
-	"douyin/src/pkg/snowflake"
 	"douyin/src/kitex_gen/comment"
+	"douyin/src/pkg/snowflake"
 
 	"gorm.io/gorm"
 )
@@ -18,11 +18,6 @@ func CreateComment(ctx context.Context, comment *model.Comment) error {
 
 func DeleteComment(ctx context.Context, commentID int64) (err error) {
 	_, err = qComment.WithContext(ctx).Where(qComment.ID.Eq(commentID)).Delete()
-	return
-}
-
-func GetCommentCount(ctx context.Context, videoID int64) (count int64, err error) {
-	err = qVideo.WithContext(ctx).Select(qVideo.CommentCount).Where(qVideo.ID.Eq(videoID)).Scan(&count)
 	return
 }
 

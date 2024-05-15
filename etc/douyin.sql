@@ -51,11 +51,6 @@ CREATE TABLE `user` (
   `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '用户名',
   `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '头像地址',
   `background_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '背景图地址',
-  `total_favorited` bigint NOT NULL DEFAULT '0' COMMENT '获赞数',
-  `favorite_count` bigint NOT NULL DEFAULT '0' COMMENT '喜欢数',
-  `follow_count` bigint NOT NULL DEFAULT '0' COMMENT '关注数',
-  `follower_count` bigint NOT NULL DEFAULT '0' COMMENT '粉丝数',
-  `work_count` bigint NOT NULL DEFAULT '0' COMMENT '作品数',
   `signature` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '个性签名',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -84,13 +79,10 @@ DROP TABLE IF EXISTS `video`;
 CREATE TABLE `video` (
   `id` bigint unsigned NOT NULL COMMENT '视频ID',
   `author_id` bigint NOT NULL DEFAULT '0' COMMENT '作者ID',
-  `play_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '视频地址',
-  `cover_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '封面地址',
+  `play_url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '视频地址',
+  `cover_url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '封面地址',
   `upload_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间',
-  `favorite_count` bigint NOT NULL DEFAULT '0' COMMENT '点赞数',
   `title` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '标题',
-  `comment_count` bigint NOT NULL DEFAULT '0' COMMENT '评论数',
   PRIMARY KEY (`id`),
-  KEY `idx_author_id` (`author_id`),
-  KEY `idx_upload_time` (`upload_time` DESC)
+  KEY `idx_author_id` (`author_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

@@ -68,14 +68,14 @@ func GetUserByIDs(ctx context.Context, authorIDs []int64) ([]*model.User, error)
 	users := make([]*model.User, len(authorIDs))
 
 	var wg sync.WaitGroup
-	var firstErr error
+	var wgErr error
 	wg.Add(len(authorIDs))
 	for i, authorID := range authorIDs {
 		go func(i int, authorID int64) {
 			defer wg.Done()
 			user, err := GetUserByID(ctx, authorID)
-			if err != nil && firstErr == nil {
-				firstErr = err
+			if err != nil {
+				wgErr = err
 				return
 			}
 			users[i] = user
@@ -83,7 +83,7 @@ func GetUserByIDs(ctx context.Context, authorIDs []int64) ([]*model.User, error)
 	}
 	wg.Wait()
 
-	return users, firstErr
+	return users, wgErr
 }
 
 // GetUserLoginByName 根据用户名查询用户密码, 如果用户不存在则返回nil
@@ -135,35 +135,6 @@ func CreateUser(ctx context.Context, username, password string) (userID int64, e
 	return
 }
 
-func GetUserFavoriteCount(ctx context.Context, userID int64) (int64, error) {
-	var cnt int64
-	err := qUser.WithContext(ctx).Where(qUser.ID.Eq(userID)).Select(qUser.FavoriteCount).Scan(&cnt)
-	return cnt, err
-}
-
-func GetUserTotalFavorited(ctx context.Context, userID int64) (int64, error) {
-	var cnt int64
-	err := qUser.WithContext(ctx).Where(qUser.ID.Eq(userID)).Select(qUser.TotalFavorited).Scan(&cnt)
-	return cnt, err
-}
-
-func GetUserFollowCount(ctx context.Context, userID int64) (int64, error) {
-	var cnt int64
-	err := qUser.WithContext(ctx).Where(qUser.ID.Eq(userID)).Select(qUser.FollowCount).Scan(&cnt)
-	return cnt, err
-}
-
-func GetUserFollowerCount(ctx context.Context, userID int64) (int64, error) {
-	var cnt int64
-	err := qUser.WithContext(ctx).Where(qUser.ID.Eq(userID)).Select(qUser.FollowerCount).Scan(&cnt)
-	return cnt, err
-}
-
-func GetUserWorkCount(ctx context.Context, userID int64) (int64, error) {
-	var cnt int64
-	err := qUser.WithContext(ctx).Where(qUser.ID.Eq(userID)).Select(qUser.WorkCount).Scan(&cnt)
-	return cnt, err
-}
 
 func ToUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *user.User {
 	userResponse := &user.User{
@@ -171,20 +142,67 @@ func ToUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *
 		Name:            mUser.Name,
 		Avatar:          &mUser.Avatar,
 		BackgroundImage: &mUser.BackgroundImage,
-		FavoriteCount:   &mUser.FavoriteCount,
-		FollowCount:     &mUser.FollowCount,
-		FollowerCount:   &mUser.FollowerCount,
-		WorkCount:       &mUser.WorkCount,
 		IsFollow:        false,
 		Signature:       &mUser.Signature,
-		TotalFavorited:  &mUser.TotalFavorited,
 	}
 
-	if followerID == nil || *followerID == 0 {
+	var wg sync.WaitGroup
+	var wgErr error
+	wg.Add(5)
+	go func() {
+		defer wg.Done()
+		cnt, err := GetUserFavoriteCount(ctx, mUser.ID)
+		if err != nil {
+			wgErr = err
+			return
+		}
+		userResponse.FavoriteCount = &cnt
+	}()
+	go func() {
+		defer wg.Done()
+		cnt, err := GetUserTotalFavorited(ctx, mUser.ID)
+		if err != nil {
+			wgErr = err
+			return
+		}
+		userResponse.TotalFavorited = &cnt
+	}()
+	go func() {
+		defer wg.Done()
+		cnt, err := GetUserFollowCount(ctx, mUser.ID)
+		if err != nil {
+			wgErr = err
+			return
+		}
+		userResponse.FollowCount = &cnt
+	}()
+	go func() {
+		defer wg.Done()
+		cnt, err := GetUserFollowerCount(ctx, mUser.ID)
+		if err != nil {
+			wgErr = err
+			return
+		}
+		userResponse.FollowerCount = &cnt
+	}()
+	go func() {
+		defer wg.Done()
+		cnt, err := GetUserWorkCount(ctx, mUser.ID)
+		if err != nil {
+			wgErr = err
+			return
+		}
+		userResponse.WorkCount = &cnt
+	}()
+	wg.Wait()
+	if wgErr != nil {
 		return userResponse
 	}
 
 	// 判断是否关注
+	if followerID == nil || *followerID == 0 {
+		return userResponse
+	}
 	exist, err := CheckRelationExist(ctx, *followerID, mUser.ID)
 	if err != nil {
 		return userResponse
@@ -192,15 +210,4 @@ func ToUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *
 	userResponse.IsFollow = exist
 
 	return userResponse
-}
-
-func UpdateUser(ctx context.Context, user *model.User) error {
-	_, err := qUser.WithContext(ctx).Where(qUser.ID.Eq(user.ID)).Updates(map[string]any{
-		"total_favorited": user.TotalFavorited,
-		"favorite_count":  user.FavoriteCount,
-		"follow_count":    user.FollowCount,
-		"follower_count":  user.FollowerCount,
-		"work_count":      user.WorkCount,
-	})
-	return err
 }

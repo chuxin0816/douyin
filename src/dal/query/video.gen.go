@@ -32,9 +32,7 @@ func newVideo(db *gorm.DB, opts ...gen.DOOption) video {
 	_video.PlayURL = field.NewString(tableName, "play_url")
 	_video.CoverURL = field.NewString(tableName, "cover_url")
 	_video.UploadTime = field.NewTime(tableName, "upload_time")
-	_video.FavoriteCount = field.NewInt64(tableName, "favorite_count")
 	_video.Title = field.NewString(tableName, "title")
-	_video.CommentCount = field.NewInt64(tableName, "comment_count")
 
 	_video.fillFieldMap()
 
@@ -44,15 +42,13 @@ func newVideo(db *gorm.DB, opts ...gen.DOOption) video {
 type video struct {
 	videoDo videoDo
 
-	ALL           field.Asterisk
-	ID            field.Int64  // 视频ID
-	AuthorID      field.Int64  // 作者ID
-	PlayURL       field.String // 视频地址
-	CoverURL      field.String // 封面地址
-	UploadTime    field.Time   // 上传时间
-	FavoriteCount field.Int64  // 点赞数
-	Title         field.String // 标题
-	CommentCount  field.Int64  // 评论数
+	ALL        field.Asterisk
+	ID         field.Int64  // 视频ID
+	AuthorID   field.Int64  // 作者ID
+	PlayURL    field.String // 视频地址
+	CoverURL   field.String // 封面地址
+	UploadTime field.Time   // 上传时间
+	Title      field.String // 标题
 
 	fieldMap map[string]field.Expr
 }
@@ -74,9 +70,7 @@ func (v *video) updateTableName(table string) *video {
 	v.PlayURL = field.NewString(table, "play_url")
 	v.CoverURL = field.NewString(table, "cover_url")
 	v.UploadTime = field.NewTime(table, "upload_time")
-	v.FavoriteCount = field.NewInt64(table, "favorite_count")
 	v.Title = field.NewString(table, "title")
-	v.CommentCount = field.NewInt64(table, "comment_count")
 
 	v.fillFieldMap()
 
@@ -101,15 +95,13 @@ func (v *video) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (v *video) fillFieldMap() {
-	v.fieldMap = make(map[string]field.Expr, 8)
+	v.fieldMap = make(map[string]field.Expr, 6)
 	v.fieldMap["id"] = v.ID
 	v.fieldMap["author_id"] = v.AuthorID
 	v.fieldMap["play_url"] = v.PlayURL
 	v.fieldMap["cover_url"] = v.CoverURL
 	v.fieldMap["upload_time"] = v.UploadTime
-	v.fieldMap["favorite_count"] = v.FavoriteCount
 	v.fieldMap["title"] = v.Title
-	v.fieldMap["comment_count"] = v.CommentCount
 }
 
 func (v video) clone(db *gorm.DB) video {

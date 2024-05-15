@@ -91,6 +91,7 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 				}
 				videoIDs[i] = videoID
 			}
+
 			return nil, nil
 		}
 	})
@@ -101,4 +102,63 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 func RemoveFavoriteCache(ctx context.Context, userID, videoID string) error {
 	key := GetRedisKey(KeyUserFavoritePF + userID)
 	return RDB.SRem(ctx, key, videoID).Err()
+}
+
+// GetUserFavoriteCount 获取用户点赞数
+func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err error) {
+	// 使用singleflight解决缓存击穿并减少redis压力
+	key := GetRedisKey(KeyUserFavoriteCountPF + strconv.FormatInt(userID, 10))
+	_, err, _ = g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
+
+		// 先查询redis缓存
+		cnt, err = RDB.Get(ctx, key).Int64()
+		if err == redis.Nil {
+			// 缓存未命中，查询mysql
+			cnt, err = qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID)).Count()
+			if err != nil {
+				return nil, err
+			}
+
+			// 写入redis缓存
+			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
+			return nil, err
+		}
+
+		return nil, err
+	})
+
+	return
+}
+
+func GetVideoFavoriteCount(ctx context.Context, videoID int64) (cnt int64, err error) {
+	// 使用singleflight解决缓存击穿并减少redis压力
+	key := GetRedisKey(KeyVideoFavoriteCountPF + strconv.FormatInt(videoID, 10))
+	_, err, _ = g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
+
+		// 先查询redis缓存
+		cnt, err = RDB.Get(ctx, key).Int64()
+		if err == redis.Nil {
+			// 缓存未命中，查询mysql
+			cnt, err = qFavorite.WithContext(ctx).Where(qFavorite.VideoID.Eq(videoID)).Count()
+			if err != nil {
+				return nil, err
+			}
+
+			// 写入redis缓存
+			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
+			return nil, err
+		}
+
+		return nil, err
+	})
+
+	return
 }

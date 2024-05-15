@@ -9,6 +9,7 @@ import (
 	"douyin/src/dal"
 	"douyin/src/dal/model"
 	favorite "douyin/src/kitex_gen/favorite"
+	"douyin/src/kitex_gen/feed"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
 
@@ -224,13 +225,25 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 	}
 
 	// 获取视频列表
-	videoList, err := dal.GetVideoList(ctx, req.UserId, videoIDs)
+	mVideoList, err := dal.GetVideoList(ctx, videoIDs)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取视频列表失败")
 		klog.Error("获取视频列表失败, err: ", err)
 		return nil, err
 	}
+
+	// 将model.Video转换为feed.Video
+	videoList := make([]*feed.Video, len(mVideoList))
+	var wg sync.WaitGroup
+	wg.Add(len(mVideoList))
+	for i, mVideo := range mVideoList {
+		go func(i int, mVideo *model.Video) {
+			defer wg.Done()
+			videoList[i] = dal.ToVideoResponse(ctx, nil, mVideo)
+		}(i, mVideo)
+	}
+	wg.Wait()
 
 	// 返回响应
 	resp = &favorite.FavoriteListResponse{VideoList: videoList}

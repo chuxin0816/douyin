@@ -44,7 +44,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 	// 检查关注数是否超过10k
 	var followCnt int64
 	keyUserFollowCnt := dal.GetRedisKey(dal.KeyUserFollowCountPF + strconv.FormatInt(req.UserId, 10))
-	cnt, err := dal.RDB.Get(ctx, keyUserFollowCnt).Result()
+	followCnt, err = dal.RDB.Get(ctx, keyUserFollowCnt).Int64()
 	if err == redis.Nil {
 		followCnt, err = dal.GetUserFollowCount(ctx, req.UserId)
 		if err != nil {
@@ -65,7 +65,6 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 		klog.Error("查询缓存失败, err: ", err)
 		return nil, err
 	} else {
-		followCnt, err = strconv.ParseInt(cnt, 10, 64)
 		if err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "类型转换失败")

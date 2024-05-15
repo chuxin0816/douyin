@@ -4,8 +4,11 @@ import (
 	"context"
 	"os"
 	"strconv"
+	"sync"
 
 	"douyin/src/dal"
+	"douyin/src/dal/model"
+	"douyin/src/kitex_gen/feed"
 	publish "douyin/src/kitex_gen/publish"
 	"douyin/src/pkg/oss"
 	"douyin/src/pkg/tracing"
@@ -103,13 +106,25 @@ func (s *PublishServiceImpl) PublishList(ctx context.Context, req *publish.Publi
 	defer span.End()
 
 	// 查询视频列表
-	videoList, err := dal.GetPublishList(ctx, req.UserId, req.ToUserId)
+	mVideoList, err := dal.GetPublishList(ctx, req.ToUserId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "查询视频列表失败")
 		klog.Error("查询视频列表失败, err: ", err)
 		return nil, err
 	}
+
+	// 将model.Video转换为feed.Video
+	videoList := make([]*feed.Video, len(mVideoList))
+	var wg sync.WaitGroup
+	wg.Add(len(mVideoList))
+	for i, mVideo := range mVideoList {
+		go func(i int, mVideo *model.Video) {
+			defer wg.Done()
+			videoList[i] = dal.ToVideoResponse(ctx, req.UserId, mVideo)
+		}(i, mVideo)
+	}
+	wg.Wait()
 
 	// 返回响应
 	resp = &publish.PublishListResponse{VideoList: videoList}

@@ -2,6 +2,7 @@ package dal
 
 const (
 	Prefix                  = "douyin:"               // 项目公共前缀
+	KeyVideoInfoPF          = "video:info:"           // 视频基础信息
 	KeyVideoFavoriteCountPF = "video:favorite_count:" // 视频获赞数
 	KeyVideoCommentCountPF  = "video:comment_count:"  // 视频评论数
 	KeyUserFavoritePF       = "user:favorite:"        // Set 用户喜欢的视频

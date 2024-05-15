@@ -152,3 +152,60 @@ func RemoveRelationCache(ctx context.Context, userID, toUserID string) error {
 
 	return err
 }
+
+func GetUserFollowCount(ctx context.Context, userID int64) (cnt int64, err error) {
+	// 使用singleflight解决缓存击穿并减少redis压力
+	key := GetRedisKey(KeyUserFollowCountPF + strconv.FormatInt(userID, 10))
+	_, err, _ = g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
+
+		// 先查询redis缓存
+		cnt, err = RDB.Get(ctx, key).Int64()
+		if err == redis.Nil {
+			// 缓存未命中，查询mysql
+			cnt, err = qRelation.WithContext(ctx).Where(qRelation.FollowerID.Eq(userID)).Count()
+			if err != nil {
+				return nil, err
+			}
+
+			// 写入redis缓存
+			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
+			return nil, err
+		}
+		return nil, err
+	})
+
+	return
+}
+
+func GetUserFollowerCount(ctx context.Context, userID int64) (cnt int64, err error) {
+	// 使用singleflight解决缓存击穿并减少redis压力
+	key := GetRedisKey(KeyUserFollowerCountPF + strconv.FormatInt(userID, 10))
+	_, err, _ = g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
+
+		// 先查询redis缓存
+		cnt, err = RDB.Get(ctx, key).Int64()
+		if err == redis.Nil {
+			// 缓存未命中，查询mysql
+			cnt, err = qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(userID)).Count()
+			if err != nil {
+				return nil, err
+			}
+
+			// 写入redis缓存
+			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
+			return nil, err
+		}
+
+		return nil, err
+	})
+
+	return
+}
