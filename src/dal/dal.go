@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	ExpireTime        = time.Hour * 72
+	ExpireTime        = time.Hour
 	delayTime         = 100 * time.Millisecond
 	randFactor        = 30
 	aggregateInterval = time.Second * 2

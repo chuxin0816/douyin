@@ -2,65 +2,91 @@ package dal
 
 import (
 	"context"
+	"encoding/json"
 	"strconv"
+	"sync"
+	"time"
 
 	"douyin/src/dal/model"
 	"douyin/src/dal/query"
 	"douyin/src/kitex_gen/user"
 	"douyin/src/pkg/snowflake"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 // GetUserByID 用户通过作者id查询作者信息
-func GetUserByID(ctx context.Context, authorID int64) (*model.User, error) {
+func GetUserByID(ctx context.Context, authorID int64) (user *model.User, err error) {
 	// 先判断布隆过滤器中是否存在
 	if !bloomFilter.Test([]byte(strconv.FormatInt(authorID, 10))) {
 		return nil, ErrUserNotExist
 	}
 
-	user, err := qUser.WithContext(ctx).Where(qUser.ID.Eq(authorID)).First()
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, ErrUserNotExist
-		}
-		return nil, err
-	}
+	// 使用singleflight解决缓存击穿并减少redis压力
+	key := GetRedisKey(KeyUserInfoPF + strconv.FormatInt(authorID, 10))
+	_, err, _ = g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
 
-	return user, nil
+		// 先查询redis缓存
+		userInfo, err := RDB.Get(ctx, key).Result()
+		if err == redis.Nil {
+			// 缓存未命中，查询mysql
+			user, err = qUser.WithContext(ctx).Where(qUser.ID.Eq(authorID)).First()
+			if err != nil {
+				if err == gorm.ErrRecordNotFound {
+					return nil, ErrUserNotExist
+				}
+				return nil, err
+			}
+
+			// 写入redis缓存
+			b, err := json.Marshal(user)
+			if err != nil {
+				return nil, err
+			}
+			userInfo = string(b)
+			err = RDB.Set(ctx, key, userInfo, ExpireTime+GetRandomTime()).Err()
+			return nil, err
+		} else if err != nil {
+			return nil, err
+		} else {
+			// 缓存命中
+			err = json.Unmarshal([]byte(userInfo), user)
+			return nil, err
+		}
+	})
+
+	return
 }
 
 // GetUserByIDs 根据用户id列表查询用户信息
 func GetUserByIDs(ctx context.Context, authorIDs []int64) ([]*model.User, error) {
-	// 先判断布隆过滤器中是否存在
-	for _, id := range authorIDs {
-		if !bloomFilter.Test([]byte(strconv.FormatInt(id, 10))) {
-			return nil, ErrUserNotExist
-		}
-	}
-	// 查询数据库
-	users, err := qUser.WithContext(ctx).Where(qUser.ID.In(authorIDs...)).Find()
-	if err != nil {
-		return nil, err
-	}
+	users := make([]*model.User, len(authorIDs))
 
-	// 解决重复字段缺少问题
-	userMap := make(map[int64]*model.User)
-	for _, mUser := range users {
-		userMap[mUser.ID] = mUser
+	var wg sync.WaitGroup
+	var firstErr error
+	wg.Add(len(authorIDs))
+	for i, authorID := range authorIDs {
+		go func(i int, authorID int64) {
+			defer wg.Done()
+			user, err := GetUserByID(ctx, authorID)
+			if err != nil && firstErr == nil {
+				firstErr = err
+				return
+			}
+			users[i] = user
+		}(i, authorID)
 	}
+	wg.Wait()
 
-	// 将users按照ids的顺序排列
-	users = make([]*model.User, 0, len(authorIDs))
-	for _, id := range authorIDs {
-		user := userMap[id]
-		users = append(users, user)
-	}
-
-	return users, nil
+	return users, firstErr
 }
 
-// GetUserByName 根据用户名查询用户密码, 如果用户不存在则返回nil
+// GetUserLoginByName 根据用户名查询用户密码, 如果用户不存在则返回nil
 func GetUserLoginByName(ctx context.Context, username string) *model.UserLogin {
 	// 先判断布隆过滤器中是否存在
 	if !bloomFilter.Test([]byte(username)) {

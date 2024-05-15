@@ -42,7 +42,10 @@ func (mq *syncMQ) syncBloomFilter(ctx context.Context) {
 		if msg.Type != "INSERT" {
 			continue
 		}
-		if msg.Table == "user" || msg.Table == "video" {
+		if msg.Table == "user" {
+			dal.AddToBloom(msg.Data[0]["id"])
+			dal.AddToBloom(msg.Data[0]["name"])
+		} else if msg.Table == "video" {
 			dal.AddToBloom(msg.Data[0]["id"])
 		}
 	}
