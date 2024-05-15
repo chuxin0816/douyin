@@ -25,10 +25,9 @@ import (
 )
 
 const (
-	ExpireTime        = time.Hour * 24
-	delayTime         = 150 * time.Millisecond
-	randFactor        = 30
-	aggregateInterval = time.Second * 2
+	ExpireTime   = time.Hour * 24
+	delayTime    = 150 * time.Millisecond
+	randFactor   = 30
 )
 
 var (

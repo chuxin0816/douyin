@@ -58,44 +58,20 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	}
 
 	// 已经点赞
-	if exist && req.ActionType == 1 {
+	if (exist || kafka.FavoriteMap[req.UserId][req.VideoId] == 1) && req.ActionType == 1 {
 		return nil, dal.ErrAlreadyFavorite
 	}
 	// 未点赞
-	if !exist && req.ActionType == -1 {
+	if (!exist || kafka.FavoriteMap[req.UserId][req.VideoId] == -1) && req.ActionType == -1 {
 		return nil, dal.ErrNotFavorite
 	}
 
-	// 添加缓存避免重复操作
+	// 添加到map
+	kafka.Mu.Lock()
+	kafka.FavoriteMap[req.UserId][req.VideoId] = req.ActionType
+	kafka.Mu.Unlock()
+
 	keyUserFavorite := dal.GetRedisKey(dal.KeyUserFavoritePF + strconv.FormatInt(req.UserId, 10))
-	if req.ActionType == 1 {
-		dal.RDB.SAdd(ctx, keyUserFavorite, req.VideoId)
-		dal.RDB.Expire(ctx, keyUserFavorite, dal.ExpireTime+dal.GetRandomTime())
-	} else {
-		dal.RDB.SRem(ctx, keyUserFavorite, req.VideoId)
-	}
-
-	// 通过kafka更新favorite表
-	err = kafka.Favorite(ctx, &model.Favorite{
-		ID:      req.ActionType,
-		UserID:  req.UserId,
-		VideoID: req.VideoId,
-	})
-	if err != nil {
-		// 更新失败，回滚缓存
-		if req.ActionType == 1 {
-			dal.RDB.SRem(ctx, keyUserFavorite, req.VideoId)
-		} else {
-			dal.RDB.SAdd(ctx, keyUserFavorite, req.VideoId)
-			dal.RDB.Expire(ctx, keyUserFavorite, dal.ExpireTime+dal.GetRandomTime())
-		}
-
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "通过kafka更新favorite表失败")
-		klog.Error("通过kafka更新favorite表失败, err: ", err)
-		return nil, err
-	}
-
 	keyVideoFavoriteCnt := dal.GetRedisKey(dal.KeyVideoFavoriteCountPF + strconv.FormatInt(req.VideoId, 10))
 	keyUserFavoriteCnt := dal.GetRedisKey(dal.KeyUserFavoriteCountPF + strconv.FormatInt(req.UserId, 10))
 	keyUserTotalFavorited := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF + strconv.FormatInt(authorID, 10))
@@ -193,6 +169,12 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 
 	// 更新缓存
 	pipe := dal.RDB.Pipeline()
+	if req.ActionType == 1 {
+		pipe.SAdd(ctx, keyUserFavorite, req.VideoId)
+		pipe.Expire(ctx, keyUserFavorite, dal.ExpireTime+dal.GetRandomTime())
+	} else {
+		pipe.SRem(ctx, keyUserFavorite, req.VideoId)
+	}
 	pipe.IncrBy(ctx, keyVideoFavoriteCnt, req.ActionType)
 	pipe.IncrBy(ctx, keyUserFavoriteCnt, req.ActionType)
 	pipe.IncrBy(ctx, keyUserTotalFavorited, req.ActionType)

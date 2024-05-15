@@ -2,6 +2,8 @@ package kafka
 
 import (
 	"context"
+	"sync"
+	"time"
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
@@ -17,7 +19,13 @@ type favoriteMQ struct {
 	*mq
 }
 
-var favoriteMQInstance *favoriteMQ
+const syncInterval = time.Second * 2
+
+var (
+	favoriteMQInstance *favoriteMQ
+	FavoriteMap        = make(map[int64]map[int64]int64)
+	Mu                 sync.Mutex
+)
 
 func initFavoriteMQ() {
 	favoriteMQInstance = &favoriteMQ{
@@ -29,6 +37,7 @@ func initFavoriteMQ() {
 	}
 
 	go favoriteMQInstance.consumeFavorite(context.Background())
+	go syncFavoriteToDB()
 }
 
 func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
@@ -82,4 +91,30 @@ func Favorite(ctx context.Context, favorite *model.Favorite) error {
 	return favoriteMQInstance.Writer.WriteMessages(ctx, kafka.Message{
 		Value: data,
 	})
+}
+
+// syncFavoriteToDB 同步点赞数据到数据库
+func syncFavoriteToDB() {
+	ticker := time.NewTicker(syncInterval)
+	for range ticker.C {
+		Mu.Lock()
+		backupFavoriteMap := FavoriteMap
+		FavoriteMap = make(map[int64]map[int64]int64)
+		Mu.Unlock()
+
+		for userID, videoMap := range backupFavoriteMap {
+			for videoID, actionType := range videoMap {
+				// 通过kafka更新favorite表
+				err := Favorite(context.Background(), &model.Favorite{
+					ID:      actionType,
+					UserID:  userID,
+					VideoID: videoID,
+				})
+				if err != nil {
+					klog.Error("通过kafka更新favorite表失败, err: ", err)
+					continue
+				}
+			}
+		}
+	}
 }
