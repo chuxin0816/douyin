@@ -75,7 +75,7 @@ func SaveVideo(ctx context.Context, userID int64, videoName, coverName, title st
 func GetPublishList(ctx context.Context, userID *int64, authorID int64) ([]*feed.Video, error) {
 	// 查询视频信息
 	mVideoList, err := qVideo.WithContext(ctx).Where(qVideo.AuthorID.Eq(authorID)).
-		Order(qVideo.UploadTime.Desc()).Find()
+		Order(qVideo.UploadTime.Desc()).Limit(30).Find()
 	if err != nil {
 		return nil, err
 	}
