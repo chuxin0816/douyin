@@ -73,10 +73,8 @@ func FollowList(ctx context.Context, userID int64) (followList []int64, err erro
 
 			// 写入redis缓存
 			if len(followList) > 0 {
-				pipe := RDB.Pipeline()
-				pipe.SAdd(ctx, key, followList)
-				pipe.Expire(ctx, key, ExpireTime+GetRandomTime())
-				_, err = pipe.Exec(ctx)
+				RDB.SAdd(ctx, key, followList)
+				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
 			}
 
 			return nil, err
@@ -116,10 +114,8 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 
 			// 写入redis缓存
 			if len(followerList) > 0 {
-				pipeline := RDB.Pipeline()
-				pipeline.SAdd(ctx, key, followerList[:min(len(followerList), 50)])
-				pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
-				_, err = pipeline.Exec(ctx)
+				RDB.SAdd(ctx, key, followerList[:min(len(followerList), 50)])
+				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
 			}
 			return nil, err
 		} else if err != nil {
@@ -141,18 +137,6 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 	return
 }
 
-func RemoveRelationCache(ctx context.Context, userID, toUserID string) error {
-	keyFollowPF := GetRedisKey(KeyUserFollowPF + userID)
-	keyFollower := GetRedisKey(KeyUserFollowerPF + toUserID)
-
-	pipe := RDB.Pipeline()
-	pipe.SRem(ctx, keyFollowPF, toUserID)
-	pipe.SRem(ctx, keyFollower, userID)
-	_, err := pipe.Exec(ctx)
-
-	return err
-}
-
 func GetUserFollowCount(ctx context.Context, userID int64) (cnt int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFollowCountPF + strconv.FormatInt(userID, 10))
@@ -172,7 +156,7 @@ func GetUserFollowCount(ctx context.Context, userID int64) (cnt int64, err error
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
+			err = RDB.Set(ctx, key, cnt, 0).Err()
 			return nil, err
 		}
 		return nil, err
@@ -200,7 +184,7 @@ func GetUserFollowerCount(ctx context.Context, userID int64) (cnt int64, err err
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
+			err = RDB.Set(ctx, key, cnt, 0).Err()
 			return nil, err
 		}
 

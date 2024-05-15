@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
-	"sync"
 	"time"
 
 	"douyin/src/config"
@@ -51,9 +50,6 @@ var (
 	collectionMessage *mongo.Collection
 	g                 = &singleflight.Group{}
 	bloomFilter       *bloom.BloomFilter
-	CacheUserID       = make(map[int64]struct{})
-	CacheVideoID      = make(map[int64]struct{})
-	Mu                sync.Mutex
 )
 
 var (

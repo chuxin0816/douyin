@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"douyin/src/dal"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
@@ -38,7 +40,38 @@ func (mq *cacheMQ) removeCache(ctx context.Context) {
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
-
+		switch msg.Table {
+		case "user":
+			if msg.Type == "UPDATE" || msg.Type == "DELETE" {
+				keyUserInfo := dal.GetRedisKey(dal.KeyUserInfoPF + msg.Data[0]["id"])
+				dal.RDB.Del(ctx, keyUserInfo)
+			}
+		case "video":
+			if msg.Type == "INSERT" {
+				keyUserWorkCnt := dal.GetRedisKey(dal.KeyUserWorkCountPF + msg.Data[0]["author_id"])
+				dal.RDB.Del(ctx, keyUserWorkCnt)
+			} else if msg.Type == "UPDATE" {
+				keyVideoInfo := dal.GetRedisKey(dal.KeyVideoInfoPF + msg.Data[0]["id"])
+				dal.RDB.Del(ctx, keyVideoInfo)
+			} else if msg.Type == "DELETE" {
+				keyUserWorkCnt := dal.GetRedisKey(dal.KeyUserWorkCountPF + msg.Data[0]["author_id"])
+				dal.RDB.Del(ctx, keyUserWorkCnt)
+				keyVideoInfo := dal.GetRedisKey(dal.KeyVideoInfoPF + msg.Data[0]["id"])
+				dal.RDB.Del(ctx, keyVideoInfo)
+			}
+		case "comment":
+			if msg.Type == "INSERT" || msg.Type == "DELETE" {
+				keyVideoCommentCnt := dal.GetRedisKey(dal.KeyVideoCommentCountPF + msg.Data[0]["video_id"])
+				dal.RDB.Del(ctx, keyVideoCommentCnt)
+			}
+		case "relation":
+			if msg.Type == "INSERT" || msg.Type == "DELETE" {
+				keyFollowCnt := dal.GetRedisKey(dal.KeyUserFollowCountPF + msg.Data[0]["follower_id"])
+				dal.RDB.Del(ctx, keyFollowCnt)
+				keyFollower := dal.GetRedisKey(dal.KeyUserFollowerPF + msg.Data[0]["author_id"])
+				dal.RDB.Del(ctx, keyFollower)
+			}
+		}
 	}
 
 	// 程序退出前关闭Reader

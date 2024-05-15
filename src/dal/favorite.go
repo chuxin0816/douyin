@@ -31,7 +31,7 @@ func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool,
 	if id != 0 {
 		// 写入redis缓存
 		RDB.SAdd(ctx, key, videoID)
-		RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
+		RDB.Expire(ctx, key, 0)
 
 		return true, nil
 	}
@@ -72,10 +72,8 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 
 			// 写入redis缓存
 			if len(videoIDs) > 0 {
-				pipeline := RDB.Pipeline()
-				pipeline.SAdd(ctx, key, videoIDs)
-				pipeline.Expire(ctx, key, ExpireTime+GetRandomTime())
-				_, err = pipeline.Exec(ctx)
+				RDB.SAdd(ctx, key, videoIDs)
+				RDB.Expire(ctx, key, 0)
 			}
 
 			return nil, err
@@ -99,11 +97,6 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 	return
 }
 
-func RemoveFavoriteCache(ctx context.Context, userID, videoID string) error {
-	key := GetRedisKey(KeyUserFavoritePF + userID)
-	return RDB.SRem(ctx, key, videoID).Err()
-}
-
 // GetUserFavoriteCount 获取用户点赞数
 func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
@@ -124,7 +117,7 @@ func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err err
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
+			err = RDB.Set(ctx, key, cnt, 0).Err()
 			return nil, err
 		}
 
@@ -153,7 +146,7 @@ func GetVideoFavoriteCount(ctx context.Context, videoID int64) (cnt int64, err e
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
+			err = RDB.Set(ctx, key, cnt, 0).Err()
 			return nil, err
 		}
 

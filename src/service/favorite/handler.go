@@ -82,6 +82,14 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 		VideoID: req.VideoId,
 	})
 	if err != nil {
+		// 更新失败，回滚缓存
+		if req.ActionType == 1 {
+			dal.RDB.SRem(ctx, keyUserFavorite, req.VideoId)
+		} else {
+			dal.RDB.SAdd(ctx, keyUserFavorite, req.VideoId)
+			dal.RDB.Expire(ctx, keyUserFavorite, dal.ExpireTime+dal.GetRandomTime())
+		}
+
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "通过kafka更新favorite表失败")
 		klog.Error("通过kafka更新favorite表失败, err: ", err)
@@ -94,7 +102,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 
 	// 检查相关字段是否存在缓存
 	var wg sync.WaitGroup
-	var errExist error
+	var wgErr error
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
@@ -102,7 +110,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "检查key是否存在失败")
 			klog.Error("检查key是否存在失败, err: ", err)
-			errExist = err
+			wgErr = err
 			return
 		} else if exist == 0 {
 			// 缓存不存在，查询数据库写入缓存
@@ -111,14 +119,14 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "查询视频点赞数失败")
 				klog.Error("查询数据库失败, err: ", err)
-				errExist = err
+				wgErr = err
 				return
 			}
 			if err := dal.RDB.Set(ctx, keyVideoFavoriteCnt, cnt, 0).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)
-				errExist = err
+				wgErr = err
 				return
 			}
 		}
@@ -129,7 +137,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "检查key是否存在失败")
 			klog.Error("检查key是否存在失败, err: ", err)
-			errExist = err
+			wgErr = err
 			return
 		} else if exist == 0 {
 			// 缓存不存在，查询数据库写入缓存
@@ -138,14 +146,14 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "查询用户点赞数失败")
 				klog.Error("查询数据库失败, err: ", err)
-				errExist = err
+				wgErr = err
 				return
 			}
 			if err := dal.RDB.Set(ctx, keyUserFavoriteCnt, cnt, 0).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)
-				errExist = err
+				wgErr = err
 				return
 			}
 		}
@@ -156,7 +164,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "检查key是否存在失败")
 			klog.Error("检查key是否存在失败, err: ", err)
-			errExist = err
+			wgErr = err
 			return
 		} else if exist == 0 {
 			// 缓存不存在，查询数据库写入缓存
@@ -165,22 +173,22 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "查询用户总点赞数失败")
 				klog.Error("查询数据库失败, err: ", err)
-				errExist = err
+				wgErr = err
 				return
 			}
 			if err := dal.RDB.Set(ctx, keyUserTotalFavorited, cnt, 0).Err(); err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "写入缓存失败")
 				klog.Error("写入缓存失败, err: ", err)
-				errExist = err
+				wgErr = err
 				return
 			}
 		}
 	}()
 	wg.Wait()
 
-	if errExist != nil {
-		return nil, errExist
+	if wgErr != nil {
+		return nil, wgErr
 	}
 
 	// 更新缓存
@@ -194,15 +202,6 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 		klog.Error("更新缓存相关字段失败, err: ", err)
 		return nil, err
 	}
-
-	// 写入待同步切片
-	go func() {
-		dal.Mu.Lock()
-		dal.CacheUserID[req.UserId] = struct{}{}
-		dal.CacheUserID[authorID] = struct{}{}
-		dal.CacheVideoID[req.VideoId] = struct{}{}
-		dal.Mu.Unlock()
-	}()
 
 	// 返回响应
 	resp = &favorite.FavoriteActionResponse{}

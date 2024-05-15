@@ -48,7 +48,7 @@ func GetVideoByID(ctx context.Context, videoID int64) (video *model.Video, err e
 			if err != nil {
 				return nil, err
 			}
-			err = RDB.Set(ctx, key, videoInfo, ExpireTime+GetRandomTime()).Err()
+			err = RDB.Set(ctx, key, videoInfo, 0).Err()
 
 			return nil, err
 		} else if err != nil {
@@ -152,7 +152,7 @@ func GetUserTotalFavorited(ctx context.Context, userID int64) (total int64, err 
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, total, ExpireTime+GetRandomTime()).Err()
+			err = RDB.Set(ctx, key, total, 0).Err()
 			return nil, err
 		}
 		return nil, err
@@ -181,7 +181,7 @@ func GetVideoCommentCount(ctx context.Context, videoID int64) (count int64, err 
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, count, ExpireTime+GetRandomTime()).Err()
+			err = RDB.Set(ctx, key, count, 0).Err()
 			return nil, err
 		}
 
@@ -326,7 +326,7 @@ func GetUserWorkCount(ctx context.Context, userID int64) (cnt int64, err error) 
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
+			err = RDB.Set(ctx, key, cnt, 0).Err()
 			return nil, err
 		}
 

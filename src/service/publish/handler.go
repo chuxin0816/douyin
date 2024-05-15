@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"os"
-	"strconv"
 	"sync"
 
 	"douyin/src/dal"
@@ -55,44 +54,6 @@ func (s *PublishServiceImpl) PublishAction(ctx context.Context, req *publish.Pub
 		klog.Error("操作数据库失败, err: ", err)
 		return nil, err
 	}
-
-	// 修改用户发布视频数
-	key := dal.GetRedisKey(dal.KeyUserWorkCountPF + strconv.FormatInt(req.UserId, 10))
-	// 检查key是否存在
-	if exist, err := dal.RDB.Exists(ctx, key).Result(); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "检查key是否存在失败")
-		klog.Error("检查key是否存在失败, err: ", err)
-		return nil, err
-	} else if exist == 0 {
-		// 缓存不存在，查询数据库写入缓存
-		cnt, err := dal.GetUserWorkCount(ctx, req.UserId)
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "查询用户作品数失败")
-			klog.Error("查询用户作品数失败, err: ", err)
-			return nil, err
-		}
-		if err := dal.RDB.Set(ctx, key, cnt, 0).Err(); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "写入缓存失败")
-			klog.Error("写入缓存失败, err: ", err)
-			return nil, err
-		}
-	}
-	if err := dal.RDB.Incr(ctx, key).Err(); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "增加用户作品数失败")
-		klog.Error("增加用户作品数失败, err: ", err)
-		return nil, err
-	}
-
-	// 写入待同步队列
-	go func() {
-		dal.Mu.Lock()
-		dal.CacheUserID[req.UserId] = struct{}{}
-		dal.Mu.Unlock()
-	}()
 
 	// 返回响应
 	resp = &publish.PublishActionResponse{}

@@ -13,7 +13,6 @@ import (
 	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -42,35 +41,9 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 	}
 
 	// 检查关注数是否超过10k
-	var followCnt int64
-	keyUserFollowCnt := dal.GetRedisKey(dal.KeyUserFollowCountPF + strconv.FormatInt(req.UserId, 10))
-	followCnt, err = dal.RDB.Get(ctx, keyUserFollowCnt).Int64()
-	if err == redis.Nil {
-		followCnt, err = dal.GetUserFollowCount(ctx, req.UserId)
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "查询数据库失败")
-			klog.Error("查询数据库失败, err: ", err)
-			return nil, err
-		}
-		if err = dal.RDB.Set(ctx, keyUserFollowCnt, followCnt, 0).Err(); err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "写入缓存失败")
-			klog.Error("写入缓存失败, err: ", err)
-			return nil, err
-		}
-	} else if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "查询缓存失败")
-		klog.Error("查询缓存失败, err: ", err)
+	followCnt, err := dal.GetUserFollowCount(ctx, req.UserId)
+	if err != nil {
 		return nil, err
-	} else {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "类型转换失败")
-			klog.Error("类型转换失败, err: ", err)
-			return nil, err
-		}
 	}
 
 	if followCnt >= 10000 {
@@ -92,6 +65,14 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 		FollowerID: req.UserId,
 	})
 	if err != nil {
+		// 更新失败，回滚缓存
+		if req.ActionType == 1 {
+			dal.RDB.SRem(ctx, keyUserFollow, req.ToUserId)
+		} else {
+			dal.RDB.SAdd(ctx, keyUserFollow, req.ToUserId)
+			dal.RDB.Expire(ctx, keyUserFollow, dal.ExpireTime+dal.GetRandomTime())
+		}
+
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "通过kafka更新数据库失败")
 		klog.Error("通过kafka更新数据库失败, err: ", err)
@@ -99,6 +80,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 	}
 
 	// 更新缓存相关字段
+	keyUserFollowCnt := dal.GetRedisKey(dal.KeyUserFollowCountPF + strconv.FormatInt(req.UserId, 10))
 	keyUserFollowerCnt := dal.GetRedisKey(dal.KeyUserFollowerCountPF + strconv.FormatInt(req.ToUserId, 10))
 	// 检查key是否存在
 	if exist, err := dal.RDB.Exists(ctx, keyUserFollowerCnt).Result(); err != nil {
@@ -123,7 +105,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 		}
 	}
 
-	pipe := dal.RDB.TxPipeline()
+	pipe := dal.RDB.Pipeline()
 	pipe.IncrBy(ctx, keyUserFollowCnt, req.ActionType)
 	pipe.IncrBy(ctx, keyUserFollowerCnt, req.ActionType)
 	if _, err := pipe.Exec(ctx); err != nil {
@@ -132,14 +114,6 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 		klog.Error("更新缓存失败, err: ", err)
 		return nil, err
 	}
-
-	// 写入待同步切片
-	go func() {
-		dal.Mu.Lock()
-		dal.CacheUserID[req.UserId] = struct{}{}
-		dal.CacheUserID[req.ToUserId] = struct{}{}
-		dal.Mu.Unlock()
-	}()
 
 	// 返回响应
 	resp = &relation.RelationActionResponse{}
