@@ -395,3 +395,114 @@ services:
       timeout: 2s
       retries: 3
     container_name: Jaeger
+
+  nebula-metad:
+    image: docker.io/vesoft/nebula-metad:latest
+    environment:
+      USER: root
+    command:
+      - --meta_server_addrs=nebula-metad:9559
+      - --local_ip=nebula-metad
+      - --ws_ip=nebula-metad
+      - --port=9559
+      - --ws_http_port=19559
+      - --data_path=/data/meta
+      - --log_dir=/logs
+      - --v=0
+      - --minloglevel=0
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://nebula-metad:19559/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    ports:
+      - 9559:9559
+      - 19559:19559
+      - 19560:19560
+    restart: on-failure
+    cap_add:
+      - SYS_PTRACE
+    container_name: Nebula-metad
+
+  nebula-storaged:
+    image: docker.io/vesoft/nebula-storaged:latest
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+    command:
+      - --meta_server_addrs=nebula-metad:9559
+      - --local_ip=nebula-storaged
+      - --ws_ip=nebula-storaged
+      - --port=9779
+      - --ws_http_port=19779
+      - --data_path=/data/storage
+      - --log_dir=/logs
+      - --v=0
+      - --minloglevel=0
+    depends_on:
+      - nebula-metad
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://nebula-storaged:19779/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    ports:
+      - 9779:9779
+      - 19779:19779
+      - 19780:19780
+    restart: on-failure
+    cap_add:
+      - SYS_PTRACE
+    container_name: Nebula-storaged
+
+  nebula-graphd:
+    image: docker.io/vesoft/nebula-graphd:latest
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+    command:
+      - --meta_server_addrs=nebula-metad:9559
+      - --port=9669
+      - --local_ip=nebula-graphd
+      - --ws_ip=nebula-graphd
+      - --ws_http_port=19669
+      - --log_dir=/logs
+      - --v=0
+      - --minloglevel=0
+    depends_on:
+      - nebula-storaged
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://nebula-graphd:19669/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    ports:
+      - 9669:9669
+      - 19669:19669
+      - 19670:19670
+    restart: on-failure
+    cap_add:
+      - SYS_PTRACE
+    container_name: Nebula-graphd
+
+  nebula-console:
+    image: docker.io/vesoft/nebula-console:v3.6.0
+    entrypoint: ""
+    command: 
+      - sh
+      - -c
+      - |
+        for i in `seq 1 60`;do
+          var=`nebula-console -addr nebula-graphd -port 9669 -u root -p nebula -e 'ADD HOSTS "nebula-storaged":9779'`;
+          if [[ $$? == 0 ]];then
+            break;
+          fi;
+          sleep 1;
+          echo "retry to add hosts.";
+        done && tail -f /dev/null;
+    depends_on:
+      - nebula-graphd
+    container_name: Nebula-console
