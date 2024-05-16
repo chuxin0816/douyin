@@ -8,6 +8,7 @@ const (
 	KeyUserFavoritePF       = "user:favorite:"        // Set 用户喜欢的视频
 	KeyUserFollowPF         = "user:follow:"          // Set 用户关注列表
 	KeyUserFollowerPF       = "user:follower:"        // Set 用户粉丝列表(50条左右)
+	KeyUserFriendPF         = "user:friend:"          // Set 用户好友列表
 	KeyUserInfoPF           = "user:info:"            // 用户基础信息
 	KeyUserTotalFavoritedPF = "user:total_favorited:" // 用户总获赞数
 	KeyUserFavoriteCountPF  = "user:favorite_count:"  // 用户喜欢数

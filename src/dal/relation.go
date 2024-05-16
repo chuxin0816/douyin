@@ -104,6 +104,7 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 			time.Sleep(delayTime)
 			g.Forget(key)
 		}()
+
 		// 先查询redis缓存
 		userIDs, err := RDB.SMembers(ctx, key).Result()
 		if err == redis.Nil {
@@ -130,6 +131,58 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 				}
 				followerList[i] = userID
 			}
+			return nil, nil
+		}
+	})
+
+	return
+}
+
+func FriendList(ctx context.Context, userID int64) (friendList []int64, err error) {
+	// 使用singleflight解决缓存击穿并减少redis压力
+	key := GetRedisKey(KeyUserFriendPF + strconv.FormatInt(userID, 10))
+	_, err, _ = g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
+
+		// 先查询redis缓存
+		userIDs, err := RDB.SMembers(ctx, key).Result()
+		if err == redis.Nil {
+			// 缓存未命中，查询mysql
+			// 查询关注列表
+			followList, err := FollowList(ctx, userID)
+			if err != nil {
+				return nil, err
+			}
+
+			// 查看是否互相关注
+			friendList = make([]int64, 0, len(followList))
+			for _, id := range followList {
+				exist, err := CheckRelationExist(ctx, id, userID)
+				if err != nil {
+					return nil, err
+				}
+				if exist {
+					friendList = append(friendList, id)
+				}
+			}
+
+			return nil, nil
+		} else if err != nil {
+			return nil, err
+		} else {
+			// 缓存命中，转换为int64
+			friendList = make([]int64, len(userIDs))
+			for i, id := range userIDs {
+				userID, err := strconv.ParseInt(id, 10, 64)
+				if err != nil {
+					return nil, err
+				}
+				friendList[i] = userID
+			}
+
 			return nil, nil
 		}
 	})
