@@ -237,14 +237,59 @@ func GetVideoList(ctx context.Context, videoIDs []int64) ([]*model.Video, error)
 	return videoList, nil
 }
 
+func GetUserWorkCount(ctx context.Context, userID int64) (cnt int64, err error) {
+	// 使用singleflight解决缓存击穿并减少redis压力
+	key := GetRedisKey(KeyUserWorkCountPF, strconv.FormatInt(userID, 10))
+	_, err, _ = g.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(delayTime)
+			g.Forget(key)
+		}()
+
+		// 先查询redis缓存
+		cnt, err = RDB.Get(ctx, key).Int64()
+		if err == redis.Nil {
+			// 缓存未命中，查询mysql
+			cnt, err = qVideo.WithContext(ctx).Where(qVideo.AuthorID.Eq(userID)).Count()
+			if err != nil {
+				return nil, err
+			}
+
+			// 写入redis缓存
+			err = RDB.Set(ctx, key, cnt, 0).Err()
+			return nil, err
+		}
+
+		return nil, err
+	})
+
+	return
+}
+
+func CheckVideoExist(ctx context.Context, videoID int64) error {
+	// 判断视频是否存在
+	if !bloomFilter.Test([]byte(strconv.FormatInt(videoID, 10))) {
+		return ErrVideoNotExist
+	}
+
+	_, err := qVideo.WithContext(ctx).
+		Where(qVideo.ID.Eq(videoID)).
+		Select(qVideo.ID).First()
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return ErrVideoNotExist
+		}
+		return err
+	}
+
+	return nil
+}
+
 func ToVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video) *feed.Video {
 	video := &feed.Video{
 		Id: mVideo.ID,
-		// Author:        ToUserResponse(ctx, userID, author),
-		// CommentCount:  mVideo.CommentCount,
 		PlayUrl:  mVideo.PlayURL,
 		CoverUrl: mVideo.CoverURL,
-		// FavoriteCount: mVideo.FavoriteCount,
 		IsFavorite: false,
 		Title:      mVideo.Title,
 	}
@@ -305,33 +350,4 @@ func GetAuthorID(ctx context.Context, videoID int64) (int64, error) {
 	err := qVideo.WithContext(ctx).Where(qVideo.ID.Eq(videoID)).Select(qVideo.AuthorID).Scan(&authorID)
 
 	return authorID, err
-}
-
-func GetUserWorkCount(ctx context.Context, userID int64) (cnt int64, err error) {
-	// 使用singleflight解决缓存击穿并减少redis压力
-	key := GetRedisKey(KeyUserWorkCountPF, strconv.FormatInt(userID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
-		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
-		}()
-
-		// 先查询redis缓存
-		cnt, err = RDB.Get(ctx, key).Int64()
-		if err == redis.Nil {
-			// 缓存未命中，查询mysql
-			cnt, err = qVideo.WithContext(ctx).Where(qVideo.AuthorID.Eq(userID)).Count()
-			if err != nil {
-				return nil, err
-			}
-
-			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, 0).Err()
-			return nil, err
-		}
-
-		return nil, err
-	})
-
-	return
 }

@@ -2,7 +2,6 @@ package dal
 
 import (
 	"context"
-	"strconv"
 
 	"douyin/src/dal/model"
 	"douyin/src/kitex_gen/comment"
@@ -48,23 +47,4 @@ func ToCommentResponse(ctx context.Context, userID *int64, mComment *model.Comme
 		Content:    mComment.Content,
 		CreateDate: mComment.CreateTime.Format("01-02"),
 	}
-}
-
-func CheckVideoExist(ctx context.Context, videoID int64) error {
-	// 判断视频是否存在
-	if !bloomFilter.Test([]byte(strconv.FormatInt(videoID, 10))) {
-		return ErrVideoNotExist
-	}
-
-	_, err := qVideo.WithContext(ctx).
-		Where(qVideo.ID.Eq(videoID)).
-		Select(qVideo.ID).First()
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return ErrVideoNotExist
-		}
-		return err
-	}
-
-	return nil
 }
