@@ -24,7 +24,7 @@ func GetUserByID(ctx context.Context, authorID int64) (user *model.User, err err
 	}
 
 	// 使用singleflight解决缓存击穿并减少redis压力
-	key := GetRedisKey(KeyUserInfoPF + strconv.FormatInt(authorID, 10))
+	key := GetRedisKey(KeyUserInfoPF, strconv.FormatInt(authorID, 10))
 	_, err, _ = g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)

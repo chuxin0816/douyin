@@ -1,5 +1,7 @@
 package dal
 
+import "strings"
+
 const (
 	Prefix                  = "douyin:"               // 项目公共前缀
 	KeyVideoInfoPF          = "video:info:"           // 视频基础信息
@@ -17,6 +19,11 @@ const (
 	KeyUserWorkCountPF      = "user:work_count:"      // 用户作品数
 )
 
-func GetRedisKey(key string) string {
-	return Prefix + key
+func GetRedisKey(keys ...string) string {
+	var builder strings.Builder
+	builder.WriteString(Prefix)
+	for _, key := range keys {
+		builder.WriteString(key)
+	}
+	return builder.String()
 }

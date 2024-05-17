@@ -24,7 +24,7 @@ const (
 // GetVideoByID 通过视频ID查询视频信息
 func GetVideoByID(ctx context.Context, videoID int64) (video *model.Video, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
-	key := GetRedisKey(KeyVideoInfoPF + strconv.FormatInt(videoID, 10))
+	key := GetRedisKey(KeyVideoInfoPF, strconv.FormatInt(videoID, 10))
 	_, err, _ = g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
@@ -114,7 +114,7 @@ func SaveVideo(ctx context.Context, userID int64, videoName, coverName, title st
 // GetUserTotalFavorited 获取用户发布的视频ID列表
 func GetUserTotalFavorited(ctx context.Context, userID int64) (total int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
-	key := GetRedisKey(KeyUserTotalFavoritedPF + strconv.FormatInt(userID, 10))
+	key := GetRedisKey(KeyUserTotalFavoritedPF, strconv.FormatInt(userID, 10))
 	_, err, _ = g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
@@ -164,7 +164,7 @@ func GetUserTotalFavorited(ctx context.Context, userID int64) (total int64, err 
 // GetVideoFavoriteCount 获取视频点赞数
 func GetVideoCommentCount(ctx context.Context, videoID int64) (count int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
-	key := GetRedisKey(KeyVideoCommentCountPF + strconv.FormatInt(videoID, 10))
+	key := GetRedisKey(KeyVideoCommentCountPF, strconv.FormatInt(videoID, 10))
 	_, err, _ = g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
@@ -309,7 +309,7 @@ func GetAuthorID(ctx context.Context, videoID int64) (int64, error) {
 
 func GetUserWorkCount(ctx context.Context, userID int64) (cnt int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
-	key := GetRedisKey(KeyUserWorkCountPF + strconv.FormatInt(userID, 10))
+	key := GetRedisKey(KeyUserWorkCountPF, strconv.FormatInt(userID, 10))
 	_, err, _ = g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)

@@ -71,10 +71,10 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	kafka.FavoriteMap[req.UserId][req.VideoId] = req.ActionType
 	kafka.Mu.Unlock()
 
-	keyUserFavorite := dal.GetRedisKey(dal.KeyUserFavoritePF + strconv.FormatInt(req.UserId, 10))
-	keyVideoFavoriteCnt := dal.GetRedisKey(dal.KeyVideoFavoriteCountPF + strconv.FormatInt(req.VideoId, 10))
-	keyUserFavoriteCnt := dal.GetRedisKey(dal.KeyUserFavoriteCountPF + strconv.FormatInt(req.UserId, 10))
-	keyUserTotalFavorited := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF + strconv.FormatInt(authorID, 10))
+	keyUserFavorite := dal.GetRedisKey(dal.KeyUserFavoritePF, strconv.FormatInt(req.UserId, 10))
+	keyVideoFavoriteCnt := dal.GetRedisKey(dal.KeyVideoFavoriteCountPF, strconv.FormatInt(req.VideoId, 10))
+	keyUserFavoriteCnt := dal.GetRedisKey(dal.KeyUserFavoriteCountPF, strconv.FormatInt(req.UserId, 10))
+	keyUserTotalFavorited := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF, strconv.FormatInt(authorID, 10))
 
 	// 检查相关字段是否存在缓存
 	var wg sync.WaitGroup

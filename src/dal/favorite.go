@@ -14,7 +14,7 @@ import (
 
 func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool, error) {
 	// 查看是否已经点赞
-	key := GetRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
+	key := GetRedisKey(KeyUserFavoritePF, strconv.FormatInt(userID, 10))
 	exist := RDB.SIsMember(ctx, key, videoID).Val()
 	if exist {
 		return true, nil
@@ -55,7 +55,7 @@ func DeleteFavorite(ctx context.Context, userID, videoID int64) error {
 
 func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err error) {
 	// 使用singleflight防止缓存击穿并减少redis压力
-	key := GetRedisKey(KeyUserFavoritePF + strconv.FormatInt(userID, 10))
+	key := GetRedisKey(KeyUserFavoritePF, strconv.FormatInt(userID, 10))
 	_, err, _ = g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
@@ -100,7 +100,7 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 // GetUserFavoriteCount 获取用户点赞数
 func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
-	key := GetRedisKey(KeyUserFavoriteCountPF + strconv.FormatInt(userID, 10))
+	key := GetRedisKey(KeyUserFavoriteCountPF, strconv.FormatInt(userID, 10))
 	_, err, _ = g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
@@ -129,7 +129,7 @@ func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err err
 
 func GetVideoFavoriteCount(ctx context.Context, videoID int64) (cnt int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
-	key := GetRedisKey(KeyVideoFavoriteCountPF + strconv.FormatInt(videoID, 10))
+	key := GetRedisKey(KeyVideoFavoriteCountPF, strconv.FormatInt(videoID, 10))
 	_, err, _ = g.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(delayTime)
