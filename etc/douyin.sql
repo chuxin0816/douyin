@@ -30,19 +30,6 @@ CREATE TABLE `favorite` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
--- Table structure for relation
--- ----------------------------
-DROP TABLE IF EXISTS `relation`;
-CREATE TABLE `relation` (
-  `id` bigint unsigned NOT NULL,
-  `author_id` bigint NOT NULL DEFAULT '0' COMMENT '作者ID',
-  `follower_id` bigint NOT NULL DEFAULT '0' COMMENT '粉丝ID',
-  PRIMARY KEY (`id`),
-  KEY `idx_follower_id` (`follower_id`),
-  KEY `idx_author_follower` (`author_id`,`follower_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- ----------------------------
 -- Table structure for user
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;

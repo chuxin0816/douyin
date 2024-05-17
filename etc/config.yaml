@@ -49,6 +49,13 @@ database:
     port: 27017
     dbname: douyin
 
+  nebula:
+    host: nebula-graphd
+    port: 9669
+    user: root
+    password: nebula
+    space: douyin
+
 consul:
   consul_addr: consul:8500
   feed_addr: feed:8890

@@ -69,6 +69,7 @@ type DatabaseConfig struct {
 	MySQLSlaves []*MySQLConfig `mapstructure:"mysql-slaves"`
 	Redis       *RedisConfig   `mapstructure:"redis"`
 	Mongo       *MongoConfig   `mapstructure:"mongo"`
+	Nebula      *NebulaConfig  `mapstructure:"nebula"`
 }
 
 type MySQLConfig struct {
@@ -90,6 +91,14 @@ type MongoConfig struct {
 	Host   string `mapstructure:"host"`
 	Port   int    `mapstructure:"port"`
 	DBName string `mapstructure:"dbname"`
+}
+
+type NebulaConfig struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+	Space    string `mapstructure:"space"`
 }
 
 type ConsulConfig struct {

@@ -3,33 +3,38 @@ package dal
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
-	"douyin/src/dal/model"
-	"douyin/src/pkg/snowflake"
-
 	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
-// CheckRelationExist 检查userID是否关注了toUserID
-func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, error) {
+// CheckRelationExist 检查userID是否关注了authorID
+func CheckRelationExist(ctx context.Context, userID, authorID int64) (bool, error) {
 	key := GetRedisKey(KeyUserFollowPF, strconv.FormatInt(userID, 10))
-	if RDB.SIsMember(ctx, key, toUserID).Val() {
+	if RDB.SIsMember(ctx, key, authorID).Val() {
 		return true, nil
 	}
 
 	// 缓存未命中, 查询数据库
-	relation, err := qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).
-		Select(qRelation.ID).First()
+	var builder strings.Builder
+	builder.WriteString("match (v:user)-[:follow]->(v2:user) where id(v) == ")
+	builder.WriteString(strconv.FormatInt(userID, 10))
+	builder.WriteString(" and id(v2) == ")
+	builder.WriteString(strconv.FormatInt(authorID, 10))
+	builder.WriteString(" return count(*)>0 as result")
+	resp, err := sessionPool.Execute(builder.String())
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return false, nil
-		}
 		return false, err
 	}
 
-	if relation.ID != 0 {
+	res, err := resp.GetValuesByColName("result")
+	if err != nil {
+		return false, err
+	}
+	exist, _ := res[0].AsBool()
+
+	if exist {
 		// 写入redis缓存
 		RDB.SAdd(ctx, key, userID)
 		RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
@@ -40,17 +45,45 @@ func CheckRelationExist(ctx context.Context, userID, toUserID int64) (bool, erro
 	return false, nil
 }
 
-func Follow(ctx context.Context, userID, toUserID int64) error {
-	relation := &model.Relation{
-		ID:         snowflake.GenerateID(),
-		AuthorID:   toUserID,
-		FollowerID: userID,
+func Follow(ctx context.Context, userID, authorID int64) error {
+	// 添加用户点
+	var builder strings.Builder
+	builder.WriteString("insert vertex user() values ")
+	builder.WriteString(strconv.FormatInt(userID, 10))
+	builder.WriteString(":()")
+	_, err := sessionPool.Execute(builder.String())
+	if err != nil {
+		return err
 	}
-	return qRelation.WithContext(ctx).Create(relation)
+	builder.Reset()
+	builder.WriteString("insert vertex user() values ")
+	builder.WriteString(strconv.FormatInt(authorID, 10))
+	builder.WriteString(":()")
+	_, err = sessionPool.Execute(builder.String())
+	if err != nil {
+		return err
+	}
+
+	// 添加关注边
+	builder.Reset()
+	builder.WriteString("insert edge follow() values ")
+	builder.WriteString(strconv.FormatInt(userID, 10))
+	builder.WriteString("->")
+	builder.WriteString(strconv.FormatInt(authorID, 10))
+	builder.WriteString(":()")
+	_, err = sessionPool.Execute(builder.String())
+
+	return err
 }
 
-func UnFollow(ctx context.Context, userID, toUserID int64) error {
-	_, err := qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(toUserID), qRelation.FollowerID.Eq(userID)).Delete()
+func UnFollow(ctx context.Context, userID, authorID int64) error {
+	var builder strings.Builder
+	builder.WriteString("delete edge follow ")
+	builder.WriteString(strconv.FormatInt(userID, 10))
+	builder.WriteString("->")
+	builder.WriteString(strconv.FormatInt(authorID, 10))
+	_, err := sessionPool.Execute(builder.String())
+
 	return err
 }
 
@@ -67,8 +100,23 @@ func FollowList(ctx context.Context, userID int64) (followList []int64, err erro
 		userIDs, err := RDB.SMembers(ctx, key).Result()
 		if err == redis.Nil {
 			// 缓存未命中, 查询数据库
-			if err := qRelation.WithContext(ctx).Where(qRelation.FollowerID.Eq(userID)).Select(qRelation.AuthorID).Scan(&followList); err != nil {
+			var builder strings.Builder
+			builder.WriteString("match (v:user)-[:follow]->(v2:user) where id(v) == ")
+			builder.WriteString(strconv.FormatInt(userID, 10))
+			builder.WriteString(" return id(v2) as followList")
+			resp, err := sessionPool.Execute(builder.String())
+			if err != nil {
 				return nil, err
+			}
+
+			res, err := resp.GetValuesByColName("followList")
+			if err != nil {
+				return nil, err
+			}
+
+			followList = make([]int64, len(res))
+			for i, id := range res {
+				followList[i], _ = id.AsInt()
 			}
 
 			// 写入redis缓存
@@ -77,7 +125,7 @@ func FollowList(ctx context.Context, userID int64) (followList []int64, err erro
 				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
 			}
 
-			return nil, err
+			return nil, nil
 		} else if err != nil {
 			return nil, err
 		} else {
@@ -109,8 +157,23 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 		userIDs, err := RDB.SMembers(ctx, key).Result()
 		if err == redis.Nil {
 			// 缓存未命中，查询mysql
-			if err := qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(userID)).Select(qRelation.FollowerID).Limit(50).Scan(&followerList); err != nil {
+			var builder strings.Builder
+			builder.WriteString("match (v:user)<-[:follow]-(v2:user) where id(v) == ")
+			builder.WriteString(strconv.FormatInt(userID, 10))
+			builder.WriteString(" return id(v2) as followerList limit 50")
+			resp, err := sessionPool.Execute(builder.String())
+			if err != nil {
 				return nil, err
+			}
+
+			res, err := resp.GetValuesByColName("followerList")
+			if err != nil {
+				return nil, err
+			}
+
+			followerList = make([]int64, len(res))
+			for i, id := range res {
+				followerList[i], _ = id.AsInt()
 			}
 
 			// 写入redis缓存
@@ -118,7 +181,8 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 				RDB.SAdd(ctx, key, followerList[:min(len(followerList), 50)])
 				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
 			}
-			return nil, err
+
+			return nil, nil
 		} else if err != nil {
 			return nil, err
 		} else {
@@ -131,6 +195,7 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 				}
 				followerList[i] = userID
 			}
+
 			return nil, nil
 		}
 	})
@@ -151,22 +216,23 @@ func FriendList(ctx context.Context, userID int64) (friendList []int64, err erro
 		userIDs, err := RDB.SMembers(ctx, key).Result()
 		if err == redis.Nil {
 			// 缓存未命中，查询mysql
-			// 查询关注列表
-			followList, err := FollowList(ctx, userID)
+			var builder strings.Builder
+			builder.WriteString("match (v:user)-[:follow]->(v2:user)-[:follow]->(v:user) where id(v) == ")
+			builder.WriteString(strconv.FormatInt(userID, 10))
+			builder.WriteString(" return id(v2) as friendList")
+			resp, err := sessionPool.Execute(builder.String())
 			if err != nil {
 				return nil, err
 			}
 
-			// 查看是否互相关注
-			friendList = make([]int64, 0, len(followList))
-			for _, id := range followList {
-				exist, err := CheckRelationExist(ctx, id, userID)
-				if err != nil {
-					return nil, err
-				}
-				if exist {
-					friendList = append(friendList, id)
-				}
+			res, err := resp.GetValuesByColName("friendList")
+			if err != nil {
+				return nil, err
+			}
+
+			friendList = make([]int64, len(res))
+			for i, id := range res {
+				friendList[i], _ = id.AsInt()
 			}
 
 			return nil, nil
@@ -203,10 +269,21 @@ func GetUserFollowCount(ctx context.Context, userID int64) (cnt int64, err error
 		cnt, err = RDB.Get(ctx, key).Int64()
 		if err == redis.Nil {
 			// 缓存未命中，查询mysql
-			cnt, err = qRelation.WithContext(ctx).Where(qRelation.FollowerID.Eq(userID)).Count()
+			var builder strings.Builder
+			builder.WriteString("match (v:user)-[:follow]->(v2:user) where id(v) == ")
+			builder.WriteString(strconv.FormatInt(userID, 10))
+			builder.WriteString(" return count(*) as followCount")
+			resp, err := sessionPool.Execute(builder.String())
 			if err != nil {
 				return nil, err
 			}
+
+			res, err := resp.GetValuesByColName("followCount")
+			if err != nil {
+				return nil, err
+			}
+
+			cnt, _ = res[0].AsInt()
 
 			// 写入redis缓存
 			err = RDB.Set(ctx, key, cnt, 0).Err()
@@ -231,10 +308,21 @@ func GetUserFollowerCount(ctx context.Context, userID int64) (cnt int64, err err
 		cnt, err = RDB.Get(ctx, key).Int64()
 		if err == redis.Nil {
 			// 缓存未命中，查询mysql
-			cnt, err = qRelation.WithContext(ctx).Where(qRelation.AuthorID.Eq(userID)).Count()
+			var builder strings.Builder
+			builder.WriteString("match (v:user)<-[:follow]-(v2:user) where id(v)==")
+			builder.WriteString(strconv.FormatInt(userID, 10))
+			builder.WriteString(" return count(*) as followerCount")
+			resp, err := sessionPool.Execute(builder.String())
 			if err != nil {
 				return nil, err
 			}
+
+			res, err := resp.GetValuesByColName("followerCount")
+			if err != nil {
+				return nil, err
+			}
+
+			cnt, _ = res[0].AsInt()
 
 			// 写入redis缓存
 			err = RDB.Set(ctx, key, cnt, 0).Err()

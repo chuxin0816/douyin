@@ -12,6 +12,7 @@ import (
 	"douyin/src/dal/query"
 
 	"github.com/bits-and-blooms/bloom/v3"
+	nebula "github.com/vesoft-inc/nebula-go/v3"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -25,9 +26,9 @@ import (
 )
 
 const (
-	ExpireTime   = time.Hour * 24
-	delayTime    = 150 * time.Millisecond
-	randFactor   = 30
+	ExpireTime = time.Hour * 24
+	delayTime  = 150 * time.Millisecond
+	randFactor = 30
 )
 
 var (
@@ -47,6 +48,7 @@ var (
 	db                *gorm.DB
 	RDB               *redis.ClusterClient
 	collectionMessage *mongo.Collection
+	sessionPool       *nebula.SessionPool
 	g                 = &singleflight.Group{}
 	bloomFilter       *bloom.BloomFilter
 )
@@ -55,7 +57,6 @@ var (
 	q          = new(query.Query)
 	qComment   = q.Comment
 	qFavorite  = q.Favorite
-	qRelation  = q.Relation
 	qUser      = q.User
 	qUserLogin = q.UserLogin
 	qVideo     = q.Video
@@ -70,6 +71,9 @@ func Init() {
 
 	// 初始化MongoDB
 	InitMongo()
+
+	// 初始化Nebula
+	InitNebula()
 
 	// 初始化布隆过滤器
 	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
@@ -128,7 +132,6 @@ func InitMySQL() {
 	q = query.Use(db)
 	qComment = q.Comment
 	qFavorite = q.Favorite
-	qRelation = q.Relation
 	qUser = q.User
 	qUserLogin = q.UserLogin
 	qVideo = q.Video
@@ -162,6 +165,24 @@ func InitMongo() {
 	}
 
 	collectionMessage = client.Database(config.Conf.Mongo.DBName).Collection("message")
+}
+
+func InitNebula() {
+	hostAddr := nebula.HostAddress{Host: config.Conf.DatabaseConfig.Nebula.Host, Port: config.Conf.DatabaseConfig.Nebula.Port}
+	cfg, err := nebula.NewSessionPoolConf(
+		config.Conf.DatabaseConfig.Nebula.User,
+		config.Conf.DatabaseConfig.Nebula.Password,
+		[]nebula.HostAddress{hostAddr},
+		config.Conf.DatabaseConfig.Nebula.Space,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	sessionPool, err = nebula.NewSessionPool(*cfg, nebula.DefaultLogger{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func Close() {
