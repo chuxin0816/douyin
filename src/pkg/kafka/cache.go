@@ -64,13 +64,6 @@ func (mq *cacheMQ) removeCache(ctx context.Context) {
 				keyVideoCommentCnt := dal.GetRedisKey(dal.KeyVideoCommentCountPF, msg.Data[0]["video_id"])
 				dal.RDB.Del(ctx, keyVideoCommentCnt)
 			}
-		case "relation":
-			if msg.Type == "INSERT" || msg.Type == "DELETE" {
-				keyFollowCnt := dal.GetRedisKey(dal.KeyUserFollowCountPF, msg.Data[0]["follower_id"])
-				dal.RDB.Del(ctx, keyFollowCnt)
-				keyFollower := dal.GetRedisKey(dal.KeyUserFollowerPF, msg.Data[0]["author_id"])
-				dal.RDB.Del(ctx, keyFollower)
-			}
 		}
 	}
 

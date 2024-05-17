@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"strconv"
 	"sync"
 
 	"douyin/src/dal"
@@ -50,113 +49,15 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 		return nil, dal.ErrFollowLimit
 	}
 
-	// 添加缓存避免重复操作
-	keyUserFollow := dal.GetRedisKey(dal.KeyUserFollowPF, strconv.FormatInt(req.UserId, 10))
-	if req.ActionType == 1 {
-		dal.RDB.SAdd(ctx, keyUserFollow, req.ToUserId)
-		dal.RDB.Expire(ctx, keyUserFollow, dal.ExpireTime+dal.GetRandomTime())
-	} else {
-		dal.RDB.SRem(ctx, keyUserFollow, req.ToUserId)
-	}
-
 	// 通过kafka更新数据库
 	err = kafka.Relation(ctx, &model.Relation{
 		AuthorID:   req.ToUserId,
 		FollowerID: req.UserId,
 	})
 	if err != nil {
-		// 更新失败，回滚缓存
-		if req.ActionType == 1 {
-			dal.RDB.SRem(ctx, keyUserFollow, req.ToUserId)
-		} else {
-			dal.RDB.SAdd(ctx, keyUserFollow, req.ToUserId)
-			dal.RDB.Expire(ctx, keyUserFollow, dal.ExpireTime+dal.GetRandomTime())
-		}
-
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "通过kafka更新数据库失败")
 		klog.Error("通过kafka更新数据库失败, err: ", err)
-		return nil, err
-	}
-
-	// 更新缓存相关字段
-	keyAuthorFriend := dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(req.ToUserId, 10))
-	keyUserFriend := dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(req.UserId, 10))
-	keyUserFollowCnt := dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(req.UserId, 10))
-	keyUserFollowerCnt := dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(req.ToUserId, 10))
-	// 检查key是否存在
-	var wg sync.WaitGroup
-	var wgErr error
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		if exist, err := dal.RDB.Exists(ctx, keyUserFollowCnt).Result(); err != nil {
-			wgErr = err
-			return
-		} else if exist == 0 {
-			// 缓存不存在，查询数据库写入缓存
-			cnt, err := dal.GetUserFollowCount(ctx, req.UserId)
-			if err != nil {
-				wgErr = err
-				return
-			}
-			if err = dal.RDB.Set(ctx, keyUserFollowCnt, cnt, 0).Err(); err != nil {
-				wgErr = err
-				return
-			}
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		if exist, err := dal.RDB.Exists(ctx, keyUserFollowerCnt).Result(); err != nil {
-			wgErr = err
-			return
-		} else if exist == 0 {
-			// 缓存不存在，查询数据库写入缓存
-			cnt, err := dal.GetUserFollowerCount(ctx, req.ToUserId)
-			if err != nil {
-				wgErr = err
-				return
-			}
-			if err = dal.RDB.Set(ctx, keyUserFollowerCnt, cnt, 0).Err(); err != nil {
-				wgErr = err
-				return
-			}
-		}
-	}()
-	wg.Wait()
-	if wgErr != nil {
-		span.RecordError(wgErr)
-		span.SetStatus(codes.Error, "检查相关字段是否存在缓存失败")
-		klog.Error("检查相关字段是否存在缓存失败, err: ", wgErr)
-		return nil, wgErr
-	}
-
-	pipe := dal.RDB.Pipeline()
-	// 好友关系缓存
-	if req.ActionType == 1 {
-		exist, err := dal.CheckRelationExist(ctx, req.ToUserId, req.UserId)
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "检查是否关注失败")
-			klog.Error("检查是否关注失败, err: ", err)
-			return nil, err
-		}
-		if exist {
-			pipe.SAdd(ctx, keyAuthorFriend, req.UserId)
-			pipe.SAdd(ctx, keyUserFriend, req.ToUserId)
-		}
-	} else {
-		pipe.SRem(ctx, keyAuthorFriend, req.UserId)
-		pipe.SRem(ctx, keyUserFriend, req.ToUserId)
-	}
-	// 关注数和粉丝数缓存
-	pipe.IncrBy(ctx, keyUserFollowCnt, req.ActionType)
-	pipe.IncrBy(ctx, keyUserFollowerCnt, req.ActionType)
-	if _, err := pipe.Exec(ctx); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "更新缓存失败")
-		klog.Error("更新缓存失败, err: ", err)
 		return nil, err
 	}
 

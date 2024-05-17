@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"strconv"
 	"sync"
 	"time"
 
@@ -67,6 +68,18 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 				klog.Error("删除记录失败, err: ", err)
 				continue
 			}
+		}
+
+		// 删除缓存
+		pipe := dal.RDB.Pipeline()
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowPF, strconv.FormatInt(favorite.UserID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowerPF, strconv.FormatInt(favorite.UserID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(favorite.UserID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(favorite.UserID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(favorite.UserID, 10)))
+		_, err = pipe.Exec(ctx)
+		if err != nil {
+			klog.Error("删除缓存失败, err: ", err)
 		}
 	}
 
