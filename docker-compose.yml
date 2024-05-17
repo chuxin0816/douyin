@@ -491,6 +491,8 @@ services:
   nebula-console:
     image: docker.io/vesoft/nebula-console:v3.6.0
     entrypoint: ""
+    volumes:
+      - ./etc/user.ngpl:/user.ngpl
     command: 
       - sh
       - -c
@@ -502,7 +504,9 @@ services:
           fi;
           sleep 1;
           echo "retry to add hosts.";
-        done && tail -f /dev/null;
+        done 
+        nebula-console -addr nebula-graphd -port 9669 -u root -p nebula -f /user.ngpl;
+        tail -f /dev/null
     depends_on:
       - nebula-graphd
     container_name: Nebula-console

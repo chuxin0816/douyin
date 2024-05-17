@@ -1,0 +1,8 @@
+drop space douyin;
+create space douyin(vid_type=int64);
+:sleep 20
+use douyin;
+create tag user();
+create edge follow();
+create tag index user_index on user();
+create edge index follow_index on follow();
