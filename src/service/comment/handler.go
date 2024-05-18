@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"sync"
 	"time"
 
 	"douyin/src/dal"
@@ -124,19 +123,22 @@ func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.Comme
 	}
 
 	// 将model.Comment转换为comment.Comment
-	var wgCommentList sync.WaitGroup
-	wgCommentList.Add(len(mCommentList))
 	commentList := make([]*comment.Comment, len(mCommentList))
 	for i, c := range mCommentList {
-		go func(i int, c *model.Comment) {
-			defer wgCommentList.Done()
-			commentList[i] = dal.ToCommentResponse(ctx, req.UserId, c, mUsers[i])
-		}(i, c)
+		commentList[i] = toCommentResponse(ctx, req.UserId, c, mUsers[i])
 	}
-	wgCommentList.Wait()
 
 	// 返回响应
 	resp = &comment.CommentListResponse{CommentList: commentList}
 
 	return
+}
+
+func toCommentResponse(ctx context.Context, userID *int64, mComment *model.Comment, user *model.User) *comment.Comment {
+	return &comment.Comment{
+		Id:         mComment.ID,
+		User:       toUserResponse(ctx, userID, user),
+		Content:    mComment.Content,
+		CreateDate: mComment.CreateTime.Format("01-02"),
+	}
 }

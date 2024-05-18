@@ -40,7 +40,7 @@ func (s *MessageServiceImpl) MessageChat(ctx context.Context, req *message.Messa
 	for i, m := range mMessageList {
 		go func(i int, m *model.Message) {
 			defer wg.Done()
-			messageList[i] = dal.ToMessageResponse(m)
+			messageList[i] = toMessageResponse(m)
 		}(i, m)
 	}
 	wg.Wait()
@@ -82,4 +82,14 @@ func (s *MessageServiceImpl) MessageAction(ctx context.Context, req *message.Mes
 	resp = &message.MessageActionResponse{}
 
 	return
+}
+
+func toMessageResponse(mMessage *model.Message) *message.Message {
+	return &message.Message{
+		Id:         mMessage.ID,
+		ToUserId:   mMessage.ToUserID,
+		FromUserId: mMessage.FromUserID,
+		Content:    mMessage.Content,
+		CreateTime: mMessage.CreateTime,
+	}
 }

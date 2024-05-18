@@ -3,12 +3,10 @@ package dal
 import (
 	"context"
 	"strconv"
-	"sync"
 	"sync/atomic"
 	"time"
 
 	"douyin/src/dal/model"
-	"douyin/src/kitex_gen/feed"
 	"douyin/src/pkg/snowflake"
 
 	"github.com/redis/go-redis/v9"
@@ -73,23 +71,12 @@ func GetFeedList(ctx context.Context, userID *int64, latestTime time.Time, count
 
 	videoList := make([]*model.Video, len(feedIDs))
 	// 查询视频信息
-	var wg sync.WaitGroup
-	var wgErr error
-	wg.Add(len(feedIDs))
 	for i, videoID := range feedIDs {
-		go func(i int, videoID int64) {
-			defer wg.Done()
-			video, err := GetVideoByID(ctx, videoID)
-			if err != nil {
-				wgErr = err
-				return
-			}
-			videoList[i] = video
-		}(i, videoID)
-	}
-	wg.Wait()
-	if wgErr != nil {
-		return nil, wgErr
+		video, err := GetVideoByID(ctx, videoID)
+		if err != nil {
+			return nil, err
+		}
+		videoList[i] = video
 	}
 
 	return videoList, nil
@@ -132,23 +119,12 @@ func GetUserTotalFavorited(ctx context.Context, userID int64) (total int64, err 
 			}
 
 			// 查询用户发布视频的点赞数
-			var wg sync.WaitGroup
-			var wgErr error
-			wg.Add(len(videoIDs))
 			for _, videoID := range videoIDs {
-				go func(videoID int64) {
-					defer wg.Done()
-					cnt, err := GetVideoFavoriteCount(ctx, videoID)
-					if err != nil {
-						wgErr = err
-						return
-					}
-					atomic.AddInt64(&total, cnt)
-				}(videoID)
-			}
-			wg.Wait()
-			if wgErr != nil {
-				return nil, wgErr
+				cnt, err := GetVideoFavoriteCount(ctx, videoID)
+				if err != nil {
+					return nil, err
+				}
+				atomic.AddInt64(&total, cnt)
 			}
 
 			// 写入redis缓存
@@ -202,23 +178,12 @@ func GetPublishList(ctx context.Context, authorID int64) ([]*model.Video, error)
 
 	videoList := make([]*model.Video, len(videoIDs))
 	// 查询视频信息
-	var wg sync.WaitGroup
-	var wgErr error
-	wg.Add(len(videoIDs))
 	for i, videoID := range videoIDs {
-		go func(i int, videoID int64) {
-			defer wg.Done()
-			video, err := GetVideoByID(ctx, videoID)
-			if err != nil {
-				wgErr = err
-				return
-			}
-			videoList[i] = video
-		}(i, videoID)
-	}
-	wg.Wait()
-	if wgErr != nil {
-		return nil, wgErr
+		video, err := GetVideoByID(ctx, videoID)
+		if err != nil {
+			return nil, err
+		}
+		videoList[i] = video
 	}
 
 	return videoList, nil
@@ -283,65 +248,6 @@ func CheckVideoExist(ctx context.Context, videoID int64) error {
 	}
 
 	return nil
-}
-
-func ToVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video) *feed.Video {
-	video := &feed.Video{
-		Id: mVideo.ID,
-		PlayUrl:  mVideo.PlayURL,
-		CoverUrl: mVideo.CoverURL,
-		IsFavorite: false,
-		Title:      mVideo.Title,
-	}
-
-	var wg sync.WaitGroup
-	var wgErr error
-	wg.Add(3)
-	go func() {
-		defer wg.Done()
-		author, err := GetUserByID(ctx, mVideo.AuthorID)
-		if err != nil {
-			wgErr = err
-			return
-		}
-		video.Author = ToUserResponse(ctx, userID, author)
-	}()
-	go func() {
-		defer wg.Done()
-		cnt, err := GetVideoCommentCount(ctx, mVideo.ID)
-		if err != nil {
-			wgErr = err
-			return
-		}
-		video.CommentCount = cnt
-	}()
-	go func() {
-		defer wg.Done()
-		cnt, err := GetVideoFavoriteCount(ctx, mVideo.ID)
-		if err != nil {
-			wgErr = err
-			return
-		}
-		video.FavoriteCount = cnt
-	}()
-	wg.Wait()
-	if wgErr != nil {
-		return video
-	}
-
-	// 未登录直接返回
-	if userID == nil || *userID == 0 {
-		return video
-	}
-
-	// 查询缓存判断是否点赞
-	exist, err := CheckFavoriteExist(ctx, *userID, mVideo.ID)
-	if err != nil {
-		return video
-	}
-	video.IsFavorite = exist
-
-	return video
 }
 
 func GetAuthorID(ctx context.Context, videoID int64) (int64, error) {

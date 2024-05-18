@@ -40,11 +40,3 @@ func GetCommentList(ctx context.Context, videoID int64) ([]*model.Comment, error
 	return commentList, nil
 }
 
-func ToCommentResponse(ctx context.Context, userID *int64, mComment *model.Comment, user *model.User) *comment.Comment {
-	return &comment.Comment{
-		Id:         mComment.ID,
-		User:       ToUserResponse(ctx, userID, user),
-		Content:    mComment.Content,
-		CreateDate: mComment.CreateTime.Format("01-02"),
-	}
-}

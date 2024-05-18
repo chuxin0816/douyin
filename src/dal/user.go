@@ -3,12 +3,10 @@ package dal
 import (
 	"context"
 	"strconv"
-	"sync"
 	"time"
 
 	"douyin/src/dal/model"
 	"douyin/src/dal/query"
-	"douyin/src/kitex_gen/user"
 	"douyin/src/pkg/snowflake"
 
 	"github.com/redis/go-redis/v9"
@@ -125,80 +123,4 @@ func CreateUser(ctx context.Context, username, password string) (userID int64, e
 	})
 
 	return
-}
-
-func ToUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *user.User {
-	userResponse := &user.User{
-		Id:              mUser.ID,
-		Name:            mUser.Name,
-		Avatar:          &mUser.Avatar,
-		BackgroundImage: &mUser.BackgroundImage,
-		IsFollow:        false,
-		Signature:       &mUser.Signature,
-	}
-
-	var wg sync.WaitGroup
-	var wgErr error
-	wg.Add(5)
-	go func() {
-		defer wg.Done()
-		cnt, err := GetUserFavoriteCount(ctx, mUser.ID)
-		if err != nil {
-			wgErr = err
-			return
-		}
-		userResponse.FavoriteCount = &cnt
-	}()
-	go func() {
-		defer wg.Done()
-		cnt, err := GetUserTotalFavorited(ctx, mUser.ID)
-		if err != nil {
-			wgErr = err
-			return
-		}
-		userResponse.TotalFavorited = &cnt
-	}()
-	go func() {
-		defer wg.Done()
-		cnt, err := GetUserFollowCount(ctx, mUser.ID)
-		if err != nil {
-			wgErr = err
-			return
-		}
-		userResponse.FollowCount = &cnt
-	}()
-	go func() {
-		defer wg.Done()
-		cnt, err := GetUserFollowerCount(ctx, mUser.ID)
-		if err != nil {
-			wgErr = err
-			return
-		}
-		userResponse.FollowerCount = &cnt
-	}()
-	go func() {
-		defer wg.Done()
-		cnt, err := GetUserWorkCount(ctx, mUser.ID)
-		if err != nil {
-			wgErr = err
-			return
-		}
-		userResponse.WorkCount = &cnt
-	}()
-	wg.Wait()
-	if wgErr != nil {
-		return userResponse
-	}
-
-	// 判断是否关注
-	if followerID == nil || *followerID == 0 {
-		return userResponse
-	}
-	exist, err := CheckRelationExist(ctx, *followerID, mUser.ID)
-	if err != nil {
-		return userResponse
-	}
-	userResponse.IsFollow = exist
-
-	return userResponse
 }

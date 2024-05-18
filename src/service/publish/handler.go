@@ -3,10 +3,8 @@ package main
 import (
 	"context"
 	"os"
-	"sync"
 
 	"douyin/src/dal"
-	"douyin/src/dal/model"
 	"douyin/src/kitex_gen/feed"
 	publish "douyin/src/kitex_gen/publish"
 	"douyin/src/pkg/oss"
@@ -77,15 +75,9 @@ func (s *PublishServiceImpl) PublishList(ctx context.Context, req *publish.Publi
 
 	// 将model.Video转换为feed.Video
 	videoList := make([]*feed.Video, len(mVideoList))
-	var wg sync.WaitGroup
-	wg.Add(len(mVideoList))
 	for i, mVideo := range mVideoList {
-		go func(i int, mVideo *model.Video) {
-			defer wg.Done()
-			videoList[i] = dal.ToVideoResponse(ctx, req.UserId, mVideo)
-		}(i, mVideo)
+		videoList[i] = ToVideoResponse(ctx, req.UserId, mVideo)
 	}
-	wg.Wait()
 
 	// 返回响应
 	resp = &publish.PublishListResponse{VideoList: videoList}

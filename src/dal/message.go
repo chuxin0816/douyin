@@ -61,13 +61,3 @@ func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*mode
 
 	return messageList, nil
 }
-
-func ToMessageResponse(mMessage *model.Message) *message.Message {
-	return &message.Message{
-		Id:         mMessage.ID,
-		ToUserId:   mMessage.ToUserID,
-		FromUserId: mMessage.FromUserID,
-		Content:    mMessage.Content,
-		CreateTime: mMessage.CreateTime,
-	}
-}

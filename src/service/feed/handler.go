@@ -42,15 +42,9 @@ func (s *FeedServiceImpl) Feed(ctx context.Context, req *feed.FeedRequest) (resp
 
 	// 将model.Video转换为feed.Video
 	videoList := make([]*feed.Video, len(mVideoList))
-	var wg sync.WaitGroup
-	wg.Add(len(mVideoList))
 	for i, mVideo := range mVideoList {
-		go func(i int, mVideo *model.Video) {
-			defer wg.Done()
-			videoList[i] = dal.ToVideoResponse(ctx, req.UserId, mVideo)
-		}(i, mVideo)
+		videoList[i] = toVideoResponse(ctx, req.UserId, mVideo)
 	}
-	wg.Wait()
 
 	// 计算下次请求的时间
 	var nextTime *int64
@@ -63,4 +57,63 @@ func (s *FeedServiceImpl) Feed(ctx context.Context, req *feed.FeedRequest) (resp
 	resp = &feed.FeedResponse{VideoList: videoList, NextTime: nextTime}
 
 	return
+}
+
+func toVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video) *feed.Video {
+	video := &feed.Video{
+		Id:         mVideo.ID,
+		PlayUrl:    mVideo.PlayURL,
+		CoverUrl:   mVideo.CoverURL,
+		IsFavorite: false,
+		Title:      mVideo.Title,
+	}
+
+	var wg sync.WaitGroup
+	var wgErr error
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		author, err := dal.GetUserByID(ctx, mVideo.AuthorID)
+		if err != nil {
+			wgErr = err
+			return
+		}
+		video.Author = ToUserResponse(ctx, userID, author)
+	}()
+	go func() {
+		defer wg.Done()
+		cnt, err := dal.GetVideoCommentCount(ctx, mVideo.ID)
+		if err != nil {
+			wgErr = err
+			return
+		}
+		video.CommentCount = cnt
+	}()
+	go func() {
+		defer wg.Done()
+		cnt, err := GetVideoFavoriteCount(ctx, mVideo.ID)
+		if err != nil {
+			wgErr = err
+			return
+		}
+		video.FavoriteCount = cnt
+	}()
+	wg.Wait()
+	if wgErr != nil {
+		return video
+	}
+
+	// 未登录直接返回
+	if userID == nil || *userID == 0 {
+		return video
+	}
+
+	// 查询缓存判断是否点赞
+	exist, err := CheckFavoriteExist(ctx, *userID, mVideo.ID)
+	if err != nil {
+		return video
+	}
+	video.IsFavorite = exist
+
+	return video
 }

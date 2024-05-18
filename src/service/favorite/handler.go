@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"douyin/src/dal"
-	"douyin/src/dal/model"
 	favorite "douyin/src/kitex_gen/favorite"
 	"douyin/src/kitex_gen/feed"
 	"douyin/src/pkg/kafka"
@@ -191,15 +190,9 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 
 	// 将model.Video转换为feed.Video
 	videoList := make([]*feed.Video, len(mVideoList))
-	var wg sync.WaitGroup
-	wg.Add(len(mVideoList))
 	for i, mVideo := range mVideoList {
-		go func(i int, mVideo *model.Video) {
-			defer wg.Done()
-			videoList[i] = dal.ToVideoResponse(ctx, nil, mVideo)
-		}(i, mVideo)
+		videoList[i] = ToVideoResponse(ctx, nil, mVideo)
 	}
-	wg.Wait()
 
 	// 返回响应
 	resp = &favorite.FavoriteListResponse{VideoList: videoList}
