@@ -145,9 +145,8 @@ func Init() {
 
 	// 监控配置文件变化
 	go func() {
-		for {
-			time.Sleep(time.Second * 5)
-
+		ticker := time.NewTicker(time.Second * 10)
+		for range ticker.C {
 			if err := viper.WatchRemoteConfig(); err != nil {
 				klog.Error("watch remote config failed, err:%v", err)
 				continue
