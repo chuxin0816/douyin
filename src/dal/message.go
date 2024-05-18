@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"douyin/src/dal/model"
-	"douyin/src/kitex_gen/message"
 	"douyin/src/pkg/snowflake"
 
 	"go.mongodb.org/mongo-driver/bson"

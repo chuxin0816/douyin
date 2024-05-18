@@ -137,36 +137,6 @@ func GetUserTotalFavorited(ctx context.Context, userID int64) (total int64, err 
 	return
 }
 
-// GetVideoFavoriteCount 获取视频点赞数
-func GetVideoCommentCount(ctx context.Context, videoID int64) (count int64, err error) {
-	// 使用singleflight解决缓存击穿并减少redis压力
-	key := GetRedisKey(KeyVideoCommentCountPF, strconv.FormatInt(videoID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
-		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
-		}()
-
-		// 先查询redis缓存
-		count, err = RDB.Get(ctx, key).Int64()
-		if err == redis.Nil {
-			// 缓存未命中，查询mysql
-			count, err = qComment.WithContext(ctx).Where(qComment.VideoID.Eq(videoID)).Count()
-			if err != nil {
-				return nil, err
-			}
-
-			// 写入redis缓存
-			err = RDB.Set(ctx, key, count, 0).Err()
-			return nil, err
-		}
-
-		return nil, err
-	})
-
-	return
-}
-
 // GetPublishList 获取用户发布的视频列表
 func GetPublishList(ctx context.Context, authorID int64) ([]*model.Video, error) {
 	// 查询视频ID列表

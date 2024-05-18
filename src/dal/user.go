@@ -83,7 +83,6 @@ func GetUserLoginByName(ctx context.Context, username string) *model.UserLogin {
 		return nil
 	}
 
-	// user, err := qUser.WithContext(ctx).Where(qUser.Name.Eq(username)).Select(qUser.ID, qUser.Password).First()
 	user, err := qUserLogin.WithContext(ctx).Select(qUserLogin.ID, qUserLogin.Password).Where(qUserLogin.Username.Eq(username)).First()
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
