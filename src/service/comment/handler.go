@@ -24,7 +24,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 	defer span.End()
 
 	// 判断视频是否存在
-	if err := dal.CheckVideoExist(ctx, req.VideoId); err != nil {
+	if err := CheckVideoExist(ctx, req.VideoId); err != nil {
 		span.RecordError(err)
 
 		if errors.Is(err, dal.ErrVideoNotExist) {
@@ -79,7 +79,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 	}
 
 	// 获取用户信息
-	mUser, err := dal.GetUserByID(ctx, req.UserId)
+	mUser, err := GetUserByID(ctx, req.UserId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取用户信息失败")
@@ -89,7 +89,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 
 	// 返回响应
 	resp = &comment.CommentActionResponse{
-		Comment: dal.ToCommentResponse(ctx, &mComment.UserID, mComment, mUser),
+		Comment: toCommentResponse(ctx, &mComment.UserID, mComment, mUser),
 	}
 
 	return
@@ -114,7 +114,7 @@ func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.Comme
 	for i, c := range mCommentList {
 		userIDs[i] = c.UserID
 	}
-	mUsers, err := dal.GetUserByIDs(ctx, userIDs)
+	mUsers, err := GetUserByIDs(ctx, userIDs)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取用户信息失败")

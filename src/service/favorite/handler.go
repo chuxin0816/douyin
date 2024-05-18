@@ -25,7 +25,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	defer span.End()
 
 	// 判断视频是否存在
-	if err := dal.CheckVideoExist(ctx, req.VideoId); err != nil {
+	if err := CheckVideoExist(ctx, req.VideoId); err != nil {
 		span.RecordError(err)
 
 		if errors.Is(err, dal.ErrVideoNotExist) {
@@ -39,7 +39,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	}
 
 	// 获取作者ID
-	authorID, err := dal.GetAuthorID(ctx, req.VideoId)
+	authorID, err := GetAuthorID(ctx, req.VideoId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取作者ID失败")

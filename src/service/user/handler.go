@@ -144,7 +144,7 @@ func toUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *
 	wg.Add(5)
 	go func() {
 		defer wg.Done()
-		cnt, err := dal.GetUserFavoriteCount(ctx, mUser.ID)
+		cnt, err := GetUserFavoriteCount(ctx, mUser.ID)
 		if err != nil {
 			wgErr = err
 			return
@@ -153,7 +153,7 @@ func toUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := dal.GetUserTotalFavorited(ctx, mUser.ID)
+		cnt, err := GetUserTotalFavorited(ctx, mUser.ID)
 		if err != nil {
 			wgErr = err
 			return
@@ -162,7 +162,7 @@ func toUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := dal.GetUserFollowCount(ctx, mUser.ID)
+		cnt, err := GetUserFollowCount(ctx, mUser.ID)
 		if err != nil {
 			wgErr = err
 			return
@@ -171,7 +171,7 @@ func toUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := dal.GetUserFollowerCount(ctx, mUser.ID)
+		cnt, err := GetUserFollowerCount(ctx, mUser.ID)
 		if err != nil {
 			wgErr = err
 			return
@@ -180,7 +180,7 @@ func toUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := dal.GetUserWorkCount(ctx, mUser.ID)
+		cnt, err := GetUserWorkCount(ctx, mUser.ID)
 		if err != nil {
 			wgErr = err
 			return
@@ -196,7 +196,7 @@ func toUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *
 	if followerID == nil || *followerID == 0 {
 		return userResponse
 	}
-	exist, err := dal.CheckRelationExist(ctx, *followerID, mUser.ID)
+	exist, err := CheckRelationExist(ctx, *followerID, mUser.ID)
 	if err != nil {
 		return userResponse
 	}

@@ -73,7 +73,7 @@ func toVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video) *f
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		author, err := dal.GetUserByID(ctx, mVideo.AuthorID)
+		author, err := GetUserByID(ctx, mVideo.AuthorID)
 		if err != nil {
 			wgErr = err
 			return
@@ -82,7 +82,7 @@ func toVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video) *f
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := dal.GetVideoCommentCount(ctx, mVideo.ID)
+		cnt, err := GetVideoCommentCount(ctx, mVideo.ID)
 		if err != nil {
 			wgErr = err
 			return

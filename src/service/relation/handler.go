@@ -81,7 +81,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 	}
 
 	// 获取用户信息
-	mUserList, err := dal.GetUserByIDs(ctx, followList)
+	mUserList, err := GetUserByIDs(ctx, followList)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取用户信息失败")
@@ -116,7 +116,7 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 	}
 
 	// 获取用户信息
-	mUserList, err := dal.GetUserByIDs(ctx, followerList)
+	mUserList, err := GetUserByIDs(ctx, followerList)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取用户信息失败")
@@ -151,7 +151,7 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 	}
 
 	// 获取用户信息
-	mFriendList, err := dal.GetUserByIDs(ctx, friendList)
+	mFriendList, err := GetUserByIDs(ctx, friendList)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取用户信息失败")
