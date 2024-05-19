@@ -23,6 +23,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"FavoriteList":      kitex.NewMethodInfo(favoriteListHandler, newFavoriteServiceFavoriteListArgs, newFavoriteServiceFavoriteListResult, false),
 		"FavoriteCnt":       kitex.NewMethodInfo(favoriteCntHandler, newFavoriteServiceFavoriteCntArgs, newFavoriteServiceFavoriteCntResult, false),
 		"TotalFavoritedCnt": kitex.NewMethodInfo(totalFavoritedCntHandler, newFavoriteServiceTotalFavoritedCntArgs, newFavoriteServiceTotalFavoritedCntResult, false),
+		"FavoriteExist":     kitex.NewMethodInfo(favoriteExistHandler, newFavoriteServiceFavoriteExistArgs, newFavoriteServiceFavoriteExistResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "favorite",
@@ -111,6 +112,24 @@ func newFavoriteServiceTotalFavoritedCntResult() interface{} {
 	return favorite.NewFavoriteServiceTotalFavoritedCntResult()
 }
 
+func favoriteExistHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*favorite.FavoriteServiceFavoriteExistArgs)
+	realResult := result.(*favorite.FavoriteServiceFavoriteExistResult)
+	success, err := handler.(favorite.FavoriteService).FavoriteExist(ctx, realArg.UserId, realArg.VideoId)
+	if err != nil {
+		return err
+	}
+	realResult.Success = &success
+	return nil
+}
+func newFavoriteServiceFavoriteExistArgs() interface{} {
+	return favorite.NewFavoriteServiceFavoriteExistArgs()
+}
+
+func newFavoriteServiceFavoriteExistResult() interface{} {
+	return favorite.NewFavoriteServiceFavoriteExistResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -156,6 +175,17 @@ func (p *kClient) TotalFavoritedCnt(ctx context.Context, userId int64) (r int64,
 	_args.UserId = userId
 	var _result favorite.FavoriteServiceTotalFavoritedCntResult
 	if err = p.c.Call(ctx, "TotalFavoritedCnt", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) FavoriteExist(ctx context.Context, userId int64, videoId int64) (r bool, err error) {
+	var _args favorite.FavoriteServiceFavoriteExistArgs
+	_args.UserId = userId
+	_args.VideoId = videoId
+	var _result favorite.FavoriteServiceFavoriteExistResult
+	if err = p.c.Call(ctx, "FavoriteExist", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

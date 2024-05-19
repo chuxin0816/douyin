@@ -3,19 +3,46 @@ package main
 import (
 	"context"
 
+	"douyin/src/config"
 	"douyin/src/dal"
 	"douyin/src/dal/model"
 	relation "douyin/src/kitex_gen/relation"
 	"douyin/src/kitex_gen/user"
+	"douyin/src/kitex_gen/user/userservice"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
 
+	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
+	consul "github.com/kitex-contrib/registry-consul"
 	"go.opentelemetry.io/otel/codes"
 )
 
 // RelationServiceImpl implements the last service interface defined in the IDL.
 type RelationServiceImpl struct{}
+
+var userClient userservice.Client
+
+func init() {
+	// 服务发现
+	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	userClient, err = userservice.NewClient(
+		config.Conf.OpenTelemetryConfig.UserName,
+		client.WithResolver(r),
+		client.WithSuite(tracing2.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.UserName}),
+		client.WithMuxConnection(2),
+	)
+	if err != nil {
+		panic(err)
+	}
+}
 
 // RelationAction implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.RelationActionRequest) (resp *relation.RelationActionResponse, err error) {
@@ -81,18 +108,19 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 	}
 
 	// 获取用户信息
-	mUserList, err := GetUserByIDs(ctx, followList)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "获取用户信息失败")
-		klog.Error("获取用户信息失败, err: ", err)
-		return nil, err
-	}
-
-	// 将model.User转换为user.User
-	userList := make([]*user.User, len(mUserList))
-	for i, u := range mUserList {
-		userList[i] = toUserResponse(ctx, req.UserId, u)
+	userList := make([]*user.User, len(followList))
+	for i, u := range followList {
+		user, err := userClient.UserInfo(ctx, &user.UserInfoRequest{
+			UserId:   req.UserId,
+			AuthorId: u,
+		})
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "获取用户信息失败")
+			klog.Error("获取用户信息失败, err: ", err)
+			return nil, err
+		}
+		userList[i] = user.User
 	}
 
 	// 返回响应
@@ -116,18 +144,20 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 	}
 
 	// 获取用户信息
-	mUserList, err := GetUserByIDs(ctx, followerList)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "获取用户信息失败")
-		klog.Error("获取用户信息失败, err: ", err)
-		return nil, err
-	}
-
-	// 将model.User转换为user.User
-	userList := make([]*user.User, len(mUserList))
-	for i, u := range mUserList {
-		userList[i] = ToUserResponse(ctx, req.UserId, u)
+	// 获取用户信息
+	userList := make([]*user.User, len(followerList))
+	for i, u := range followerList {
+		user, err := userClient.UserInfo(ctx, &user.UserInfoRequest{
+			UserId:   req.UserId,
+			AuthorId: u,
+		})
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "获取用户信息失败")
+			klog.Error("获取用户信息失败, err: ", err)
+			return nil, err
+		}
+		userList[i] = user.User
 	}
 
 	// 返回响应
@@ -151,18 +181,19 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 	}
 
 	// 获取用户信息
-	mFriendList, err := GetUserByIDs(ctx, friendList)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "获取用户信息失败")
-		klog.Error("获取用户信息失败, err: ", err)
-		return nil, err
-	}
-
-	// 将model.User转换为user.User
-	userList := make([]*user.User, len(mFriendList))
-	for i, u := range mFriendList {
-		userList[i] = ToUserResponse(ctx, req.UserId, u)
+	userList := make([]*user.User, len(friendList))
+	for i, u := range friendList {
+		user, err := userClient.UserInfo(ctx, &user.UserInfoRequest{
+			UserId:   req.UserId,
+			AuthorId: u,
+		})
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "获取用户信息失败")
+			klog.Error("获取用户信息失败, err: ", err)
+			return nil, err
+		}
+		userList[i] = user.User
 	}
 
 	// 返回响应
@@ -173,18 +204,48 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 
 // RelationExist implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationExist(ctx context.Context, userId int64, authorId int64) (resp bool, err error) {
-	// TODO: Your code here...
+	ctx, span := tracing.Tracer.Start(ctx, "RelationExist")
+	defer span.End()
+
+	resp, err = dal.CheckRelationExist(ctx, userId, authorId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "检查关注关系失败")
+		klog.Error("检查关注关系失败, err: ", err)
+		return
+	}
+
 	return
 }
 
 // FollowCnt implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) FollowCnt(ctx context.Context, userId int64) (resp int64, err error) {
-	// TODO: Your code here...
+	ctx, span := tracing.Tracer.Start(ctx, "FollowCnt")
+	defer span.End()
+
+	resp, err = dal.GetUserFollowCount(ctx, userId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "获取关注数失败")
+		klog.Error("获取关注数失败, err: ", err)
+		return
+	}
+
 	return
 }
 
 // FollowerCnt implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) FollowerCnt(ctx context.Context, userId int64) (resp int64, err error) {
-	// TODO: Your code here...
+	ctx, span := tracing.Tracer.Start(ctx, "FollowerCnt")
+	defer span.End()
+
+	resp, err = dal.GetUserFollowerCount(ctx, userId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "获取粉丝数失败")
+		klog.Error("获取粉丝数失败, err: ", err)
+		return
+	}
+
 	return
 }

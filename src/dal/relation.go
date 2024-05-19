@@ -90,10 +90,10 @@ func UnFollow(ctx context.Context, userID, authorID int64) error {
 func FollowList(ctx context.Context, userID int64) (followList []int64, err error) {
 	// 使用singleflight防止缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFollowPF, strconv.FormatInt(userID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存
@@ -147,10 +147,10 @@ func FollowList(ctx context.Context, userID int64) (followList []int64, err erro
 func FollowerList(ctx context.Context, userID int64) (followerList []int64, err error) {
 	// 使用singleflight防止缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFollowerPF, strconv.FormatInt(userID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存
@@ -206,10 +206,10 @@ func FollowerList(ctx context.Context, userID int64) (followerList []int64, err 
 func FriendList(ctx context.Context, userID int64) (friendList []int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFriendPF, strconv.FormatInt(userID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存
@@ -259,10 +259,10 @@ func FriendList(ctx context.Context, userID int64) (friendList []int64, err erro
 func GetUserFollowCount(ctx context.Context, userID int64) (cnt int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFollowCountPF, strconv.FormatInt(userID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存
@@ -298,10 +298,10 @@ func GetUserFollowCount(ctx context.Context, userID int64) (cnt int64, err error
 func GetUserFollowerCount(ctx context.Context, userID int64) (cnt int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFollowerCountPF, strconv.FormatInt(userID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存

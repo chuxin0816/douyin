@@ -2,22 +2,51 @@ package main
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"sync"
+	"sync/atomic"
+	"time"
 
+	"douyin/src/config"
 	"douyin/src/dal"
-	video "douyin/src/kitex_gen/Video"
 	favorite "douyin/src/kitex_gen/favorite"
+	"douyin/src/kitex_gen/video"
+	"douyin/src/kitex_gen/video/videoservice"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
 
+	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
+	consul "github.com/kitex-contrib/registry-consul"
+	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/codes"
 )
 
 // FavoriteServiceImpl implements the last service interface defined in the IDL.
 type FavoriteServiceImpl struct{}
+
+var videoClient videoservice.Client
+
+func init() {
+	// 服务发现
+	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	videoClient, err = videoservice.NewClient(
+		config.Conf.OpenTelemetryConfig.VideoName,
+		client.WithResolver(r),
+		client.WithSuite(tracing2.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.VideoName}),
+		client.WithMuxConnection(2),
+	)
+	if err != nil {
+		panic(err)
+	}
+}
 
 // FavoriteAction implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.FavoriteActionRequest) (resp *favorite.FavoriteActionResponse, err error) {
@@ -25,21 +54,21 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	defer span.End()
 
 	// 判断视频是否存在
-	if err := CheckVideoExist(ctx, req.VideoId); err != nil {
+	exist, err := videoClient.VideoExist(ctx, req.VideoId)
+	if err != nil {
 		span.RecordError(err)
-
-		if errors.Is(err, dal.ErrVideoNotExist) {
-			span.SetStatus(codes.Error, "视频不存在")
-			klog.Error("视频不存在, videoID: ", req.VideoId)
-			return nil, err
-		}
-		span.SetStatus(codes.Error, "判断视频是否存在失败")
-		klog.Error("判断视频是否存在失败, err: ", err)
+		span.SetStatus(codes.Error, "查询视频失败")
+		klog.Error("查询视频失败, err: ", err)
 		return nil, err
+	}
+	if !exist {
+		span.SetStatus(codes.Error, "视频不存在")
+		klog.Error("视频不存在, err: ", err)
+		return nil, dal.ErrVideoNotExist
 	}
 
 	// 获取作者ID
-	authorID, err := GetAuthorID(ctx, req.VideoId)
+	authorID, err := videoClient.AuthorId(ctx, req.VideoId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取作者ID失败")
@@ -48,7 +77,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	}
 
 	// 检查是否已经点赞
-	exist, err := dal.CheckFavoriteExist(ctx, req.UserId, req.VideoId)
+	exist, err = dal.CheckFavoriteExist(ctx, req.UserId, req.VideoId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "检查是否已经点赞失败")
@@ -122,7 +151,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 			return
 		} else if exist == 0 {
 			// 缓存不存在，查询数据库写入缓存
-			cnt, err := GetUserTotalFavorited(ctx, authorID)
+			cnt, err := s.TotalFavoritedCnt(ctx, authorID)
 			if err != nil {
 				wgErr = err
 				return
@@ -171,7 +200,7 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 	defer span.End()
 
 	// 获取喜欢的视频ID列表
-	videoIDs, err := dal.GetFavoriteList(ctx, req.ToUserId)
+	videoIDs, err := dal.GetFavoriteList(ctx, req.AuthorId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取喜欢的视频ID列表失败")
@@ -180,20 +209,16 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 	}
 
 	// 获取视频列表
-	mVideoList, err := dal.GetVideoList(ctx, videoIDs)
+	videoList, err := videoClient.VideoInfoList(ctx, &video.VideoInfoListRequest{
+		UserId:      req.UserId,
+		VideoIdList: videoIDs,
+	})
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取视频列表失败")
 		klog.Error("获取视频列表失败, err: ", err)
 		return nil, err
 	}
-
-	// 将model.Video转换为video.Video
-	videoList := make([]*video.Video, len(mVideoList))
-	for i, mVideo := range mVideoList {
-		videoList[i] = toVideoResponse(ctx, nil, mVideo)
-	}
-
 	// 返回响应
 	resp = &favorite.FavoriteListResponse{VideoList: videoList}
 
@@ -202,12 +227,85 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 
 // FavoriteCnt implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteCnt(ctx context.Context, userId int64) (resp int64, err error) {
-	// TODO: Your code here...
+	ctx, span := tracing.Tracer.Start(ctx, "FavoriteCnt")
+	defer span.End()
+
+	resp, err = dal.GetUserFavoriteCount(ctx, userId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "获取用户喜欢的视频数失败")
+		klog.Error("获取用户喜欢的视频数失败, err: ", err)
+		return
+	}
+
 	return
 }
 
 // TotalFavoritedCnt implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) TotalFavoritedCnt(ctx context.Context, userId int64) (resp int64, err error) {
-	// TODO: Your code here...
+	ctx, span := tracing.Tracer.Start(ctx, "TotalFavoritedCnt")
+	defer span.End()
+
+	key := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF, strconv.FormatInt(userId, 10))
+	// 使用singleflight解决缓存击穿并减少redis压力
+	_, err, _ = dal.G.Do(key, func() (interface{}, error) {
+		go func() {
+			time.Sleep(dal.DelayTime)
+			dal.G.Forget(key)
+		}()
+		// 先查询redis缓存
+		resp, err = dal.RDB.Get(ctx, key).Int64()
+		if err == redis.Nil {
+			// 缓存未命中，查询mysql
+			// 查询用户发布列表
+			videoIDs, err := videoClient.PublishIDList(ctx, userId)
+			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, "查询用户发布列表失败")
+				klog.Error("查询用户发布列表失败, err: ", err)
+				return nil, err
+			}
+
+			// 查询用户发布视频的点赞数
+			for _, videoID := range videoIDs {
+				cnt, err := dal.GetVideoFavoriteCount(ctx, videoID)
+				if err != nil {
+					span.RecordError(err)
+					span.SetStatus(codes.Error, "查询用户发布视频的点赞数失败")
+					klog.Error("查询用户发布视频的点赞数失败, err: ", err)
+					return nil, err
+				}
+				atomic.AddInt64(&resp, cnt)
+			}
+
+			// 写入redis缓存
+			dal.RDB.Set(ctx, key, resp, 0)
+
+		} else if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "查询用户总点赞数失败")
+			klog.Error("查询用户总点赞数失败, err: ", err)
+			return nil, err
+		}
+
+		return nil, nil
+	})
+
+	return
+}
+
+// FavoriteExist implements the FavoriteServiceImpl interface.
+func (s *FavoriteServiceImpl) FavoriteExist(ctx context.Context, userId int64, videoId int64) (resp bool, err error) {
+	ctx, span := tracing.Tracer.Start(ctx, "FavoriteExist")
+	defer span.End()
+
+	resp, err = dal.CheckFavoriteExist(ctx, userId, videoId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "查询是否已经点赞失败")
+		klog.Error("查询是否已经点赞失败, err: ", err)
+		return
+	}
+
 	return
 }

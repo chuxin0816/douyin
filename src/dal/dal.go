@@ -27,7 +27,7 @@ import (
 
 const (
 	ExpireTime = time.Hour * 24
-	delayTime  = 150 * time.Millisecond
+	DelayTime  = 150 * time.Millisecond
 	randFactor = 30
 )
 
@@ -49,7 +49,7 @@ var (
 	RDB               *redis.ClusterClient
 	collectionMessage *mongo.Collection
 	sessionPool       *nebula.SessionPool
-	g                 = &singleflight.Group{}
+	G                 = &singleflight.Group{}
 	bloomFilter       *bloom.BloomFilter
 )
 

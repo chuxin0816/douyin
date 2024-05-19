@@ -15,6 +15,7 @@ type Client interface {
 	FavoriteList(ctx context.Context, req *favorite.FavoriteListRequest, callOptions ...callopt.Option) (r *favorite.FavoriteListResponse, err error)
 	FavoriteCnt(ctx context.Context, userId int64, callOptions ...callopt.Option) (r int64, err error)
 	TotalFavoritedCnt(ctx context.Context, userId int64, callOptions ...callopt.Option) (r int64, err error)
+	FavoriteExist(ctx context.Context, userId int64, videoId int64, callOptions ...callopt.Option) (r bool, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -64,4 +65,9 @@ func (p *kFavoriteServiceClient) FavoriteCnt(ctx context.Context, userId int64, 
 func (p *kFavoriteServiceClient) TotalFavoritedCnt(ctx context.Context, userId int64, callOptions ...callopt.Option) (r int64, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.TotalFavoritedCnt(ctx, userId)
+}
+
+func (p *kFavoriteServiceClient) FavoriteExist(ctx context.Context, userId int64, videoId int64, callOptions ...callopt.Option) (r bool, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.FavoriteExist(ctx, userId, videoId)
 }

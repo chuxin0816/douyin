@@ -47,7 +47,7 @@ func init() {
 		config.Conf.OpenTelemetryConfig.UserName,
 		client.WithResolver(r),
 		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.UserName}),
 		client.WithMuxConnection(2),
 	)
 	if err != nil {

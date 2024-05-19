@@ -2,24 +2,75 @@ package main
 
 import (
 	"context"
-	"errors"
 	"sync"
 
+	"douyin/src/config"
 	"douyin/src/dal"
-	"douyin/src/dal/model"
+	"douyin/src/kitex_gen/favorite/favoriteservice"
+	"douyin/src/kitex_gen/relation/relationservice"
 	user "douyin/src/kitex_gen/user"
+	"douyin/src/kitex_gen/video/videoservice"
 	"douyin/src/pkg/jwt"
 	"douyin/src/pkg/tracing"
 
+	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
+	consul "github.com/kitex-contrib/registry-consul"
 	"go.opentelemetry.io/otel/codes"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var ErrBcrypt = errors.New("加密密码失败")
-
 // UserServiceImpl implements the last service interface defined in the IDL.
 type UserServiceImpl struct{}
+
+var (
+	favoriteClient favoriteservice.Client
+	relationClient relationservice.Client
+	videoClient    videoservice.Client
+)
+
+func init() {
+	// 服务发现
+	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	favoriteClient, err = favoriteservice.NewClient(
+		config.Conf.OpenTelemetryConfig.FavoriteName,
+		client.WithResolver(r),
+		client.WithSuite(tracing2.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.FavoriteName}),
+		client.WithMuxConnection(2),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	relationClient, err = relationservice.NewClient(
+		config.Conf.OpenTelemetryConfig.RelationName,
+		client.WithResolver(r),
+		client.WithSuite(tracing2.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.RelationName}),
+		client.WithMuxConnection(2),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	videoClient, err = videoservice.NewClient(
+		config.Conf.OpenTelemetryConfig.VideoName,
+		client.WithResolver(r),
+		client.WithSuite(tracing2.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.VideoName}),
+		client.WithMuxConnection(2),
+	)
+	if err != nil {
+		panic(err)
+	}
+}
 
 // Register implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRequest) (resp *user.UserRegisterResponse, err error) {
@@ -41,7 +92,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "加密密码失败")
 		klog.Error("加密密码失败")
-		return nil, ErrBcrypt
+		return nil, err
 	}
 	req.Password = string(bPassword)
 
@@ -123,84 +174,85 @@ func (s *UserServiceImpl) UserInfo(ctx context.Context, req *user.UserInfoReques
 		return nil, err
 	}
 
-	// 返回响应
-	resp = &user.UserInfoResponse{User: toUserResponse(ctx, req.UserId, mUser)}
-
-	return
-}
-
-func toUserResponse(ctx context.Context, followerID *int64, mUser *model.User) *user.User {
 	userResponse := &user.User{
 		Id:              mUser.ID,
 		Name:            mUser.Name,
-		Avatar:          &mUser.Avatar,
-		BackgroundImage: &mUser.BackgroundImage,
+		Avatar:          mUser.Avatar,
+		BackgroundImage: mUser.BackgroundImage,
 		IsFollow:        false,
-		Signature:       &mUser.Signature,
+		Signature:       mUser.Signature,
 	}
-
 	var wg sync.WaitGroup
 	var wgErr error
 	wg.Add(5)
 	go func() {
 		defer wg.Done()
-		cnt, err := GetUserFavoriteCount(ctx, mUser.ID)
+		cnt, err := favoriteClient.FavoriteCnt(ctx, mUser.ID)
 		if err != nil {
 			wgErr = err
 			return
 		}
-		userResponse.FavoriteCount = &cnt
+		userResponse.FavoriteCount = cnt
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := GetUserTotalFavorited(ctx, mUser.ID)
+		cnt, err := favoriteClient.TotalFavoritedCnt(ctx, mUser.ID)
 		if err != nil {
 			wgErr = err
 			return
 		}
-		userResponse.TotalFavorited = &cnt
+		userResponse.TotalFavorited = cnt
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := GetUserFollowCount(ctx, mUser.ID)
+		cnt, err := relationClient.FollowCnt(ctx, mUser.ID)
 		if err != nil {
 			wgErr = err
 			return
 		}
-		userResponse.FollowCount = &cnt
+		userResponse.FollowCount = cnt
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := GetUserFollowerCount(ctx, mUser.ID)
+		cnt, err := relationClient.FollowerCnt(ctx, mUser.ID)
 		if err != nil {
 			wgErr = err
 			return
 		}
-		userResponse.FollowerCount = &cnt
+		userResponse.FollowerCount = cnt
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := GetUserWorkCount(ctx, mUser.ID)
+		cnt, err := videoClient.WorkCount(ctx, mUser.ID)
 		if err != nil {
 			wgErr = err
 			return
 		}
-		userResponse.WorkCount = &cnt
+		userResponse.WorkCount = cnt
 	}()
 	wg.Wait()
 	if wgErr != nil {
-		return userResponse
+		span.RecordError(wgErr)
+		span.SetStatus(codes.Error, "查询用户信息失败")
+		klog.Error("查询用户信息失败")
+		return nil, wgErr
 	}
 
 	// 判断是否关注
-	if followerID == nil || *followerID == 0 {
-		return userResponse
+	if req.UserId == nil {
+		return
 	}
-	exist, err := CheckRelationExist(ctx, *followerID, mUser.ID)
+	exist, err := relationClient.RelationExist(ctx, *req.UserId, mUser.ID)
 	if err != nil {
-		return userResponse
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "查询用户信息失败")
+		klog.Error("查询用户信息失败")
+		return nil, err
 	}
 	userResponse.IsFollow = exist
 
-	return userResponse
+	// 返回响应
+	resp = &user.UserInfoResponse{User: userResponse}
+
+	return
 }

@@ -2,21 +2,63 @@ package main
 
 import (
 	"context"
-	"errors"
 	"time"
 
+	"douyin/src/config"
 	"douyin/src/dal"
 	"douyin/src/dal/model"
 	comment "douyin/src/kitex_gen/comment"
+	"douyin/src/kitex_gen/user"
+	"douyin/src/kitex_gen/user/userservice"
+	"douyin/src/kitex_gen/video/videoservice"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
 
+	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
+	consul "github.com/kitex-contrib/registry-consul"
 	"go.opentelemetry.io/otel/codes"
 )
 
 // CommentServiceImpl implements the last service interface defined in the IDL.
 type CommentServiceImpl struct{}
+
+var (
+	userClient  userservice.Client
+	videoClient videoservice.Client
+)
+
+func init() {
+	// 服务发现
+	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	videoClient, err = videoservice.NewClient(
+		config.Conf.OpenTelemetryConfig.VideoName,
+		client.WithResolver(r),
+		client.WithSuite(tracing2.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.VideoName}),
+		client.WithMuxConnection(2),
+	)
+	if err != nil {
+		panic(err)
+	}
+	
+	userClient, err = userservice.NewClient(
+		config.Conf.OpenTelemetryConfig.UserName,
+		client.WithResolver(r),
+		client.WithSuite(tracing2.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.UserName}),
+		client.WithMuxConnection(2),
+	)
+	if err != nil {
+		panic(err)
+	}
+}
 
 // CommentAction implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.CommentActionRequest) (resp *comment.CommentActionResponse, err error) {
@@ -24,17 +66,17 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 	defer span.End()
 
 	// 判断视频是否存在
-	if err := CheckVideoExist(ctx, req.VideoId); err != nil {
+	exist, err := videoClient.VideoExist(ctx, req.VideoId)
+	if err != nil {
 		span.RecordError(err)
-
-		if errors.Is(err, dal.ErrVideoNotExist) {
-			span.SetStatus(codes.Error, "视频不存在")
-			klog.Error("视频不存在, err: ", err)
-			return nil, err
-		}
 		span.SetStatus(codes.Error, "查询视频失败")
 		klog.Error("查询视频失败, err: ", err)
 		return nil, err
+	}
+	if !exist {
+		span.SetStatus(codes.Error, "视频不存在")
+		klog.Error("视频不存在, err: ", err)
+		return nil, dal.ErrVideoNotExist
 	}
 
 	mComment := &model.Comment{ID: *req.CommentId, VideoID: req.VideoId, UserID: req.UserId, Content: *req.CommentText}
@@ -79,7 +121,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 	}
 
 	// 获取用户信息
-	mUser, err := GetUserByID(ctx, req.UserId)
+	user, err := userClient.UserInfo(ctx, &user.UserInfoRequest{AuthorId: req.UserId})
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取用户信息失败")
@@ -89,7 +131,12 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 
 	// 返回响应
 	resp = &comment.CommentActionResponse{
-		Comment: toCommentResponse(ctx, &mComment.UserID, mComment, mUser),
+		Comment: &comment.Comment{
+			Id:         mComment.ID,
+			User:       user.User,
+			Content:    mComment.Content,
+			CreateDate: mComment.CreateTime.Format("01-02"),
+		},
 	}
 
 	return
@@ -109,23 +156,21 @@ func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.Comme
 		return nil, err
 	}
 
-	// 获取用户信息
-	userIDs := make([]int64, len(mCommentList))
-	for i, c := range mCommentList {
-		userIDs[i] = c.UserID
-	}
-	mUsers, err := GetUserByIDs(ctx, userIDs)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, "获取用户信息失败")
-		klog.Error("获取用户信息失败, err: ", err)
-		return nil, err
-	}
-
-	// 将model.Comment转换为comment.Comment
 	commentList := make([]*comment.Comment, len(mCommentList))
 	for i, c := range mCommentList {
-		commentList[i] = toCommentResponse(ctx, req.UserId, c, mUsers[i])
+		user, err := userClient.UserInfo(ctx, &user.UserInfoRequest{UserId: req.UserId, AuthorId: c.UserID})
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "获取用户信息失败")
+			klog.Error("获取用户信息失败, err: ", err)
+			return nil, err
+		}
+		commentList[i] = &comment.Comment{
+			Id:         c.ID,
+			User:       user.User,
+			Content:    c.Content,
+			CreateDate: c.CreateTime.Format("01-02"),
+		}
 	}
 
 	// 返回响应
@@ -134,17 +179,18 @@ func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.Comme
 	return
 }
 
-func toCommentResponse(ctx context.Context, userID *int64, mComment *model.Comment, user *model.User) *comment.Comment {
-	return &comment.Comment{
-		Id:         mComment.ID,
-		User:       toUserResponse(ctx, userID, user),
-		Content:    mComment.Content,
-		CreateDate: mComment.CreateTime.Format("01-02"),
-	}
-}
-
 // CommentCnt implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentCnt(ctx context.Context, videoId int64) (resp int64, err error) {
-	// TODO: Your code here...
+	ctx, span := tracing.Tracer.Start(ctx, "CommentCnt")
+	defer span.End()
+
+	resp, err = dal.GetVideoCommentCount(ctx, videoId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "获取评论数失败")
+		klog.Error("获取评论数失败, err: ", err)
+		return
+	}
+
 	return
 }

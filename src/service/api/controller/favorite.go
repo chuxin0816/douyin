@@ -44,7 +44,7 @@ func init() {
 		config.Conf.OpenTelemetryConfig.FavoriteName,
 		client.WithResolver(r),
 		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.FavoriteName}),
 		client.WithMuxConnection(2),
 	)
 	if err != nil {
@@ -130,7 +130,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	// 业务逻辑处理
 	resp, err := favoriteClient.FavoriteList(c, &favorite.FavoriteListRequest{
 		UserId:   userID,
-		ToUserId: req.ToUserID,
+		AuthorId: req.ToUserID,
 	})
 	if err != nil {
 		Error(ctx, CodeServerBusy)

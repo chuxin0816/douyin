@@ -29,4 +29,5 @@ service FavoriteService {
     Favorite_list_response FavoriteList(1: Favorite_list_request req);
     i64 FavoriteCnt(1: i64 user_id);
     i64 TotalFavoritedCnt(1: i64 user_id);
+    bool FavoriteExist(1: i64 user_id, 2: i64 video_id);
 }

@@ -56,10 +56,10 @@ func DeleteFavorite(ctx context.Context, userID, videoID int64) error {
 func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err error) {
 	// 使用singleflight防止缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFavoritePF, strconv.FormatInt(userID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存
@@ -101,10 +101,10 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFavoriteCountPF, strconv.FormatInt(userID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存
@@ -130,10 +130,10 @@ func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err err
 func GetVideoFavoriteCount(ctx context.Context, videoID int64) (cnt int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyVideoFavoriteCountPF, strconv.FormatInt(videoID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存

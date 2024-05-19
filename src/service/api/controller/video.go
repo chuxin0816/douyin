@@ -58,7 +58,7 @@ func init() {
 		config.Conf.OpenTelemetryConfig.VideoName,
 		client.WithResolver(r),
 		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.VideoName}),
 		client.WithMuxConnection(2),
 	)
 	if err != nil {

@@ -6,14 +6,22 @@ import (
 	"sync"
 	"time"
 
+	"douyin/src/config"
 	"douyin/src/dal"
-	"douyin/src/dal/model"
+	"douyin/src/kitex_gen/comment/commentservice"
+	"douyin/src/kitex_gen/favorite/favoriteservice"
+	"douyin/src/kitex_gen/user"
+	"douyin/src/kitex_gen/user/userservice"
 	video "douyin/src/kitex_gen/video"
 	"douyin/src/pkg/oss"
 	"douyin/src/pkg/tracing"
 
+	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/google/uuid"
+	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
+	consul "github.com/kitex-contrib/registry-consul"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -21,6 +29,53 @@ const count = 30
 
 // VideoServiceImpl implements the last service interface defined in the IDL.
 type VideoServiceImpl struct{}
+
+var (
+	userClient     userservice.Client
+	commentClient  commentservice.Client
+	favoriteClient favoriteservice.Client
+)
+
+func init() {
+	// 服务发现
+	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	userClient, err = userservice.NewClient(
+		config.Conf.OpenTelemetryConfig.UserName,
+		client.WithResolver(r),
+		client.WithSuite(tracing2.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.UserName}),
+		client.WithMuxConnection(2),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	commentClient, err = commentservice.NewClient(
+		config.Conf.OpenTelemetryConfig.CommentName,
+		client.WithResolver(r),
+		client.WithSuite(tracing2.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.CommentName}),
+		client.WithMuxConnection(2),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	favoriteClient, err = favoriteservice.NewClient(
+		config.Conf.OpenTelemetryConfig.FavoriteName,
+		client.WithResolver(r),
+		client.WithSuite(tracing2.NewClientSuite()),
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.FavoriteName}),
+		client.WithMuxConnection(2),
+	)
+	if err != nil {
+		panic(err)
+	}
+}
 
 // Feed implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) Feed(ctx context.Context, req *video.FeedRequest) (resp *video.FeedResponse, err error) {
@@ -35,7 +90,7 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *video.FeedRequest) (re
 	}
 
 	// 查询视频列表
-	mVideoList, err := dal.GetFeedList(ctx, req.UserId, latestTime, count)
+	videoIDs, err := dal.GetFeedList(ctx, req.UserId, latestTime, count)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "查询视频列表失败")
@@ -43,17 +98,16 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *video.FeedRequest) (re
 		return nil, err
 	}
 
-	// 将model.Video转换为video.Video
-	videoList := make([]*video.Video, len(mVideoList))
-	for i, mVideo := range mVideoList {
-		videoList[i] = toVideoResponse(ctx, req.UserId, mVideo)
-	}
+	videoList, err := s.VideoInfoList(ctx, &video.VideoInfoListRequest{
+		UserId:      req.UserId,
+		VideoIdList: videoIDs,
+	})
 
 	// 计算下次请求的时间
 	var nextTime *int64
-	if len(mVideoList) > 0 {
+	if len(videoList) > 0 {
 		nextTime = new(int64)
-		*nextTime = mVideoList[len(mVideoList)-1].UploadTime.Unix()
+		*nextTime = videoList[len(videoList)-1].UploadTime
 	}
 
 	// 返回响应
@@ -108,7 +162,7 @@ func (s *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishLi
 	defer span.End()
 
 	// 查询视频列表
-	mVideoList, err := dal.GetPublishList(ctx, req.AuthorId)
+	videoIDs, err := dal.GetPublishList(ctx, req.AuthorId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "查询视频列表失败")
@@ -116,11 +170,10 @@ func (s *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishLi
 		return nil, err
 	}
 
-	// 将model.Video转换为video.Video
-	videoList := make([]*video.Video, len(mVideoList))
-	for i, mVideo := range mVideoList {
-		videoList[i] = toVideoResponse(ctx, req.UserId, mVideo)
-	}
+	videoList, err := s.VideoInfoList(ctx, &video.VideoInfoListRequest{
+		UserId:      req.UserId,
+		VideoIdList: videoIDs,
+	})
 
 	// 返回响应
 	resp = &video.PublishListResponse{VideoList: videoList}
@@ -130,36 +183,66 @@ func (s *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishLi
 
 // WorkCount implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) WorkCount(ctx context.Context, userId int64) (resp int64, err error) {
-	// TODO: Your code here...
+	ctx, span := tracing.Tracer.Start(ctx, "WorkCount")
+	defer span.End()
+
+	resp, err = dal.GetUserWorkCount(ctx, userId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "查询作品数量失败")
+		klog.Error("查询作品数量失败, err: ", err)
+		return
+	}
+
 	return
 }
 
 // AuthorId implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) AuthorId(ctx context.Context, videoId int64) (resp int64, err error) {
-	// TODO: Your code here...
+	ctx, span := tracing.Tracer.Start(ctx, "AuthorId")
+	defer span.End()
+
+	resp, err = dal.GetAuthorID(ctx, videoId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "查询作者ID失败")
+		klog.Error("查询作者ID失败, err: ", err)
+		return
+	}
+
 	return
 }
 
 // VideoExist implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) VideoExist(ctx context.Context, videoId int64) (resp bool, err error) {
-	// TODO: Your code here...
+	ctx, span := tracing.Tracer.Start(ctx, "VideoExist")
+	defer span.End()
+
+	resp, err = dal.CheckVideoExist(ctx, videoId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "查询视频是否存在失败")
+		klog.Error("查询视频是否存在失败, err: ", err)
+		return
+	}
+
 	return
 }
 
 // VideoInfo implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) VideoInfo(ctx context.Context, req *video.VideoInfoRequest) (resp *video.Video, err error) {
-	// TODO: Your code here...
-	return
-}
+	ctx, span := tracing.Tracer.Start(ctx, "VideoInfo")
+	defer span.End()
 
-// VideoInfoList implements the VideoServiceImpl interface.
-func (s *VideoServiceImpl) VideoInfoList(ctx context.Context, req *video.VideoInfoListRequest) (resp []*video.Video, err error) {
-	// TODO: Your code here...
-	return
-}
+	mVideo, err := dal.GetVideoByID(ctx, req.VideoId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "查询视频信息失败")
+		klog.Error("查询视频信息失败, err: ", err)
+		return
+	}
 
-func toVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video) *video.Video {
-	video := &video.Video{
+	resp = &video.Video{
 		Id:         mVideo.ID,
 		PlayUrl:    mVideo.PlayURL,
 		CoverUrl:   mVideo.CoverURL,
@@ -172,53 +255,96 @@ func toVideoResponse(ctx context.Context, userID *int64, mVideo *model.Video) *v
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		author, err := GetUserByID(ctx, mVideo.AuthorID)
+		user, err := userClient.UserInfo(ctx, &user.UserInfoRequest{
+			UserId:   req.UserId,
+			AuthorId: mVideo.AuthorID,
+		})
 		if err != nil {
 			wgErr = err
 			return
 		}
-		video.Author = ToUserResponse(ctx, userID, author)
+		resp.Author = user.User
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := GetVideoCommentCount(ctx, mVideo.ID)
+		cnt, err := commentClient.CommentCnt(ctx, mVideo.ID)
 		if err != nil {
 			wgErr = err
 			return
 		}
-		video.CommentCount = cnt
+		resp.CommentCount = cnt
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := GetVideoFavoriteCount(ctx, mVideo.ID)
+		cnt, err := favoriteClient.FavoriteCnt(ctx, mVideo.ID)
 		if err != nil {
 			wgErr = err
 			return
 		}
-		video.FavoriteCount = cnt
+		resp.FavoriteCount = cnt
 	}()
 	wg.Wait()
 	if wgErr != nil {
-		return video
+		span.RecordError(wgErr)
+		span.SetStatus(codes.Error, "查询视频信息失败")
+		klog.Error("查询视频信息失败, err: ", wgErr)
+		return nil, wgErr
 	}
 
 	// 未登录直接返回
-	if userID == nil || *userID == 0 {
-		return video
+	if req.UserId == nil {
+		return
 	}
 
 	// 查询缓存判断是否点赞
-	exist, err := CheckFavoriteExist(ctx, *userID, mVideo.ID)
+	exist, err := favoriteClient.FavoriteExist(ctx, *req.UserId, mVideo.ID)
 	if err != nil {
-		return video
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "查询视频是否点赞失败")
+		klog.Error("查询视频是否点赞失败, err: ", err)
+		return
 	}
-	video.IsFavorite = exist
+	resp.IsFavorite = exist
 
-	return video
+	return
+}
+
+// VideoInfoList implements the VideoServiceImpl interface.
+func (s *VideoServiceImpl) VideoInfoList(ctx context.Context, req *video.VideoInfoListRequest) (resp []*video.Video, err error) {
+	ctx, span := tracing.Tracer.Start(ctx, "VideoInfoList")
+	defer span.End()
+
+	resp = make([]*video.Video, len(req.VideoIdList))
+	for i, videoId := range req.VideoIdList {
+		video, err := s.VideoInfo(ctx, &video.VideoInfoRequest{
+			UserId:  req.UserId,
+			VideoId: videoId,
+		})
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "查询视频信息失败")
+			klog.Error("查询视频信息失败, err: ", err)
+			return nil, err
+		}
+
+		resp[i] = video
+	}
+
+	return
 }
 
 // PublishIDList implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) PublishIDList(ctx context.Context, userId int64) (resp []int64, err error) {
-	// TODO: Your code here...
+	ctx, span := tracing.Tracer.Start(ctx, "PublishIDList")
+	defer span.End()
+
+	resp, err = dal.GetPublishList(ctx, userId)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "查询视频ID列表失败")
+		klog.Error("查询视频ID列表失败, err: ", err)
+		return
+	}
+
 	return
 }

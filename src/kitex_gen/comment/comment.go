@@ -792,7 +792,7 @@ func (p *CommentActionRequest) Field5DeepEqual(src *int64) bool {
 type CommentActionResponse struct {
 	StatusCode int32    `thrift:"status_code,1" frugal:"1,default,i32" json:"status_code"`
 	StatusMsg  *string  `thrift:"status_msg,2,optional" frugal:"2,optional,string" json:"status_msg,omitempty"`
-	Comment    *Comment `thrift:"comment,3,optional" frugal:"3,optional,Comment" json:"comment,omitempty"`
+	Comment    *Comment `thrift:"comment,3" frugal:"3,default,Comment" json:"comment"`
 }
 
 func NewCommentActionResponse() *CommentActionResponse {
@@ -1024,16 +1024,14 @@ WriteFieldEndError:
 }
 
 func (p *CommentActionResponse) writeField3(oprot thrift.TProtocol) (err error) {
-	if p.IsSetComment() {
-		if err = oprot.WriteFieldBegin("comment", thrift.STRUCT, 3); err != nil {
-			goto WriteFieldBeginError
-		}
-		if err := p.Comment.Write(oprot); err != nil {
-			return err
-		}
-		if err = oprot.WriteFieldEnd(); err != nil {
-			goto WriteFieldEndError
-		}
+	if err = oprot.WriteFieldBegin("comment", thrift.STRUCT, 3); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := p.Comment.Write(oprot); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
 	}
 	return nil
 WriteFieldBeginError:

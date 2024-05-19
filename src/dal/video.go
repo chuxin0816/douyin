@@ -23,10 +23,10 @@ const (
 func GetVideoByID(ctx context.Context, videoID int64) (video *model.Video, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyVideoInfoPF, strconv.FormatInt(videoID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存
@@ -61,17 +61,9 @@ func GetVideoByID(ctx context.Context, videoID int64) (video *model.Video, err e
 	return
 }
 
-// GetFeedList 获取视频Feed流
-func GetFeedList(ctx context.Context, userID *int64, latestTime time.Time, count int) ([]*model.Video, error) {
-	// 查询Feed流ID列表
-	var feedIDs []int64
-	if err := qVideo.WithContext(ctx).Where(qVideo.UploadTime.Lt(latestTime)).Select(qVideo.ID).Limit(count).Scan(&feedIDs); err != nil {
-		return nil, err
-	}
-
-	videoList := make([]*model.Video, len(feedIDs))
-	// 查询视频信息
-	for i, videoID := range feedIDs {
+func GetVideoList(ctx context.Context, videoIDs []int64) ([]*model.Video, error) {
+	videoList := make([]*model.Video, len(videoIDs))
+	for i, videoID := range videoIDs {
 		video, err := GetVideoByID(ctx, videoID)
 		if err != nil {
 			return nil, err
@@ -80,6 +72,17 @@ func GetFeedList(ctx context.Context, userID *int64, latestTime time.Time, count
 	}
 
 	return videoList, nil
+}
+
+// GetFeedList 获取视频Feed流
+func GetFeedList(ctx context.Context, userID *int64, latestTime time.Time, count int) ([]int64, error) {
+	// 查询Feed流ID列表
+	var feedIDs []int64
+	if err := qVideo.WithContext(ctx).Where(qVideo.UploadTime.Lt(latestTime)).Select(qVideo.ID).Limit(count).Scan(&feedIDs); err != nil {
+		return nil, err
+	}
+
+	return feedIDs, nil
 }
 
 // SaveVideo 保存视频信息到数据库
@@ -102,10 +105,10 @@ func SaveVideo(ctx context.Context, userID int64, videoName, coverName, title st
 func GetUserTotalFavorited(ctx context.Context, userID int64) (total int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserTotalFavoritedPF, strconv.FormatInt(userID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存
@@ -138,38 +141,23 @@ func GetUserTotalFavorited(ctx context.Context, userID int64) (total int64, err 
 }
 
 // GetPublishList 获取用户发布的视频列表
-func GetPublishList(ctx context.Context, authorID int64) ([]*model.Video, error) {
-	// 查询视频ID列表
+func GetPublishList(ctx context.Context, authorID int64) ([]int64, error) {
 	var videoIDs []int64
 	err := qVideo.WithContext(ctx).Where(qVideo.AuthorID.Eq(authorID)).Select(qVideo.ID).Scan(&videoIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	// 查询视频信息
-	return GetVideoList(ctx, videoIDs)
-}
-
-func GetVideoList(ctx context.Context, videoIDs []int64) ([]*model.Video, error) {
-	videoList := make([]*model.Video, len(videoIDs))
-	for i, videoID := range videoIDs {
-		video, err := GetVideoByID(ctx, videoID)
-		if err != nil {
-			return nil, err
-		}
-		videoList[i] = video
-	}
-
-	return videoList, nil
+	return videoIDs, nil
 }
 
 func GetUserWorkCount(ctx context.Context, userID int64) (cnt int64, err error) {
 	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserWorkCountPF, strconv.FormatInt(userID, 10))
-	_, err, _ = g.Do(key, func() (interface{}, error) {
+	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
-			time.Sleep(delayTime)
-			g.Forget(key)
+			time.Sleep(DelayTime)
+			G.Forget(key)
 		}()
 
 		// 先查询redis缓存
@@ -192,23 +180,21 @@ func GetUserWorkCount(ctx context.Context, userID int64) (cnt int64, err error) 
 	return
 }
 
-func CheckVideoExist(ctx context.Context, videoID int64) error {
+func CheckVideoExist(ctx context.Context, videoID int64) (bool, error) {
 	// 判断视频是否存在
 	if !bloomFilter.Test([]byte(strconv.FormatInt(videoID, 10))) {
-		return ErrVideoNotExist
+		return false, nil
 	}
 
-	_, err := qVideo.WithContext(ctx).
-		Where(qVideo.ID.Eq(videoID)).
-		Select(qVideo.ID).First()
+	_, err := qVideo.WithContext(ctx).Where(qVideo.ID.Eq(videoID)).Select(qVideo.ID).First()
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return ErrVideoNotExist
+			return false, nil
 		}
-		return err
+		return false, err
 	}
 
-	return nil
+	return true, nil
 }
 
 func GetAuthorID(ctx context.Context, videoID int64) (int64, error) {
