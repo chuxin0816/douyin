@@ -23,6 +23,9 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"RelationFollowList":   kitex.NewMethodInfo(relationFollowListHandler, newRelationServiceRelationFollowListArgs, newRelationServiceRelationFollowListResult, false),
 		"RelationFollowerList": kitex.NewMethodInfo(relationFollowerListHandler, newRelationServiceRelationFollowerListArgs, newRelationServiceRelationFollowerListResult, false),
 		"RelationFriendList":   kitex.NewMethodInfo(relationFriendListHandler, newRelationServiceRelationFriendListArgs, newRelationServiceRelationFriendListResult, false),
+		"RelationExist":        kitex.NewMethodInfo(relationExistHandler, newRelationServiceRelationExistArgs, newRelationServiceRelationExistResult, false),
+		"FollowCnt":            kitex.NewMethodInfo(followCntHandler, newRelationServiceFollowCntArgs, newRelationServiceFollowCntResult, false),
+		"FollowerCnt":          kitex.NewMethodInfo(followerCntHandler, newRelationServiceFollowerCntArgs, newRelationServiceFollowerCntResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "relation",
@@ -111,6 +114,60 @@ func newRelationServiceRelationFriendListResult() interface{} {
 	return relation.NewRelationServiceRelationFriendListResult()
 }
 
+func relationExistHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*relation.RelationServiceRelationExistArgs)
+	realResult := result.(*relation.RelationServiceRelationExistResult)
+	success, err := handler.(relation.RelationService).RelationExist(ctx, realArg.UserId, realArg.AuthorId)
+	if err != nil {
+		return err
+	}
+	realResult.Success = &success
+	return nil
+}
+func newRelationServiceRelationExistArgs() interface{} {
+	return relation.NewRelationServiceRelationExistArgs()
+}
+
+func newRelationServiceRelationExistResult() interface{} {
+	return relation.NewRelationServiceRelationExistResult()
+}
+
+func followCntHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*relation.RelationServiceFollowCntArgs)
+	realResult := result.(*relation.RelationServiceFollowCntResult)
+	success, err := handler.(relation.RelationService).FollowCnt(ctx, realArg.UserId)
+	if err != nil {
+		return err
+	}
+	realResult.Success = &success
+	return nil
+}
+func newRelationServiceFollowCntArgs() interface{} {
+	return relation.NewRelationServiceFollowCntArgs()
+}
+
+func newRelationServiceFollowCntResult() interface{} {
+	return relation.NewRelationServiceFollowCntResult()
+}
+
+func followerCntHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*relation.RelationServiceFollowerCntArgs)
+	realResult := result.(*relation.RelationServiceFollowerCntResult)
+	success, err := handler.(relation.RelationService).FollowerCnt(ctx, realArg.UserId)
+	if err != nil {
+		return err
+	}
+	realResult.Success = &success
+	return nil
+}
+func newRelationServiceFollowerCntArgs() interface{} {
+	return relation.NewRelationServiceFollowerCntArgs()
+}
+
+func newRelationServiceFollowerCntResult() interface{} {
+	return relation.NewRelationServiceFollowerCntResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -156,6 +213,37 @@ func (p *kClient) RelationFriendList(ctx context.Context, req *relation.Relation
 	_args.Req = req
 	var _result relation.RelationServiceRelationFriendListResult
 	if err = p.c.Call(ctx, "RelationFriendList", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) RelationExist(ctx context.Context, userId int64, authorId int64) (r bool, err error) {
+	var _args relation.RelationServiceRelationExistArgs
+	_args.UserId = userId
+	_args.AuthorId = authorId
+	var _result relation.RelationServiceRelationExistResult
+	if err = p.c.Call(ctx, "RelationExist", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) FollowCnt(ctx context.Context, userId int64) (r int64, err error) {
+	var _args relation.RelationServiceFollowCntArgs
+	_args.UserId = userId
+	var _result relation.RelationServiceFollowCntResult
+	if err = p.c.Call(ctx, "FollowCnt", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) FollowerCnt(ctx context.Context, userId int64) (r int64, err error) {
+	var _args relation.RelationServiceFollowerCntArgs
+	_args.UserId = userId
+	var _result relation.RelationServiceFollowerCntResult
+	if err = p.c.Call(ctx, "FollowerCnt", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

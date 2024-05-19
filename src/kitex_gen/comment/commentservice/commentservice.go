@@ -21,6 +21,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	methods := map[string]kitex.MethodInfo{
 		"CommentAction": kitex.NewMethodInfo(commentActionHandler, newCommentServiceCommentActionArgs, newCommentServiceCommentActionResult, false),
 		"CommentList":   kitex.NewMethodInfo(commentListHandler, newCommentServiceCommentListArgs, newCommentServiceCommentListResult, false),
+		"CommentCnt":    kitex.NewMethodInfo(commentCntHandler, newCommentServiceCommentCntArgs, newCommentServiceCommentCntResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "comment",
@@ -73,6 +74,24 @@ func newCommentServiceCommentListResult() interface{} {
 	return comment.NewCommentServiceCommentListResult()
 }
 
+func commentCntHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*comment.CommentServiceCommentCntArgs)
+	realResult := result.(*comment.CommentServiceCommentCntResult)
+	success, err := handler.(comment.CommentService).CommentCnt(ctx, realArg.VideoId)
+	if err != nil {
+		return err
+	}
+	realResult.Success = &success
+	return nil
+}
+func newCommentServiceCommentCntArgs() interface{} {
+	return comment.NewCommentServiceCommentCntArgs()
+}
+
+func newCommentServiceCommentCntResult() interface{} {
+	return comment.NewCommentServiceCommentCntResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -98,6 +117,16 @@ func (p *kClient) CommentList(ctx context.Context, req *comment.CommentListReque
 	_args.Req = req
 	var _result comment.CommentServiceCommentListResult
 	if err = p.c.Call(ctx, "CommentList", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) CommentCnt(ctx context.Context, videoId int64) (r int64, err error) {
+	var _args comment.CommentServiceCommentCntArgs
+	_args.VideoId = videoId
+	var _result comment.CommentServiceCommentCntResult
+	if err = p.c.Call(ctx, "CommentCnt", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

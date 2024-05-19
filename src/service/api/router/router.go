@@ -54,7 +54,8 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	apiRouter := h.Group("/douyin")
 
 	// basic apis
-	apiRouter.GET("/feed/", controller.Feed)
+	videoController := controller.NewVideoController()
+	apiRouter.GET("/feed/", videoController.Feed)
 
 	userRouter := apiRouter.Group("/user")
 	{
@@ -66,9 +67,8 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 
 	publishRouter := apiRouter.Group("/publish")
 	{
-		publishController := controller.NewPublishController()
-		publishRouter.POST("/action/", middleware.AuthMiddleware(), publishController.Action)
-		publishRouter.GET("/list/", publishController.List)
+		publishRouter.POST("/action/", middleware.AuthMiddleware(), videoController.PublishAction)
+		publishRouter.GET("/list/", videoController.PublishList)
 	}
 
 	// interaction apis

@@ -1,4 +1,4 @@
-include "feed.thrift"
+include "video.thrift"
 
 namespace go favorite
 
@@ -15,17 +15,18 @@ struct Favorite_action_response {
 
 struct Favorite_list_request {
   1: optional i64 user_id; // 用户id
-  2: i64 to_user_id; // 对方用户id
+  2: i64 author_id; // 对方用户id
 }
 
 struct Favorite_list_response {
   1: i32 status_code; // 状态码，0-成功，其他值-失败
   2: optional string status_msg; // 返回状态描述
-  3: list<feed.Video> video_list; // 用户点赞视频列表
+  3: list<video.Video> video_list; // 用户点赞视频列表
 }
 
 service FavoriteService {
     Favorite_action_response FavoriteAction(1: Favorite_action_request req);
     Favorite_list_response FavoriteList(1: Favorite_list_request req);
+    i64 FavoriteCnt(1: i64 user_id);
+    i64 TotalFavoritedCnt(1: i64 user_id);
 }
-

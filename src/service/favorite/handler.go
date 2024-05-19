@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	"douyin/src/dal"
+	video "douyin/src/kitex_gen/Video"
 	favorite "douyin/src/kitex_gen/favorite"
-	"douyin/src/kitex_gen/feed"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
 
@@ -122,7 +122,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 			return
 		} else if exist == 0 {
 			// 缓存不存在，查询数据库写入缓存
-			cnt, err := dal.GetUserTotalFavorited(ctx, authorID)
+			cnt, err := GetUserTotalFavorited(ctx, authorID)
 			if err != nil {
 				wgErr = err
 				return
@@ -188,14 +188,26 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 		return nil, err
 	}
 
-	// 将model.Video转换为feed.Video
-	videoList := make([]*feed.Video, len(mVideoList))
+	// 将model.Video转换为video.Video
+	videoList := make([]*video.Video, len(mVideoList))
 	for i, mVideo := range mVideoList {
-		videoList[i] = ToVideoResponse(ctx, nil, mVideo)
+		videoList[i] = toVideoResponse(ctx, nil, mVideo)
 	}
 
 	// 返回响应
 	resp = &favorite.FavoriteListResponse{VideoList: videoList}
 
+	return
+}
+
+// FavoriteCnt implements the FavoriteServiceImpl interface.
+func (s *FavoriteServiceImpl) FavoriteCnt(ctx context.Context, userId int64) (resp int64, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// TotalFavoritedCnt implements the FavoriteServiceImpl interface.
+func (s *FavoriteServiceImpl) TotalFavoritedCnt(ctx context.Context, userId int64) (resp int64, err error) {
+	// TODO: Your code here...
 	return
 }

@@ -5,9 +5,10 @@ import (
 
 	"douyin/src/config"
 	"douyin/src/dal"
-	feed "douyin/src/kitex_gen/feed/feedservice"
+	video "douyin/src/kitex_gen/video/videoservice"
 	"douyin/src/logger"
 	"douyin/src/pkg/kafka"
+	"douyin/src/pkg/oss"
 	"douyin/src/pkg/snowflake"
 	"douyin/src/pkg/tracing"
 
@@ -21,7 +22,7 @@ import (
 func main() {
 	config.Init()
 	go watchConfig()
-	tracing.Init(config.Conf.OpenTelemetryConfig.FeedName)
+	tracing.Init(config.Conf.OpenTelemetryConfig.VideoName)
 	defer tracing.Close()
 	logger.Init()
 	snowflake.Init()
@@ -29,7 +30,7 @@ func main() {
 	defer dal.Close()
 	kafka.Init()
 
-	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.FeedAddr)
+	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.VideoAddr)
 	if err != nil {
 		klog.Fatal("resolve tcp addr failed: ", err)
 	}
@@ -40,11 +41,11 @@ func main() {
 		klog.Fatal("new consul register failed: ", err)
 	}
 
-	svr := feed.NewServer(new(FeedServiceImpl),
+	svr := video.NewServer(new(VideoServiceImpl),
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
 		server.WithSuite(kitexTracing.NewServerSuite()),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.FeedName}),
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.VideoName}),
 		server.WithMuxTransport(),
 	)
 
@@ -57,13 +58,16 @@ func watchConfig() {
 	for {
 		select {
 		case <-config.NoticeOpenTelemetry:
-			tracing.Init(config.Conf.OpenTelemetryConfig.FeedName)
+			tracing.Init(config.Conf.OpenTelemetryConfig.VideoName)
 
 		case <-config.NoticeLog:
 			logger.Init()
 
 		case <-config.NoticeSnowflake:
 			snowflake.Init()
+
+		case <-config.NoticeOss:
+			oss.Init()
 
 		case <-config.NoticeMySQL:
 			dal.InitMySQL()

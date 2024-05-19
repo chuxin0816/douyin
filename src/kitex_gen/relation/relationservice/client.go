@@ -15,6 +15,9 @@ type Client interface {
 	RelationFollowList(ctx context.Context, req *relation.RelationFollowListRequest, callOptions ...callopt.Option) (r *relation.RelationFollowListResponse, err error)
 	RelationFollowerList(ctx context.Context, req *relation.RelationFollowerListRequest, callOptions ...callopt.Option) (r *relation.RelationFollowerListResponse, err error)
 	RelationFriendList(ctx context.Context, req *relation.RelationFriendListRequest, callOptions ...callopt.Option) (r *relation.RelationFriendListResponse, err error)
+	RelationExist(ctx context.Context, userId int64, authorId int64, callOptions ...callopt.Option) (r bool, err error)
+	FollowCnt(ctx context.Context, userId int64, callOptions ...callopt.Option) (r int64, err error)
+	FollowerCnt(ctx context.Context, userId int64, callOptions ...callopt.Option) (r int64, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -64,4 +67,19 @@ func (p *kRelationServiceClient) RelationFollowerList(ctx context.Context, req *
 func (p *kRelationServiceClient) RelationFriendList(ctx context.Context, req *relation.RelationFriendListRequest, callOptions ...callopt.Option) (r *relation.RelationFriendListResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.RelationFriendList(ctx, req)
+}
+
+func (p *kRelationServiceClient) RelationExist(ctx context.Context, userId int64, authorId int64, callOptions ...callopt.Option) (r bool, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.RelationExist(ctx, userId, authorId)
+}
+
+func (p *kRelationServiceClient) FollowCnt(ctx context.Context, userId int64, callOptions ...callopt.Option) (r int64, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.FollowCnt(ctx, userId)
+}
+
+func (p *kRelationServiceClient) FollowerCnt(ctx context.Context, userId int64, callOptions ...callopt.Option) (r int64, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.FollowerCnt(ctx, userId)
 }

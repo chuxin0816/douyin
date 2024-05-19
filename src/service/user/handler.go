@@ -115,7 +115,7 @@ func (s *UserServiceImpl) UserInfo(ctx context.Context, req *user.UserInfoReques
 	defer span.End()
 
 	// 查询用户信息
-	mUser, err := dal.GetUserByID(ctx, req.ToUserId)
+	mUser, err := dal.GetUserByID(ctx, req.AuthorId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "查询用户信息失败")

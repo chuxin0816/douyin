@@ -61,21 +61,6 @@ func GetUserByID(ctx context.Context, authorID int64) (user *model.User, err err
 	return
 }
 
-// GetUserByIDs 根据用户id列表查询用户信息
-func GetUserByIDs(ctx context.Context, authorIDs []int64) ([]*model.User, error) {
-	users := make([]*model.User, len(authorIDs))
-
-	for i, authorID := range authorIDs {
-		user, err := GetUserByID(ctx, authorID)
-		if err != nil {
-			return nil, err
-		}
-		users[i] = user
-	}
-
-	return users, nil
-}
-
 // GetUserLoginByName 根据用户名查询用户密码, 如果用户不存在则返回nil
 func GetUserLoginByName(ctx context.Context, username string) *model.UserLogin {
 	// 先判断布隆过滤器中是否存在

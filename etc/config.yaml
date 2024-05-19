@@ -58,11 +58,10 @@ database:
 
 consul:
   consul_addr: consul:8500
-  feed_addr: feed:8890
   user_addr: user:8891
-  favorite_addr: favorite:8892
-  comment_addr: comment:8893
-  publish_addr: publish:8894
+  video_addr: video:8892
+  favorite_addr: favorite:8893
+  comment_addr: comment:8894
   relation_addr: relation:8895
   message_addr: message:8896
 
@@ -74,11 +73,10 @@ kafka:
 
 open_telemetry:
   api_name: "api"
-  feed_name: "feed"
   user_name: "user"
+  video_name: "video"
   favorite_name: "favorite"
   comment_name: "comment"
-  publish_name: "publish"
   relation_name: "relation"
   message_name: "message"
   jaeger_addr: "jaeger:4318"

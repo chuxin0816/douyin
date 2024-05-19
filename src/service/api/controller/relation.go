@@ -24,7 +24,7 @@ import (
 type RelationController struct{}
 
 type RelationActionRequest struct {
-	ToUserID   int64 `query:"to_user_id,string"  vd:"$>0"`        // 对方用户id
+	Author   int64 `query:"to_user_id,string"  vd:"$>0"`        // 对方用户id
 	ActionType int64 `query:"action_type,string" vd:"$==1||$==2"` // 1-关注，2-取消关注
 }
 
@@ -82,7 +82,7 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 不能关注自己
-	if userID == req.ToUserID {
+	if userID == req.Author {
 		Error(ctx, CodeInvalidParam)
 		hlog.Warn("不能关注自己")
 		return
@@ -91,7 +91,7 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	// 业务逻辑处理
 	resp, err := relationClient.RelationAction(c, &relation.RelationActionRequest{
 		UserId:     userID,
-		ToUserId:   req.ToUserID,
+		AuthorId:   req.Author,
 		ActionType: req.ActionType,
 	})
 	if err != nil {
@@ -145,7 +145,7 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	// 业务逻辑处理
 	resp, err := relationClient.RelationFollowList(c, &relation.RelationFollowListRequest{
 		UserId:   userID,
-		ToUserId: req.UserID,
+		AuthorId: req.UserID,
 	})
 	if err != nil {
 		Error(ctx, CodeServerBusy)
@@ -180,7 +180,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	// 业务逻辑处理
 	resp, err := relationClient.RelationFollowerList(c, &relation.RelationFollowerListRequest{
 		UserId:   userID,
-		ToUserId: req.UserID,
+		AuthorId: req.UserID,
 	})
 	if err != nil {
 		Error(ctx, CodeServerBusy)
@@ -215,7 +215,7 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	// 业务逻辑处理
 	resp, err := relationClient.RelationFriendList(c, &relation.RelationFriendListRequest{
 		UserId:   userID,
-		ToUserId: req.UserID,
+		AuthorId: req.UserID,
 	})
 	if err != nil {
 		Error(ctx, CodeServerBusy)

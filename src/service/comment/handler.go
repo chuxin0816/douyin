@@ -142,3 +142,9 @@ func toCommentResponse(ctx context.Context, userID *int64, mComment *model.Comme
 		CreateDate: mComment.CreateTime.Format("01-02"),
 	}
 }
+
+// CommentCnt implements the CommentServiceImpl interface.
+func (s *CommentServiceImpl) CommentCnt(ctx context.Context, videoId int64) (resp int64, err error) {
+	// TODO: Your code here...
+	return
+}

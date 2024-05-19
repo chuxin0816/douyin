@@ -2,6 +2,13 @@ include "user.thrift"
 
 namespace go comment
 
+struct Comment {
+  1: i64 id; // 视频评论id
+  2: user.User user; // 评论用户信息
+  3: string content; // 评论内容
+  4: string create_date; // 评论发布日期，格式 mm-dd
+}
+
 struct Comment_action_request {
   1: i64 user_id; // 用户id
   2: i64 video_id; // 视频id
@@ -27,14 +34,8 @@ struct Comment_list_response {
   3: list<Comment> comment_list; // 评论列表
 }
 
-struct Comment {
-  1: i64 id; // 视频评论id
-  2: user.User user; // 评论用户信息
-  3: string content; // 评论内容
-  4: string create_date; // 评论发布日期，格式 mm-dd
-}
-
 service CommentService {
-    Comment_action_response CommentAction(1:Comment_action_request req)
-    Comment_list_response CommentList(1:Comment_list_request req)
+    Comment_action_response CommentAction(1: Comment_action_request req)
+    Comment_list_response CommentList(1: Comment_list_request req)
+    i64 CommentCnt(1: i64 video_id)
 }

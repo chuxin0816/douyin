@@ -4,7 +4,7 @@ namespace go relation
 
 struct Relation_action_request {
   1: i64 user_id; // 用户id
-  2: i64 to_user_id; // 对方用户id
+  2: i64 author_id; // 对方用户id
   3: i64 action_type; // 1-关注，2-取消关注
 }
 
@@ -14,8 +14,8 @@ struct Relation_action_response {
 }
 
 struct Relation_follow_list_request {
-  1: i64 to_user_id; // 对方用户id
-  2: optional i64 user_id; // 用户id
+  1: optional i64 user_id; // 用户id
+  2: i64 author_id; // 对方用户id
 }
 
 struct Relation_follow_list_response {
@@ -25,8 +25,8 @@ struct Relation_follow_list_response {
 }
 
 struct Relation_follower_list_request {
-  1: i64 to_user_id; // 对方用户id
-  2: optional i64 user_id; // 用户id
+  1: optional i64 user_id; // 用户id
+  2: i64 author_id; // 对方用户id
 }
 
 struct Relation_follower_list_response {
@@ -36,8 +36,8 @@ struct Relation_follower_list_response {
 }
 
 struct Relation_friend_list_request {
-  1: i64 to_user_id; // 对方用户id
-  2: optional i64 user_id; // 用户id
+  1: optional i64 user_id; // 用户id
+  2: i64 author_id; // 对方用户id
 }
 
 struct Relation_friend_list_response {
@@ -51,4 +51,7 @@ service RelationService{
     Relation_follow_list_response RelationFollowList(1: Relation_follow_list_request req)
     Relation_follower_list_response RelationFollowerList(1: Relation_follower_list_request req)
     Relation_friend_list_response RelationFriendList(1: Relation_friend_list_request req)
+    bool RelationExist(1: i64 user_id, 2: i64 author_id)
+    i64 FollowCnt(1: i64 user_id)
+    i64 FollowerCnt(1: i64 user_id)
 }

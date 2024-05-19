@@ -4,13 +4,14 @@ import (
 	"context"
 	"mime/multipart"
 	"net/http"
+	"time"
 
 	"douyin/src/pkg/jwt"
 	"douyin/src/pkg/tracing"
 
 	"douyin/src/config"
-	"douyin/src/kitex_gen/publish"
-	"douyin/src/kitex_gen/publish/publishservice"
+	"douyin/src/kitex_gen/video"
+	"douyin/src/kitex_gen/video/videoservice"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -27,7 +28,12 @@ const (
 	maxFileSize = 500 * 1024 * 1024 // 500MB
 )
 
-type PublishController struct{}
+type VideoController struct{}
+
+type FeedRequest struct {
+	LatestTime int64  `query:"latest_time,string"` // 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
+	Token      string `query:"token"`              // 用户登录状态下设置
+}
 
 type PublishActionRequest struct {
 	Data  *multipart.FileHeader `form:"data"`                // 视频数据
@@ -39,7 +45,7 @@ type PublishListRequest struct {
 	Token  string `query:"token"`                   // 用户登录状态下设置
 }
 
-var publishClient publishservice.Client
+var videoClient videoservice.Client
 
 func init() {
 	// 服务发现
@@ -48,8 +54,8 @@ func init() {
 		panic(err)
 	}
 
-	publishClient, err = publishservice.NewClient(
-		config.Conf.OpenTelemetryConfig.PublishName,
+	videoClient, err = videoservice.NewClient(
+		config.Conf.OpenTelemetryConfig.VideoName,
 		client.WithResolver(r),
 		client.WithSuite(tracing2.NewClientSuite()),
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.ApiName}),
@@ -60,11 +66,47 @@ func init() {
 	}
 }
 
-func NewPublishController() *PublishController {
-	return &PublishController{}
+func NewVideoController() *VideoController {
+	return &VideoController{}
 }
 
-func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) {
+// Feed 不限制登录状态，返回按投稿时间倒序的视频列表，视频数由服务端控制，单次最多30个
+func (vc *VideoController) Feed(c context.Context, ctx *app.RequestContext) {
+	c, span := tracing.Tracer.Start(c, "Feed")
+	defer span.End()
+
+	// 获取参数
+	req := &FeedRequest{LatestTime: time.Now().Unix()}
+	err := ctx.Bind(req)
+	if err != nil {
+		Error(ctx, CodeInvalidParam)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "参数解析失败")
+		hlog.Error("参数解析失败, err: ", err)
+		return
+	}
+
+	// 验证token
+	userID := jwt.ParseToken(req.Token)
+
+	// 业务逻辑处理
+	resp, err := videoClient.Feed(c, &video.FeedRequest{
+		LatestTime: req.LatestTime,
+		UserId:     userID,
+	})
+	if err != nil {
+		Error(ctx, CodeServerBusy)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "业务逻辑处理失败")
+		hlog.Error("业务逻辑处理失败, err: ", err)
+		return
+	}
+
+	// 返回结果
+	Success(ctx, resp)
+}
+
+func (vc *VideoController) PublishAction(c context.Context, ctx *app.RequestContext) {
 	c, span := tracing.Tracer.Start(c, "PublishAction")
 	defer span.End()
 
@@ -131,7 +173,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := publishClient.PublishAction(c, &publish.PublishActionRequest{
+	resp, err := videoClient.PublishAction(c, &video.PublishActionRequest{
 		UserId: userID,
 		Data:   buf,
 		Title:  req.Title,
@@ -148,7 +190,7 @@ func (pc *PublishController) Action(c context.Context, ctx *app.RequestContext) 
 	Success(ctx, resp)
 }
 
-func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
+func (vc *VideoController) PublishList(c context.Context, ctx *app.RequestContext) {
 	c, span := tracing.Tracer.Start(c, "PublishList")
 	defer span.End()
 
@@ -168,9 +210,9 @@ func (pc *PublishController) List(c context.Context, ctx *app.RequestContext) {
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := publishClient.PublishList(c, &publish.PublishListRequest{
+	resp, err := videoClient.PublishList(c, &video.PublishListRequest{
 		UserId:   userID,
-		ToUserId: authorID,
+		AuthorId: authorID,
 	})
 	if err != nil {
 		Error(ctx, CodeServerBusy)

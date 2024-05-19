@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-RUN_NAME="publish"
+RUN_NAME="video"
 
 mkdir -p output/bin
 cp script/* output/

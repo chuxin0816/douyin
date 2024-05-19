@@ -56,7 +56,7 @@
 go run cmd/gen/generator.go
 2. Kitex代码生成
 cd src/service/feed
-kitex -module douyin -service feed -gen-path ../../kitex_gen/ ../../idl/feed.thrift
+kitex -module douyin -service user -gen-path ../../kitex_gen/ ../../idl/user.thrift
 ```
 ## 未来更新:
 * 使用ElasticSearch对用户消息和系统日志进行索引存储

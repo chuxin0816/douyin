@@ -103,11 +103,10 @@ type NebulaConfig struct {
 
 type ConsulConfig struct {
 	ConsulAddr   string `mapstructure:"consul_addr"`
-	FeedAddr     string `mapstructure:"feed_addr"`
 	UserAddr     string `mapstructure:"user_addr"`
+	VideoAddr    string `mapstructure:"video_addr"`
 	FavoriteAddr string `mapstructure:"favorite_addr"`
 	CommentAddr  string `mapstructure:"comment_addr"`
-	PublishAddr  string `mapstructure:"publish_addr"`
 	RelationAddr string `mapstructure:"relation_addr"`
 	MessageAddr  string `mapstructure:"message_addr"`
 }
@@ -118,11 +117,10 @@ type KafkaConfig struct {
 
 type OpenTelemetryConfig struct {
 	ApiName      string `mapstructure:"api_name"`
-	FeedName     string `mapstructure:"feed_name"`
 	UserName     string `mapstructure:"user_name"`
+	VideoName    string `mapstructure:"video_name"`
 	FavoriteName string `mapstructure:"favorite_name"`
 	CommentName  string `mapstructure:"comment_name"`
-	PublishName  string `mapstructure:"publish_name"`
 	RelationName string `mapstructure:"relation_name"`
 	MessageName  string `mapstructure:"message_name"`
 	JaegerAddr   string `mapstructure:"jaeger_addr"`

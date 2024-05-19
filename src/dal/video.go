@@ -146,17 +146,8 @@ func GetPublishList(ctx context.Context, authorID int64) ([]*model.Video, error)
 		return nil, err
 	}
 
-	videoList := make([]*model.Video, len(videoIDs))
 	// 查询视频信息
-	for i, videoID := range videoIDs {
-		video, err := GetVideoByID(ctx, videoID)
-		if err != nil {
-			return nil, err
-		}
-		videoList[i] = video
-	}
-
-	return videoList, nil
+	return GetVideoList(ctx, videoIDs)
 }
 
 func GetVideoList(ctx context.Context, videoIDs []int64) ([]*model.Video, error) {

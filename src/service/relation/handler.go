@@ -23,7 +23,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 	defer span.End()
 
 	// 检查是否关注
-	exist, err := dal.CheckRelationExist(ctx, req.UserId, req.ToUserId)
+	exist, err := dal.CheckRelationExist(ctx, req.UserId, req.AuthorId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "检查是否关注失败")
@@ -50,7 +50,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 
 	// 通过kafka更新数据库
 	err = kafka.Relation(ctx, &model.Relation{
-		AuthorID:   req.ToUserId,
+		AuthorID:   req.AuthorId,
 		FollowerID: req.UserId,
 	})
 	if err != nil {
@@ -72,7 +72,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 	defer span.End()
 
 	// 获取关注列表
-	followList, err := dal.FollowList(ctx, req.ToUserId)
+	followList, err := dal.FollowList(ctx, req.AuthorId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取关注列表失败")
@@ -92,7 +92,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 	// 将model.User转换为user.User
 	userList := make([]*user.User, len(mUserList))
 	for i, u := range mUserList {
-		userList[i] = ToUserResponse(ctx, req.UserId, u)
+		userList[i] = toUserResponse(ctx, req.UserId, u)
 	}
 
 	// 返回响应
@@ -107,7 +107,7 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 	defer span.End()
 
 	// 获取粉丝列表
-	followerList, err := dal.FollowerList(ctx, req.ToUserId)
+	followerList, err := dal.FollowerList(ctx, req.AuthorId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取粉丝列表失败")
@@ -142,7 +142,7 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 	defer span.End()
 
 	// 获取好友列表
-	friendList, err := dal.FriendList(ctx, req.ToUserId)
+	friendList, err := dal.FriendList(ctx, req.AuthorId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取好友列表失败")
@@ -168,5 +168,23 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 	// 返回响应
 	resp = &relation.RelationFriendListResponse{UserList: userList}
 
+	return
+}
+
+// RelationExist implements the RelationServiceImpl interface.
+func (s *RelationServiceImpl) RelationExist(ctx context.Context, userId int64, authorId int64) (resp bool, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// FollowCnt implements the RelationServiceImpl interface.
+func (s *RelationServiceImpl) FollowCnt(ctx context.Context, userId int64) (resp int64, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// FollowerCnt implements the RelationServiceImpl interface.
+func (s *RelationServiceImpl) FollowerCnt(ctx context.Context, userId int64) (resp int64, err error) {
+	// TODO: Your code here...
 	return
 }

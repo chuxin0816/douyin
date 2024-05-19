@@ -80,7 +80,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	// 业务逻辑处理
 	resp, err := userClient.UserInfo(c, &user.UserInfoRequest{
 		UserId:   userID,
-		ToUserId: req.UserID,
+		AuthorId: req.UserID,
 	})
 	if err != nil {
 		span.RecordError(err)
