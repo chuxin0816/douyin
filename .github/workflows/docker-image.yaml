@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [api, comment, favorite, feed, message, publish, relation, user]
+        component: [api, comment, favorite, message, relation, user, video]
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

@@ -11,25 +11,6 @@ services:
         condition: service_healthy
     container_name: Api
     
-  feed:
-    image: ghcr.io/chuxin0816/douyin:feed
-    ports:
-      - "8890:8890"
-    depends_on:
-      consul:
-        condition: service_healthy
-      mysql-slave:
-        condition: service_healthy
-      mysql-master:
-        condition: service_healthy
-      redis-slave:
-        condition: service_healthy
-      kafka-ui:
-        condition: service_healthy
-      jaeger:
-        condition: service_healthy
-    container_name: Feed
-
   user:
     image: ghcr.io/chuxin0816/douyin:user
     ports:
@@ -49,10 +30,29 @@ services:
         condition: service_healthy
     container_name: User
 
+  video:
+    image: ghcr.io/chuxin0816/douyin:video
+    ports:
+      - "8892:8892"
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql-master:
+        condition: service_healthy
+      mysql-slave:
+        condition: service_healthy
+      redis-slave:
+        condition: service_healthy
+      kafka-ui:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    container_name: Video
+
   favorite:
     image: ghcr.io/chuxin0816/douyin:favorite
     ports:
-      - "8892:8892"
+      - "8893:8893"
     depends_on:
       consul:
         condition: service_healthy
@@ -71,25 +71,6 @@ services:
   comment:
     image: ghcr.io/chuxin0816/douyin:comment
     ports:
-      - "8893:8893"
-    depends_on:
-      consul:
-        condition: service_healthy
-      mysql-master:
-        condition: service_healthy
-      mysql-slave:
-        condition: service_healthy
-      redis-slave:
-        condition: service_healthy
-      kafka-ui:
-        condition: service_healthy
-      jaeger:
-        condition: service_healthy
-    container_name: Comment
-
-  publish:
-    image: ghcr.io/chuxin0816/douyin:publish
-    ports:
       - "8894:8894"
     depends_on:
       consul:
@@ -104,7 +85,7 @@ services:
         condition: service_healthy
       jaeger:
         condition: service_healthy
-    container_name: Publish
+    container_name: Comment
 
   relation:
     image: ghcr.io/chuxin0816/douyin:relation
