@@ -33,11 +33,10 @@
 │       ├── api             HTTP服务端
 │       ├── comment         评论服务
 │       ├── favorite        点赞服务 
-│       ├── feed            视频流服务
 │       ├── message         消息服务
-│       ├── publish         视频发布服务
 │       ├── relation        关注服务
-│       └── user            用户服务
+│       ├── user            用户服务
+│       └── video           视频服务
 └── docker-compose.yml
 ```
 ##  性能测试
