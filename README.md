@@ -5,7 +5,7 @@
 [![Visitors](https://api.visitorbadge.io/api/daily?path=https://github.com/chuxin0816/douyin&label=VISITORS%20TODAY&countColor=%231758f0)](https://github.com/chuxin0816/douyin)
 </div>
 
-该项目为字节跳动青训营项目，实现了抖音主要功能模块，包括视频流、视频投稿、注册登录、个人信息、点赞评论、用户关注、即时通讯等核心业务，从[单体架构](https://github.com/chuxin0816/douyin/tree/v1)升级到[微服务架构](https://github.com/chuxin0816/douyin)，并持续优化相关技术实现。
+该项目为字节跳动青训营项目，实现了抖音主要功能模块，包括视频、用户、点赞、评论、关注、消息等服务，从[单体架构](https://github.com/chuxin0816/douyin/tree/v1)升级到[微服务架构](https://github.com/chuxin0816/douyin)，并持续优化相关技术实现。
 
 接口文档: [Apifox](https://apifox.com/apidoc/shared-0c80e0c6-daca-4b12-96a4-01ca8c2b6cd1) ｜ 项目演示地址：http://chuxin0816.com:8888/ (已关闭)
 ## 项目部署
