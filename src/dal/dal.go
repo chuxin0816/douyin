@@ -251,7 +251,3 @@ func loadDataToBloom() error {
 
 	return nil
 }
-
-func AddToBloom(ID string) {
-	bloomFilter.Add([]byte(ID))
-}
