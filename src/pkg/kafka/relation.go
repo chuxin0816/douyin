@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"strconv"
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
@@ -58,6 +59,19 @@ func (mq *relationMQ) consumeRelation(ctx context.Context) {
 				klog.Error("删除记录失败, err: ", err)
 				continue
 			}
+		}
+
+		// 删除缓存
+		pipe := dal.RDB.Pipeline()
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowPF, strconv.FormatInt(relation.FollowerID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowerPF, strconv.FormatInt(relation.AuthorID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(relation.FollowerID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(relation.AuthorID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(relation.FollowerID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(relation.FollowerID, 10)))
+		_, err = pipe.Exec(ctx)
+		if err != nil {
+			klog.Error("删除缓存失败, err: ", err)
 		}
 	}
 
