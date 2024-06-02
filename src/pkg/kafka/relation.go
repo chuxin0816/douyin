@@ -79,7 +79,7 @@ func Relation(ctx context.Context, relation *model.Relation) error {
 		return err
 	}
 
-	return favoriteMQInstance.Writer.WriteMessages(ctx, kafka.Message{
+	return relationMQInstance.Writer.WriteMessages(ctx, kafka.Message{
 		Value: data,
 	})
 }

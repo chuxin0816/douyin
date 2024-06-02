@@ -70,7 +70,7 @@ func SendMessage(ctx context.Context, message *model.Message) error {
 		return err
 	}
 
-	return favoriteMQInstance.Writer.WriteMessages(ctx, kafka.Message{
+	return messageMQInstance.Writer.WriteMessages(ctx, kafka.Message{
 		Value: data,
 	})
 }
