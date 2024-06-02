@@ -46,23 +46,16 @@ func (mq *relationMQ) consumeRelation(ctx context.Context) {
 			continue
 		}
 
-		// 检查记录是否存在
-		exist, err := dal.CheckRelationExist(ctx, relation.FollowerID, relation.AuthorID)
-		if err != nil {
-			klog.Error("检查记录是否存在失败, err: ", err)
-			continue
-		}
-
-		if exist {
-			// 存在则取关
-			if err := dal.UnFollow(ctx, relation.FollowerID, relation.AuthorID); err != nil {
-				klog.Error("删除记录失败, err: ", err)
+		if relation.ID == 1 {
+			// 关注
+			if err := dal.Follow(ctx, relation.FollowerID, relation.AuthorID); err != nil {
+				klog.Error("添加记录失败, err: ", err)
 				continue
 			}
 		} else {
-			// 不存在则关注
-			if err := dal.Follow(ctx, relation.FollowerID, relation.AuthorID); err != nil {
-				klog.Error("添加记录失败, err: ", err)
+			// 取关
+			if err := dal.UnFollow(ctx, relation.FollowerID, relation.AuthorID); err != nil {
+				klog.Error("删除记录失败, err: ", err)
 				continue
 			}
 		}
