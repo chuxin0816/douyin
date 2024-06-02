@@ -77,6 +77,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 
 	// 通过kafka更新数据库
 	err = kafka.Relation(ctx, &model.Relation{
+		ID:         req.ActionType,
 		AuthorID:   req.AuthorId,
 		FollowerID: req.UserId,
 	})

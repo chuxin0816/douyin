@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	ExpireTime = time.Hour * 24
+	ExpireTime = time.Minute * 30
 	DelayTime  = 150 * time.Millisecond
 	randFactor = 30
 )

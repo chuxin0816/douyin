@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"strconv"
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
@@ -46,25 +47,31 @@ func (mq *relationMQ) consumeRelation(ctx context.Context) {
 			continue
 		}
 
-		// 检查记录是否存在
-		exist, err := dal.CheckRelationExist(ctx, relation.FollowerID, relation.AuthorID)
-		if err != nil {
-			klog.Error("检查记录是否存在失败, err: ", err)
-			continue
-		}
-
-		if exist {
-			// 存在则取关
-			if err := dal.UnFollow(ctx, relation.FollowerID, relation.AuthorID); err != nil {
-				klog.Error("删除记录失败, err: ", err)
-				continue
-			}
-		} else {
-			// 不存在则关注
+		if relation.ID == 1 {
+			// 关注
 			if err := dal.Follow(ctx, relation.FollowerID, relation.AuthorID); err != nil {
 				klog.Error("添加记录失败, err: ", err)
 				continue
 			}
+		} else {
+			// 取关
+			if err := dal.UnFollow(ctx, relation.FollowerID, relation.AuthorID); err != nil {
+				klog.Error("删除记录失败, err: ", err)
+				continue
+			}
+		}
+
+		// 删除缓存
+		pipe := dal.RDB.Pipeline()
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowPF, strconv.FormatInt(relation.FollowerID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowerPF, strconv.FormatInt(relation.AuthorID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(relation.FollowerID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(relation.AuthorID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(relation.FollowerID, 10)))
+		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(relation.FollowerID, 10)))
+		_, err = pipe.Exec(ctx)
+		if err != nil {
+			klog.Error("删除缓存失败, err: ", err)
 		}
 	}
 
@@ -86,7 +93,7 @@ func Relation(ctx context.Context, relation *model.Relation) error {
 		return err
 	}
 
-	return favoriteMQInstance.Writer.WriteMessages(ctx, kafka.Message{
+	return relationMQInstance.Writer.WriteMessages(ctx, kafka.Message{
 		Value: data,
 	})
 }
