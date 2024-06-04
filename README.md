@@ -42,7 +42,7 @@
 ##  性能测试
 使用wrk进行性能测试，400个连接，16个线程，压力测试30s：读接口QPS 3500+，写接口QPS 2800+，压测过程全链路无错误
 ## 技术选型：
-- 框架选型：使用 **Hertz** 作为 HTTP 微服务框架，**Kitex** 作为 RPC 微服务框架；使用 **GORM GEN** 生成代码并操作 MySQL 数据库
+- 框架选型：使用 **Hertz** 作为 HTTP 微服务框架，**Kitex** 作为 RPC 微服务框架；使用 **GORM/GEN** 生成代码并操作 MySQL 数据库
 - 数据库：使用 **MySQL** 和 **Redis** 集群实现读写分离，使用 **MongoDB** 存储用户消息，使用 **NebulaGraph** 存储用户关系
 - 服务注册与发现：使用 **Consul** 作为服务发现与注册中心和配置中心，并通过 **viper** 实时监控和读取配置文件
 - 缓存策略：通过 **Cache Aside** + **Write Behind** 等多种策略提升数据访问速度。使用 **SingleFlight** 减轻数据库压力并防止缓存击穿、使用布隆过滤器减少缓存穿透，并通过随机延时策略避免缓存雪崩
@@ -57,7 +57,3 @@ go run cmd/gen/generator.go
 cd src/service/feed
 kitex -module douyin -service user -gen-path ../../kitex_gen/ ../../idl/user.thrift
 ```
-## 未来更新:
-* 使用ElasticSearch对用户消息和系统日志进行索引存储
-* 使用Prometheus和Grafana监控服务
-* 使用Kubernetes编排容器
