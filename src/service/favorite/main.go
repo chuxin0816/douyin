@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 
+	"douyin/src/client"
 	"douyin/src/config"
 	"douyin/src/dal"
 	favorite "douyin/src/kitex_gen/favorite/favoriteservice"
@@ -29,6 +30,7 @@ func main() {
 	dal.Init()
 	defer dal.Close()
 	kafka.Init()
+	client.Init()
 
 	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.FavoriteAddr)
 	if err != nil {

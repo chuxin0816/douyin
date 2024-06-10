@@ -3,19 +3,14 @@ package controller
 import (
 	"context"
 
-	"douyin/src/config"
+	"douyin/src/client"
 	"douyin/src/dal"
 	"douyin/src/kitex_gen/comment"
-	"douyin/src/kitex_gen/comment/commentservice"
 	"douyin/src/pkg/jwt"
 	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 
 	"go.opentelemetry.io/otel/codes"
 )
@@ -32,27 +27,6 @@ type CommentActionRequest struct {
 type CommentListRequest struct {
 	VideoID int64  `query:"video_id,string" vd:"$>0"` // 视频id
 	Token   string `query:"token"`                    // 用户登录状态下设置
-}
-
-var commentClient commentservice.Client
-
-func init() {
-	// 服务发现
-	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		panic(err)
-	}
-
-	commentClient, err = commentservice.NewClient(
-		config.Conf.OpenTelemetryConfig.CommentName,
-		client.WithResolver(r),
-		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.CommentName}),
-		client.WithMuxConnection(2),
-	)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func NewCommentController() *CommentController {
@@ -89,7 +63,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := commentClient.CommentAction(c, &comment.CommentActionRequest{
+	resp, err := client.CommentClient.CommentAction(c, &comment.CommentActionRequest{
 		UserId:      userID,
 		VideoId:     req.VideoID,
 		ActionType:  req.ActionType,
@@ -140,7 +114,7 @@ func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := commentClient.CommentList(c, &comment.CommentListRequest{
+	resp, err := client.CommentClient.CommentList(c, &comment.CommentListRequest{
 		UserId:  userID,
 		VideoId: req.VideoID,
 	})

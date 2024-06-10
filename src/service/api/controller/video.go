@@ -6,21 +6,15 @@ import (
 	"net/http"
 	"time"
 
+	"douyin/src/client"
 	"douyin/src/pkg/jwt"
 	"douyin/src/pkg/tracing"
 
-	"douyin/src/config"
 	"douyin/src/kitex_gen/video"
-	"douyin/src/kitex_gen/video/videoservice"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"go.opentelemetry.io/otel/codes"
-
-	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 )
 
 const (
@@ -43,27 +37,6 @@ type PublishActionRequest struct {
 type PublishListRequest struct {
 	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
 	Token  string `query:"token"`                   // 用户登录状态下设置
-}
-
-var videoClient videoservice.Client
-
-func init() {
-	// 服务发现
-	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		panic(err)
-	}
-
-	videoClient, err = videoservice.NewClient(
-		config.Conf.OpenTelemetryConfig.VideoName,
-		client.WithResolver(r),
-		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.VideoName}),
-		client.WithMuxConnection(2),
-	)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func NewVideoController() *VideoController {
@@ -90,7 +63,7 @@ func (vc *VideoController) Feed(c context.Context, ctx *app.RequestContext) {
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := videoClient.Feed(c, &video.FeedRequest{
+	resp, err := client.VideoClient.Feed(c, &video.FeedRequest{
 		LatestTime: req.LatestTime,
 		UserId:     userID,
 	})
@@ -173,7 +146,7 @@ func (vc *VideoController) PublishAction(c context.Context, ctx *app.RequestCont
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := videoClient.PublishAction(c, &video.PublishActionRequest{
+	resp, err := client.VideoClient.PublishAction(c, &video.PublishActionRequest{
 		UserId: userID,
 		Data:   buf,
 		Title:  req.Title,
@@ -210,7 +183,7 @@ func (vc *VideoController) PublishList(c context.Context, ctx *app.RequestContex
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := videoClient.PublishList(c, &video.PublishListRequest{
+	resp, err := client.VideoClient.PublishList(c, &video.PublishListRequest{
 		UserId:   userID,
 		AuthorId: authorID,
 	})

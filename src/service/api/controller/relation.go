@@ -3,55 +3,28 @@ package controller
 import (
 	"context"
 
+	"douyin/src/client"
 	"douyin/src/dal"
 	"douyin/src/pkg/jwt"
 	"douyin/src/pkg/tracing"
 
-	"douyin/src/config"
 	"douyin/src/kitex_gen/relation"
-	"douyin/src/kitex_gen/relation/relationservice"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"go.opentelemetry.io/otel/codes"
-
-	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 )
 
 type RelationController struct{}
 
 type RelationActionRequest struct {
-	Author   int64 `query:"to_user_id,string"  vd:"$>0"`        // 对方用户id
+	Author     int64 `query:"to_user_id,string"  vd:"$>0"`        // 对方用户id
 	ActionType int64 `query:"action_type,string" vd:"$==1||$==2"` // 1-关注，2-取消关注
 }
 
 type RelationListRequest struct {
 	UserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
 	Token  string `query:"token"`                   // 用户登录状态下设置
-}
-
-var relationClient relationservice.Client
-
-func init() {
-	// 服务发现
-	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		panic(err)
-	}
-
-	relationClient, err = relationservice.NewClient(
-		config.Conf.OpenTelemetryConfig.RelationName,
-		client.WithResolver(r),
-		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.RelationName}),
-		client.WithMuxConnection(2),
-	)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func NewRelationController() *RelationController {
@@ -89,7 +62,7 @@ func (rc *RelationController) Action(c context.Context, ctx *app.RequestContext)
 	}
 
 	// 业务逻辑处理
-	resp, err := relationClient.RelationAction(c, &relation.RelationActionRequest{
+	resp, err := client.RelationClient.RelationAction(c, &relation.RelationActionRequest{
 		UserId:     userID,
 		AuthorId:   req.Author,
 		ActionType: req.ActionType,
@@ -143,7 +116,7 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := relationClient.RelationFollowList(c, &relation.RelationFollowListRequest{
+	resp, err := client.RelationClient.RelationFollowList(c, &relation.RelationFollowListRequest{
 		UserId:   userID,
 		AuthorId: req.UserID,
 	})
@@ -178,7 +151,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := relationClient.RelationFollowerList(c, &relation.RelationFollowerListRequest{
+	resp, err := client.RelationClient.RelationFollowerList(c, &relation.RelationFollowerListRequest{
 		UserId:   userID,
 		AuthorId: req.UserID,
 	})
@@ -213,7 +186,7 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := relationClient.RelationFriendList(c, &relation.RelationFriendListRequest{
+	resp, err := client.RelationClient.RelationFriendList(c, &relation.RelationFriendListRequest{
 		UserId:   userID,
 		AuthorId: req.UserID,
 	})

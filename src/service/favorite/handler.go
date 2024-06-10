@@ -7,19 +7,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"douyin/src/config"
+	"douyin/src/client"
 	"douyin/src/dal"
 	favorite "douyin/src/kitex_gen/favorite"
 	"douyin/src/kitex_gen/video"
-	"douyin/src/kitex_gen/video/videoservice"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
 
-	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/codes"
 )
@@ -27,34 +22,13 @@ import (
 // FavoriteServiceImpl implements the last service interface defined in the IDL.
 type FavoriteServiceImpl struct{}
 
-var videoClient videoservice.Client
-
-func init() {
-	// 服务发现
-	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		panic(err)
-	}
-
-	videoClient, err = videoservice.NewClient(
-		config.Conf.OpenTelemetryConfig.VideoName,
-		client.WithResolver(r),
-		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.VideoName}),
-		client.WithMuxConnection(2),
-	)
-	if err != nil {
-		panic(err)
-	}
-}
-
 // FavoriteAction implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.FavoriteActionRequest) (resp *favorite.FavoriteActionResponse, err error) {
 	ctx, span := tracing.Tracer.Start(ctx, "FavoriteAction")
 	defer span.End()
 
 	// 判断视频是否存在
-	exist, err := videoClient.VideoExist(ctx, req.VideoId)
+	exist, err := client.VideoClient.VideoExist(ctx, req.VideoId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "查询视频失败")
@@ -68,7 +42,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	}
 
 	// 获取作者ID
-	authorID, err := videoClient.AuthorId(ctx, req.VideoId)
+	authorID, err := client.VideoClient.AuthorId(ctx, req.VideoId)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "获取作者ID失败")
@@ -209,7 +183,7 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 	}
 
 	// 获取视频列表
-	videoList, err := videoClient.VideoInfoList(ctx, &video.VideoInfoListRequest{
+	videoList, err := client.VideoClient.VideoInfoList(ctx, &video.VideoInfoListRequest{
 		UserId:      req.UserId,
 		VideoIdList: videoIDs,
 	})
@@ -258,7 +232,7 @@ func (s *FavoriteServiceImpl) TotalFavoritedCnt(ctx context.Context, userId int6
 		if err == redis.Nil {
 			// 缓存未命中，查询mysql
 			// 查询用户发布列表
-			videoIDs, err := videoClient.PublishIDList(ctx, userId)
+			videoIDs, err := client.VideoClient.PublishIDList(ctx, userId)
 			if err != nil {
 				span.RecordError(err)
 				span.SetStatus(codes.Error, "查询用户发布列表失败")

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"douyin/src/client"
 	"douyin/src/config"
 	"douyin/src/logger"
 	"douyin/src/pkg/jwt"
@@ -22,6 +23,9 @@ func main() {
 
 	// 初始化日志
 	logger.Init()
+
+	// 初始化RPC客户端
+	client.Init()
 
 	// 注册路由
 	h := router.Setup(config.Conf.HertzConfig)
