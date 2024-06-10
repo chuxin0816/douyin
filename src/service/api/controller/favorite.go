@@ -3,19 +3,14 @@ package controller
 import (
 	"context"
 
-	"douyin/src/config"
+	"douyin/src/client"
 	"douyin/src/dal"
 	"douyin/src/kitex_gen/favorite"
-	"douyin/src/kitex_gen/favorite/favoriteservice"
 	"douyin/src/pkg/jwt"
 	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -29,27 +24,6 @@ type FavoriteActionRequest struct {
 type FavoriteListRequest struct {
 	ToUserID int64  `query:"user_id,string" vd:"$>0"` // 用户id
 	Token    string `query:"token"`                   // 用户登录状态下设置
-}
-
-var favoriteClient favoriteservice.Client
-
-func init() {
-	// 服务发现
-	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		panic(err)
-	}
-
-	favoriteClient, err = favoriteservice.NewClient(
-		config.Conf.OpenTelemetryConfig.FavoriteName,
-		client.WithResolver(r),
-		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.FavoriteName}),
-		client.WithMuxConnection(2),
-	)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func NewFavoriteController() *FavoriteController {
@@ -80,7 +54,7 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 
 	// 业务逻辑处理
-	resp, err := favoriteClient.FavoriteAction(c, &favorite.FavoriteActionRequest{
+	resp, err := client.FavoriteClient.FavoriteAction(c, &favorite.FavoriteActionRequest{
 		UserId:     userID,
 		VideoId:    req.VideoID,
 		ActionType: req.ActionType,
@@ -128,7 +102,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := favoriteClient.FavoriteList(c, &favorite.FavoriteListRequest{
+	resp, err := client.FavoriteClient.FavoriteList(c, &favorite.FavoriteListRequest{
 		UserId:   userID,
 		AuthorId: req.ToUserID,
 	})

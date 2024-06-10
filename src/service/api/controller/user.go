@@ -3,22 +3,16 @@ package controller
 import (
 	"context"
 
+	"douyin/src/client"
 	"douyin/src/dal"
 	"douyin/src/pkg/jwt"
 	"douyin/src/pkg/tracing"
 
-	"douyin/src/config"
 	"douyin/src/kitex_gen/user"
-	"douyin/src/kitex_gen/user/userservice"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"go.opentelemetry.io/otel/codes"
-
-	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 )
 
 type UserController struct{}
@@ -32,27 +26,6 @@ type UserInfoRequest struct {
 type UserRequest struct {
 	Username string `query:"username" vd:"0<len($)&&len($)<33"` // 注册用户名，最长32个字符
 	Password string `query:"password" vd:"5<len($)&&len($)<33"` // 密码，最长32个字符
-}
-
-var userClient userservice.Client
-
-func init() {
-	// 服务发现
-	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		panic(err)
-	}
-
-	userClient, err = userservice.NewClient(
-		config.Conf.OpenTelemetryConfig.UserName,
-		client.WithResolver(r),
-		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.UserName}),
-		client.WithMuxConnection(2),
-	)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func NewUserController() *UserController {
@@ -78,7 +51,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 	userID := jwt.ParseToken(req.Token)
 
 	// 业务逻辑处理
-	resp, err := userClient.UserInfo(c, &user.UserInfoRequest{
+	resp, err := client.UserClient.UserInfo(c, &user.UserInfoRequest{
 		UserId:   userID,
 		AuthorId: req.UserID,
 	})
@@ -117,7 +90,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := userClient.Register(c, &user.UserRegisterRequest{
+	resp, err := client.UserClient.Register(c, &user.UserRegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -156,7 +129,7 @@ func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 业务逻辑处理
-	resp, err := userClient.Login(c, &user.UserLoginRequest{
+	resp, err := client.UserClient.Login(c, &user.UserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})

@@ -3,46 +3,20 @@ package main
 import (
 	"context"
 
-	"douyin/src/config"
+	"douyin/src/client"
 	"douyin/src/dal"
 	"douyin/src/dal/model"
 	relation "douyin/src/kitex_gen/relation"
 	"douyin/src/kitex_gen/user"
-	"douyin/src/kitex_gen/user/userservice"
 	"douyin/src/pkg/kafka"
 	"douyin/src/pkg/tracing"
 
-	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 	"go.opentelemetry.io/otel/codes"
 )
 
 // RelationServiceImpl implements the last service interface defined in the IDL.
 type RelationServiceImpl struct{}
-
-var userClient userservice.Client
-
-func init() {
-	// 服务发现
-	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		panic(err)
-	}
-
-	userClient, err = userservice.NewClient(
-		config.Conf.OpenTelemetryConfig.UserName,
-		client.WithResolver(r),
-		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.UserName}),
-		client.WithMuxConnection(2),
-	)
-	if err != nil {
-		panic(err)
-	}
-}
 
 // RelationAction implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.RelationActionRequest) (resp *relation.RelationActionResponse, err error) {
@@ -111,7 +85,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 	// 获取用户信息
 	userList := make([]*user.User, len(followList))
 	for i, u := range followList {
-		user, err := userClient.UserInfo(ctx, &user.UserInfoRequest{
+		user, err := client.UserClient.UserInfo(ctx, &user.UserInfoRequest{
 			UserId:   req.UserId,
 			AuthorId: u,
 		})
@@ -148,7 +122,7 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 	// 获取用户信息
 	userList := make([]*user.User, len(followerList))
 	for i, u := range followerList {
-		user, err := userClient.UserInfo(ctx, &user.UserInfoRequest{
+		user, err := client.UserClient.UserInfo(ctx, &user.UserInfoRequest{
 			UserId:   req.UserId,
 			AuthorId: u,
 		})
@@ -184,7 +158,7 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 	// 获取用户信息
 	userList := make([]*user.User, len(friendList))
 	for i, u := range friendList {
-		user, err := userClient.UserInfo(ctx, &user.UserInfoRequest{
+		user, err := client.UserClient.UserInfo(ctx, &user.UserInfoRequest{
 			UserId:   req.UserId,
 			AuthorId: u,
 		})

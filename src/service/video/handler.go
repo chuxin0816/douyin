@@ -6,22 +6,15 @@ import (
 	"sync"
 	"time"
 
-	"douyin/src/config"
+	"douyin/src/client"
 	"douyin/src/dal"
-	"douyin/src/kitex_gen/comment/commentservice"
-	"douyin/src/kitex_gen/favorite/favoriteservice"
 	"douyin/src/kitex_gen/user"
-	"douyin/src/kitex_gen/user/userservice"
 	video "douyin/src/kitex_gen/video"
 	"douyin/src/pkg/oss"
 	"douyin/src/pkg/tracing"
 
-	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/google/uuid"
-	tracing2 "github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -29,53 +22,6 @@ const count = 30
 
 // VideoServiceImpl implements the last service interface defined in the IDL.
 type VideoServiceImpl struct{}
-
-var (
-	userClient     userservice.Client
-	commentClient  commentservice.Client
-	favoriteClient favoriteservice.Client
-)
-
-func init() {
-	// 服务发现
-	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		panic(err)
-	}
-
-	userClient, err = userservice.NewClient(
-		config.Conf.OpenTelemetryConfig.UserName,
-		client.WithResolver(r),
-		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.UserName}),
-		client.WithMuxConnection(2),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	commentClient, err = commentservice.NewClient(
-		config.Conf.OpenTelemetryConfig.CommentName,
-		client.WithResolver(r),
-		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.CommentName}),
-		client.WithMuxConnection(2),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	favoriteClient, err = favoriteservice.NewClient(
-		config.Conf.OpenTelemetryConfig.FavoriteName,
-		client.WithResolver(r),
-		client.WithSuite(tracing2.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.FavoriteName}),
-		client.WithMuxConnection(2),
-	)
-	if err != nil {
-		panic(err)
-	}
-}
 
 // Feed implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) Feed(ctx context.Context, req *video.FeedRequest) (resp *video.FeedResponse, err error) {
@@ -255,7 +201,7 @@ func (s *VideoServiceImpl) VideoInfo(ctx context.Context, req *video.VideoInfoRe
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		user, err := userClient.UserInfo(ctx, &user.UserInfoRequest{
+		user, err := client.UserClient.UserInfo(ctx, &user.UserInfoRequest{
 			UserId:   req.UserId,
 			AuthorId: mVideo.AuthorID,
 		})
@@ -267,7 +213,7 @@ func (s *VideoServiceImpl) VideoInfo(ctx context.Context, req *video.VideoInfoRe
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := commentClient.CommentCnt(ctx, mVideo.ID)
+		cnt, err := client.CommentClient.CommentCnt(ctx, mVideo.ID)
 		if err != nil {
 			wgErr = err
 			return
@@ -276,7 +222,7 @@ func (s *VideoServiceImpl) VideoInfo(ctx context.Context, req *video.VideoInfoRe
 	}()
 	go func() {
 		defer wg.Done()
-		cnt, err := favoriteClient.FavoriteCnt(ctx, mVideo.ID)
+		cnt, err := client.FavoriteClient.FavoriteCnt(ctx, mVideo.ID)
 		if err != nil {
 			wgErr = err
 			return
@@ -297,7 +243,7 @@ func (s *VideoServiceImpl) VideoInfo(ctx context.Context, req *video.VideoInfoRe
 	}
 
 	// 查询缓存判断是否点赞
-	exist, err := favoriteClient.FavoriteExist(ctx, *req.UserId, mVideo.ID)
+	exist, err := client.FavoriteClient.FavoriteExist(ctx, *req.UserId, mVideo.ID)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "查询视频是否点赞失败")

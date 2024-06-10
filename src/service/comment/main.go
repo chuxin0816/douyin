@@ -3,6 +3,7 @@ package main
 import (
 	"net"
 
+	"douyin/src/client"
 	"douyin/src/config"
 	"douyin/src/dal"
 	comment "douyin/src/kitex_gen/comment/commentservice"
@@ -28,6 +29,7 @@ func main() {
 	dal.Init()
 	defer dal.Close()
 	kafka.Init()
+	client.Init()
 
 	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.CommentAddr)
 	if err != nil {
