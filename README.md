@@ -18,6 +18,7 @@
 │   └── gen                 Gorm/Gen
 ├── etc                     配置文件
 ├── src
+│   ├── client              RPC客户端
 │   ├── config
 │   ├── dal                 访问数据库(MySQL, Redis, MongoDB, NebulaGraph)
 │   ├── idl
