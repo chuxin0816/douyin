@@ -7,6 +7,7 @@ import (
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
+	"douyin/src/pkg/snowflake"
 	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -19,7 +20,7 @@ type favoriteMQ struct {
 	*mq
 }
 
-const syncInterval = time.Second * 2
+const syncInterval = time.Second * 5
 
 var (
 	favoriteMQInstance *favoriteMQ
@@ -49,24 +50,31 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 			break
 		}
 
-		favorite := &model.Favorite{}
-		if err := msgpack.Unmarshal(m.Value, favorite); err != nil {
+		favorites := make([]*model.Favorite, 0)
+		if err := msgpack.Unmarshal(m.Value, &favorites); err != nil {
 			klog.Error("failed to unmarshal message: ", err)
 			continue
 		}
 
-		if favorite.ID == 1 {
-			// 点赞
-			if err := dal.CreateFavorite(ctx, favorite.UserID, favorite.VideoID); err != nil {
-				klog.Error("添加记录失败, err: ", err)
-				continue
+		creates := make([]*model.Favorite, 0, len(favorites))
+		deletes := make([]int64, 0, len(favorites))
+
+		for _, favorite := range favorites {
+			if favorite.ID == 1 {
+				favorite.ID = snowflake.GenerateID()
+				creates = append(creates, favorite)
+			} else {
+				deletes = append(deletes, favorite.UserID)
 			}
-		} else {
-			// 取消点赞
-			if err := dal.DeleteFavorite(ctx, favorite.UserID, favorite.VideoID); err != nil {
-				klog.Error("删除记录失败, err: ", err)
-				continue
-			}
+		}
+
+		if err := dal.BatchCreateFavorite(ctx, creates); err != nil {
+			klog.Error("failed to create favorite: ", err)
+			continue
+		}
+		if err := dal.BatchDeleteFavorite(ctx, deletes); err != nil {
+			klog.Error("failed to delete favorite: ", err)
+			continue
 		}
 	}
 
@@ -76,11 +84,11 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 	}
 }
 
-func Favorite(ctx context.Context, favorite *model.Favorite) error {
+func BatchFavorite(ctx context.Context, favorites []*model.Favorite) error {
 	ctx, span := tracing.Tracer.Start(ctx, "kafka.Favorite")
 	defer span.End()
 
-	data, err := msgpack.Marshal(favorite)
+	data, err := msgpack.Marshal(favorites)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "failed to marshal message")
@@ -102,19 +110,21 @@ func syncFavoriteToDB() {
 		FavoriteMap = make(map[int64]map[int64]int64)
 		Mu.Unlock()
 
+		favorites := make([]*model.Favorite, 0, len(backupFavoriteMap))
 		for userID, videoMap := range backupFavoriteMap {
 			for videoID, actionType := range videoMap {
-				// 通过kafka更新favorite表
-				err := Favorite(context.Background(), &model.Favorite{
+				favorites = append(favorites, &model.Favorite{
 					ID:      actionType,
 					UserID:  userID,
 					VideoID: videoID,
 				})
-				if err != nil {
-					klog.Error("通过kafka更新favorite表失败, err: ", err)
-					continue
-				}
 			}
 		}
+
+		if err := BatchFavorite(context.Background(), favorites); err != nil {
+			klog.Error("通过kafka更新favorite表失败, err: ", err)
+			continue
+		}
+
 	}
 }
