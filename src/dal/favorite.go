@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"douyin/src/dal/model"
-	"douyin/src/pkg/snowflake"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -39,17 +38,12 @@ func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool,
 	return false, nil
 }
 
-func CreateFavorite(ctx context.Context, userID, videoID int64) error {
-	mFavorite := &model.Favorite{
-		ID:      snowflake.GenerateID(),
-		UserID:  userID,
-		VideoID: videoID,
-	}
-	return qFavorite.WithContext(ctx).Create(mFavorite)
+func BatchCreateFavorite(ctx context.Context, favorites []*model.Favorite) error {
+	return qFavorite.WithContext(ctx).Create(favorites...)
 }
 
-func DeleteFavorite(ctx context.Context, userID, videoID int64) error {
-	_, err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.Eq(userID), qFavorite.VideoID.Eq(videoID)).Delete()
+func BatchDeleteFavorite(ctx context.Context, userIDs []int64) error {
+	_, err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.In(userIDs...)).Delete()
 	return err
 }
 

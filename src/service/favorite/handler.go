@@ -84,7 +84,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		if exist, err := dal.RDB.Exists(ctx, keyVideoFavoriteCnt).Result(); err != nil {
+		if exist, err := dal.RDB.Exists(ctx, keyVideoFavoriteCnt).Result(); err != nil && err != redis.Nil {
 			wgErr = err
 			return
 		} else if exist == 0 {
@@ -102,7 +102,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	}()
 	go func() {
 		defer wg.Done()
-		if exist, err := dal.RDB.Exists(ctx, keyUserFavoriteCnt).Result(); err != nil {
+		if exist, err := dal.RDB.Exists(ctx, keyUserFavoriteCnt).Result(); err != nil && err != redis.Nil {
 			wgErr = err
 			return
 		} else if exist == 0 {
@@ -120,7 +120,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	}()
 	go func() {
 		defer wg.Done()
-		if exist, err := dal.RDB.Exists(ctx, keyUserTotalFavorited).Result(); err != nil {
+		if exist, err := dal.RDB.Exists(ctx, keyUserTotalFavorited).Result(); err != nil && err != redis.Nil {
 			wgErr = err
 			return
 		} else if exist == 0 {
