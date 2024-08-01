@@ -35,9 +35,9 @@ func initRelationMQ() {
 func (mq *relationMQ) consumeRelation(ctx context.Context) {
 	// 接收消息
 	for {
-		m, err := mq.Reader.ReadMessage(ctx)
+		m, err := mq.Reader.FetchMessage(ctx)
 		if err != nil {
-			klog.Error("failed to read message: ", err)
+			klog.Error("failed to fetch message: ", err)
 			break
 		}
 
@@ -72,6 +72,10 @@ func (mq *relationMQ) consumeRelation(ctx context.Context) {
 		_, err = pipe.Exec(ctx)
 		if err != nil {
 			klog.Error("删除缓存失败, err: ", err)
+		}
+
+		if err := mq.Reader.CommitMessages(ctx, m); err != nil {
+			klog.Error("failed to commit message: ", err)
 		}
 	}
 

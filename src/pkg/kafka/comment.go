@@ -34,9 +34,9 @@ func initCommentMQ() {
 func (mq *commentMQ) consumeComment(ctx context.Context) {
 	// 接收消息
 	for {
-		m, err := mq.Reader.ReadMessage(ctx)
+		m, err := mq.Reader.FetchMessage(ctx)
 		if err != nil {
-			klog.Error("failed to read message: ", err)
+			klog.Error("failed to fetch message: ", err)
 			break
 		}
 
@@ -45,8 +45,8 @@ func (mq *commentMQ) consumeComment(ctx context.Context) {
 		if err := msgpack.Unmarshal(m.Value, comment); err == nil {
 			if err := dal.CreateComment(ctx, comment); err != nil {
 				klog.Error("failed to create comment: ", err)
+				continue
 			}
-			continue
 		}
 
 		// 解析为CommentID，成功则删除评论
@@ -54,11 +54,15 @@ func (mq *commentMQ) consumeComment(ctx context.Context) {
 		if err := msgpack.Unmarshal(m.Value, &commentID); err == nil {
 			if err := dal.DeleteComment(ctx, commentID); err != nil {
 				klog.Error("failed to delete comment: ", err)
+				continue
 			}
-			continue
 		}
 
-		klog.Error("failed to unmarshal message: ", err)
+		klog.Warn("failed to unmarshal message: ", err)
+
+		if err := mq.Reader.CommitMessages(ctx, m); err != nil {
+			klog.Error("failed to commit message: ", err)
+		}
 	}
 
 	// 程序退出前关闭Reader

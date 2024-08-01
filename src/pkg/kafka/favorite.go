@@ -44,9 +44,9 @@ func initFavoriteMQ() {
 func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 	// 接收消息
 	for {
-		m, err := mq.Reader.ReadMessage(ctx)
+		m, err := mq.Reader.FetchMessage(ctx)
 		if err != nil {
-			klog.Error("failed to read message: ", err)
+			klog.Error("failed to fetch message: ", err)
 			break
 		}
 
@@ -75,6 +75,10 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 		if err := dal.BatchDeleteFavorite(ctx, deletes); err != nil {
 			klog.Error("failed to delete favorite: ", err)
 			continue
+		}
+
+		if err := mq.Reader.CommitMessages(ctx, m); err != nil {
+			klog.Error("failed to commit message: ", err)
 		}
 	}
 
