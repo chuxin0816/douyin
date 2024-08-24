@@ -5,14 +5,16 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
+type respCode = int32
+
 const (
 	CtxUserIDKey = "userID"
 	rpcErrPrefix = "remote or network error[remote]: biz error: "
 )
 
 const (
-	CodeSuccess     int32 = 0
-	CodeNoAuthority int32 = 1000 + iota
+	CodeSuccess     respCode = 0
+	CodeNoAuthority respCode = 1000 + iota
 	CodeInvalidParam
 	CodeUserExist
 	CodeUserNotExist
@@ -30,7 +32,7 @@ const (
 	CodeServerBusy
 )
 
-var codeMsgMap = map[int32]string{
+var codeMsgMap = map[respCode]string{
 	CodeSuccess:         "请求成功",
 	CodeNoAuthority:     "权限不足",
 	CodeInvalidParam:    "请求参数错误",
@@ -51,19 +53,19 @@ var codeMsgMap = map[int32]string{
 }
 
 type Response struct {
-	StatusCode int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
-	StatusMsg  string `json:"status_msg"`  // 返回状态描述
+	StatusCode respCode `json:"status_code"` // 状态码，0-成功，其他值-失败
+	StatusMsg  string   `json:"status_msg"`  // 返回状态描述
 }
 
 func Success(ctx *app.RequestContext, data any) {
 	ctx.JSON(consts.StatusOK, data)
 }
 
-func Error(ctx *app.RequestContext, code int32) {
+func Error(ctx *app.RequestContext, code respCode) {
 	ctx.JSON(consts.StatusOK, &Response{StatusCode: code, StatusMsg: StatusMsg(code)})
 }
 
-func StatusMsg(code int32) string {
+func StatusMsg(code respCode) string {
 	msg, ok := codeMsgMap[code]
 	if !ok {
 		msg = codeMsgMap[CodeServerBusy]
