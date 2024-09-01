@@ -9,6 +9,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool, error) {
@@ -39,11 +40,11 @@ func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool,
 }
 
 func BatchCreateFavorite(ctx context.Context, favorites []*model.Favorite) error {
-	return qFavorite.WithContext(ctx).Create(favorites...)
+	return qFavorite.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(favorites...)
 }
 
 func BatchDeleteFavorite(ctx context.Context, userIDs []int64) error {
-	_, err := qFavorite.WithContext(ctx).Where(qFavorite.UserID.In(userIDs...)).Delete()
+	_, err := qFavorite.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Where(qFavorite.UserID.In(userIDs...)).Delete()
 	return err
 }
 

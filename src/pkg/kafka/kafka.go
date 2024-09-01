@@ -1,18 +1,21 @@
 package kafka
 
 import (
+	"time"
+
 	"douyin/src/config"
 
 	"github.com/segmentio/kafka-go"
 )
 
 const (
-	topicCanal    = "canal"
-	topicComment  = "comment"
-	topicFavorite = "favorite"
-	topicRelation = "relation"
-	topicMessage  = "message"
-	groupID       = "backend"
+	topicCanal     = "canal"
+	topicComment   = "comment"
+	topicFavorite  = "favorite"
+	topicRelation  = "relation"
+	topicMessage   = "message"
+	groupID        = "backend"
+	commitInterval = 1 * time.Second
 )
 
 type mq struct {
@@ -41,14 +44,16 @@ func NewWriter(topic string) *kafka.Writer {
 		Topic:        topic,
 		Balancer:     &kafka.LeastBytes{},
 		RequiredAcks: int(kafka.RequireOne),
+		MaxAttempts:  3,
 	})
 }
 
 func NewReader(topic string) *kafka.Reader {
 	return kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  config.Conf.KafkaConfig.Brokers,
-		Topic:    topic,
-		GroupID:  groupID,
-		MaxBytes: 10e6, // 10MB
+		Brokers:        config.Conf.KafkaConfig.Brokers,
+		Topic:          topic,
+		GroupID:        groupID,
+		MaxBytes:       10e6,           // 10MB
+		CommitInterval: commitInterval, // 每秒刷新一次提交给 Kafka
 	})
 }

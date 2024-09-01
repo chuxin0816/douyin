@@ -34,9 +34,9 @@ func initMessageMQ() {
 func (mq *messageMQ) consumeMessage(ctx context.Context) {
 	// 接收消息
 	for {
-		m, err := mq.Reader.ReadMessage(ctx)
+		m, err := mq.Reader.FetchMessage(ctx)
 		if err != nil {
-			klog.Error("failed to read message: ", err)
+			klog.Error("failed to fetch message: ", err)
 			break
 		}
 
@@ -49,6 +49,11 @@ func (mq *messageMQ) consumeMessage(ctx context.Context) {
 		// 写入数据库
 		if err := dal.MessageAction(ctx, message); err != nil {
 			klog.Error("failed to write message to database: ", err)
+			continue
+		}
+
+		if err := mq.Reader.CommitMessages(ctx, m); err != nil {
+			klog.Error("failed to commit message: ", err)
 		}
 	}
 
