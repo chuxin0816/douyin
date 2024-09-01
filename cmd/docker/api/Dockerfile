@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM golang:1.23.0-alpine AS builder
 
 WORKDIR /douyin
 
