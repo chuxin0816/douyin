@@ -31,5 +31,4 @@ jobs:
           file: ./cmd/docker/${{ matrix.component }}/Dockerfile
           push: true
           tags: ghcr.io/chuxin0816/douyin:${{ matrix.component }}
-          # platforms: linux/amd64,linux/arm64
-          platforms: linux/arm64
+          platforms: linux/amd64,linux/arm64
