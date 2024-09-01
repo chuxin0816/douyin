@@ -20,7 +20,7 @@ type favoriteMQ struct {
 	*mq
 }
 
-const syncInterval = time.Second * 5
+const syncInterval = time.Second * 10
 
 var (
 	favoriteMQInstance *favoriteMQ
