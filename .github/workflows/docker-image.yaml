@@ -3,10 +3,10 @@ name: Docker Image CI
 on:
   push:
     branches: ['main']
-    paths: ['cmd/docker/**', 'src/**']
+    paths: ['cmd/docker/**', 'src/**', 'go.mod']
   pull_request:
     branches: ['main']
-    paths: ['cmd/docker/**', 'src/**']
+    paths: ['cmd/docker/**', 'src/**', 'go.mod']
 
 jobs:
   build-push-image:
