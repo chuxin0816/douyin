@@ -7,6 +7,7 @@ import (
 	"douyin/src/dal"
 
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
 )
 
 type cacheMQ struct {
@@ -30,6 +31,8 @@ func initCacheMQ() {
 func (mq *cacheMQ) removeCache(ctx context.Context) {
 	// 接收消息
 	for {
+		ctx, span := otel.Tracer("kafka").Start(ctx, "removeCache")
+
 		m, err := mq.Reader.ReadMessage(ctx)
 		if err != nil {
 			klog.Error("failed to read message: ", err)
@@ -65,6 +68,8 @@ func (mq *cacheMQ) removeCache(ctx context.Context) {
 				dal.RDB.Del(ctx, keyVideoCommentCnt)
 			}
 		}
+
+		span.End()
 	}
 
 	// 程序退出前关闭Reader

@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"douyin/src/client"
+	"douyin/src/common/kafka"
 	"douyin/src/dal"
 	"douyin/src/dal/model"
-	relation "douyin/src/kitex_gen/relation"
+	"douyin/src/kitex_gen/relation"
 	"douyin/src/kitex_gen/user"
-	"douyin/src/pkg/kafka"
-	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -20,7 +20,7 @@ type RelationServiceImpl struct{}
 
 // RelationAction implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.RelationActionRequest) (resp *relation.RelationActionResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "RelationAction")
+	ctx, span := otel.Tracer("relation").Start(ctx, "RelationAction")
 	defer span.End()
 
 	// 检查是否关注
@@ -70,7 +70,7 @@ func (s *RelationServiceImpl) RelationAction(ctx context.Context, req *relation.
 
 // RelationFollowList implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relation.RelationFollowListRequest) (resp *relation.RelationFollowListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "RelationFollowList")
+	ctx, span := otel.Tracer("relation").Start(ctx, "RelationFollowList")
 	defer span.End()
 
 	// 获取关注列表
@@ -106,7 +106,7 @@ func (s *RelationServiceImpl) RelationFollowList(ctx context.Context, req *relat
 
 // RelationFollowerList implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *relation.RelationFollowerListRequest) (resp *relation.RelationFollowerListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "RelationFollowerList")
+	ctx, span := otel.Tracer("relation").Start(ctx, "RelationFollowerList")
 	defer span.End()
 
 	// 获取粉丝列表
@@ -143,7 +143,7 @@ func (s *RelationServiceImpl) RelationFollowerList(ctx context.Context, req *rel
 
 // RelationFriendList implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relation.RelationFriendListRequest) (resp *relation.RelationFriendListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "RelationFriendList")
+	ctx, span := otel.Tracer("relation").Start(ctx, "RelationFriendList")
 	defer span.End()
 
 	// 获取好友列表
@@ -179,7 +179,7 @@ func (s *RelationServiceImpl) RelationFriendList(ctx context.Context, req *relat
 
 // RelationExist implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) RelationExist(ctx context.Context, userId int64, authorId int64) (resp bool, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "RelationExist")
+	ctx, span := otel.Tracer("relation").Start(ctx, "RelationExist")
 	defer span.End()
 
 	resp, err = dal.CheckRelationExist(ctx, userId, authorId)
@@ -195,7 +195,7 @@ func (s *RelationServiceImpl) RelationExist(ctx context.Context, userId int64, a
 
 // FollowCnt implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) FollowCnt(ctx context.Context, userId int64) (resp int64, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "FollowCnt")
+	ctx, span := otel.Tracer("relation").Start(ctx, "FollowCnt")
 	defer span.End()
 
 	resp, err = dal.GetUserFollowCount(ctx, userId)
@@ -211,7 +211,7 @@ func (s *RelationServiceImpl) FollowCnt(ctx context.Context, userId int64) (resp
 
 // FollowerCnt implements the RelationServiceImpl interface.
 func (s *RelationServiceImpl) FollowerCnt(ctx context.Context, userId int64) (resp int64, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "FollowerCnt")
+	ctx, span := otel.Tracer("relation").Start(ctx, "FollowerCnt")
 	defer span.End()
 
 	resp, err = dal.GetUserFollowerCount(ctx, userId)

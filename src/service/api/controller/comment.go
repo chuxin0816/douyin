@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"douyin/src/client"
+	"douyin/src/common/jwt"
 	"douyin/src/dal"
 	"douyin/src/kitex_gen/comment"
-	"douyin/src/pkg/jwt"
-	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -34,7 +34,7 @@ func NewCommentController() *CommentController {
 }
 
 func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "CommentAction")
+	c, span := otel.Tracer("comment").Start(c, "CommentAction")
 	defer span.End()
 	// 获取参数
 	req := &CommentActionRequest{}
@@ -96,7 +96,7 @@ func (cc *CommentController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (cc *CommentController) List(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "CommentList")
+	c, span := otel.Tracer("comment").Start(c, "CommentList")
 	defer span.End()
 
 	// 获取参数

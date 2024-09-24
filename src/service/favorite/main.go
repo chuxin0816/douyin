@@ -5,27 +5,26 @@ import (
 	"net"
 
 	"douyin/src/client"
+	"douyin/src/common/kafka"
+	"douyin/src/common/mtl"
+	"douyin/src/common/snowflake"
 	"douyin/src/config"
 	"douyin/src/dal"
-	favorite "douyin/src/kitex_gen/favorite/favoriteservice"
-	"douyin/src/logger"
-	"douyin/src/pkg/kafka"
-	"douyin/src/pkg/snowflake"
-	"douyin/src/pkg/tracing"
+	"douyin/src/kitex_gen/favorite/favoriteservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
-	kitexTracing "github.com/kitex-contrib/obs-opentelemetry/tracing"
+	prometheus "github.com/kitex-contrib/monitor-prometheus"
+	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	consul "github.com/kitex-contrib/registry-consul"
 )
 
 func main() {
 	config.Init()
 	go watchConfig()
-	tracing.Init(config.Conf.OpenTelemetryConfig.FavoriteName)
-	defer tracing.Close()
-	logger.Init()
+	mtl.InitTracing(config.Conf.OpenTelemetryConfig.FavoriteName)
+	mtl.InitLog()
 	snowflake.Init()
 	dal.Init()
 	defer dal.Close()
@@ -43,12 +42,13 @@ func main() {
 		klog.Fatal("new consul register failed: ", err)
 	}
 
-	svr := favorite.NewServer(new(FavoriteServiceImpl),
+	svr := favoriteservice.NewServer(new(FavoriteServiceImpl),
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
-		server.WithSuite(kitexTracing.NewServerSuite()),
+		server.WithSuite(tracing.NewServerSuite()),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.FavoriteName}),
 		server.WithMuxTransport(),
+		server.WithTracer(prometheus.NewServerTracer("", "", prometheus.WithDisableServer(true), prometheus.WithRegistry(mtl.Registry))),
 	)
 	err = svr.Run()
 	if err != nil {
@@ -60,10 +60,10 @@ func watchConfig() {
 	for {
 		select {
 		case <-config.NoticeOpenTelemetry:
-			tracing.Init(config.Conf.OpenTelemetryConfig.FavoriteName)
+			mtl.InitTracing(config.Conf.OpenTelemetryConfig.FavoriteName)
 
 		case <-config.NoticeLog:
-			logger.Init()
+			mtl.InitLog()
 
 		case <-config.NoticeSnowflake:
 			snowflake.Init()

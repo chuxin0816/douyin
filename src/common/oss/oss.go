@@ -9,11 +9,11 @@ import (
 	"sync"
 
 	"douyin/src/config"
-	"douyin/src/pkg/tracing"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/cloudwego/kitex/pkg/klog"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -38,7 +38,7 @@ func Init() {
 
 // UploadFile 上传文件到oss
 func UploadFile(ctx context.Context, data []byte, uuidName string) error {
-	ctx, span := tracing.Tracer.Start(ctx, "UploadFile")
+	ctx, span := otel.Tracer("oss").Start(ctx, "UploadFile")
 	defer span.End()
 
 	videoName := uuidName + ".mp4"
@@ -96,7 +96,7 @@ func UploadFile(ctx context.Context, data []byte, uuidName string) error {
 
 // getCoverImage 获取视频第15帧作为封面
 func getCoverImage(ctx context.Context, videoName string) (io.Reader, error) {
-	_, span := tracing.Tracer.Start(ctx, "GetCoverImage")
+	_, span := otel.Tracer("oss").Start(ctx, "GetCoverImage")
 	defer span.End()
 
 	buf := bytes.NewBuffer(nil)

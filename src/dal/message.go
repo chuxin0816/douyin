@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"douyin/src/common/snowflake"
 	"douyin/src/dal/model"
-	"douyin/src/pkg/snowflake"
 
 	"go.mongodb.org/mongo-driver/bson"
 )

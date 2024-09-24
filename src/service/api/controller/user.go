@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"douyin/src/client"
+	"douyin/src/common/jwt"
 	"douyin/src/dal"
-	"douyin/src/pkg/jwt"
-	"douyin/src/pkg/tracing"
 
 	"douyin/src/kitex_gen/user"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -33,7 +33,7 @@ func NewUserController() *UserController {
 }
 
 func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "UserInfo")
+	c, span := otel.Tracer("user").Start(c, "UserInfo")
 	defer span.End()
 
 	// 获取参数
@@ -75,7 +75,7 @@ func (uc *UserController) Info(c context.Context, ctx *app.RequestContext) {
 }
 
 func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "Register")
+	c, span := otel.Tracer("user").Start(c, "Register")
 	defer span.End()
 
 	// 获取参数
@@ -114,7 +114,7 @@ func (uc *UserController) Register(c context.Context, ctx *app.RequestContext) {
 }
 
 func (uc *UserController) Login(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "Login")
+	c, span := otel.Tracer("user").Start(c, "Login")
 	defer span.End()
 
 	// 获取参数

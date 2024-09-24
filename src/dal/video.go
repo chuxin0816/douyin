@@ -6,8 +6,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"douyin/src/common/snowflake"
 	"douyin/src/dal/model"
-	"douyin/src/pkg/snowflake"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/vmihailenco/msgpack/v5"

@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"douyin/src/client"
+	"douyin/src/common/kafka"
 	"douyin/src/dal"
-	favorite "douyin/src/kitex_gen/favorite"
+	"douyin/src/kitex_gen/favorite"
 	"douyin/src/kitex_gen/video"
-	"douyin/src/pkg/kafka"
-	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -24,7 +24,7 @@ type FavoriteServiceImpl struct{}
 
 // FavoriteAction implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.FavoriteActionRequest) (resp *favorite.FavoriteActionResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "FavoriteAction")
+	ctx, span := otel.Tracer("favorite").Start(ctx, "FavoriteAction")
 	defer span.End()
 
 	// 判断视频是否存在
@@ -170,7 +170,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 
 // FavoriteList implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.FavoriteListRequest) (resp *favorite.FavoriteListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "FavoriteList")
+	ctx, span := otel.Tracer("favorite").Start(ctx, "FavoriteList")
 	defer span.End()
 
 	// 获取喜欢的视频ID列表
@@ -201,7 +201,7 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 
 // FavoriteCnt implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteCnt(ctx context.Context, userId int64) (resp int64, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "FavoriteCnt")
+	ctx, span := otel.Tracer("favorite").Start(ctx, "FavoriteCnt")
 	defer span.End()
 
 	resp, err = dal.GetUserFavoriteCount(ctx, userId)
@@ -217,7 +217,7 @@ func (s *FavoriteServiceImpl) FavoriteCnt(ctx context.Context, userId int64) (re
 
 // TotalFavoritedCnt implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) TotalFavoritedCnt(ctx context.Context, userId int64) (resp int64, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "TotalFavoritedCnt")
+	ctx, span := otel.Tracer("favorite").Start(ctx, "TotalFavoritedCnt")
 	defer span.End()
 
 	key := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF, strconv.FormatInt(userId, 10))
@@ -270,7 +270,7 @@ func (s *FavoriteServiceImpl) TotalFavoritedCnt(ctx context.Context, userId int6
 
 // FavoriteExist implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteExist(ctx context.Context, userId int64, videoId int64) (resp bool, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "FavoriteExist")
+	ctx, span := otel.Tracer("favorite").Start(ctx, "FavoriteExist")
 	defer span.End()
 
 	resp, err = dal.CheckFavoriteExist(ctx, userId, videoId)

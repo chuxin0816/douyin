@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"douyin/src/client"
+	"douyin/src/common/jwt"
 	"douyin/src/dal"
 	"douyin/src/kitex_gen/favorite"
-	"douyin/src/pkg/jwt"
-	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -31,7 +31,7 @@ func NewFavoriteController() *FavoriteController {
 }
 
 func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "FavoriteAction")
+	c, span := otel.Tracer("favorite").Start(c, "FavoriteAction")
 	defer span.End()
 
 	// 获取参数
@@ -84,7 +84,7 @@ func (fc *FavoriteController) Action(c context.Context, ctx *app.RequestContext)
 }
 
 func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "FavoriteList")
+	c, span := otel.Tracer("favorite").Start(c, "FavoriteList")
 	defer span.End()
 
 	// 获取参数

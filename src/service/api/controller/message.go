@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"douyin/src/client"
-	"douyin/src/pkg/tracing"
 
 	"douyin/src/kitex_gen/message"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -31,7 +31,7 @@ func NewMessageController() *MessageController {
 }
 
 func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "MessageAction")
+	c, span := otel.Tracer("message").Start(c, "MessageAction")
 	defer span.End()
 
 	// 获取参数
@@ -68,7 +68,7 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 }
 
 func (mc *MessageController) Chat(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "MessageChat")
+	c, span := otel.Tracer("message").Start(c, "MessageChat")
 	defer span.End()
 
 	// 获取参数
