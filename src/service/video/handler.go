@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"douyin/src/client"
+	"douyin/src/common/oss"
 	"douyin/src/dal"
 	"douyin/src/kitex_gen/user"
-	video "douyin/src/kitex_gen/video"
-	"douyin/src/pkg/oss"
-	"douyin/src/pkg/tracing"
+	"douyin/src/kitex_gen/video"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -25,7 +25,7 @@ type VideoServiceImpl struct{}
 
 // Feed implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) Feed(ctx context.Context, req *video.FeedRequest) (resp *video.FeedResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "Feed")
+	ctx, span := otel.Tracer("video").Start(ctx, "Feed")
 	defer span.End()
 
 	// 参数解析
@@ -63,7 +63,7 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *video.FeedRequest) (re
 
 // PublishAction implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) PublishAction(ctx context.Context, req *video.PublishActionRequest) (resp *video.PublishActionResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "PublishAction")
+	ctx, span := otel.Tracer("video").Start(ctx, "PublishAction")
 	defer span.End()
 
 	// 生成uuid作为文件名
@@ -104,7 +104,7 @@ func (s *VideoServiceImpl) PublishAction(ctx context.Context, req *video.Publish
 
 // PublishList implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishListRequest) (resp *video.PublishListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "PublishList")
+	ctx, span := otel.Tracer("video").Start(ctx, "PublishList")
 	defer span.End()
 
 	// 查询视频列表
@@ -129,7 +129,7 @@ func (s *VideoServiceImpl) PublishList(ctx context.Context, req *video.PublishLi
 
 // WorkCount implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) WorkCount(ctx context.Context, userId int64) (resp int64, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "WorkCount")
+	ctx, span := otel.Tracer("video").Start(ctx, "WorkCount")
 	defer span.End()
 
 	resp, err = dal.GetUserWorkCount(ctx, userId)
@@ -145,7 +145,7 @@ func (s *VideoServiceImpl) WorkCount(ctx context.Context, userId int64) (resp in
 
 // AuthorId implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) AuthorId(ctx context.Context, videoId int64) (resp int64, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "AuthorId")
+	ctx, span := otel.Tracer("video").Start(ctx, "AuthorId")
 	defer span.End()
 
 	resp, err = dal.GetAuthorID(ctx, videoId)
@@ -161,7 +161,7 @@ func (s *VideoServiceImpl) AuthorId(ctx context.Context, videoId int64) (resp in
 
 // VideoExist implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) VideoExist(ctx context.Context, videoId int64) (resp bool, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "VideoExist")
+	ctx, span := otel.Tracer("video").Start(ctx, "VideoExist")
 	defer span.End()
 
 	resp, err = dal.CheckVideoExist(ctx, videoId)
@@ -177,7 +177,7 @@ func (s *VideoServiceImpl) VideoExist(ctx context.Context, videoId int64) (resp 
 
 // VideoInfo implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) VideoInfo(ctx context.Context, req *video.VideoInfoRequest) (resp *video.Video, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "VideoInfo")
+	ctx, span := otel.Tracer("video").Start(ctx, "VideoInfo")
 	defer span.End()
 
 	mVideo, err := dal.GetVideoByID(ctx, req.VideoId)
@@ -257,7 +257,7 @@ func (s *VideoServiceImpl) VideoInfo(ctx context.Context, req *video.VideoInfoRe
 
 // VideoInfoList implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) VideoInfoList(ctx context.Context, req *video.VideoInfoListRequest) (resp []*video.Video, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "VideoInfoList")
+	ctx, span := otel.Tracer("video").Start(ctx, "VideoInfoList")
 	defer span.End()
 
 	resp = make([]*video.Video, len(req.VideoIdList))
@@ -281,7 +281,7 @@ func (s *VideoServiceImpl) VideoInfoList(ctx context.Context, req *video.VideoIn
 
 // PublishIDList implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) PublishIDList(ctx context.Context, userId int64) (resp []int64, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "PublishIDList")
+	ctx, span := otel.Tracer("video").Start(ctx, "PublishIDList")
 	defer span.End()
 
 	resp, err = dal.GetPublishList(ctx, userId)

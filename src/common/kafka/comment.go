@@ -5,11 +5,11 @@ import (
 
 	"douyin/src/dal"
 	"douyin/src/dal/model"
-	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
 	"github.com/vmihailenco/msgpack/v5"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -34,6 +34,8 @@ func initCommentMQ() {
 func (mq *commentMQ) consumeComment(ctx context.Context) {
 	// 接收消息
 	for {
+		ctx, span := otel.Tracer("kafka").Start(ctx, "consumeComment")
+
 		m, err := mq.Reader.FetchMessage(ctx)
 		if err != nil {
 			klog.Error("failed to fetch message: ", err)
@@ -63,6 +65,8 @@ func (mq *commentMQ) consumeComment(ctx context.Context) {
 		if err := mq.Reader.CommitMessages(ctx, m); err != nil {
 			klog.Error("failed to commit message: ", err)
 		}
+
+		span.End()
 	}
 
 	// 程序退出前关闭Reader
@@ -72,7 +76,7 @@ func (mq *commentMQ) consumeComment(ctx context.Context) {
 }
 
 func CreateComment(ctx context.Context, comment *model.Comment) error {
-	ctx, span := tracing.Tracer.Start(ctx, "kafka.CreateComment")
+	ctx, span := otel.Tracer("kafka").Start(ctx, "CreateComment")
 	defer span.End()
 
 	value, err := msgpack.Marshal(comment)
@@ -88,7 +92,7 @@ func CreateComment(ctx context.Context, comment *model.Comment) error {
 }
 
 func DeleteComment(ctx context.Context, commentID int64) error {
-	ctx, span := tracing.Tracer.Start(ctx, "kafka.DeleteComment")
+	ctx, span := otel.Tracer("kafka").Start(ctx, "DeleteComment")
 	defer span.End()
 
 	value, err := msgpack.Marshal(commentID)

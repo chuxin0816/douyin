@@ -15,7 +15,7 @@ hertz:
   port: 8888
 
 log:
-  path: ./logs
+  path: ../logs
   max_size: 10485760 #10M
   max_backups: 10
   max_age: 30

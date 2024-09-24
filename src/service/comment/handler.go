@@ -5,14 +5,14 @@ import (
 	"time"
 
 	"douyin/src/client"
+	"douyin/src/common/kafka"
 	"douyin/src/dal"
 	"douyin/src/dal/model"
-	comment "douyin/src/kitex_gen/comment"
+	"douyin/src/kitex_gen/comment"
 	"douyin/src/kitex_gen/user"
-	"douyin/src/pkg/kafka"
-	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/kitex/pkg/klog"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -21,7 +21,7 @@ type CommentServiceImpl struct{}
 
 // CommentAction implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.CommentActionRequest) (resp *comment.CommentActionResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "CommentAction")
+	ctx, span := otel.Tracer("comment").Start(ctx, "CommentAction")
 	defer span.End()
 
 	// 判断视频是否存在
@@ -103,7 +103,7 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 
 // CommentList implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.CommentListRequest) (resp *comment.CommentListResponse, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "CommentList")
+	ctx, span := otel.Tracer("comment").Start(ctx, "CommentList")
 	defer span.End()
 
 	// 获取评论列表
@@ -140,7 +140,7 @@ func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.Comme
 
 // CommentCnt implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentCnt(ctx context.Context, videoId int64) (resp int64, err error) {
-	ctx, span := tracing.Tracer.Start(ctx, "CommentCnt")
+	ctx, span := otel.Tracer("comment").Start(ctx, "CommentCnt")
 	defer span.End()
 
 	resp, err = dal.GetVideoCommentCount(ctx, videoId)

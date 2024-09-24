@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"douyin/src/client"
-	"douyin/src/pkg/jwt"
-	"douyin/src/pkg/tracing"
+	"douyin/src/common/jwt"
 
 	"douyin/src/kitex_gen/video"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -45,7 +45,7 @@ func NewVideoController() *VideoController {
 
 // Feed 不限制登录状态，返回按投稿时间倒序的视频列表，视频数由服务端控制，单次最多30个
 func (vc *VideoController) Feed(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "Feed")
+	c, span := otel.Tracer("video").Start(c, "Feed")
 	defer span.End()
 
 	// 获取参数
@@ -80,7 +80,7 @@ func (vc *VideoController) Feed(c context.Context, ctx *app.RequestContext) {
 }
 
 func (vc *VideoController) PublishAction(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "PublishAction")
+	c, span := otel.Tracer("video").Start(c, "PublishAction")
 	defer span.End()
 
 	// 获取参数
@@ -164,7 +164,7 @@ func (vc *VideoController) PublishAction(c context.Context, ctx *app.RequestCont
 }
 
 func (vc *VideoController) PublishList(c context.Context, ctx *app.RequestContext) {
-	c, span := tracing.Tracer.Start(c, "PublishList")
+	c, span := otel.Tracer("video").Start(c, "PublishList")
 	defer span.End()
 
 	// 获取参数

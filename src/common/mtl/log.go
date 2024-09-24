@@ -1,4 +1,4 @@
-package logger
+package mtl
 
 import (
 	"os"
@@ -15,7 +15,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func Init() {
+func InitLog() {
 	// 可定制的输出目录。
 	var logFilePath string = config.Conf.LogConfig.Path
 	if err := os.MkdirAll(logFilePath, 0o777); err != nil {

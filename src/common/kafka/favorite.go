@@ -5,14 +5,14 @@ import (
 	"sync"
 	"time"
 
+	"douyin/src/common/snowflake"
 	"douyin/src/dal"
 	"douyin/src/dal/model"
-	"douyin/src/pkg/snowflake"
-	"douyin/src/pkg/tracing"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
 	"github.com/vmihailenco/msgpack/v5"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -38,12 +38,14 @@ func initFavoriteMQ() {
 	}
 
 	go favoriteMQInstance.consumeFavorite(context.Background())
-	go syncFavoriteToDB()
+	go syncFavoriteToDB(context.Background())
 }
 
 func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 	// 接收消息
 	for {
+		ctx, span := otel.Tracer("kafka").Start(ctx, "consumeFavorite")
+
 		m, err := mq.Reader.FetchMessage(ctx)
 		if err != nil {
 			klog.Error("failed to fetch message: ", err)
@@ -80,6 +82,8 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 		if err := mq.Reader.CommitMessages(ctx, m); err != nil {
 			klog.Error("failed to commit message: ", err)
 		}
+
+		span.End()
 	}
 
 	// 程序退出前关闭Reader
@@ -89,7 +93,7 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 }
 
 func BatchFavorite(ctx context.Context, favorites []*model.Favorite) error {
-	ctx, span := tracing.Tracer.Start(ctx, "kafka.Favorite")
+	ctx, span := otel.Tracer("kafka").Start(ctx, "kafka.Favorite")
 	defer span.End()
 
 	data, err := msgpack.Marshal(favorites)
@@ -106,9 +110,11 @@ func BatchFavorite(ctx context.Context, favorites []*model.Favorite) error {
 }
 
 // syncFavoriteToDB 同步点赞数据到数据库
-func syncFavoriteToDB() {
+func syncFavoriteToDB(ctx context.Context) {
 	ticker := time.NewTicker(syncInterval)
 	for range ticker.C {
+		_, span := otel.Tracer("kafka").Start(ctx, "syncFavoriteToDB")
+
 		Mu.Lock()
 		backupFavoriteMap := FavoriteMap
 		FavoriteMap = make(map[int64]map[int64]int64)
@@ -130,5 +136,6 @@ func syncFavoriteToDB() {
 			continue
 		}
 
+		span.End()
 	}
 }

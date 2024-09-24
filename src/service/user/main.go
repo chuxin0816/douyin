@@ -4,27 +4,26 @@ import (
 	"net"
 
 	"douyin/src/client"
+	"douyin/src/common/kafka"
+	"douyin/src/common/mtl"
+	"douyin/src/common/snowflake"
 	"douyin/src/config"
 	"douyin/src/dal"
-	user "douyin/src/kitex_gen/user/userservice"
-	"douyin/src/logger"
-	"douyin/src/pkg/kafka"
-	"douyin/src/pkg/snowflake"
-	"douyin/src/pkg/tracing"
+	"douyin/src/kitex_gen/user/userservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
-	kitexTracing "github.com/kitex-contrib/obs-opentelemetry/tracing"
+	prometheus "github.com/kitex-contrib/monitor-prometheus"
+	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	consul "github.com/kitex-contrib/registry-consul"
 )
 
 func main() {
 	config.Init()
 	go watchConfig()
-	tracing.Init(config.Conf.OpenTelemetryConfig.UserName)
-	defer tracing.Close()
-	logger.Init()
+	mtl.InitTracing(config.Conf.OpenTelemetryConfig.UserName)
+	mtl.InitLog()
 	snowflake.Init()
 	dal.Init()
 	defer dal.Close()
@@ -42,12 +41,13 @@ func main() {
 		klog.Fatal("new consul register failed: ", err)
 	}
 
-	svr := user.NewServer(new(UserServiceImpl),
+	svr := userservice.NewServer(new(UserServiceImpl),
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
-		server.WithSuite(kitexTracing.NewServerSuite()),
+		server.WithSuite(tracing.NewServerSuite()),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.UserName}),
 		server.WithMuxTransport(),
+		server.WithTracer(prometheus.NewServerTracer("", "", prometheus.WithDisableServer(true), prometheus.WithRegistry(mtl.Registry))),
 	)
 
 	if err = svr.Run(); err != nil {
@@ -59,10 +59,10 @@ func watchConfig() {
 	for {
 		select {
 		case <-config.NoticeOpenTelemetry:
-			tracing.Init(config.Conf.OpenTelemetryConfig.UserName)
+			mtl.InitTracing(config.Conf.OpenTelemetryConfig.UserName)
 
 		case <-config.NoticeLog:
-			logger.Init()
+			mtl.InitLog()
 
 		case <-config.NoticeSnowflake:
 			snowflake.Init()

@@ -22,7 +22,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
-	gormTracing "gorm.io/plugin/opentelemetry/tracing"
+	"gorm.io/plugin/opentelemetry/tracing"
 )
 
 const (
@@ -125,7 +125,7 @@ func InitMySQL() {
 	}
 
 	// 链路追踪插件
-	if err := db.Use(gormTracing.NewPlugin(gormTracing.WithoutMetrics())); err != nil {
+	if err := db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
 		panic(err)
 	}
 

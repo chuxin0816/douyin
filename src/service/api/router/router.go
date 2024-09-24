@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"douyin/src/common/mtl"
 	"douyin/src/config"
 	"douyin/src/dal"
 	"douyin/src/service/api/controller"
@@ -17,6 +18,7 @@ import (
 	"github.com/hertz-contrib/cache"
 	"github.com/hertz-contrib/cache/persist"
 	"github.com/hertz-contrib/http2/factory"
+	hertzprom "github.com/hertz-contrib/monitor-prometheus"
 	hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
 )
 
@@ -28,6 +30,13 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 		server.WithStreamBody(true),
 		server.WithH2C(true),
 		server.WithALPN(true),
+		server.WithTracer(hertzprom.NewServerTracer(
+			"",
+			"",
+			hertzprom.WithRegistry(mtl.Registry),
+			hertzprom.WithDisableServer(true),
+		),
+		),
 		tracer,
 	)
 	// HTTP2
