@@ -14,7 +14,7 @@ import (
 
 var Registry *prometheus.Registry
 
-func InitMetric(serviceName string, metricsPort string, registryAddr string) {
+func InitMetric(serviceName string, metricsAddr string, registryAddr string) {
 	Registry = prometheus.NewRegistry()
 
 	// 添加 Go 编译信息
@@ -29,7 +29,7 @@ func InitMetric(serviceName string, metricsPort string, registryAddr string) {
 		panic(err)
 	}
 
-	addr, err := net.ResolveTCPAddr("tcp", metricsPort)
+	addr, err := net.ResolveTCPAddr("tcp", metricsAddr)
 	if err != nil {
 		panic(err)
 	}
@@ -50,5 +50,5 @@ func InitMetric(serviceName string, metricsPort string, registryAddr string) {
 	})
 
 	http.Handle("/metrics", promhttp.HandlerFor(Registry, promhttp.HandlerOpts{}))
-	go http.ListenAndServe(metricsPort, nil) //nolint:errcheck
+	go http.ListenAndServe(metricsAddr, nil) //nolint:errcheck
 }

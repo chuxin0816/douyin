@@ -123,6 +123,7 @@ type OpenTelemetryConfig struct {
 	CommentName  string `mapstructure:"comment_name"`
 	RelationName string `mapstructure:"relation_name"`
 	MessageName  string `mapstructure:"message_name"`
+	MetricAddr   string `mapstructure:"metric_addr"`
 	JaegerAddr   string `mapstructure:"jaeger_addr"`
 }
 

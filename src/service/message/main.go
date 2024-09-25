@@ -17,6 +17,7 @@ import (
 func main() {
 	config.Init()
 	go watchConfig()
+	mtl.InitMetric(config.Conf.OpenTelemetryConfig.ApiName, config.Conf.OpenTelemetryConfig.MetricAddr, config.Conf.ConsulConfig.ConsulAddr)
 	mtl.InitTracing(config.Conf.OpenTelemetryConfig.MessageName)
 	mtl.InitLog()
 	snowflake.Init()
