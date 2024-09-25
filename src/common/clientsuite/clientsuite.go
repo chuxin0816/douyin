@@ -2,6 +2,7 @@ package clientsuite
 
 import (
 	"github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/pkg/circuitbreak"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/pkg/transmeta"
 	"github.com/cloudwego/kitex/transport"
@@ -27,10 +28,16 @@ func (s CommonClientSuite) Options() []client.Option {
 		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
 	}
 
+	// 配置熔断 (默认200个样本，失败率达到50%熔断，熔断10s)
+	cbs := circuitbreak.NewCBSuite(func(ri rpcinfo.RPCInfo) string {
+		return circuitbreak.RPCInfo2Key(ri)
+	})
+
 	opts = append(opts,
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: s.ServiceName}),
 		client.WithSuite(tracing.NewClientSuite()),
 		client.WithMuxConnection(2),
+		client.WithCircuitBreaker(cbs),
 	)
 
 	return opts
