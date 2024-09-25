@@ -1,6 +1,8 @@
 package client
 
 import (
+	"sync"
+
 	"douyin/src/kitex_gen/comment/commentservice"
 	"douyin/src/kitex_gen/favorite/favoriteservice"
 	"douyin/src/kitex_gen/message/messageservice"
@@ -16,13 +18,17 @@ var (
 	RelationClient relationservice.Client
 	UserClient     userservice.Client
 	VideoClient    videoservice.Client
+	once           sync.Once
+	err            error
 )
 
 func Init() {
-	initCommentClient()
-	initFavoriteClient()
-	initMessageClient()
-	initRelationClient()
-	initUserClient()
-	initVideoClient()
+	once.Do(func() {
+		initCommentClient()
+		initFavoriteClient()
+		initMessageClient()
+		initRelationClient()
+		initUserClient()
+		initVideoClient()
+	})
 }

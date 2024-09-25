@@ -16,6 +16,9 @@ func main() {
 	// 初始化jwt
 	jwt.Init()
 
+	// 初始化监控指标
+	mtl.InitMetric(config.Conf.OpenTelemetryConfig.ApiName, config.Conf.OpenTelemetryConfig.MetricAddr, config.Conf.ConsulConfig.ConsulAddr)
+
 	// 初始化链路追踪
 	mtl.InitTracing(config.Conf.OpenTelemetryConfig.ApiName)
 

@@ -79,4 +79,5 @@ open_telemetry:
   comment_name: "comment"
   relation_name: "relation"
   message_name: "message"
+  metric_addr: ":9990"
   jaeger_addr: "jaeger:4318"
