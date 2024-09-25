@@ -1,23 +1,18 @@
 package main
 
 import (
-	"net"
-
 	"douyin/src/client"
 	"douyin/src/common/kafka"
 	"douyin/src/common/mtl"
 	"douyin/src/common/oss"
+	"douyin/src/common/serversuite"
 	"douyin/src/common/snowflake"
 	"douyin/src/config"
 	"douyin/src/dal"
 	"douyin/src/kitex_gen/video/videoservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
-	prometheus "github.com/kitex-contrib/monitor-prometheus"
-	"github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 )
 
 func main() {
@@ -31,27 +26,15 @@ func main() {
 	kafka.Init()
 	client.Init()
 
-	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.VideoAddr)
-	if err != nil {
-		klog.Fatal("resolve tcp addr failed: ", err)
-	}
+	opts := server.WithSuite(serversuite.CommonServerSuite{
+		RegistryAddr: config.Conf.ConsulConfig.ConsulAddr,
+		ServiceAddr:  config.Conf.ConsulConfig.VideoAddr,
+		ServiceName:  config.Conf.OpenTelemetryConfig.VideoName,
+	})
 
-	// 服务注册
-	r, err := consul.NewConsulRegister(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		klog.Fatal("new consul register failed: ", err)
-	}
+	svr := videoservice.NewServer(new(VideoServiceImpl), opts)
 
-	svr := videoservice.NewServer(new(VideoServiceImpl),
-		server.WithServiceAddr(addr),
-		server.WithRegistry(r),
-		server.WithSuite(tracing.NewServerSuite()),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.VideoName}),
-		server.WithMuxTransport(),
-		server.WithTracer(prometheus.NewServerTracer("", "", prometheus.WithDisableServer(true), prometheus.WithRegistry(mtl.Registry))),
-	)
-
-	if err = svr.Run(); err != nil {
+	if err := svr.Run(); err != nil {
 		klog.Fatal("run server failed: ", err)
 	}
 }

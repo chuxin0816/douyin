@@ -1,23 +1,17 @@
 package main
 
 import (
-	"log"
-	"net"
-
 	"douyin/src/client"
 	"douyin/src/common/kafka"
 	"douyin/src/common/mtl"
+	"douyin/src/common/serversuite"
 	"douyin/src/common/snowflake"
 	"douyin/src/config"
 	"douyin/src/dal"
 	"douyin/src/kitex_gen/favorite/favoriteservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
-	prometheus "github.com/kitex-contrib/monitor-prometheus"
-	"github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 )
 
 func main() {
@@ -31,28 +25,16 @@ func main() {
 	kafka.Init()
 	client.Init()
 
-	addr, err := net.ResolveTCPAddr("tcp", config.Conf.ConsulConfig.FavoriteAddr)
-	if err != nil {
-		klog.Fatal("resolve tcp addr failed: ", err)
-	}
+	opts := server.WithSuite(serversuite.CommonServerSuite{
+		RegistryAddr: config.Conf.ConsulConfig.ConsulAddr,
+		ServiceAddr:  config.Conf.ConsulConfig.FavoriteAddr,
+		ServiceName:  config.Conf.OpenTelemetryConfig.FavoriteName,
+	})
 
-	// 服务注册
-	r, err := consul.NewConsulRegister(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		klog.Fatal("new consul register failed: ", err)
-	}
+	svr := favoriteservice.NewServer(new(FavoriteServiceImpl), opts)
 
-	svr := favoriteservice.NewServer(new(FavoriteServiceImpl),
-		server.WithServiceAddr(addr),
-		server.WithRegistry(r),
-		server.WithSuite(tracing.NewServerSuite()),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.FavoriteName}),
-		server.WithMuxTransport(),
-		server.WithTracer(prometheus.NewServerTracer("", "", prometheus.WithDisableServer(true), prometheus.WithRegistry(mtl.Registry))),
-	)
-	err = svr.Run()
-	if err != nil {
-		log.Println(err.Error())
+	if err := svr.Run(); err != nil {
+		klog.Fatal("run server failed: ", err)
 	}
 }
 
