@@ -355,7 +355,7 @@ services:
       /bin/sh -c "
         docker-entrypoint.sh agent -dev -client=0.0.0.0 &  # 启动 Consul 服务
         while ! nc -z localhost 8500; do sleep 1; done;  # 等待 Consul 服务开始监听端口 8500
-        curl -X PUT --data-binary @/config.yaml http://localhost:8500/v1/kv/config  # 将 config.yaml 文件的内容上传到 Consul
+        curl -X PUT --data-binary @/config.yaml http://localhost:8500/v1/kv/conf/config.yaml  # 将 config.yaml 文件的内容上传到 Consul
         wait %1  # 等待后台的 Consul 服务
       "
     healthcheck:
