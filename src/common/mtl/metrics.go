@@ -5,14 +5,17 @@ import (
 	"net/http"
 
 	"github.com/cloudwego/kitex/pkg/registry"
-	"github.com/cloudwego/kitex/server"
 	consul "github.com/kitex-contrib/registry-consul"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var Registry *prometheus.Registry
+var (
+	Registry     *prometheus.Registry
+	r            registry.Registry
+	registryInfo *registry.Info
+)
 
 func InitMetric(serviceName string, metricsAddr string, registryAddr string) {
 	Registry = prometheus.NewRegistry()
@@ -34,7 +37,7 @@ func InitMetric(serviceName string, metricsAddr string, registryAddr string) {
 		panic(err)
 	}
 
-	registryInfo := &registry.Info{
+	registryInfo = &registry.Info{
 		ServiceName: "prometheus",
 		Addr:        addr,
 		Weight:      1,
@@ -45,10 +48,10 @@ func InitMetric(serviceName string, metricsAddr string, registryAddr string) {
 		panic(err)
 	}
 
-	server.RegisterShutdownHook(func() {
-		r.Deregister(registryInfo) //nolint:errcheck
-	})
-
 	http.Handle("/metrics", promhttp.HandlerFor(Registry, promhttp.HandlerOpts{}))
 	go http.ListenAndServe(metricsAddr, nil) //nolint:errcheck
+}
+
+func DeregisterMetric() error {
+	return r.Deregister(registryInfo)
 }
