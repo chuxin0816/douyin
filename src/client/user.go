@@ -1,29 +1,22 @@
 package client
 
 import (
+	"douyin/src/common/clientsuite"
 	"douyin/src/config"
 	"douyin/src/kitex_gen/user/userservice"
 
 	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	"github.com/kitex-contrib/obs-opentelemetry/tracing"
-	consul "github.com/kitex-contrib/registry-consul"
 )
 
 func initUserClient() {
-	// 服务发现
-	r, err := consul.NewConsulResolver(config.Conf.ConsulConfig.ConsulAddr)
-	if err != nil {
-		panic(err)
+	opts := []client.Option{
+		client.WithSuite(clientsuite.CommonClientSuite{
+			RegistryAddr: config.Conf.ConsulConfig.ConsulAddr,
+			ServiceName:  config.Conf.OpenTelemetryConfig.UserName,
+		}),
 	}
 
-	UserClient, err = userservice.NewClient(
-		config.Conf.OpenTelemetryConfig.UserName,
-		client.WithResolver(r),
-		client.WithSuite(tracing.NewClientSuite()),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.UserName}),
-		client.WithMuxConnection(2),
-	)
+	UserClient, err = userservice.NewClient(config.Conf.OpenTelemetryConfig.UserName, opts...)
 	if err != nil {
 		panic(err)
 	}
