@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/chuxin0816/douyin:api
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          ports:
+            - containerPort: 8888
+          securityContext:
+            sysctls:
+              - name: net.ipv4.ip_local_port_range
+                value: "15000 65000"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: api-svc
+spec:
+  selector:
+    app: api
+  type: ClusterIP
+  ports:
+    - name: "8888"
+      port: 8888
+      targetPort: 8888
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  labels:
+    name: nginx-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host:
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: api-svc
+                port:
+                  number: 8888

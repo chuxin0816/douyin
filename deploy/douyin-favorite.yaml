@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: favorite
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: favorite
+  template:
+    metadata:
+      labels:
+        app: favorite
+    spec:
+      containers:
+        - name: favorite
+          image: ghcr.io/chuxin0816/douyin:favorite
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          ports:
+            - containerPort: 8893
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: favorite-svc
+spec:
+  selector:
+    app: favorite
+  type: ClusterIP
+  ports:
+    - name: "8893"
+      port: 8893
+      targetPort: 8893

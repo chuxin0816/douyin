@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relation
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: relation
+  template:
+    metadata:
+      labels:
+        app: relation
+    spec:
+      containers:
+        - name: relation
+          image: ghcr.io/chuxin0816/douyin:relation
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          ports:
+            - containerPort: 8895
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: relation-svc
+spec:
+  selector:
+    app: relation
+  type: ClusterIP
+  ports:
+    - name: "8895"
+      port: 8895
+      targetPort: 8895
