@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"douyin/src/config"
+	"douyin/src/dal/model"
 	"douyin/src/dal/query"
 
 	"github.com/bits-and-blooms/bloom/v3"
@@ -21,6 +22,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
 	"gorm.io/plugin/opentelemetry/tracing"
+	"gorm.io/sharding"
 )
 
 const (
@@ -118,6 +120,20 @@ func InitMySQL() {
 	if err != nil {
 		panic(err)
 	}
+
+	// 分表路由
+	err = db.Use(sharding.Register(
+		sharding.Config{
+			ShardingKey: "create_time",
+			ShardingAlgorithm: func(columnValue any) (suffix string, err error) {
+				t, ok := columnValue.(time.Time)
+				if !ok {
+					return "", nil
+				}
+				return t.Format("200601"), nil
+			},
+		}, model.Message{},
+	))
 
 	// 链路追踪插件
 	if err := db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
