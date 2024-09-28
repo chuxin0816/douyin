@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -56,12 +57,7 @@ func (s *MessageServiceImpl) MessageAction(ctx context.Context, req *message.Mes
 	ctx, span := otel.Tracer("message").Start(ctx, "MessageAction")
 	defer span.End()
 
-	var convertID string
-	if req.UserId < req.ToUserId {
-		convertID = fmt.Sprintf("%d_%d", req.UserId, req.ToUserId)
-	} else {
-		convertID = fmt.Sprintf("%d_%d", req.ToUserId, req.UserId)
-	}
+	convertID := getConvertID(req.UserId, req.ToUserId)
 
 	msg := &model.Message{
 		ToUserID:   req.ToUserId,
@@ -92,4 +88,18 @@ func toMessageResponse(mMessage *model.Message) *message.Message {
 		Content:    mMessage.Content,
 		CreateTime: mMessage.CreateTime,
 	}
+}
+
+func getConvertID(userID, toUserID int64) string {
+	var builder strings.Builder
+	if userID < toUserID {
+		builder.WriteString(strconv.FormatInt(userID, 10))
+		builder.WriteString("_")
+		builder.WriteString(strconv.FormatInt(toUserID, 10))
+	} else {
+		builder.WriteString(strconv.FormatInt(toUserID, 10))
+		builder.WriteString("_")
+		builder.WriteString(strconv.FormatInt(userID, 10))
+	}
+	return builder.String()
 }
