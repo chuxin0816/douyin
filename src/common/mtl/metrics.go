@@ -52,6 +52,6 @@ func InitMetric(serviceName string, metricsAddr string, registryAddr string) {
 	go http.ListenAndServe(metricsAddr, nil) //nolint:errcheck
 }
 
-func DeregisterMetric() error {
-	return r.Deregister(registryInfo)
+func DeregisterMetric() {
+	r.Deregister(registryInfo) //nolint:errcheck
 }
