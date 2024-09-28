@@ -9,6 +9,7 @@ require (
 	github.com/apache/thrift v0.20.0
 	github.com/bits-and-blooms/bloom/v3 v3.7.0
 	github.com/bwmarrin/snowflake v0.3.0
+	github.com/chuxin0816/concurrent-map v1.1.0
 	github.com/cloudwego/hertz v0.9.2
 	github.com/cloudwego/kitex v0.10.3
 	github.com/golang-jwt/jwt v3.2.2+incompatible

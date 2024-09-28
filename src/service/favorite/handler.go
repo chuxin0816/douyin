@@ -60,18 +60,21 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	}
 
 	// 已经点赞
-	if (exist || kafka.FavoriteMap[req.UserId][req.VideoId] == 1) && req.ActionType == 1 {
+	if exist && req.ActionType == 1 {
 		return nil, dal.ErrAlreadyFavorite
 	}
 	// 未点赞
-	if (!exist || kafka.FavoriteMap[req.UserId][req.VideoId] == -1) && req.ActionType == -1 {
+	if !exist && req.ActionType == -1 {
 		return nil, dal.ErrNotFavorite
 	}
 
 	// 添加到map
-	kafka.Mu.Lock()
-	kafka.FavoriteMap[req.UserId][req.VideoId] = req.ActionType
-	kafka.Mu.Unlock()
+	e := kafka.FavoriteEvent{
+		UserID:     req.UserId,
+		VideoID:    req.VideoId,
+		ActionType: req.ActionType,
+	}
+	kafka.FavoriteMap.Set(e.String(), e)
 
 	keyUserFavorite := dal.GetRedisKey(dal.KeyUserFavoritePF, strconv.FormatInt(req.UserId, 10))
 	keyVideoFavoriteCnt := dal.GetRedisKey(dal.KeyVideoFavoriteCountPF, strconv.FormatInt(req.VideoId, 10))
