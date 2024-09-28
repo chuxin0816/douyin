@@ -2,12 +2,17 @@ package kafka
 
 import (
 	"context"
-	"sync"
+	"fmt"
+	"hash/fnv"
+	"strconv"
+	"strings"
 	"time"
 
 	"douyin/src/common/snowflake"
 	"douyin/src/dal"
 	"douyin/src/dal/model"
+
+	cmap "github.com/chuxin0816/concurrent-map"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/segmentio/kafka-go"
@@ -20,12 +25,33 @@ type favoriteMQ struct {
 	*mq
 }
 
+type FavoriteEvent struct {
+	UserID     int64
+	VideoID    int64
+	ActionType int64
+}
+
+// 使用 FNV-1a 生成唯一的较短字符串
+func (f FavoriteEvent) String() string {
+	h := fnv.New64a()
+
+	// 拼接三个 int64 字段并写入哈希
+	var builder strings.Builder
+	builder.WriteString(strconv.FormatInt(f.UserID, 10))
+	builder.WriteString("_")
+	builder.WriteString(strconv.FormatInt(f.VideoID, 10))
+	builder.WriteString("_")
+	builder.WriteString(strconv.FormatInt(f.ActionType, 10))
+	h.Write([]byte(builder.String()))
+
+	return fmt.Sprintf("%x", h.Sum64())
+}
+
 const syncInterval = time.Second * 10
 
 var (
 	favoriteMQInstance *favoriteMQ
-	FavoriteMap        = make(map[int64]map[int64]int64)
-	Mu                 sync.Mutex
+	FavoriteMap        *cmap.ConcurrentMap[FavoriteEvent]
 )
 
 func initFavoriteMQ() {
@@ -39,6 +65,8 @@ func initFavoriteMQ() {
 
 	go favoriteMQInstance.consumeFavorite(context.Background())
 	go syncFavoriteToDB(context.Background())
+
+	FavoriteMap = cmap.New(cmap.WithShardCount[FavoriteEvent](128))
 }
 
 func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
@@ -115,20 +143,14 @@ func syncFavoriteToDB(ctx context.Context) {
 	for range ticker.C {
 		_, span := otel.Tracer("kafka").Start(ctx, "syncFavoriteToDB")
 
-		Mu.Lock()
-		backupFavoriteMap := FavoriteMap
-		FavoriteMap = make(map[int64]map[int64]int64)
-		Mu.Unlock()
-
-		favorites := make([]*model.Favorite, 0, len(backupFavoriteMap))
-		for userID, videoMap := range backupFavoriteMap {
-			for videoID, actionType := range videoMap {
-				favorites = append(favorites, &model.Favorite{
-					ID:      actionType,
-					UserID:  userID,
-					VideoID: videoID,
-				})
-			}
+		events := FavoriteMap.PopAll()
+		favorites := make([]*model.Favorite, 0, len(events))
+		for event := range events {
+			favorites = append(favorites, &model.Favorite{
+				ID:      event.Val.ActionType,
+				UserID:  event.Val.UserID,
+				VideoID: event.Val.VideoID,
+			})
 		}
 
 		if err := BatchFavorite(context.Background(), favorites); err != nil {

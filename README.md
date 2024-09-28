@@ -61,7 +61,6 @@ kitex -module douyin -service user -gen-path ../../kitex_gen/ ../../idl/user.thr
 ```
 ## 未来规划
 脱离青训营抖音客户端限制，对接口参数优化，添加新接口
-* 点赞，评论模块使用mongodb存储
 * 添加双token
 * 发布列表，喜欢列表，评论列表，关注列表，粉丝列表，好友列表增加分页参数
 * 添加热门视频列表，关注视频列表，好友视频列表

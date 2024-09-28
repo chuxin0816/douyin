@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: video
+  template:
+    metadata:
+      labels:
+        app: video
+    spec:
+      containers:
+        - name: video
+          image: ghcr.io/chuxin0816/douyin:video
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          ports:
+            - containerPort: 8892
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: video-svc
+spec:
+  selector:
+    app: video
+  type: ClusterIP
+  ports:
+    - name: "8892"
+      port: 8892
+      targetPort: 8892

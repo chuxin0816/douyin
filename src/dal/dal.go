@@ -9,12 +9,11 @@ import (
 	"time"
 
 	"douyin/src/config"
+	"douyin/src/dal/model"
 	"douyin/src/dal/query"
 
 	"github.com/bits-and-blooms/bloom/v3"
 	nebula "github.com/vesoft-inc/nebula-go/v3"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
@@ -23,6 +22,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
 	"gorm.io/plugin/opentelemetry/tracing"
+	"gorm.io/sharding"
 )
 
 const (
@@ -45,12 +45,11 @@ var (
 )
 
 var (
-	db                *gorm.DB
-	RDB               *redis.ClusterClient
-	collectionMessage *mongo.Collection
-	sessionPool       *nebula.SessionPool
-	G                 = &singleflight.Group{}
-	bloomFilter       *bloom.BloomFilter
+	db          *gorm.DB
+	RDB         *redis.ClusterClient
+	sessionPool *nebula.SessionPool
+	G           = &singleflight.Group{}
+	bloomFilter *bloom.BloomFilter
 )
 
 var (
@@ -68,9 +67,6 @@ func Init() {
 
 	// 初始化Redis
 	InitRedis()
-
-	// 初始化MongoDB
-	InitMongo()
 
 	// 初始化Nebula
 	InitNebula()
@@ -124,6 +120,23 @@ func InitMySQL() {
 		panic(err)
 	}
 
+	// 分表路由
+	err = db.Use(sharding.Register(
+		sharding.Config{
+			ShardingKey: "create_time",
+			ShardingAlgorithm: func(columnValue any) (suffix string, err error) {
+				t, ok := columnValue.(time.Time)
+				if !ok {
+					return "", nil
+				}
+				return t.Format("200601"), nil
+			},
+		}, model.Message{},
+	))
+	if err != nil {
+		panic(err)
+	}
+
 	// 链路追踪插件
 	if err := db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
 		panic(err)
@@ -135,6 +148,8 @@ func InitMySQL() {
 	qUser = q.User
 	qUserLogin = q.UserLogin
 	qVideo = q.Video
+
+	generateMessageTable()
 }
 
 func InitRedis() {
@@ -151,20 +166,6 @@ func InitRedis() {
 	if err := redisotel.InstrumentTracing(RDB); err != nil {
 		panic(err)
 	}
-}
-
-func InitMongo() {
-	uri := fmt.Sprintf("mongodb://%s:%d", config.Conf.Mongo.Host, config.Conf.Mongo.Port)
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
-	if err != nil {
-		panic(err)
-	}
-	err = client.Ping(context.Background(), nil)
-	if err != nil {
-		panic(err)
-	}
-
-	collectionMessage = client.Database(config.Conf.Mongo.DBName).Collection("message")
 }
 
 func InitNebula() {
@@ -250,4 +251,26 @@ func loadDataToBloom() error {
 	}
 
 	return nil
+}
+
+// 创建今年的消息表
+func generateMessageTable() {
+	year := time.Now().Year()
+	for i := 1; i <= 12; i++ {
+		table := fmt.Sprintf("message_%d%02d", year, i)
+		err := db.Exec(
+			`CREATE TABLE IF NOT EXISTS ` + table + `(
+  				id bigint unsigned NOT NULL,
+  				from_user_id bigint NOT NULL DEFAULT '0' COMMENT '发送者ID',
+ 				to_user_id bigint NOT NULL DEFAULT '0' COMMENT '接收者ID',
+  				convert_id varchar(41) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '会话ID',
+  				content varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '消息内容',
+  				create_time bigint NOT NULL DEFAULT '0' COMMENT '创建时间',
+  				PRIMARY KEY (id),
+  				KEY idx_convertId_createTime (convert_id,create_time)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;`).Error
+		if err != nil {
+			panic(err)
+		}
+	}
 }

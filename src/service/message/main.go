@@ -56,9 +56,6 @@ func watchConfig() {
 		case <-config.NoticeRedis:
 			dal.InitRedis()
 
-		case <-config.NoticeMongo:
-			dal.InitMongo()
-
 		case <-config.NoticeKafka:
 			kafka.Init()
 		}

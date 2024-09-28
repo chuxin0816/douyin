@@ -20,7 +20,7 @@ func main() {
 	mtl.InitMetric(config.Conf.OpenTelemetryConfig.ApiName, config.Conf.OpenTelemetryConfig.MetricAddr, config.Conf.ConsulConfig.ConsulAddr)
 	defer mtl.DeregisterMetric()
 	mtl.InitTracing(config.Conf.OpenTelemetryConfig.FavoriteName)
-	defer mtl.ShutdownTracing()
+	defer mtl.ShutdownTracing() 
 	mtl.InitLog()
 	snowflake.Init()
 	dal.Init()

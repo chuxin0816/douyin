@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: message
+  template:
+    metadata:
+      labels:
+        app: message
+    spec:
+      containers:
+        - name: message
+          image: ghcr.io/chuxin0816/douyin:message
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          ports:
+            - containerPort: 8896
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: message-svc
+spec:
+  selector:
+    app: message
+  type: ClusterIP
+  ports:
+    - name: "8896"
+      port: 8896
+      targetPort: 8896

@@ -21,7 +21,6 @@ var (
 	NoticeLog           = make(chan struct{})
 	NoticeMySQL         = make(chan struct{})
 	NoticeRedis         = make(chan struct{})
-	NoticeMongo         = make(chan struct{})
 	NoticeConsul        = make(chan struct{})
 	NoticeKafka         = make(chan struct{})
 	NoticeOpenTelemetry = make(chan struct{})
@@ -67,7 +66,6 @@ type DatabaseConfig struct {
 	MySQLMaster *MySQLConfig   `yaml:"mysql-master"`
 	MySQLSlaves []*MySQLConfig `yaml:"mysql-slaves"`
 	Redis       *RedisConfig   `yaml:"redis"`
-	Mongo       *MongoConfig   `yaml:"mongo"`
 	Nebula      *NebulaConfig  `yaml:"nebula"`
 }
 
@@ -84,12 +82,6 @@ type RedisConfig struct {
 	SentinelAddrs []string `yaml:"sentinel_addrs"`
 	Password      string   `yaml:"password"`
 	DB            int      `yaml:"db"`
-}
-
-type MongoConfig struct {
-	Host   string `yaml:"host"`
-	Port   int    `yaml:"port"`
-	DBName string `yaml:"dbname"`
 }
 
 type NebulaConfig struct {
@@ -182,10 +174,6 @@ func Init() {
 			if !reflect.DeepEqual(Conf.DatabaseConfig.Redis, newConf.DatabaseConfig.Redis) {
 				Conf.DatabaseConfig.Redis = newConf.DatabaseConfig.Redis
 				NoticeRedis <- struct{}{}
-			}
-			if !reflect.DeepEqual(Conf.DatabaseConfig.Mongo, newConf.DatabaseConfig.Mongo) {
-				Conf.DatabaseConfig.Mongo = newConf.DatabaseConfig.Mongo
-				NoticeMongo <- struct{}{}
 			}
 		}
 

@@ -45,6 +45,13 @@ func (mc *MessageController) Action(c context.Context, ctx *app.RequestContext) 
 		return
 	}
 
+	// 检查评论字数
+	if len(req.Content) > 500 {
+		Error(ctx, codeLengthLimit)
+		hlog.Warn("字数超过限制")
+		return
+	}
+
 	// 从认证中间件中获取userID
 	userID := ctx.MustGet(CtxUserIDKey).(int64)
 

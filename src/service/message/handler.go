@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -56,20 +55,15 @@ func (s *MessageServiceImpl) MessageAction(ctx context.Context, req *message.Mes
 	ctx, span := otel.Tracer("message").Start(ctx, "MessageAction")
 	defer span.End()
 
-	var convertID string
-	if req.UserId < req.ToUserId {
-		convertID = fmt.Sprintf("%d_%d", req.UserId, req.ToUserId)
-	} else {
-		convertID = fmt.Sprintf("%d_%d", req.ToUserId, req.UserId)
-	}
-
+	convertID := dal.GetConvertID(req.UserId, req.ToUserId)
 	msg := &model.Message{
 		ToUserID:   req.ToUserId,
 		FromUserID: req.UserId,
 		ConvertID:  convertID,
 		Content:    req.Content,
-		CreateTime: time.Now().Unix(),
+		CreateTime: time.Now().UnixMilli(),
 	}
+	
 	// 通过kafka更新数据库
 	if err := kafka.SendMessage(ctx, msg); err != nil {
 		span.RecordError(err)
