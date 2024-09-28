@@ -14,14 +14,14 @@ func MessageAction(ctx context.Context, message *model.Message) error {
 	message.ID = snowflake.GenerateID()
 	message.CreateTime = time.Now().UnixMilli()
 
-	return db.Model(&model.Message{}).Create(message).Error
+	return db.WithContext(ctx).Model(&model.Message{}).Create(message).Error
 }
 
 func MessageList(ctx context.Context, userID, toUserID, lastTime int64) ([]*model.Message, error) {
 	convertID := GetConvertID(userID, toUserID)
 
 	messageList := make([]*model.Message, 0)
-	err := db.Model(&model.Message{}).Where("convert_id = ? AND create_time > ?", convertID, lastTime).Find(&messageList).Error
+	err := db.WithContext(ctx).Model(&model.Message{}).Where("convert_id = ? AND create_time > ?", convertID, lastTime).Find(&messageList).Error
 
 	return messageList, err
 }

@@ -56,7 +56,6 @@ var (
 	q          = new(query.Query)
 	qComment   = q.Comment
 	qFavorite  = q.Favorite
-	qMessage   = q.Message
 	qUser      = q.User
 	qUserLogin = q.UserLogin
 	qVideo     = q.Video
