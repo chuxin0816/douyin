@@ -3,7 +3,6 @@ package mtl
 import (
 	"context"
 
-	"github.com/cloudwego/kitex/server"
 	"github.com/kitex-contrib/obs-opentelemetry/provider"
 )
 
@@ -16,12 +15,8 @@ func InitTracing(serviceName string) {
 		provider.WithInsecure(),
 		provider.WithEnableMetrics(false),
 	)
-
-	server.RegisterShutdownHook(func() {
-		p.Shutdown(context.Background()) //nolint:errcheck
-	})
 }
 
-func ShutdownTracing() error {
-	return p.Shutdown(context.Background())
+func ShutdownTracing() {
+	p.Shutdown(context.Background()) //nolint:errcheck
 }
