@@ -13,8 +13,6 @@ import (
 
 	"github.com/bits-and-blooms/bloom/v3"
 	nebula "github.com/vesoft-inc/nebula-go/v3"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
@@ -45,18 +43,18 @@ var (
 )
 
 var (
-	db                *gorm.DB
-	RDB               *redis.ClusterClient
-	collectionMessage *mongo.Collection
-	sessionPool       *nebula.SessionPool
-	G                 = &singleflight.Group{}
-	bloomFilter       *bloom.BloomFilter
+	db          *gorm.DB
+	RDB         *redis.ClusterClient
+	sessionPool *nebula.SessionPool
+	G           = &singleflight.Group{}
+	bloomFilter *bloom.BloomFilter
 )
 
 var (
 	q          = new(query.Query)
 	qComment   = q.Comment
 	qFavorite  = q.Favorite
+	qMessage   = q.Message
 	qUser      = q.User
 	qUserLogin = q.UserLogin
 	qVideo     = q.Video
@@ -68,9 +66,6 @@ func Init() {
 
 	// 初始化Redis
 	InitRedis()
-
-	// 初始化MongoDB
-	InitMongo()
 
 	// 初始化Nebula
 	InitNebula()
@@ -151,20 +146,6 @@ func InitRedis() {
 	if err := redisotel.InstrumentTracing(RDB); err != nil {
 		panic(err)
 	}
-}
-
-func InitMongo() {
-	uri := fmt.Sprintf("mongodb://%s:%d", config.Conf.Mongo.Host, config.Conf.Mongo.Port)
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
-	if err != nil {
-		panic(err)
-	}
-	err = client.Ping(context.Background(), nil)
-	if err != nil {
-		panic(err)
-	}
-
-	collectionMessage = client.Database(config.Conf.Mongo.DBName).Collection("message")
 }
 
 func InitNebula() {

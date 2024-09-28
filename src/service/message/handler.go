@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -57,15 +55,15 @@ func (s *MessageServiceImpl) MessageAction(ctx context.Context, req *message.Mes
 	ctx, span := otel.Tracer("message").Start(ctx, "MessageAction")
 	defer span.End()
 
-	convertID := getConvertID(req.UserId, req.ToUserId)
-
+	convertID := dal.GetConvertID(req.UserId, req.ToUserId)
 	msg := &model.Message{
 		ToUserID:   req.ToUserId,
 		FromUserID: req.UserId,
 		ConvertID:  convertID,
 		Content:    req.Content,
-		CreateTime: time.Now().Unix(),
+		CreateTime: time.Now().UnixMilli(),
 	}
+	
 	// 通过kafka更新数据库
 	if err := kafka.SendMessage(ctx, msg); err != nil {
 		span.RecordError(err)
@@ -88,18 +86,4 @@ func toMessageResponse(mMessage *model.Message) *message.Message {
 		Content:    mMessage.Content,
 		CreateTime: mMessage.CreateTime,
 	}
-}
-
-func getConvertID(userID, toUserID int64) string {
-	var builder strings.Builder
-	if userID < toUserID {
-		builder.WriteString(strconv.FormatInt(userID, 10))
-		builder.WriteString("_")
-		builder.WriteString(strconv.FormatInt(toUserID, 10))
-	} else {
-		builder.WriteString(strconv.FormatInt(toUserID, 10))
-		builder.WriteString("_")
-		builder.WriteString(strconv.FormatInt(userID, 10))
-	}
-	return builder.String()
 }
