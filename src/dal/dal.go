@@ -130,7 +130,8 @@ func InitMySQL() {
 				if !ok {
 					return "", nil
 				}
-				id := utils.Fnv32a(t)%128 + 1
+				h := utils.NewDefaultHasher()
+				id := h.Sum64(t)%128 + 1
 				return fmt.Sprintf("_%03d", id), nil
 			},
 		}, model.Message{},
