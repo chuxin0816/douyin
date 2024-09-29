@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"douyin/src/common/utils"
 	"douyin/src/config"
 	"douyin/src/dal/model"
 	"douyin/src/dal/query"
@@ -123,13 +124,14 @@ func InitMySQL() {
 	// 分表路由
 	err = db.Use(sharding.Register(
 		sharding.Config{
-			ShardingKey: "create_time",
+			ShardingKey: "convert_id",
 			ShardingAlgorithm: func(columnValue any) (suffix string, err error) {
-				t, ok := columnValue.(time.Time)
+				t, ok := columnValue.(string)
 				if !ok {
 					return "", nil
 				}
-				return t.Format("200601"), nil
+				id := utils.Fnv32a(t)%128
+				return fmt.Sprintf("_%03d", id), nil
 			},
 		}, model.Message{},
 	))
