@@ -2,13 +2,12 @@ package kafka
 
 import (
 	"context"
-	"fmt"
-	"hash/fnv"
 	"strconv"
 	"strings"
 	"time"
 
 	"douyin/src/common/snowflake"
+	"douyin/src/common/utils"
 	"douyin/src/dal"
 	"douyin/src/dal/model"
 
@@ -33,8 +32,6 @@ type FavoriteEvent struct {
 
 // 使用 FNV-1a 生成唯一的较短字符串
 func (f FavoriteEvent) String() string {
-	h := fnv.New64a()
-
 	// 拼接三个 int64 字段并写入哈希
 	var builder strings.Builder
 	builder.WriteString(strconv.FormatInt(f.UserID, 10))
@@ -42,9 +39,8 @@ func (f FavoriteEvent) String() string {
 	builder.WriteString(strconv.FormatInt(f.VideoID, 10))
 	builder.WriteString("_")
 	builder.WriteString(strconv.FormatInt(f.ActionType, 10))
-	h.Write([]byte(builder.String()))
 
-	return fmt.Sprintf("%x", h.Sum64())
+	return strconv.FormatUint(uint64(utils.Fnv32a(builder.String())), 10)
 }
 
 const syncInterval = time.Second * 10
