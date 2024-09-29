@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"hash/fnv"
 	"strconv"
 	"strings"
@@ -44,7 +43,7 @@ func (f FavoriteEvent) String() string {
 	builder.WriteString(strconv.FormatInt(f.ActionType, 10))
 	h.Write([]byte(builder.String()))
 
-	return fmt.Sprintf("%x", h.Sum64())
+	return strconv.FormatUint(h.Sum64(), 10)
 }
 
 const syncInterval = time.Second * 10
