@@ -130,7 +130,7 @@ func InitMySQL() {
 				if !ok {
 					return "", nil
 				}
-				id := utils.Fnv32a(t)%128
+				id := utils.Fnv32a(t)%128 + 1
 				return fmt.Sprintf("_%03d", id), nil
 			},
 		}, model.Message{},
@@ -257,9 +257,8 @@ func loadDataToBloom() error {
 
 // 创建今年的消息表
 func generateMessageTable() {
-	year := time.Now().Year()
-	for i := 1; i <= 12; i++ {
-		table := fmt.Sprintf("message_%d%02d", year, i)
+	for i := 1; i <= 128; i++ {
+		table := fmt.Sprintf("message_%03d", i)
 		err := db.Exec(
 			`CREATE TABLE IF NOT EXISTS ` + table + `(
   				id bigint unsigned NOT NULL,
