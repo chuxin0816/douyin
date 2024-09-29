@@ -40,7 +40,8 @@ func (f FavoriteEvent) String() string {
 	builder.WriteString("_")
 	builder.WriteString(strconv.FormatInt(f.ActionType, 10))
 
-	return strconv.FormatUint(uint64(utils.Fnv32a(builder.String())), 10)
+	h := utils.NewDefaultHasher()
+	return strconv.FormatUint(h.Sum64(builder.String()), 10)
 }
 
 const syncInterval = time.Second * 10
