@@ -33,42 +33,58 @@ func (mq *cacheMQ) removeCache(ctx context.Context) {
 	for {
 		ctx, span := otel.Tracer("kafka").Start(ctx, "removeCache")
 
-		m, err := mq.Reader.ReadMessage(ctx)
+		m, err := mq.Reader.FetchMessage(ctx)
 		if err != nil {
-			klog.Error("failed to read message: ", err)
+			klog.Error("failed to fetch message: ", err)
+			span.End()
 			break
 		}
 		msg := &dbMessage{}
 		if err := json.Unmarshal(m.Value, msg); err != nil {
 			klog.Error("failed to unmarshal message: ", err)
+			span.End()
 			continue
 		}
+
+		pipe := dal.RDB.Pipeline()
 		switch msg.Table {
 		case "user":
 			if msg.Type == "UPDATE" || msg.Type == "DELETE" {
 				keyUserInfo := dal.GetRedisKey(dal.KeyUserInfoPF, msg.Data[0]["id"])
-				dal.RDB.Del(ctx, keyUserInfo)
+				pipe.Del(ctx, keyUserInfo)
 			}
 		case "video":
 			if msg.Type == "INSERT" {
 				keyUserWorkCnt := dal.GetRedisKey(dal.KeyUserWorkCountPF, msg.Data[0]["author_id"])
-				dal.RDB.Del(ctx, keyUserWorkCnt)
+				dal.IncrByScript.Run(ctx, pipe, []string{keyUserWorkCnt}, 1)
 			} else if msg.Type == "UPDATE" {
 				keyVideoInfo := dal.GetRedisKey(dal.KeyVideoInfoPF, msg.Data[0]["id"])
-				dal.RDB.Del(ctx, keyVideoInfo)
+				pipe.Del(ctx, keyVideoInfo)
 			} else if msg.Type == "DELETE" {
 				keyUserWorkCnt := dal.GetRedisKey(dal.KeyUserWorkCountPF, msg.Data[0]["author_id"])
-				dal.RDB.Del(ctx, keyUserWorkCnt)
+				dal.IncrByScript.Run(ctx, pipe, []string{keyUserWorkCnt}, -1)
 				keyVideoInfo := dal.GetRedisKey(dal.KeyVideoInfoPF, msg.Data[0]["id"])
-				dal.RDB.Del(ctx, keyVideoInfo)
+				pipe.Del(ctx, keyVideoInfo)
 			}
 		case "comment":
-			if msg.Type == "INSERT" || msg.Type == "DELETE" {
+			if msg.Type == "INSERT" {
 				keyVideoCommentCnt := dal.GetRedisKey(dal.KeyVideoCommentCountPF, msg.Data[0]["video_id"])
-				dal.RDB.Del(ctx, keyVideoCommentCnt)
+				dal.IncrByScript.Run(ctx, pipe, []string{keyVideoCommentCnt}, 1)
+			} else if msg.Type == "DELETE" {
+				keyVideoCommentCnt := dal.GetRedisKey(dal.KeyVideoCommentCountPF, msg.Data[0]["video_id"])
+				dal.IncrByScript.Run(ctx, pipe, []string{keyVideoCommentCnt}, -1)
 			}
 		}
 
+		if _, err := pipe.Exec(ctx); err != nil {
+			klog.Error("failed to update or delete cache: ", err)
+			span.End()
+			continue
+		}
+
+		if err := mq.Reader.CommitMessages(ctx, m); err != nil {
+			klog.Error("failed to commit message: ", err)
+		}
 		span.End()
 	}
 
