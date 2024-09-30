@@ -74,12 +74,14 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 		m, err := mq.Reader.FetchMessage(ctx)
 		if err != nil {
 			klog.Error("failed to fetch message: ", err)
+			span.End()
 			break
 		}
 
 		favorites := make([]*model.Favorite, 0)
 		if err := msgpack.Unmarshal(m.Value, &favorites); err != nil {
 			klog.Error("failed to unmarshal message: ", err)
+			span.End()
 			continue
 		}
 
@@ -97,10 +99,12 @@ func (mq *favoriteMQ) consumeFavorite(ctx context.Context) {
 
 		if err := dal.BatchCreateFavorite(ctx, creates); err != nil {
 			klog.Error("failed to create favorite: ", err)
+			span.End()
 			continue
 		}
 		if err := dal.BatchDeleteFavorite(ctx, deletes); err != nil {
 			klog.Error("failed to delete favorite: ", err)
+			span.End()
 			continue
 		}
 

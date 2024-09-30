@@ -89,10 +89,11 @@ func (mq *relationMQ) consumeRelation(ctx context.Context) {
 			}
 		}
 
-		// 删除缓存
-		_, err = pipe.Exec(ctx)
-		if err != nil {
+		// 更新缓存
+		if _, err = pipe.Exec(ctx); err != nil {
 			klog.Error("删除缓存失败, err: ", err)
+			span.End()
+			continue
 		}
 
 		if err := mq.Reader.CommitMessages(ctx, m); err != nil {
