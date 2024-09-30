@@ -13,6 +13,8 @@ import (
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"github.com/hertz-contrib/cors"
+	"github.com/hertz-contrib/gzip"
 	"github.com/hertz-contrib/http2/factory"
 	hertzprom "github.com/hertz-contrib/monitor-prometheus"
 	hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
@@ -31,18 +33,12 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 			"",
 			hertzprom.WithRegistry(mtl.Registry),
 			hertzprom.WithDisableServer(true),
-		),
-		),
+		)),
 		tracer,
 	)
-	// HTTP2
-	h.AddProtocol("h2", factory.NewServerFactory())
-
-	// 链路追踪中间件
 	h.Use(hertztracing.ServerMiddleware(cfg))
 
-	// 限流中间件
-	h.Use(middleware.RatelimitMiddleware(3000))
+	registerMiddleware(h)
 
 	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
 		ctx.JSON(consts.StatusOK, utils.H{"message": "pong"})
@@ -101,4 +97,18 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	}
 
 	return h
+}
+
+func registerMiddleware(h *server.Hertz) {
+	// HTTP2
+	h.AddProtocol("h2", factory.NewServerFactory())
+
+	// cores
+	h.Use(cors.Default())
+
+	// gzip
+	h.Use(gzip.Gzip(gzip.DefaultCompression))
+
+	// 限流中间件
+	h.Use(middleware.RatelimitMiddleware(3000))
 }
