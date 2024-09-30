@@ -40,37 +40,56 @@ func (mq *relationMQ) consumeRelation(ctx context.Context) {
 		m, err := mq.Reader.FetchMessage(ctx)
 		if err != nil {
 			klog.Error("failed to fetch message: ", err)
+			span.End()
 			break
 		}
 
 		relation := &model.Relation{}
 		if err := msgpack.Unmarshal(m.Value, relation); err != nil {
 			klog.Error("failed to unmarshal message: ", err)
+			span.End()
 			continue
 		}
+
+		pipe := dal.RDB.Pipeline()
 
 		if relation.ID == 1 {
 			// 关注
 			if err := dal.Follow(ctx, relation.FollowerID, relation.AuthorID); err != nil {
 				klog.Error("添加记录失败, err: ", err)
+				span.End()
 				continue
+			}
+			pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(relation.FollowerID, 10)), 1)
+			pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(relation.FollowerID, 10)), 1)
+			pipe.SAdd(ctx, dal.GetRedisKey(dal.KeyUserFollowPF, strconv.FormatInt(relation.FollowerID, 10)), relation.AuthorID)
+			pipe.SAdd(ctx, dal.GetRedisKey(dal.KeyUserFollowerPF, strconv.FormatInt(relation.AuthorID, 10)), relation.FollowerID)
+			if exist, err := dal.CheckRelationExist(ctx, relation.AuthorID, relation.FollowerID); err != nil {
+				klog.Error("查询关注记录失败, err: ", err)
+			} else if exist {
+				pipe.SAdd(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(relation.FollowerID, 10)), relation.AuthorID)
+				pipe.SAdd(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(relation.AuthorID, 10)), relation.FollowerID)
 			}
 		} else {
 			// 取关
 			if err := dal.UnFollow(ctx, relation.FollowerID, relation.AuthorID); err != nil {
 				klog.Error("删除记录失败, err: ", err)
+				span.End()
 				continue
+			}
+			pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(relation.FollowerID, 10)), -1)
+			pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(relation.FollowerID, 10)), -1)
+			pipe.SRem(ctx, dal.GetRedisKey(dal.KeyUserFollowPF, strconv.FormatInt(relation.FollowerID, 10)), relation.AuthorID)
+			pipe.SRem(ctx, dal.GetRedisKey(dal.KeyUserFollowerPF, strconv.FormatInt(relation.AuthorID, 10)), relation.FollowerID)
+			if exist, err := dal.CheckRelationExist(ctx, relation.AuthorID, relation.FollowerID); err != nil {
+				klog.Error("查询关注记录失败, err: ", err)
+			} else if exist {
+				pipe.SRem(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(relation.FollowerID, 10)), relation.AuthorID)
+				pipe.SRem(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(relation.AuthorID, 10)), relation.FollowerID)
 			}
 		}
 
 		// 删除缓存
-		pipe := dal.RDB.Pipeline()
-		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowPF, strconv.FormatInt(relation.FollowerID, 10)))
-		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowerPF, strconv.FormatInt(relation.AuthorID, 10)))
-		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(relation.FollowerID, 10)))
-		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFriendPF, strconv.FormatInt(relation.AuthorID, 10)))
-		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(relation.FollowerID, 10)))
-		pipe.Del(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(relation.FollowerID, 10)))
 		_, err = pipe.Exec(ctx)
 		if err != nil {
 			klog.Error("删除缓存失败, err: ", err)
