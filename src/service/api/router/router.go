@@ -3,11 +3,9 @@ package router
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"douyin/src/common/mtl"
 	"douyin/src/config"
-	"douyin/src/dal"
 	"douyin/src/service/api/controller"
 	"douyin/src/service/api/middleware"
 
@@ -15,8 +13,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"github.com/hertz-contrib/cache"
-	"github.com/hertz-contrib/cache/persist"
 	"github.com/hertz-contrib/http2/factory"
 	hertzprom "github.com/hertz-contrib/monitor-prometheus"
 	hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
@@ -44,14 +40,6 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 
 	// 链路追踪中间件
 	h.Use(hertztracing.ServerMiddleware(cfg))
-
-	// 缓存中间件
-	memoryStore := persist.NewMemoryStore(10 * time.Second)
-	h.Use(cache.NewCacheByRequestURI(
-		memoryStore,
-		2*time.Second,
-		cache.WithPrefixKey(dal.Prefix),
-	))
 
 	// 限流中间件
 	h.Use(middleware.RatelimitMiddleware(3000))
