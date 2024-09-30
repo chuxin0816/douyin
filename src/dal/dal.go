@@ -46,11 +46,12 @@ var (
 )
 
 var (
-	db          *gorm.DB
-	RDB         *redis.ClusterClient
-	sessionPool *nebula.SessionPool
-	G           = &singleflight.Group{}
-	bloomFilter *bloom.BloomFilter
+	db           *gorm.DB
+	RDB          *redis.ClusterClient
+	IncrByScript *redis.Script
+	sessionPool  *nebula.SessionPool
+	G            = &singleflight.Group{}
+	bloomFilter  *bloom.BloomFilter
 )
 
 var (
@@ -169,6 +170,14 @@ func InitRedis() {
 	if err := redisotel.InstrumentTracing(RDB); err != nil {
 		panic(err)
 	}
+
+	IncrByScript = redis.NewScript(`
+	if redis.call('EXISTS', KEYS[1]) == 1 then
+        return redis.call('INCRBY', KEYS[1], ARGV[1])
+    else
+        return nil
+    end
+	`)
 }
 
 func InitNebula() {

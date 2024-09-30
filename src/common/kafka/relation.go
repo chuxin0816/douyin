@@ -60,8 +60,8 @@ func (mq *relationMQ) consumeRelation(ctx context.Context) {
 				span.End()
 				continue
 			}
-			pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(relation.FollowerID, 10)), 1)
-			pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(relation.FollowerID, 10)), 1)
+			dal.IncrByScript.Run(ctx, pipe, []string{dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(relation.FollowerID, 10))}, 1)
+			dal.IncrByScript.Run(ctx, pipe, []string{dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(relation.FollowerID, 10))}, 1)
 			pipe.SAdd(ctx, dal.GetRedisKey(dal.KeyUserFollowPF, strconv.FormatInt(relation.FollowerID, 10)), relation.AuthorID)
 			pipe.SAdd(ctx, dal.GetRedisKey(dal.KeyUserFollowerPF, strconv.FormatInt(relation.AuthorID, 10)), relation.FollowerID)
 			if exist, err := dal.CheckRelationExist(ctx, relation.AuthorID, relation.FollowerID); err != nil {
@@ -77,8 +77,8 @@ func (mq *relationMQ) consumeRelation(ctx context.Context) {
 				span.End()
 				continue
 			}
-			pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(relation.FollowerID, 10)), -1)
-			pipe.IncrBy(ctx, dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(relation.FollowerID, 10)), -1)
+			dal.IncrByScript.Run(ctx, pipe, []string{dal.GetRedisKey(dal.KeyUserFollowCountPF, strconv.FormatInt(relation.FollowerID, 10))}, -1)
+			dal.IncrByScript.Run(ctx, pipe, []string{dal.GetRedisKey(dal.KeyUserFollowerCountPF, strconv.FormatInt(relation.FollowerID, 10))}, -1)
 			pipe.SRem(ctx, dal.GetRedisKey(dal.KeyUserFollowPF, strconv.FormatInt(relation.FollowerID, 10)), relation.AuthorID)
 			pipe.SRem(ctx, dal.GetRedisKey(dal.KeyUserFollowerPF, strconv.FormatInt(relation.AuthorID, 10)), relation.FollowerID)
 			if exist, err := dal.CheckRelationExist(ctx, relation.AuthorID, relation.FollowerID); err != nil {

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"strconv"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -81,72 +80,6 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	keyUserFavoriteCnt := dal.GetRedisKey(dal.KeyUserFavoriteCountPF, strconv.FormatInt(req.UserId, 10))
 	keyUserTotalFavorited := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF, strconv.FormatInt(authorID, 10))
 
-	// 检查相关字段是否存在缓存
-	var wg sync.WaitGroup
-	var wgErr error
-	wg.Add(3)
-	go func() {
-		defer wg.Done()
-		if exist, err := dal.RDB.Exists(ctx, keyVideoFavoriteCnt).Result(); err != nil && err != redis.Nil {
-			wgErr = err
-			return
-		} else if exist == 0 {
-			// 缓存不存在，查询数据库写入缓存
-			cnt, err := dal.GetVideoFavoriteCount(ctx, req.VideoId)
-			if err != nil {
-				wgErr = err
-				return
-			}
-			if err := dal.RDB.Set(ctx, keyVideoFavoriteCnt, cnt, 0).Err(); err != nil {
-				wgErr = err
-				return
-			}
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		if exist, err := dal.RDB.Exists(ctx, keyUserFavoriteCnt).Result(); err != nil && err != redis.Nil {
-			wgErr = err
-			return
-		} else if exist == 0 {
-			// 缓存不存在，查询数据库写入缓存
-			cnt, err := dal.GetUserFavoriteCount(ctx, req.UserId)
-			if err != nil {
-				wgErr = err
-				return
-			}
-			if err := dal.RDB.Set(ctx, keyUserFavoriteCnt, cnt, 0).Err(); err != nil {
-				wgErr = err
-				return
-			}
-		}
-	}()
-	go func() {
-		defer wg.Done()
-		if exist, err := dal.RDB.Exists(ctx, keyUserTotalFavorited).Result(); err != nil && err != redis.Nil {
-			wgErr = err
-			return
-		} else if exist == 0 {
-			// 缓存不存在，查询数据库写入缓存
-			cnt, err := s.TotalFavoritedCnt(ctx, authorID)
-			if err != nil {
-				wgErr = err
-				return
-			}
-			if err := dal.RDB.Set(ctx, keyUserTotalFavorited, cnt, 0).Err(); err != nil {
-				wgErr = err
-				return
-			}
-		}
-	}()
-	wg.Wait()
-	if wgErr != nil {
-		span.RecordError(wgErr)
-		span.SetStatus(codes.Error, "检查相关字段是否存在缓存失败")
-		klog.Error("检查相关字段是否存在缓存失败, err: ", wgErr)
-		return nil, wgErr
-	}
-
 	// 更新缓存
 	pipe := dal.RDB.Pipeline()
 	if req.ActionType == 1 {
@@ -155,9 +88,9 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 	} else {
 		pipe.SRem(ctx, keyUserFavorite, req.VideoId)
 	}
-	pipe.IncrBy(ctx, keyVideoFavoriteCnt, req.ActionType)
-	pipe.IncrBy(ctx, keyUserFavoriteCnt, req.ActionType)
-	pipe.IncrBy(ctx, keyUserTotalFavorited, req.ActionType)
+	dal.IncrByScript.Run(ctx, pipe, []string{keyVideoFavoriteCnt}, req.ActionType)
+	dal.IncrByScript.Run(ctx, pipe, []string{keyUserFavoriteCnt}, req.ActionType)
+	dal.IncrByScript.Run(ctx, pipe, []string{keyUserTotalFavorited}, req.ActionType)
 	if _, err = pipe.Exec(ctx); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "更新缓存相关字段失败")
