@@ -13,6 +13,7 @@ import (
 	"douyin/src/dal/model"
 	"douyin/src/dal/query"
 
+	"github.com/allegro/bigcache/v3"
 	"github.com/bits-and-blooms/bloom/v3"
 	nebula "github.com/vesoft-inc/nebula-go/v3"
 
@@ -50,8 +51,10 @@ var (
 	RDB          *redis.ClusterClient
 	IncrByScript *redis.Script
 	sessionPool  *nebula.SessionPool
+	cache        *bigcache.BigCache
 	G            = &singleflight.Group{}
 	bloomFilter  *bloom.BloomFilter
+	err          error
 )
 
 var (
@@ -73,6 +76,9 @@ func Init() {
 	// 初始化Nebula
 	InitNebula()
 
+	// 初始化BigCache
+	InitBigCache()
+
 	// 初始化布隆过滤器
 	bloomFilter = bloom.NewWithEstimates(100000, 0.001)
 	if err := loadDataToBloom(); err != nil {
@@ -90,7 +96,6 @@ func InitMySQL() {
 	)
 
 	// 连接主库
-	var err error
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -200,6 +205,22 @@ func InitNebula() {
 
 func Close() {
 	RDB.Close()
+}
+
+func InitBigCache() {
+	cache, err = bigcache.New(context.Background(), bigcache.Config{
+		Shards:             1024,
+		LifeWindow:         5 * time.Second,
+		CleanWindow:        5 * time.Second,
+		MaxEntriesInWindow: 1024 * 600,
+		MaxEntrySize:       500,
+		StatsEnabled:       false,
+		Verbose:            true,
+		HardMaxCacheSize:   1024,
+	})
+	if err != nil {
+		panic(err)
+	}
 }
 
 // GetRandomTime 获取0-30min随机时间
