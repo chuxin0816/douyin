@@ -51,7 +51,7 @@ var (
 	RDB          *redis.ClusterClient
 	IncrByScript *redis.Script
 	sessionPool  *nebula.SessionPool
-	cache        *bigcache.BigCache
+	Cache        *bigcache.BigCache
 	G            = &singleflight.Group{}
 	bloomFilter  *bloom.BloomFilter
 	err          error
@@ -208,7 +208,7 @@ func Close() {
 }
 
 func InitBigCache() {
-	cache, err = bigcache.New(context.Background(), bigcache.Config{
+	Cache, err = bigcache.New(context.Background(), bigcache.Config{
 		Shards:             1024,
 		LifeWindow:         5 * time.Second,
 		CleanWindow:        5 * time.Second,

@@ -12,6 +12,7 @@ import (
 	"douyin/src/kitex_gen/favorite"
 	"douyin/src/kitex_gen/video"
 
+	"github.com/allegro/bigcache/v3"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel"
@@ -157,6 +158,15 @@ func (s *FavoriteServiceImpl) TotalFavoritedCnt(ctx context.Context, userId int6
 	defer span.End()
 
 	key := dal.GetRedisKey(dal.KeyUserTotalFavoritedPF, strconv.FormatInt(userId, 10))
+	// 查询本地缓存
+	if val, err := dal.Cache.Get(key); err == nil {
+		return strconv.ParseInt(string(val), 10, 64)
+	} else if err != bigcache.ErrEntryNotFound {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "dal.Cache.Get failed")
+		klog.Error("dal.Cache.Get failed, err: ", err)
+	}
+	
 	// 使用singleflight解决缓存击穿并减少redis压力
 	_, err, _ = dal.G.Do(key, func() (interface{}, error) {
 		go func() {
@@ -191,13 +201,19 @@ func (s *FavoriteServiceImpl) TotalFavoritedCnt(ctx context.Context, userId int6
 			// 写入redis缓存
 			dal.RDB.Set(ctx, key, resp, dal.ExpireTime+dal.GetRandomTime())
 
+			return nil, nil
 		} else if err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "查询用户总点赞数失败")
 			klog.Error("查询用户总点赞数失败, err: ", err)
 			return nil, err
 		}
-
+		// 写入本地缓存
+		if err := dal.Cache.Set(key, []byte(strconv.FormatInt(resp, 10))); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "dal.Cache.Set failed")
+			klog.Error("dal.Cache.Set failed, err: ", err)
+		}
 		return nil, nil
 	})
 

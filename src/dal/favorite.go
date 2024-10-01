@@ -7,6 +7,8 @@ import (
 
 	"douyin/src/dal/model"
 
+	"github.com/allegro/bigcache/v3"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -94,8 +96,15 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 
 // GetUserFavoriteCount 获取用户点赞数
 func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err error) {
-	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFavoriteCountPF, strconv.FormatInt(userID, 10))
+	// 查询本地缓存
+	if val, err := Cache.Get(key); err == nil {
+		return strconv.ParseInt(string(val), 10, 64)
+	} else if err != bigcache.ErrEntryNotFound {
+		klog.Error("Cache.Get failed, err: ", err)
+	}
+
+	// 使用singleflight解决缓存击穿并减少redis压力
 	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(DelayTime)
@@ -113,9 +122,12 @@ func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err err
 
 			// 写入redis缓存
 			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
-			return nil, err
+		} else if err == nil {
+			// 写入本地缓存
+			if err := Cache.Set(key, []byte(strconv.FormatInt(cnt, 10))); err != nil {
+				klog.Error("Cache.Set failed, err: ", err)
+			}
 		}
-
 		return nil, err
 	})
 
@@ -123,8 +135,15 @@ func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err err
 }
 
 func GetVideoFavoriteCount(ctx context.Context, videoID int64) (cnt int64, err error) {
-	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyVideoFavoriteCountPF, strconv.FormatInt(videoID, 10))
+	// 查询本地缓存
+	if val, err := Cache.Get(key); err == nil {
+		return strconv.ParseInt(string(val), 10, 64)
+	} else if err != bigcache.ErrEntryNotFound {
+		klog.Error("Cache.Get failed, err: ", err)
+	}
+
+	// 使用singleflight解决缓存击穿并减少redis压力
 	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(DelayTime)
@@ -142,9 +161,12 @@ func GetVideoFavoriteCount(ctx context.Context, videoID int64) (cnt int64, err e
 
 			// 写入redis缓存
 			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
-			return nil, err
+		} else if err == nil {
+			// 写入本地缓存
+			if err := Cache.Set(key, []byte(strconv.FormatInt(cnt, 10))); err != nil {
+				klog.Error("Cache.Set failed, err: ", err)
+			}
 		}
-
 		return nil, err
 	})
 

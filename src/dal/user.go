@@ -9,6 +9,8 @@ import (
 	"douyin/src/dal/model"
 	"douyin/src/dal/query"
 
+	"github.com/allegro/bigcache/v3"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
 	"github.com/vmihailenco/msgpack/v5"
 	"gorm.io/gorm"
@@ -21,8 +23,18 @@ func GetUserByID(ctx context.Context, authorID int64) (user *model.User, err err
 		return nil, ErrUserNotExist
 	}
 
-	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserInfoPF, strconv.FormatInt(authorID, 10))
+	// 查询本地缓存
+	if val, err := Cache.Get(key); err == nil {
+		err = msgpack.Unmarshal(val, user)
+		if err == nil {
+			return user, nil
+		}
+	}else if err != bigcache.ErrEntryNotFound {
+		klog.Error("Cache.Get failed, err: ", err)
+	}
+
+	// 使用singleflight解决缓存击穿并减少redis压力
 	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(DelayTime)
@@ -42,20 +54,24 @@ func GetUserByID(ctx context.Context, authorID int64) (user *model.User, err err
 			}
 
 			// 写入redis缓存
-			b, err := msgpack.Marshal(user)
+			if b, err := msgpack.Marshal(user); err != nil {
+				return nil, err
+			} else {
+				userInfo = string(b)
+			}
+			err = RDB.Set(ctx, key, userInfo, ExpireTime+GetRandomTime()).Err()
+		} else if err == nil {
+			// 缓存命中
+			err = msgpack.Unmarshal([]byte(userInfo), user)
 			if err != nil {
 				return nil, err
 			}
-			userInfo = string(b)
-			err = RDB.Set(ctx, key, userInfo, ExpireTime+GetRandomTime()).Err()
-			return nil, err
-		} else if err != nil {
-			return nil, err
-		} else {
-			// 缓存命中
-			err = msgpack.Unmarshal([]byte(userInfo), user)
-			return nil, err
+			// 写入本地缓存
+			if err := Cache.Set(key, []byte(userInfo)); err != nil {
+				klog.Error("Cache.Set failed, err: ", err)
+			}
 		}
+		return nil, err
 	})
 
 	return

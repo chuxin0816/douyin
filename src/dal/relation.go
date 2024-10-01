@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/allegro/bigcache/v3"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -257,8 +259,15 @@ func FriendList(ctx context.Context, userID int64) (friendList []int64, err erro
 }
 
 func GetUserFollowCount(ctx context.Context, userID int64) (cnt int64, err error) {
-	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFollowCountPF, strconv.FormatInt(userID, 10))
+	// 查询本地缓存
+	if val, err := Cache.Get(key); err == nil {
+		return strconv.ParseInt(string(val), 10, 64)
+	} else if err != bigcache.ErrEntryNotFound {
+		klog.Error("Cache.Get failed, err: ", err)
+	}
+
+	// 使用singleflight解决缓存击穿并减少redis压力
 	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(DelayTime)
@@ -273,21 +282,23 @@ func GetUserFollowCount(ctx context.Context, userID int64) (cnt int64, err error
 			builder.WriteString("match (v:user)-[:follow]->(v2:user) where id(v) == ")
 			builder.WriteString(strconv.FormatInt(userID, 10))
 			builder.WriteString(" return count(*) as followCount")
-			resp, err := sessionPool.Execute(builder.String())
-			if err != nil {
+			if resp, err := sessionPool.Execute(builder.String()); err != nil {
 				return nil, err
+			} else {
+				res, err := resp.GetValuesByColName("followCount")
+				if err != nil {
+					return nil, err
+				}
+				cnt, _ = res[0].AsInt()
 			}
-
-			res, err := resp.GetValuesByColName("followCount")
-			if err != nil {
-				return nil, err
-			}
-
-			cnt, _ = res[0].AsInt()
 
 			// 写入redis缓存
 			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
-			return nil, err
+		} else if err == nil {
+			// 写入本地缓存
+			if err := Cache.Set(key, []byte(strconv.FormatInt(cnt, 10))); err != nil {
+				klog.Error("Cache.Set failed, err: ", err)
+			}
 		}
 		return nil, err
 	})
@@ -296,8 +307,15 @@ func GetUserFollowCount(ctx context.Context, userID int64) (cnt int64, err error
 }
 
 func GetUserFollowerCount(ctx context.Context, userID int64) (cnt int64, err error) {
-	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserFollowerCountPF, strconv.FormatInt(userID, 10))
+	// 查询本地缓存
+	if val, err := Cache.Get(key); err == nil {
+		return strconv.ParseInt(string(val), 10, 64)
+	} else if err != bigcache.ErrEntryNotFound {
+		klog.Error("Cache.Get failed, err: ", err)
+	}
+
+	// 使用singleflight解决缓存击穿并减少redis压力
 	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(DelayTime)
@@ -312,23 +330,23 @@ func GetUserFollowerCount(ctx context.Context, userID int64) (cnt int64, err err
 			builder.WriteString("match (v:user)<-[:follow]-(v2:user) where id(v)==")
 			builder.WriteString(strconv.FormatInt(userID, 10))
 			builder.WriteString(" return count(*) as followerCount")
-			resp, err := sessionPool.Execute(builder.String())
-			if err != nil {
+			if resp, err := sessionPool.Execute(builder.String()); err != nil {
 				return nil, err
+			} else {
+				res, err := resp.GetValuesByColName("followerCount")
+				if err != nil {
+					return nil, err
+				}
+				cnt, _ = res[0].AsInt()
 			}
-
-			res, err := resp.GetValuesByColName("followerCount")
-			if err != nil {
-				return nil, err
-			}
-
-			cnt, _ = res[0].AsInt()
-
 			// 写入redis缓存
 			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
-			return nil, err
+		} else if err == nil {
+			// 写入本地缓存
+			if err := Cache.Set(key, []byte(strconv.FormatInt(cnt, 10))); err != nil {
+				klog.Error("Cache.Set failed, err: ", err)
+			}
 		}
-
 		return nil, err
 	})
 
