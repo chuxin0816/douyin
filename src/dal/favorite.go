@@ -31,7 +31,7 @@ func CheckFavoriteExist(ctx context.Context, userID int64, videoID int64) (bool,
 	if id != 0 {
 		// 写入redis缓存
 		RDB.SAdd(ctx, key, videoID)
-		RDB.Expire(ctx, key, 0)
+		RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
 
 		return true, nil
 	}
@@ -68,7 +68,7 @@ func GetFavoriteList(ctx context.Context, userID int64) (videoIDs []int64, err e
 			// 写入redis缓存
 			if len(videoIDs) > 0 {
 				RDB.SAdd(ctx, key, videoIDs)
-				RDB.Expire(ctx, key, 0)
+				RDB.Expire(ctx, key, ExpireTime+GetRandomTime())
 			}
 
 			return nil, err
@@ -112,7 +112,7 @@ func GetUserFavoriteCount(ctx context.Context, userID int64) (cnt int64, err err
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, 0).Err()
+			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
 			return nil, err
 		}
 
@@ -141,7 +141,7 @@ func GetVideoFavoriteCount(ctx context.Context, videoID int64) (cnt int64, err e
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, 0).Err()
+			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
 			return nil, err
 		}
 

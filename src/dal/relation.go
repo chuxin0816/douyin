@@ -286,7 +286,7 @@ func GetUserFollowCount(ctx context.Context, userID int64) (cnt int64, err error
 			cnt, _ = res[0].AsInt()
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, 0).Err()
+			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
 			return nil, err
 		}
 		return nil, err
@@ -325,7 +325,7 @@ func GetUserFollowerCount(ctx context.Context, userID int64) (cnt int64, err err
 			cnt, _ = res[0].AsInt()
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, 0).Err()
+			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
 			return nil, err
 		}
 

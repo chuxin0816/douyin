@@ -62,7 +62,7 @@ func GetVideoCommentCount(ctx context.Context, videoID int64) (count int64, err 
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, count, 0).Err()
+			err = RDB.Set(ctx, key, count, ExpireTime+GetRandomTime()).Err()
 			return nil, err
 		}
 

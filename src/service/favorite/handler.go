@@ -189,7 +189,7 @@ func (s *FavoriteServiceImpl) TotalFavoritedCnt(ctx context.Context, userId int6
 			}
 
 			// 写入redis缓存
-			dal.RDB.Set(ctx, key, resp, 0)
+			dal.RDB.Set(ctx, key, resp, dal.ExpireTime+dal.GetRandomTime())
 
 		} else if err != nil {
 			span.RecordError(err)
