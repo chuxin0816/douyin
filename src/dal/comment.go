@@ -8,6 +8,8 @@ import (
 	"douyin/src/common/snowflake"
 	"douyin/src/dal/model"
 
+	"github.com/allegro/bigcache/v3"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -44,8 +46,15 @@ func GetCommentList(ctx context.Context, videoID int64) ([]*model.Comment, error
 
 // GetVideoFavoriteCount 获取视频点赞数
 func GetVideoCommentCount(ctx context.Context, videoID int64) (count int64, err error) {
-	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyVideoCommentCountPF, strconv.FormatInt(videoID, 10))
+	// 查询本地缓存
+	if val, err := Cache.Get(key); err == nil {
+		return strconv.ParseInt(string(val), 10, 64)
+	} else if err != bigcache.ErrEntryNotFound {
+		klog.Error("Cache.Get failed, err: ", err)
+	}
+
+	// 使用singleflight解决缓存击穿并减少redis压力
 	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(DelayTime)
@@ -62,10 +71,13 @@ func GetVideoCommentCount(ctx context.Context, videoID int64) (count int64, err 
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, count, 0).Err()
-			return nil, err
+			err = RDB.Set(ctx, key, count, ExpireTime+GetRandomTime()).Err()
+		} else if err == nil {
+			// 写入本地缓存
+			if err := Cache.Set(key, []byte(strconv.FormatInt(count, 10))); err != nil {
+				klog.Error("Cache.Set failed, err: ", err)
+			}
 		}
-
 		return nil, err
 	})
 

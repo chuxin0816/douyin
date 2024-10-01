@@ -39,18 +39,21 @@ func (mq *messageMQ) consumeMessage(ctx context.Context) {
 		m, err := mq.Reader.FetchMessage(ctx)
 		if err != nil {
 			klog.Error("failed to fetch message: ", err)
+			span.End()
 			break
 		}
 
 		message := &model.Message{}
 		if err := msgpack.Unmarshal(m.Value, message); err != nil {
 			klog.Error("failed to unmarshal message: ", err)
+			span.End()
 			continue
 		}
 
 		// 写入数据库
 		if err := dal.MessageAction(ctx, message); err != nil {
 			klog.Error("failed to write message to database: ", err)
+			span.End()
 			continue
 		}
 

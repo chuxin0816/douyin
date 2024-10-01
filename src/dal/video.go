@@ -9,6 +9,8 @@ import (
 	"douyin/src/common/snowflake"
 	"douyin/src/dal/model"
 
+	"github.com/allegro/bigcache/v3"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
 	"github.com/vmihailenco/msgpack/v5"
 	"gorm.io/gorm"
@@ -21,8 +23,18 @@ const (
 
 // GetVideoByID 通过视频ID查询视频信息
 func GetVideoByID(ctx context.Context, videoID int64) (video *model.Video, err error) {
-	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyVideoInfoPF, strconv.FormatInt(videoID, 10))
+	// 查询本地缓存
+	if val, err := Cache.Get(key); err == nil {
+		err = msgpack.Unmarshal(val, video)
+		if err == nil {
+			return video, nil
+		}
+	} else if err != bigcache.ErrEntryNotFound {
+		klog.Error("Cache.Get failed, err: ", err)
+	}
+
+	// 使用singleflight解决缓存击穿并减少redis压力
 	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(DelayTime)
@@ -42,20 +54,23 @@ func GetVideoByID(ctx context.Context, videoID int64) (video *model.Video, err e
 			}
 
 			// 写入redis缓存
-			videoInfo, err := msgpack.Marshal(video)
+			videoInfo, err = msgpack.Marshal(video)
 			if err != nil {
 				return nil, err
 			}
-			err = RDB.Set(ctx, key, videoInfo, 0).Err()
-
-			return nil, err
-		} else if err != nil {
-			return nil, err
-		} else {
+			err = RDB.Set(ctx, key, videoInfo, ExpireTime+GetRandomTime()).Err()
+		} else if err == nil {
 			// 缓存命中
 			err = msgpack.Unmarshal(videoInfo, video)
-			return nil, err
+			if err != nil {
+				return nil, err
+			}
+			// 写入本地缓存
+			if err := Cache.Set(key, videoInfo); err != nil {
+				klog.Error("Cache.Set failed, err: ", err)
+			}
 		}
+		return nil, err
 	})
 
 	return
@@ -103,8 +118,15 @@ func SaveVideo(ctx context.Context, userID int64, videoName, coverName, title st
 
 // GetUserTotalFavorited 获取用户发布的视频ID列表
 func GetUserTotalFavorited(ctx context.Context, userID int64) (total int64, err error) {
-	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserTotalFavoritedPF, strconv.FormatInt(userID, 10))
+	// 查询本地缓存
+	if val, err := Cache.Get(key); err == nil {
+		return strconv.ParseInt(string(val), 10, 64)
+	} else if err != bigcache.ErrEntryNotFound {
+		klog.Error("Cache.Get failed, err: ", err)
+	}
+
+	// 使用singleflight解决缓存击穿并减少redis压力
 	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(DelayTime)
@@ -131,8 +153,12 @@ func GetUserTotalFavorited(ctx context.Context, userID int64) (total int64, err 
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, total, 0).Err()
-			return nil, err
+			err = RDB.Set(ctx, key, total, ExpireTime+GetRandomTime()).Err()
+		} else if err == nil {
+			// 写入本地缓存
+			if err := Cache.Set(key, []byte(strconv.FormatInt(total, 10))); err != nil {
+				klog.Error("Cache.Set failed, err: ", err)
+			}
 		}
 		return nil, err
 	})
@@ -152,8 +178,15 @@ func GetPublishList(ctx context.Context, authorID int64) ([]int64, error) {
 }
 
 func GetUserWorkCount(ctx context.Context, userID int64) (cnt int64, err error) {
-	// 使用singleflight解决缓存击穿并减少redis压力
 	key := GetRedisKey(KeyUserWorkCountPF, strconv.FormatInt(userID, 10))
+	// 查询本地缓存
+	if val, err := Cache.Get(key); err == nil {
+		return strconv.ParseInt(string(val), 10, 64)
+	} else if err != bigcache.ErrEntryNotFound {
+		klog.Error("Cache.Get failed, err: ", err)
+	}
+
+	// 使用singleflight解决缓存击穿并减少redis压力
 	_, err, _ = G.Do(key, func() (interface{}, error) {
 		go func() {
 			time.Sleep(DelayTime)
@@ -170,10 +203,13 @@ func GetUserWorkCount(ctx context.Context, userID int64) (cnt int64, err error) 
 			}
 
 			// 写入redis缓存
-			err = RDB.Set(ctx, key, cnt, 0).Err()
-			return nil, err
+			err = RDB.Set(ctx, key, cnt, ExpireTime+GetRandomTime()).Err()
+		} else if err == nil {
+			// 写入本地缓存
+			if err := Cache.Set(key, []byte(strconv.FormatInt(cnt, 10))); err != nil {
+				klog.Error("Cache.Set failed, err: ", err)
+			}
 		}
-
 		return nil, err
 	})
 
