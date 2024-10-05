@@ -41,7 +41,7 @@ database:
       - redis-sentinel1:26379
       - redis-sentinel2:26379
       - redis-sentinel3:26379
-    password:
+    password: 123456
     db: 0
 
   nebula:
