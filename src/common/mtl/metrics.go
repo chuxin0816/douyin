@@ -15,6 +15,7 @@ var (
 	Registry     *prometheus.Registry
 	r            registry.Registry
 	registryInfo *registry.Info
+	err          error
 )
 
 func InitMetric(serviceName string, metricsAddr string, registryAddr string) {
@@ -27,7 +28,7 @@ func InitMetric(serviceName string, metricsAddr string, registryAddr string) {
 	// 添加进程信息
 	Registry.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 
-	r, err := consul.NewConsulRegister(registryAddr)
+	r, err = consul.NewConsulRegister(registryAddr)
 	if err != nil {
 		panic(err)
 	}

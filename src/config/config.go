@@ -78,10 +78,11 @@ type MySQLConfig struct {
 }
 
 type RedisConfig struct {
-	MasterName    string   `yaml:"master_name"`
-	SentinelAddrs []string `yaml:"sentinel_addrs"`
-	Password      string   `yaml:"password"`
-	DB            int      `yaml:"db"`
+	MasterName       string   `yaml:"master_name"`
+	SentinelAddrs    []string `yaml:"sentinel_addrs"`
+	SentinelPassword string   `yaml:"sentinel_password"`
+	Password         string   `yaml:"password"`
+	DB               int      `yaml:"db"`
 }
 
 type NebulaConfig struct {

@@ -163,10 +163,11 @@ func InitMySQL() {
 
 func InitRedis() {
 	RDB = redis.NewFailoverClusterClient(&redis.FailoverOptions{
-		MasterName:    config.Conf.DatabaseConfig.Redis.MasterName,
-		SentinelAddrs: config.Conf.DatabaseConfig.Redis.SentinelAddrs,
-		Password:      config.Conf.DatabaseConfig.Redis.Password,
-		DB:            config.Conf.DatabaseConfig.Redis.DB,
+		MasterName:       config.Conf.DatabaseConfig.Redis.MasterName,
+		SentinelAddrs:    config.Conf.DatabaseConfig.Redis.SentinelAddrs,
+		SentinelPassword: config.Conf.DatabaseConfig.Redis.SentinelPassword,
+		Password:         config.Conf.DatabaseConfig.Redis.Password,
+		DB:               config.Conf.DatabaseConfig.Redis.DB,
 	})
 	if err := RDB.Ping(context.Background()).Err(); err != nil {
 		panic(err)
