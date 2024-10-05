@@ -110,5 +110,5 @@ func registerMiddleware(h *server.Hertz) {
 	h.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	// 限流中间件
-	h.Use(middleware.RatelimitMiddleware(3000))
+	h.Use(middleware.RatelimitMiddleware(3000, 2000))
 }

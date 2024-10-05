@@ -9,6 +9,8 @@ services:
     depends_on:
       consul:
         condition: service_healthy
+      redis-slave:
+        condition: service_healthy
     container_name: Api
     
   user:
