@@ -7,7 +7,7 @@ import (
 	"douyin/src/common/mtl"
 	"douyin/src/config"
 	"douyin/src/service/api/controller"
-	"douyin/src/service/api/middleware"
+	"douyin/src/service/api/mw"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -60,7 +60,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 
 	publishRouter := apiRouter.Group("/publish")
 	{
-		publishRouter.POST("/action/", middleware.AuthMiddleware(), videoController.PublishAction)
+		publishRouter.POST("/action/", mw.AuthMiddleware(), videoController.PublishAction)
 		publishRouter.GET("/list/", videoController.PublishList)
 	}
 
@@ -68,14 +68,14 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	favoriteRouter := apiRouter.Group("/favorite")
 	{
 		favoriteController := controller.NewFavoriteController()
-		favoriteRouter.POST("/action/", middleware.AuthMiddleware(), favoriteController.Action)
+		favoriteRouter.POST("/action/", mw.AuthMiddleware(), favoriteController.Action)
 		favoriteRouter.GET("/list/", favoriteController.List)
 	}
 
 	commentRouter := apiRouter.Group("/comment")
 	{
 		commentController := controller.NewCommentController()
-		commentRouter.POST("/action/", middleware.AuthMiddleware(), commentController.Action)
+		commentRouter.POST("/action/", mw.AuthMiddleware(), commentController.Action)
 		commentRouter.GET("/list/", commentController.List)
 	}
 
@@ -83,7 +83,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	relationRouter := apiRouter.Group("/relation")
 	{
 		relationController := controller.NewRelationController()
-		relationRouter.POST("/action/", middleware.AuthMiddleware(), relationController.Action)
+		relationRouter.POST("/action/", mw.AuthMiddleware(), relationController.Action)
 		relationRouter.GET("/follow/list/", relationController.FollowList)
 		relationRouter.GET("/follower/list/", relationController.FollowerList)
 		relationRouter.GET("/friend/list/", relationController.FriendList)
@@ -92,8 +92,8 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	messageRouter := apiRouter.Group("/message")
 	{
 		messageController := controller.NewMessageController()
-		messageRouter.POST("/action/", middleware.AuthMiddleware(), messageController.Action)
-		messageRouter.GET("/chat/", middleware.AuthMiddleware(), messageController.Chat)
+		messageRouter.POST("/action/", mw.AuthMiddleware(), messageController.Action)
+		messageRouter.GET("/chat/", mw.AuthMiddleware(), messageController.Chat)
 	}
 
 	return h
@@ -110,5 +110,5 @@ func registerMiddleware(h *server.Hertz) {
 	h.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	// 限流中间件
-	h.Use(middleware.RatelimitMiddleware(3000, 2000))
+	h.Use(mw.RatelimitMiddleware(3000, 2000))
 }

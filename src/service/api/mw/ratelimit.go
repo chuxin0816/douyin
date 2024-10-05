@@ -1,7 +1,8 @@
-package middleware
+package mw
 
 import (
 	"context"
+
 	"douyin/src/dal"
 
 	"github.com/chuxin0816/ratelimit"
