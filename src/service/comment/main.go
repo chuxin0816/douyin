@@ -17,7 +17,7 @@ import (
 func main() {
 	config.Init()
 	go watchConfig()
-	mtl.InitMetric(config.Conf.OpenTelemetryConfig.ApiName, config.Conf.OpenTelemetryConfig.MetricAddr, config.Conf.ConsulConfig.ConsulAddr)
+	mtl.InitMetric(config.Conf.OpenTelemetryConfig.CommentName, config.Conf.OpenTelemetryConfig.MetricAddr, config.Conf.ConsulConfig.ConsulAddr)
 	defer mtl.DeregisterMetric()
 	mtl.InitTracing(config.Conf.OpenTelemetryConfig.CommentName)
 	defer mtl.ShutdownTracing()
