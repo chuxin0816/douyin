@@ -38,7 +38,7 @@ func (s CommonServerSuite) Options() []server.Option {
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
 		server.WithSuite(tracing.NewServerSuite()),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.Conf.OpenTelemetryConfig.CommentName}),
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: s.ServiceName}),
 		server.WithMuxTransport(),
 		server.WithTracer(prometheus.NewServerTracer("", "", prometheus.WithDisableServer(true), prometheus.WithRegistry(mtl.Registry))),
 	}
