@@ -49,6 +49,7 @@ func Setup(conf *config.HertzConfig) *server.Hertz {
 	// basic apis
 	videoController := controller.NewVideoController()
 	apiRouter.GET("/feed/", videoController.Feed)
+	apiRouter.GET("/refresh_token", mw.RefreshTokenMiddleware())
 
 	userRouter := apiRouter.Group("/user")
 	{

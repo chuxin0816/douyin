@@ -52,7 +52,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 	}
 
 	// 生成用户token
-	token, err := jwt.GenerateToken(userID)
+	token, err := jwt.GenerateAccessToken(userID)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "生成用户token失败")
@@ -92,7 +92,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 	}
 
 	// 生成用户token
-	token, err := jwt.GenerateToken(mUser.ID)
+	token, err := jwt.GenerateAccessToken(mUser.ID)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "生成用户token失败")
