@@ -60,8 +60,17 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 		return nil, err
 	}
 
+	// 生成刷新token
+	refreshToken, err := jwt.GenerateRefreshToken(mUser.ID)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "生成刷新token失败")
+		klog.Error("生成刷新token失败")
+		return nil, err
+	}
+
 	// 返回响应
-	resp = &user.UserRegisterResponse{UserId: userID, Token: token}
+	resp = &user.UserRegisterResponse{UserId: userID, Token: token, RefreshToken: refreshToken}
 	return
 }
 
@@ -100,8 +109,17 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 		return nil, err
 	}
 
+	// 生成刷新token
+	refreshToken, err := jwt.GenerateRefreshToken(mUser.ID)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "生成刷新token失败")
+		klog.Error("生成刷新token失败")
+		return nil, err
+	}
+
 	// 返回响应
-	resp = &user.UserLoginResponse{UserId: mUser.ID, Token: token}
+	resp = &user.UserLoginResponse{UserId: mUser.ID, Token: token, RefreshToken: refreshToken}
 
 	return
 }

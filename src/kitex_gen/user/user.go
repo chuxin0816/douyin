@@ -987,10 +987,11 @@ func (p *UserRegisterRequest) Field2DeepEqual(src string) bool {
 }
 
 type UserRegisterResponse struct {
-	StatusCode int32   `thrift:"status_code,1" frugal:"1,default,i32" json:"status_code"`
-	StatusMsg  *string `thrift:"status_msg,2,optional" frugal:"2,optional,string" json:"status_msg,omitempty"`
-	UserId     int64   `thrift:"user_id,3" frugal:"3,default,i64" json:"user_id"`
-	Token      string  `thrift:"token,4" frugal:"4,default,string" json:"token"`
+	StatusCode   int32   `thrift:"status_code,1" frugal:"1,default,i32" json:"status_code"`
+	StatusMsg    *string `thrift:"status_msg,2,optional" frugal:"2,optional,string" json:"status_msg,omitempty"`
+	UserId       int64   `thrift:"user_id,3" frugal:"3,default,i64" json:"user_id"`
+	Token        string  `thrift:"token,4" frugal:"4,default,string" json:"token"`
+	RefreshToken string  `thrift:"refresh_token,5" frugal:"5,default,string" json:"refresh_token"`
 }
 
 func NewUserRegisterResponse() *UserRegisterResponse {
@@ -1021,6 +1022,10 @@ func (p *UserRegisterResponse) GetUserId() (v int64) {
 func (p *UserRegisterResponse) GetToken() (v string) {
 	return p.Token
 }
+
+func (p *UserRegisterResponse) GetRefreshToken() (v string) {
+	return p.RefreshToken
+}
 func (p *UserRegisterResponse) SetStatusCode(val int32) {
 	p.StatusCode = val
 }
@@ -1033,12 +1038,16 @@ func (p *UserRegisterResponse) SetUserId(val int64) {
 func (p *UserRegisterResponse) SetToken(val string) {
 	p.Token = val
 }
+func (p *UserRegisterResponse) SetRefreshToken(val string) {
+	p.RefreshToken = val
+}
 
 var fieldIDToName_UserRegisterResponse = map[int16]string{
 	1: "status_code",
 	2: "status_msg",
 	3: "user_id",
 	4: "token",
+	5: "refresh_token",
 }
 
 func (p *UserRegisterResponse) IsSetStatusMsg() bool {
@@ -1091,6 +1100,14 @@ func (p *UserRegisterResponse) Read(iprot thrift.TProtocol) (err error) {
 		case 4:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField4(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 5:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField5(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -1169,6 +1186,17 @@ func (p *UserRegisterResponse) ReadField4(iprot thrift.TProtocol) error {
 	p.Token = _field
 	return nil
 }
+func (p *UserRegisterResponse) ReadField5(iprot thrift.TProtocol) error {
+
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.RefreshToken = _field
+	return nil
+}
 
 func (p *UserRegisterResponse) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
@@ -1190,6 +1218,10 @@ func (p *UserRegisterResponse) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField4(oprot); err != nil {
 			fieldId = 4
+			goto WriteFieldError
+		}
+		if err = p.writeField5(oprot); err != nil {
+			fieldId = 5
 			goto WriteFieldError
 		}
 	}
@@ -1280,6 +1312,23 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
 }
 
+func (p *UserRegisterResponse) writeField5(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("refresh_token", thrift.STRING, 5); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.RefreshToken); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 5 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
+}
+
 func (p *UserRegisterResponse) String() string {
 	if p == nil {
 		return "<nil>"
@@ -1304,6 +1353,9 @@ func (p *UserRegisterResponse) DeepEqual(ano *UserRegisterResponse) bool {
 		return false
 	}
 	if !p.Field4DeepEqual(ano.Token) {
+		return false
+	}
+	if !p.Field5DeepEqual(ano.RefreshToken) {
 		return false
 	}
 	return true
@@ -1338,6 +1390,13 @@ func (p *UserRegisterResponse) Field3DeepEqual(src int64) bool {
 func (p *UserRegisterResponse) Field4DeepEqual(src string) bool {
 
 	if strings.Compare(p.Token, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *UserRegisterResponse) Field5DeepEqual(src string) bool {
+
+	if strings.Compare(p.RefreshToken, src) != 0 {
 		return false
 	}
 	return true
@@ -1567,10 +1626,11 @@ func (p *UserLoginRequest) Field2DeepEqual(src string) bool {
 }
 
 type UserLoginResponse struct {
-	StatusCode int32   `thrift:"status_code,1" frugal:"1,default,i32" json:"status_code"`
-	StatusMsg  *string `thrift:"status_msg,2,optional" frugal:"2,optional,string" json:"status_msg,omitempty"`
-	UserId     int64   `thrift:"user_id,3" frugal:"3,default,i64" json:"user_id"`
-	Token      string  `thrift:"token,4" frugal:"4,default,string" json:"token"`
+	StatusCode   int32   `thrift:"status_code,1" frugal:"1,default,i32" json:"status_code"`
+	StatusMsg    *string `thrift:"status_msg,2,optional" frugal:"2,optional,string" json:"status_msg,omitempty"`
+	UserId       int64   `thrift:"user_id,3" frugal:"3,default,i64" json:"user_id"`
+	Token        string  `thrift:"token,4" frugal:"4,default,string" json:"token"`
+	RefreshToken string  `thrift:"refresh_token,5" frugal:"5,default,string" json:"refresh_token"`
 }
 
 func NewUserLoginResponse() *UserLoginResponse {
@@ -1601,6 +1661,10 @@ func (p *UserLoginResponse) GetUserId() (v int64) {
 func (p *UserLoginResponse) GetToken() (v string) {
 	return p.Token
 }
+
+func (p *UserLoginResponse) GetRefreshToken() (v string) {
+	return p.RefreshToken
+}
 func (p *UserLoginResponse) SetStatusCode(val int32) {
 	p.StatusCode = val
 }
@@ -1613,12 +1677,16 @@ func (p *UserLoginResponse) SetUserId(val int64) {
 func (p *UserLoginResponse) SetToken(val string) {
 	p.Token = val
 }
+func (p *UserLoginResponse) SetRefreshToken(val string) {
+	p.RefreshToken = val
+}
 
 var fieldIDToName_UserLoginResponse = map[int16]string{
 	1: "status_code",
 	2: "status_msg",
 	3: "user_id",
 	4: "token",
+	5: "refresh_token",
 }
 
 func (p *UserLoginResponse) IsSetStatusMsg() bool {
@@ -1671,6 +1739,14 @@ func (p *UserLoginResponse) Read(iprot thrift.TProtocol) (err error) {
 		case 4:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField4(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 5:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField5(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -1749,6 +1825,17 @@ func (p *UserLoginResponse) ReadField4(iprot thrift.TProtocol) error {
 	p.Token = _field
 	return nil
 }
+func (p *UserLoginResponse) ReadField5(iprot thrift.TProtocol) error {
+
+	var _field string
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.RefreshToken = _field
+	return nil
+}
 
 func (p *UserLoginResponse) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
@@ -1770,6 +1857,10 @@ func (p *UserLoginResponse) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField4(oprot); err != nil {
 			fieldId = 4
+			goto WriteFieldError
+		}
+		if err = p.writeField5(oprot); err != nil {
+			fieldId = 5
 			goto WriteFieldError
 		}
 	}
@@ -1860,6 +1951,23 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 4 end error: ", p), err)
 }
 
+func (p *UserLoginResponse) writeField5(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("refresh_token", thrift.STRING, 5); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.RefreshToken); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 5 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 5 end error: ", p), err)
+}
+
 func (p *UserLoginResponse) String() string {
 	if p == nil {
 		return "<nil>"
@@ -1884,6 +1992,9 @@ func (p *UserLoginResponse) DeepEqual(ano *UserLoginResponse) bool {
 		return false
 	}
 	if !p.Field4DeepEqual(ano.Token) {
+		return false
+	}
+	if !p.Field5DeepEqual(ano.RefreshToken) {
 		return false
 	}
 	return true
@@ -1918,6 +2029,13 @@ func (p *UserLoginResponse) Field3DeepEqual(src int64) bool {
 func (p *UserLoginResponse) Field4DeepEqual(src string) bool {
 
 	if strings.Compare(p.Token, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *UserLoginResponse) Field5DeepEqual(src string) bool {
+
+	if strings.Compare(p.RefreshToken, src) != 0 {
 		return false
 	}
 	return true
