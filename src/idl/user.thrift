@@ -24,6 +24,7 @@ struct User_register_response {
   2: optional string status_msg; // 返回状态描述
   3: i64 user_id; // 用户id
   4: string token; // 用户鉴权token
+  5: string refresh_token // 刷新token
 }
 
 struct User_login_request {
@@ -36,6 +37,7 @@ struct User_login_response {
   2: optional string status_msg; // 返回状态描述
   3: i64 user_id; // 用户id
   4: string token; // 用户鉴权token
+  5: string refresh_token // 刷新token
 }
 
 struct User_info_request {

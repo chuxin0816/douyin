@@ -113,7 +113,7 @@ func (rc *RelationController) FollowList(c context.Context, ctx *app.RequestCont
 	}
 
 	// 验证token
-	userID := jwt.ParseToken(req.Token)
+	userID := jwt.ParseAccessToken(req.Token)
 
 	// 业务逻辑处理
 	resp, err := client.RelationClient.RelationFollowList(c, &relation.RelationFollowListRequest{
@@ -148,7 +148,7 @@ func (rc *RelationController) FollowerList(c context.Context, ctx *app.RequestCo
 	}
 
 	// 验证token
-	userID := jwt.ParseToken(req.Token)
+	userID := jwt.ParseAccessToken(req.Token)
 
 	// 业务逻辑处理
 	resp, err := client.RelationClient.RelationFollowerList(c, &relation.RelationFollowerListRequest{
@@ -183,7 +183,7 @@ func (rc *RelationController) FriendList(c context.Context, ctx *app.RequestCont
 	}
 
 	// 验证token
-	userID := jwt.ParseToken(req.Token)
+	userID := jwt.ParseAccessToken(req.Token)
 
 	// 业务逻辑处理
 	resp, err := client.RelationClient.RelationFriendList(c, &relation.RelationFriendListRequest{

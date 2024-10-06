@@ -12,7 +12,7 @@ require (
 	github.com/chuxin0816/ratelimit v1.2.0
 	github.com/cloudwego/hertz v0.9.2
 	github.com/cloudwego/kitex v0.10.3
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/hertz-contrib/cors v0.1.0
 	github.com/hertz-contrib/gzip v0.0.3

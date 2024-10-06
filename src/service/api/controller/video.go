@@ -60,7 +60,7 @@ func (vc *VideoController) Feed(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 验证token
-	userID := jwt.ParseToken(req.Token)
+	userID := jwt.ParseAccessToken(req.Token)
 
 	// 业务逻辑处理
 	resp, err := client.VideoClient.Feed(c, &video.FeedRequest{
@@ -180,7 +180,7 @@ func (vc *VideoController) PublishList(c context.Context, ctx *app.RequestContex
 	authorID := req.UserID
 
 	// 验证token
-	userID := jwt.ParseToken(req.Token)
+	userID := jwt.ParseAccessToken(req.Token)
 
 	// 业务逻辑处理
 	resp, err := client.VideoClient.PublishList(c, &video.PublishListRequest{

@@ -99,7 +99,7 @@ func (fc *FavoriteController) List(c context.Context, ctx *app.RequestContext) {
 	}
 
 	// 验证token
-	userID := jwt.ParseToken(req.Token)
+	userID := jwt.ParseAccessToken(req.Token)
 
 	// 业务逻辑处理
 	resp, err := client.FavoriteClient.FavoriteList(c, &favorite.FavoriteListRequest{

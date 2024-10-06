@@ -1,4 +1,4 @@
-package middleware
+package mw
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 
 const bucketName = "ratelimit"
 
-// RatelimitMiddleware 令牌桶限流中间件，fillInterval为填充间隔/牌，capacity为桶容量
+// RatelimitMiddleware 令牌桶限流中间件，rate为每秒填充的令牌数，capacity为桶容量
 func RatelimitMiddleware(rate, capacity int) app.HandlerFunc {
 	bucket := ratelimit.NewBucket(dal.RDB, dal.GetRedisKey(bucketName), rate, capacity)
 	return func(c context.Context, ctx *app.RequestContext) {
