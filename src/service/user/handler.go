@@ -61,7 +61,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 	}
 
 	// 生成刷新token
-	refreshToken, err := jwt.GenerateRefreshToken(mUser.ID)
+	refreshToken, err := jwt.GenerateRefreshToken(userID)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "生成刷新token失败")
