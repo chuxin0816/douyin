@@ -5,14 +5,14 @@ package main
 import (
 	"fmt"
 
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"gorm.io/gen"
 )
 
 func connectDB(dsn string) *gorm.DB {
-	db, err := gorm.Open(mysql.Open(dsn))
+	db, err := gorm.Open(postgres.Open(dsn))
 	if err != nil {
 		panic(fmt.Errorf("connect db fail: %w", err))
 	}
@@ -20,7 +20,7 @@ func connectDB(dsn string) *gorm.DB {
 }
 
 func main() {
-	dsn := "root:123456@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+	dsn := "host=localhost port=5432 user=postgres password=123456 dbname=douyin sslmode=disable TimeZone=Asia/Shanghai"
 
 	// 指定生成代码的具体相对目录(相对当前文件)，默认为：./query
 	// 默认生成需要使用WithContext之后才可以查询的代码，但可以通过设置gen.WithoutContext禁用该模式

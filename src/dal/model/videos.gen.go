@@ -8,11 +8,11 @@ import (
 	"time"
 )
 
-const TableNameVideo = "video"
+const TableNameVideo = "videos"
 
-// Video mapped from table <video>
+// Video mapped from table <videos>
 type Video struct {
-	ID         int64     `gorm:"column:id;primaryKey;comment:视频ID" json:"id"`                                           // 视频ID
+	ID         int64     `gorm:"column:id;primaryKey" json:"id"`
 	AuthorID   int64     `gorm:"column:author_id;not null;comment:作者ID" json:"author_id"`                               // 作者ID
 	PlayURL    string    `gorm:"column:play_url;not null;comment:视频地址" json:"play_url"`                                 // 视频地址
 	CoverURL   string    `gorm:"column:cover_url;not null;comment:封面地址" json:"cover_url"`                               // 封面地址

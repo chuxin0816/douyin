@@ -8,11 +8,11 @@ import (
 	"time"
 )
 
-const TableNameUserLogin = "user_login"
+const TableNameUserLogin = "user_logins"
 
-// UserLogin mapped from table <user_login>
+// UserLogin mapped from table <user_logins>
 type UserLogin struct {
-	ID         int64     `gorm:"column:id;primaryKey;comment:用户ID" json:"id"`                                           // 用户ID
+	ID         int64     `gorm:"column:id;primaryKey" json:"id"`
 	Username   string    `gorm:"column:username;not null;comment:用户名" json:"username"`                                  // 用户名
 	Password   string    `gorm:"column:password;not null;comment:加密密码" json:"password"`                                 // 加密密码
 	CreateTime time.Time `gorm:"column:create_time;not null;default:CURRENT_TIMESTAMP;comment:创建时间" json:"create_time"` // 创建时间

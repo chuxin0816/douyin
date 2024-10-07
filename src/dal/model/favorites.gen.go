@@ -4,9 +4,9 @@
 
 package model
 
-const TableNameFavorite = "favorite"
+const TableNameFavorite = "favorites"
 
-// Favorite mapped from table <favorite>
+// Favorite mapped from table <favorites>
 type Favorite struct {
 	ID      int64 `gorm:"column:id;primaryKey" json:"id"`
 	UserID  int64 `gorm:"column:user_id;not null;comment:用户ID" json:"user_id"`   // 用户ID

@@ -43,7 +43,7 @@ type video struct {
 	videoDo videoDo
 
 	ALL        field.Asterisk
-	ID         field.Int64  // 视频ID
+	ID         field.Int64
 	AuthorID   field.Int64  // 作者ID
 	PlayURL    field.String // 视频地址
 	CoverURL   field.String // 封面地址

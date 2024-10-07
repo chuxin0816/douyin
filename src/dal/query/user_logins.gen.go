@@ -42,7 +42,7 @@ type userLogin struct {
 	userLoginDo userLoginDo
 
 	ALL        field.Asterisk
-	ID         field.Int64  // 用户ID
+	ID         field.Int64
 	Username   field.String // 用户名
 	Password   field.String // 加密密码
 	CreateTime field.Time   // 创建时间
