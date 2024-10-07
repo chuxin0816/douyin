@@ -20,7 +20,7 @@ import (
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/singleflight"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
 	"gorm.io/plugin/opentelemetry/tracing"
@@ -67,8 +67,8 @@ var (
 )
 
 func Init() {
-	// 初始化MySQL
-	InitMySQL()
+	// 初始化PostgreSQL
+	InitPostgreSQL()
 
 	// 初始化Redis
 	InitRedis()
@@ -86,46 +86,49 @@ func Init() {
 	}
 }
 
-func InitMySQL() {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		config.Conf.DatabaseConfig.MySQLMaster.User,
-		config.Conf.DatabaseConfig.MySQLMaster.Password,
-		config.Conf.DatabaseConfig.MySQLMaster.Host,
-		config.Conf.DatabaseConfig.MySQLMaster.Port,
-		config.Conf.DatabaseConfig.MySQLMaster.DBName,
+func InitPostgreSQL() {
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Shanghai",
+		config.Conf.PostgreSQLMaster.Host,
+		config.Conf.PostgreSQLMaster.Port,
+		config.Conf.PostgreSQLMaster.User,
+		config.Conf.PostgreSQLMaster.Password,
+		config.Conf.PostgreSQLMaster.DBName,
 	)
 
 	// 连接主库
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 
 	// 连接从库
-	replicas := make([]gorm.Dialector, len(config.Conf.DatabaseConfig.MySQLSlaves))
-	for i, slave := range config.Conf.DatabaseConfig.MySQLSlaves {
-		replicas[i] = mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-			slave.User,
-			slave.Password,
+	replicas := make([]gorm.Dialector, len(config.Conf.DatabaseConfig.PostgreSQLSlaves))
+	for i, slave := range config.Conf.DatabaseConfig.PostgreSQLSlaves {
+		replicas[i] = postgres.Open(fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Shanghai",
 			slave.Host,
 			slave.Port,
+			slave.User,
+			slave.Password,
 			slave.DBName,
 		))
 	}
-	err = db.Use(
-		dbresolver.Register(dbresolver.Config{
-			Replicas: replicas,
-			Policy:   dbresolver.RandomPolicy{},
-		}).
-			// 设置连接池
-			SetConnMaxIdleTime(time.Minute * 30).
-			SetConnMaxLifetime(time.Hour).
-			SetMaxIdleConns(100).
-			SetMaxOpenConns(500),
-	)
+	err = db.Use(dbresolver.Register(dbresolver.Config{
+		Replicas: replicas,
+		Policy:   dbresolver.RandomPolicy{},
+	}))
 	if err != nil {
 		panic(err)
 	}
+
+	// 连接池
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+	sqlDB.SetConnMaxIdleTime(time.Minute * 30)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB.SetMaxIdleConns(100)
+	sqlDB.SetMaxOpenConns(500)
 
 	// 分表路由
 	err = db.Use(sharding.Register(

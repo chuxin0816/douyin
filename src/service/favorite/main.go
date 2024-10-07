@@ -20,7 +20,7 @@ func main() {
 	mtl.InitMetric(config.Conf.OpenTelemetryConfig.FavoriteName, config.Conf.OpenTelemetryConfig.MetricAddr, config.Conf.ConsulConfig.ConsulAddr)
 	defer mtl.DeregisterMetric()
 	mtl.InitTracing(config.Conf.OpenTelemetryConfig.FavoriteName)
-	defer mtl.ShutdownTracing() 
+	defer mtl.ShutdownTracing()
 	mtl.InitLog()
 	snowflake.Init()
 	dal.Init()
@@ -53,8 +53,8 @@ func watchConfig() {
 		case <-config.NoticeSnowflake:
 			snowflake.Init()
 
-		case <-config.NoticeMySQL:
-			dal.InitMySQL()
+		case <-config.NoticePostgreSQL:
+			dal.InitPostgreSQL()
 
 		case <-config.NoticeRedis:
 			dal.InitRedis()

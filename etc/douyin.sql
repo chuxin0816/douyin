@@ -1,90 +1,113 @@
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
+-- Table structure for users
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+  id BIGINT PRIMARY KEY NOT NULL,
+  name VARCHAR(32) NOT NULL DEFAULT '',
+  avatar VARCHAR(255) NOT NULL DEFAULT '',
+  background_image VARCHAR(255) NOT NULL DEFAULT '',
+  signature VARCHAR(255) NOT NULL DEFAULT '',
+  create_time TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
--- ----------------------------
--- Table structure for user
--- ----------------------------
-DROP TABLE IF EXISTS `user`;
-CREATE TABLE `user` (
-  `id` bigint unsigned NOT NULL COMMENT '用户ID',
-  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '用户名',
-  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '头像地址',
-  `background_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '背景图地址',
-  `signature` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '个性签名',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_name` (`name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE UNIQUE INDEX idx_user_name ON users (name);
 
--- ----------------------------
--- Table structure for user_login
--- ----------------------------
-DROP TABLE IF EXISTS `user_login`;
-CREATE TABLE `user_login` (
-  `id` bigint unsigned NOT NULL COMMENT '用户ID',
-  `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户名',
-  `password` char(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '加密密码',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_name` (`username`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- Add comments
+COMMENT ON COLUMN users.name IS '用户名';
+COMMENT ON COLUMN users.avatar IS '头像地址';
+COMMENT ON COLUMN users.background_image IS '背景图地址';
+COMMENT ON COLUMN users.signature IS '个性签名';
+COMMENT ON COLUMN users.create_time IS '创建时间';
+COMMENT ON COLUMN users.update_time IS '更新时间';
 
--- ----------------------------
--- Table structure for video
--- ----------------------------
-DROP TABLE IF EXISTS `video`;
-CREATE TABLE `video` (
-  `id` bigint unsigned NOT NULL COMMENT '视频ID',
-  `author_id` bigint NOT NULL DEFAULT '0' COMMENT '作者ID',
-  `play_url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '视频地址',
-  `cover_url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '封面地址',
-  `upload_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间',
-  `title` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '标题',
-  PRIMARY KEY (`id`),
-  KEY `idx_author_id` (`author_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- Table structure for user_logins
+DROP TABLE IF EXISTS user_logins;
+CREATE TABLE user_logins (
+  id BIGINT PRIMARY KEY NOT NULL,
+  username VARCHAR(32) NOT NULL,
+  password CHAR(60) NOT NULL DEFAULT '',
+  create_time TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
--- ----------------------------
--- Table structure for comment
--- ----------------------------
-DROP TABLE IF EXISTS `comment`;
-CREATE TABLE `comment` (
-  `id` bigint unsigned NOT NULL,
-  `video_id` bigint NOT NULL DEFAULT '0' COMMENT '视频ID',
-  `user_id` bigint NOT NULL DEFAULT '0' COMMENT '用户ID',
-  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '评论内容',
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_video_id` (`video_id`),
-  KEY `idx_user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE UNIQUE INDEX idx_login_name ON user_logins (username);
 
--- ----------------------------
--- Table structure for favorite
--- ----------------------------
-DROP TABLE IF EXISTS `favorite`;
-CREATE TABLE `favorite` (
-  `id` bigint unsigned NOT NULL,
-  `user_id` bigint NOT NULL DEFAULT '0' COMMENT '用户ID',
-  `video_id` bigint NOT NULL DEFAULT '0' COMMENT '视频ID',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_user_video` (`user_id`,`video_id`) USING BTREE,
-  KEY `idx_video_id` (`video_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- Add comments
+COMMENT ON COLUMN user_logins.username IS '用户名';
+COMMENT ON COLUMN user_logins.password IS '加密密码';
+COMMENT ON COLUMN user_logins.create_time IS '创建时间';
+COMMENT ON COLUMN user_logins.update_time IS '更新时间';
 
--- ----------------------------
--- Table structure for message
--- ----------------------------
-DROP TABLE IF EXISTS `message`;
-CREATE TABLE `message` (
-  `id` bigint unsigned NOT NULL,
-  `from_user_id` bigint NOT NULL DEFAULT '0' COMMENT '发送者ID',
-  `to_user_id` bigint NOT NULL DEFAULT '0' COMMENT '接收者ID',
-  `convert_id` varchar(41) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '会话ID',
-  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '消息内容',
-  `create_time` bigint NOT NULL DEFAULT '0' COMMENT '创建时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_convertId_createTime` (`convert_id`,`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- Table structure for videos
+DROP TABLE IF EXISTS videos;
+CREATE TABLE videos (
+  id BIGINT PRIMARY KEY NOT NULL,
+  author_id BIGINT NOT NULL DEFAULT 0,
+  play_url VARCHAR(100) NOT NULL DEFAULT '',
+  cover_url VARCHAR(100) NOT NULL DEFAULT '',
+  upload_time TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  title VARCHAR(30) NOT NULL DEFAULT ''
+);
+
+CREATE INDEX idx_author_id ON videos (author_id);
+
+-- Add comments
+COMMENT ON COLUMN videos.author_id IS '作者ID';
+COMMENT ON COLUMN videos.play_url IS '视频地址';
+COMMENT ON COLUMN videos.cover_url IS '封面地址';
+COMMENT ON COLUMN videos.upload_time IS '上传时间';
+COMMENT ON COLUMN videos.title IS '标题';
+
+-- Table structure for comments
+DROP TABLE IF EXISTS comments;
+CREATE TABLE comments (
+  id BIGINT PRIMARY KEY NOT NULL,
+  video_id BIGINT NOT NULL DEFAULT 0,
+  user_id BIGINT NOT NULL DEFAULT 0,
+  content VARCHAR(500) NOT NULL DEFAULT '',
+  create_time TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_comment_video_id ON comments (video_id);
+CREATE INDEX idx_user_id ON comments (user_id);
+
+-- Add comments
+COMMENT ON COLUMN comments.video_id IS '视频ID';
+COMMENT ON COLUMN comments.user_id IS '用户ID';
+COMMENT ON COLUMN comments.content IS '评论内容';
+COMMENT ON COLUMN comments.create_time IS '创建时间';
+
+-- Table structure for favorites
+DROP TABLE IF EXISTS favorites;
+CREATE TABLE favorites (
+  id BIGINT PRIMARY KEY NOT NULL,
+  user_id BIGINT NOT NULL DEFAULT 0,
+  video_id BIGINT NOT NULL DEFAULT 0
+);
+
+CREATE UNIQUE INDEX idx_user_video ON favorites (user_id, video_id);
+CREATE INDEX idx_favorite_video_id ON favorites (video_id);
+
+-- Add comments
+COMMENT ON COLUMN favorites.user_id IS '用户ID';
+COMMENT ON COLUMN favorites.video_id IS '视频ID';
+
+-- Table structure for messages
+DROP TABLE IF EXISTS messages;
+CREATE TABLE messages (
+  id BIGINT PRIMARY KEY NOT NULL,
+  from_user_id BIGINT NOT NULL DEFAULT 0,
+  to_user_id BIGINT NOT NULL DEFAULT 0,
+  convert_id VARCHAR(41) NOT NULL DEFAULT '',
+  content VARCHAR(500) NOT NULL DEFAULT '',
+  create_time BIGINT NOT NULL DEFAULT 0
+);
+
+CREATE INDEX idx_convertId_createTime ON messages (convert_id, create_time);
+
+-- Add comments
+COMMENT ON COLUMN messages.from_user_id IS '发送者ID';
+COMMENT ON COLUMN messages.to_user_id IS '接收者ID';
+COMMENT ON COLUMN messages.convert_id IS '会话ID';
+COMMENT ON COLUMN messages.content IS '消息内容';
+COMMENT ON COLUMN messages.create_time IS '创建时间';

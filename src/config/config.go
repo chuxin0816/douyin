@@ -19,7 +19,7 @@ var (
 	NoticeSnowflake     = make(chan struct{})
 	NoticeOss           = make(chan struct{})
 	NoticeLog           = make(chan struct{})
-	NoticeMySQL         = make(chan struct{})
+	NoticePostgreSQL         = make(chan struct{})
 	NoticeRedis         = make(chan struct{})
 	NoticeConsul        = make(chan struct{})
 	NoticeKafka         = make(chan struct{})
@@ -63,17 +63,17 @@ type LogConfig struct {
 }
 
 type DatabaseConfig struct {
-	MySQLMaster *MySQLConfig   `yaml:"mysql-master"`
-	MySQLSlaves []*MySQLConfig `yaml:"mysql-slaves"`
+	PostgreSQLMaster *PostgreSQLConfig   `yaml:"postgres-master"`
+	PostgreSQLSlaves []*PostgreSQLConfig `yaml:"postgres-slaves"`
 	Redis       *RedisConfig   `yaml:"redis"`
 	Nebula      *NebulaConfig  `yaml:"nebula"`
 }
 
-type MySQLConfig struct {
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
+type PostgreSQLConfig struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
 	DBName   string `yaml:"dbname"`
 }
 
@@ -164,13 +164,13 @@ func Init() {
 		}
 
 		if !reflect.DeepEqual(Conf.DatabaseConfig, newConf.DatabaseConfig) {
-			if !reflect.DeepEqual(Conf.DatabaseConfig.MySQLMaster, newConf.DatabaseConfig.MySQLMaster) {
-				Conf.DatabaseConfig.MySQLMaster = newConf.DatabaseConfig.MySQLMaster
-				NoticeMySQL <- struct{}{}
+			if !reflect.DeepEqual(Conf.DatabaseConfig.PostgreSQLMaster, newConf.DatabaseConfig.PostgreSQLMaster) {
+				Conf.DatabaseConfig.PostgreSQLMaster = newConf.DatabaseConfig.PostgreSQLMaster
+				NoticePostgreSQL <- struct{}{}
 			}
-			if !reflect.DeepEqual(Conf.DatabaseConfig.MySQLSlaves, newConf.DatabaseConfig.MySQLSlaves) {
-				Conf.DatabaseConfig.MySQLSlaves = newConf.DatabaseConfig.MySQLSlaves
-				NoticeMySQL <- struct{}{}
+			if !reflect.DeepEqual(Conf.DatabaseConfig.PostgreSQLSlaves, newConf.DatabaseConfig.PostgreSQLSlaves) {
+				Conf.DatabaseConfig.PostgreSQLSlaves = newConf.DatabaseConfig.PostgreSQLSlaves
+				NoticePostgreSQL <- struct{}{}
 			}
 			if !reflect.DeepEqual(Conf.DatabaseConfig.Redis, newConf.DatabaseConfig.Redis) {
 				Conf.DatabaseConfig.Redis = newConf.DatabaseConfig.Redis
