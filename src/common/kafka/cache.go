@@ -19,9 +19,9 @@ var cacheMQInstance *cacheMQ
 func initCacheMQ() {
 	cacheMQInstance = &cacheMQ{
 		mq: &mq{
-			Topic:  topicCanal,
-			Writer: NewWriter(topicCanal),
-			Reader: NewReader(topicCanal),
+			Topic:  topicDebezium,
+			Writer: NewWriter(topicDebezium),
+			Reader: NewReader(topicDebezium),
 		},
 	}
 	go cacheMQInstance.removeCache(context.Background())

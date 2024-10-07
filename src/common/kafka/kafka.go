@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	topicCanal     = "canal"
+	topicDebezium  = "debezium"
 	topicComment   = "comment"
 	topicFavorite  = "favorite"
 	topicRelation  = "relation"

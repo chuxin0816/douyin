@@ -53,8 +53,8 @@ func watchConfig() {
 		case <-config.NoticeSnowflake:
 			snowflake.Init()
 
-		case <-config.NoticeMySQL:
-			dal.InitMySQL()
+		case <-config.NoticePostgreSQL:
+			dal.InitPostgreSQL()
 
 		case <-config.NoticeRedis:
 			dal.InitRedis()

@@ -21,18 +21,18 @@ log:
   max_age: 30
 
 database:
-  mysql-master:
-    user: root
+  postgres-master:
+    host: postgres-master
+    port: 5432
+    user: postgres
     password: 123456
-    host: mysql-master
-    port: 3306
     dbname: douyin
 
-  mysql-slaves:
-    - user: root
+  postgres-slaves:
+    - host: postgres-slave
+      port: 5432
+      user: postgres
       password: 123456
-      host: mysql-slave
-      port: 3306
       dbname: douyin
 
   redis:

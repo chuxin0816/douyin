@@ -29,7 +29,7 @@
 │   │   ├── serversuite     服务端套件
 │   │   ├── snowflake       雪花算法
 │   ├── config
-│   ├── dal                 访问数据库(MySQL, Redis, NebulaGraph)
+│   ├── dal                 访问数据库(PostgreSQL, Redis, NebulaGraph)
 │   ├── idl
 │   ├── kitex_gen
 │   └── service
@@ -45,11 +45,11 @@
 ##  性能测试
 使用wrk进行性能测试，400个连接，16个线程，压力测试30s：读接口QPS 3500+，写接口QPS 2800+，压测过程全链路无错误
 ## 技术选型：
-- 框架选型：使用 **Hertz** 作为 HTTP 微服务框架，**Kitex** 作为 RPC 微服务框架；使用 **GORM/GEN** 生成代码并操作 MySQL 数据库
-- 数据库：使用 **MySQL** 和 **Redis** 集群实现读写分离，使用 **NebulaGraph** 存储用户关系
+- 框架选型：使用 **Hertz** 作为 HTTP 微服务框架，**Kitex** 作为 RPC 微服务框架；使用 **GORM/GEN** 生成代码并操作 PostgreSQL 数据库
+- 数据库：使用 **PostgreSQL** 和 **Redis** 集群实现读写分离，使用 **NebulaGraph** 存储用户关系
 - 服务注册与发现：使用 **Consul** 作为服务发现与注册中心和配置中心
 - 缓存策略：通过 **Write-Through** + **Write-Behind** 等多种策略提升数据访问速度。使用 **SingleFlight** 减轻数据库压力并防止缓存击穿、使用布隆过滤器减少缓存穿透，并通过随机延时策略避免缓存雪崩
-- 中间件：采用**令牌桶**作为限流中间件，**JWT** 作为用户认证中间件，使用 **Kafka** 作为消息队列，实现异步写入数据库、配合 **Canal** 删除缓存等操作
+- 中间件：采用**令牌桶**作为限流中间件，**JWT** 作为用户认证中间件，使用 **Kafka** 作为消息队列，实现异步写入数据库、配合 **Debezium** 删除缓存等操作
 - 云原生：通过 **OpenTelemetry** + **Jaeger** 实现分布式链路追踪，**Prometheus** + **Grafana** 实现项目监控，使用 **Docker Compose** 一键部署项目，并通过 **GitHub Actions** 自动构建和推送镜像
 - 其他：使用 **Snowflake** 算法生成全局唯一ID，使用 **ffmpeg** 截取视频第5帧作为封面，使用 **OSS** 存储视频和视频封面
 ## 代码生成示例:

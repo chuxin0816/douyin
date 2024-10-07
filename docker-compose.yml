@@ -127,50 +127,74 @@ services:
         condition: service_healthy
     container_name: Message
 
-  mysql-master:
-    image: mysql:8.0.37
-    ports:
-      - "3306:3306"
+  postgres-master:
+    image: bitnami/postgresql:latest
     environment:
-      MYSQL_ROOT_PASSWORD: '123456'
-      MYSQL_DATABASE: douyin
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: douyin
+      POSTGRESQL_REPLICATION_MODE: master
+      POSTGRESQL_REPLICATION_USER: replicator
+      POSTGRESQL_REPLICATION_PASSWORD: replicator_passwd
     volumes:
-      - ./etc/my_master.cnf:/etc/my.cnf
+      - ./etc/postgresql.conf:/bitnami/postgresql/conf/postgresql.conf
       - ./etc/douyin.sql:/docker-entrypoint-initdb.d/douyin.sql
-      - ./etc/init_master.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    container_name: Postgres-master
+      
+  postgres-slave:
+    image: bitnami/postgresql:latest
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: douyin
+      POSTGRESQL_REPLICATION_MODE: slave
+      POSTGRESQL_MASTER_HOST: postgres-master
+      POSTGRESQL_MASTER_PORT_NUMBER: 5432
+      POSTGRESQL_REPLICATION_USER: replicator
+      POSTGRESQL_REPLICATION_PASSWORD: replicator_passwd
+    volumes:
+      - ./etc/postgresql.conf:/bitnami/postgresql/conf/postgresql.conf
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    container_name: Postgres-slave
+  
+  debezium:
+    image: debezium/connect:latest
+    ports:
+      - "8083:8083"
+    environment:
+      - BOOTSTRAP_SERVERS=kafka-0:9092,kafka-1:9092,kafka-2:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
+    depends_on:
+      kafka-0:
+        condition: service_healthy
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+    volumes:
+      - ./etc/debezium.json:/etc/debezium/debezium.json
+      - ./etc/start-debezium.sh:/etc/debezium/debezium-start.sh
+    entrypoint: ["/etc/debezium/start-debezium.sh"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/connectors/postgres-connector/status"]
       interval: 10s
       timeout: 2s
       retries: 3
-    container_name: MySQL-master
-  
-  mysql-slave:
-    image: mysql:8.0.37
-    ports:
-      - "3307:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: '123456'
-      MYSQL_DATABASE: douyin
-    volumes:
-      - ./etc/my_slave.cnf:/etc/my.cnf
-      - ./etc/douyin.sql:/docker-entrypoint-initdb.d/douyin.sql
-      - ./etc/init_slave.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p123456"]
-      interval: 10s
-      timeout: 2s
-      retries: 3
-    container_name: MySQL-slave
-  
-  canal:
-    image: canal/canal-server:latest
-    ports:
-      - "11111:11111"
-    volumes:
-      - ./etc/instance.properties:/home/admin/canal-server/conf/example/instance.properties
-      - ./etc/canal.properties:/home/admin/canal-server/conf/canal.properties
-    container_name: Canal
+    container_name: Debezium
   
   redis-master:
     image: redis/redis-stack-server:latest
@@ -323,11 +347,7 @@ services:
       - KAFKA_CLUSTERS_0_NAME=local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka-0:9092,kafka-1:9092,kafka-2:9092
     depends_on:
-      kafka-0:
-        condition: service_healthy
-      kafka-1:
-        condition: service_healthy
-      kafka-2:
+      debezium:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "8080"]
