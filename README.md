@@ -28,6 +28,7 @@
 │   │   ├── oss             阿里云OSS
 │   │   ├── serversuite     服务端套件
 │   │   ├── snowflake       雪花算法
+│   │   └── utils           工具类(fnv哈希)
 │   ├── config
 │   ├── dal                 访问数据库(PostgreSQL, Redis, NebulaGraph)
 │   ├── idl
@@ -48,8 +49,8 @@
 - 框架选型：使用 **Hertz** 作为 HTTP 微服务框架，**Kitex** 作为 RPC 微服务框架；使用 **GORM/GEN** 生成代码并操作 PostgreSQL 数据库
 - 数据库：使用 **PostgreSQL** 和 **Redis** 集群实现读写分离，使用 **NebulaGraph** 存储用户关系
 - 服务注册与发现：使用 **Consul** 作为服务发现与注册中心和配置中心
-- 缓存策略：通过 **Write-Through** + **Write-Behind** 等多种策略提升数据访问速度。使用 **SingleFlight** 减轻数据库压力并防止缓存击穿、使用布隆过滤器减少缓存穿透，并通过随机延时策略避免缓存雪崩
-- 中间件：采用**令牌桶**作为限流中间件，**JWT** 作为用户认证中间件，使用 **Kafka** 作为消息队列，实现异步写入数据库、配合 **Debezium** 删除缓存等操作
+- 缓存策略：通过 **Cache-Aside** + **Write-Through** + **Write-Behind** 等多种策略保证数据一致性和提升数据访问速度。使用 **SingleFlight** 减轻数据库压力并防止缓存击穿、使用布隆过滤器减少缓存穿透，并通过随机延时策略避免缓存雪崩
+- 中间件：采用**令牌桶**作为限流中间件，**JWT** 作为用户认证中间件，使用 **Kafka** 作为消息队列，实现异步写入数据库、配合 **Debezium** 更新/删除缓存等操作
 - 云原生：通过 **OpenTelemetry** + **Jaeger** 实现分布式链路追踪，**Prometheus** + **Grafana** 实现项目监控，使用 **Docker Compose** 一键部署项目，并通过 **GitHub Actions** 自动构建和推送镜像
 - 其他：使用 **Snowflake** 算法生成全局唯一ID，使用 **ffmpeg** 截取视频第5帧作为封面，使用 **OSS** 存储视频和视频封面
 ## 代码生成示例:
@@ -62,7 +63,6 @@ kitex -module douyin -service user -gen-path ../../kitex_gen/ ../../idl/user.thr
 ```
 ## 未来规划
 脱离青训营抖音客户端限制，对接口参数优化，添加新接口
-* 添加双token
 * 发布列表，喜欢列表，评论列表，关注列表，粉丝列表，好友列表增加分页参数
 * 添加热门视频列表，关注视频列表，好友视频列表
 * 评论增加点赞和回复功能，评论分为最新和最热列表，使用redis zset实现

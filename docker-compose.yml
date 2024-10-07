@@ -4,6 +4,8 @@ services:
     image: ghcr.io/chuxin0816/douyin:api
     ports:
       - "8888:8888"
+    environment:
+      TZ: Asia/Shanghai
     sysctls:
       net.ipv4.ip_local_port_range: "15000 65000"
     depends_on:
@@ -17,6 +19,8 @@ services:
     image: ghcr.io/chuxin0816/douyin:user
     ports:
       - "8891:8891"
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       consul:
         condition: service_healthy
@@ -36,6 +40,8 @@ services:
     image: ghcr.io/chuxin0816/douyin:video
     ports:
       - "8892:8892"
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       consul:
         condition: service_healthy
@@ -55,6 +61,8 @@ services:
     image: ghcr.io/chuxin0816/douyin:favorite
     ports:
       - "8893:8893"
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       consul:
         condition: service_healthy
@@ -74,6 +82,8 @@ services:
     image: ghcr.io/chuxin0816/douyin:comment
     ports:
       - "8894:8894"
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       consul:
         condition: service_healthy
@@ -93,6 +103,8 @@ services:
     image: ghcr.io/chuxin0816/douyin:relation
     ports:
       - "8895:8895"
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       consul:
         condition: service_healthy
@@ -112,6 +124,8 @@ services:
     image: ghcr.io/chuxin0816/douyin:message
     ports:
       - "8896:8896"
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       consul:
         condition: service_healthy
@@ -129,17 +143,18 @@ services:
 
   postgres-master:
     image: bitnami/postgresql:latest
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: douyin
       POSTGRESQL_REPLICATION_MODE: master
       POSTGRESQL_REPLICATION_USER: replicator
       POSTGRESQL_REPLICATION_PASSWORD: replicator_passwd
+      TZ: Asia/Shanghai
     volumes:
       - ./etc/postgresql.conf:/bitnami/postgresql/conf/postgresql.conf
       - ./etc/douyin.sql:/docker-entrypoint-initdb.d/douyin.sql
-    ports:
-      - "5432:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
@@ -149,6 +164,8 @@ services:
       
   postgres-slave:
     image: bitnami/postgresql:latest
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: douyin
@@ -157,10 +174,9 @@ services:
       POSTGRESQL_MASTER_PORT_NUMBER: 5432
       POSTGRESQL_REPLICATION_USER: replicator
       POSTGRESQL_REPLICATION_PASSWORD: replicator_passwd
+      TZ: Asia/Shanghai
     volumes:
       - ./etc/postgresql.conf:/bitnami/postgresql/conf/postgresql.conf
-    ports:
-      - "5433:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
@@ -178,6 +194,7 @@ services:
       - CONFIG_STORAGE_TOPIC=my_connect_configs
       - OFFSET_STORAGE_TOPIC=my_connect_offsets
       - STATUS_STORAGE_TOPIC=my_connect_statuses
+      - TZ=Asia/Shanghai
     depends_on:
       kafka-0:
         condition: service_healthy
@@ -200,6 +217,8 @@ services:
     image: redis/redis-stack-server:latest
     ports:
       - "6379:6379"
+    environment:
+      TZ: Asia/Shanghai
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - ./etc/redis_master.conf:/usr/local/etc/redis/redis.conf
@@ -214,6 +233,8 @@ services:
     image: redis/redis-stack-server:latest
     ports:
       - "6380:6379"
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       redis-master:
         condition: service_healthy
@@ -231,6 +252,8 @@ services:
     image: redis:latest
     ports:
       - "26379:26379"
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       - redis-master
     command: redis-sentinel /usr/local/etc/redis/sentinel.conf
@@ -242,6 +265,8 @@ services:
     image: redis:latest
     ports:
       - "26380:26379"
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       - redis-master
     command: redis-sentinel /usr/local/etc/redis/sentinel.conf
@@ -253,6 +278,8 @@ services:
     image: redis:latest
     ports:
       - "26381:26379"
+    environment:
+      TZ: Asia/Shanghai
     depends_on:
       - redis-master
     command: redis-sentinel /usr/local/etc/redis/sentinel.conf
@@ -280,6 +307,7 @@ services:
       - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+      - TZ=Asia/Shanghai
     healthcheck:
       test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
       interval: 10s
@@ -306,6 +334,7 @@ services:
       - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+      - TZ=Asia/Shanghai
     healthcheck:
       test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
       interval: 10s
@@ -332,6 +361,7 @@ services:
       - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=2
+      - TZ=Asia/Shanghai
     healthcheck:
       test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
       interval: 10s
@@ -346,6 +376,7 @@ services:
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka-0:9092,kafka-1:9092,kafka-2:9092
+      - TZ=Asia/Shanghai
     depends_on:
       debezium:
         condition: service_healthy
@@ -360,6 +391,8 @@ services:
     image: consul:1.15.4
     ports:
       - "8500:8500"
+    environment:
+      TZ: Asia/Shanghai
     volumes:
       - ./etc/config.yaml:/config.yaml
     command: >
@@ -378,22 +411,25 @@ services:
   
   prometheus:
     image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    environment:
+      TZ: Asia/Shanghai
     volumes:
       - ./etc/prometheus.yaml:/etc/prometheus/prometheus.yaml
     command:
       - "--config.file=/etc/prometheus/prometheus.yaml"
-    ports:
-      - "9090:9090"
     container_name: Prometheus
 
   grafana:
     image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
-    ports:
-      - "3000:3000"
+      - TZ=Asia/Shanghai
     container_name: Grafana
 
   jaeger:
@@ -401,6 +437,8 @@ services:
     ports:
       - "16686:16686"
       - "4318:4318"
+    environment:
+      TZ: Asia/Shanghai
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "16686"]
       interval: 10s
@@ -410,8 +448,13 @@ services:
 
   nebula-metad:
     image: docker.io/vesoft/nebula-metad:latest
+    ports:
+      - 9559:9559
+      - 19559:19559
+      - 19560:19560
     environment:
       USER: root
+      TZ: Asia/Shanghai
     command:
       - --meta_server_addrs=nebula-metad:9559
       - --local_ip=nebula-metad
@@ -428,10 +471,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-    ports:
-      - 9559:9559
-      - 19559:19559
-      - 19560:19560
     restart: on-failure
     cap_add:
       - SYS_PTRACE
@@ -439,9 +478,13 @@ services:
 
   nebula-storaged:
     image: docker.io/vesoft/nebula-storaged:latest
+    ports:
+      - 9779:9779
+      - 19779:19779
+      - 19780:19780
     environment:
       USER: root
-      TZ:   "${TZ}"
+      TZ: Asia/Shanghai
     command:
       - --meta_server_addrs=nebula-metad:9559
       - --local_ip=nebula-storaged
@@ -460,10 +503,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-    ports:
-      - 9779:9779
-      - 19779:19779
-      - 19780:19780
     restart: on-failure
     cap_add:
       - SYS_PTRACE
@@ -471,9 +510,13 @@ services:
 
   nebula-graphd:
     image: docker.io/vesoft/nebula-graphd:latest
+    ports:
+      - 9669:9669
+      - 19669:19669
+      - 19670:19670
     environment:
       USER: root
-      TZ:   "${TZ}"
+      TZ: Asia/Shanghai
     command:
       - --meta_server_addrs=nebula-metad:9559
       - --port=9669
@@ -491,10 +534,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-    ports:
-      - 9669:9669
-      - 19669:19669
-      - 19670:19670
     restart: on-failure
     cap_add:
       - SYS_PTRACE
@@ -502,6 +541,8 @@ services:
 
   nebula-console:
     image: docker.io/vesoft/nebula-console:v3.6.0
+    environment:
+      TZ: Asia/Shanghai
     entrypoint: ""
     volumes:
       - ./etc/user.ngpl:/user.ngpl
