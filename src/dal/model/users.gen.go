@@ -8,11 +8,11 @@ import (
 	"time"
 )
 
-const TableNameUser = "user"
+const TableNameUser = "users"
 
-// User mapped from table <user>
+// User mapped from table <users>
 type User struct {
-	ID              int64     `gorm:"column:id;primaryKey;comment:用户ID" json:"id"`                                           // 用户ID
+	ID              int64     `gorm:"column:id;primaryKey" json:"id"`
 	Name            string    `gorm:"column:name;not null;comment:用户名" json:"name"`                                          // 用户名
 	Avatar          string    `gorm:"column:avatar;not null;comment:头像地址" json:"avatar"`                                     // 头像地址
 	BackgroundImage string    `gorm:"column:background_image;not null;comment:背景图地址" json:"background_image"`                // 背景图地址

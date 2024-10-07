@@ -44,7 +44,7 @@ type user struct {
 	userDo userDo
 
 	ALL             field.Asterisk
-	ID              field.Int64  // 用户ID
+	ID              field.Int64
 	Name            field.String // 用户名
 	Avatar          field.String // 头像地址
 	BackgroundImage field.String // 背景图地址
