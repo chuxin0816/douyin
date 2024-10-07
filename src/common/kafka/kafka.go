@@ -25,9 +25,23 @@ type mq struct {
 }
 
 type dbMessage struct {
-	Data  []map[string]string `json:"data"`
-	Table string              `json:"table"`
-	Type  string              `json:"type"`
+	payload `json:"payload"`
+}
+
+type payload struct {
+	data   `json:"after"`
+	source `json:"source"`
+	Op     string `json:"op"` // "c"->create, "u"->update, "d"->delete
+}
+
+type data struct {
+	ID       int64 `json:"id"`
+	AuthorID int64 `json:"author_id"`
+	VideoID  int64 `json:"video_id"`
+}
+
+type source struct {
+	Table string `json:"table"`
 }
 
 func Init() {

@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 
 	"douyin/src/dal"
 
@@ -49,35 +50,35 @@ func (mq *cacheMQ) removeCache(ctx context.Context) {
 		pipe := dal.RDB.Pipeline()
 		switch msg.Table {
 		case "user":
-			if msg.Type == "UPDATE" || msg.Type == "DELETE" {
-				keyUserInfo := dal.GetRedisKey(dal.KeyUserInfoPF, msg.Data[0]["id"])
+			if msg.Op == "u" || msg.Op == "d" {
+				keyUserInfo := dal.GetRedisKey(dal.KeyUserInfoPF, strconv.FormatInt(msg.ID, 10))
 				pipe.Del(ctx, keyUserInfo)
 			}
 		case "video":
-			if msg.Type == "INSERT" {
-				keyUserWorkCnt := dal.GetRedisKey(dal.KeyUserWorkCountPF, msg.Data[0]["author_id"])
+			if msg.Op == "c" {
+				keyUserWorkCnt := dal.GetRedisKey(dal.KeyUserWorkCountPF, strconv.FormatInt(msg.AuthorID, 10))
 				dal.IncrByScript.Run(ctx, pipe, []string{keyUserWorkCnt}, 1)
-			} else if msg.Type == "UPDATE" {
-				keyVideoInfo := dal.GetRedisKey(dal.KeyVideoInfoPF, msg.Data[0]["id"])
+			} else if msg.Op == "u" {
+				keyVideoInfo := dal.GetRedisKey(dal.KeyVideoInfoPF, strconv.FormatInt(msg.ID, 10))
 				pipe.Del(ctx, keyVideoInfo)
-			} else if msg.Type == "DELETE" {
-				keyUserWorkCnt := dal.GetRedisKey(dal.KeyUserWorkCountPF, msg.Data[0]["author_id"])
+			} else if msg.Op == "d" {
+				keyUserWorkCnt := dal.GetRedisKey(dal.KeyUserWorkCountPF, strconv.FormatInt(msg.AuthorID, 10))
 				dal.IncrByScript.Run(ctx, pipe, []string{keyUserWorkCnt}, -1)
-				keyVideoInfo := dal.GetRedisKey(dal.KeyVideoInfoPF, msg.Data[0]["id"])
+				keyVideoInfo := dal.GetRedisKey(dal.KeyVideoInfoPF, strconv.FormatInt(msg.ID, 10))
 				pipe.Del(ctx, keyVideoInfo)
 			}
 		case "comment":
-			if msg.Type == "INSERT" {
-				keyVideoCommentCnt := dal.GetRedisKey(dal.KeyVideoCommentCountPF, msg.Data[0]["video_id"])
+			if msg.Op == "c" {
+				keyVideoCommentCnt := dal.GetRedisKey(dal.KeyVideoCommentCountPF, strconv.FormatInt(msg.VideoID, 10))
 				dal.IncrByScript.Run(ctx, pipe, []string{keyVideoCommentCnt}, 1)
-			} else if msg.Type == "DELETE" {
-				keyVideoCommentCnt := dal.GetRedisKey(dal.KeyVideoCommentCountPF, msg.Data[0]["video_id"])
+			} else if msg.Op == "d" {
+				keyVideoCommentCnt := dal.GetRedisKey(dal.KeyVideoCommentCountPF, strconv.FormatInt(msg.VideoID, 10))
 				dal.IncrByScript.Run(ctx, pipe, []string{keyVideoCommentCnt}, -1)
 			}
 		}
 
 		if _, err := pipe.Exec(ctx); err != nil {
-			klog.Error("failed to update or delete cache: ", err)
+			klog.Error("failed to u or d cache: ", err)
 			span.End()
 			continue
 		}
