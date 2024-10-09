@@ -295,7 +295,7 @@ func loadDataToBloom() error {
 func generateMessageTables() {
 	// 尝试获取顾问锁，12345 为锁的唯一 ID
 	var lockAcquired bool
-	if err := db.Debug().Raw("SELECT pg_try_advisory_lock(?)", advisoryLockID).Scan(&lockAcquired).Error; err != nil {
+	if err := db.Raw("SELECT pg_try_advisory_lock(?)", advisoryLockID).Scan(&lockAcquired).Error; err != nil {
 		panic(err)
 	}
 
