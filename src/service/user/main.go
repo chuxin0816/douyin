@@ -17,7 +17,7 @@ import (
 func main() {
 	config.Init()
 	go watchConfig()
-	mtl.Init()
+	mtl.Init(config.Conf.OpenTelemetryConfig.UserName)
 	defer mtl.Close()
 	snowflake.Init()
 	dal.Init()
