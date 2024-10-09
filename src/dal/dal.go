@@ -28,9 +28,10 @@ import (
 )
 
 const (
-	ExpireTime = time.Minute * 30
-	DelayTime  = 150 * time.Millisecond
-	randFactor = 30
+	ExpireTime     = time.Minute * 30
+	DelayTime      = 150 * time.Millisecond
+	randFactor     = 30
+	advisoryLockID = 12345
 )
 
 var (
@@ -161,7 +162,7 @@ func InitPostgreSQL() {
 	qUserLogin = q.UserLogin
 	qVideo = q.Video
 
-	generateMessageTable()
+	generateMessageTables()
 }
 
 func InitRedis() {
@@ -290,23 +291,73 @@ func loadDataToBloom() error {
 	return nil
 }
 
-// 创建今年的消息表
-func generateMessageTable() {
+// 创建消息分表
+func generateMessageTables() {
+	// 尝试获取顾问锁，12345 为锁的唯一 ID
+	var lockAcquired bool
+	if err := db.Debug().Raw("SELECT pg_try_advisory_lock(?)", advisoryLockID).Scan(&lockAcquired).Error; err != nil {
+		panic(err)
+	}
+
+	if !lockAcquired {
+		return // 没有获取到锁，直接退出函数
+	}
+
+	// 确保在函数返回时释放顾问锁
+	defer func() {
+		if err := db.Exec("SELECT pg_advisory_unlock(12345)").Error; err != nil {
+			panic(err)
+		}
+	}()
+
+	// 开始创建表
 	for i := 1; i <= 128; i++ {
 		table := fmt.Sprintf("message_%03d", i)
-		err := db.Exec(
-			`CREATE TABLE IF NOT EXISTS ` + table + `(
-  				id bigint unsigned NOT NULL,
-  				from_user_id bigint NOT NULL DEFAULT '0' COMMENT '发送者ID',
- 				to_user_id bigint NOT NULL DEFAULT '0' COMMENT '接收者ID',
-  				convert_id varchar(41) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '会话ID',
-  				content varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '' COMMENT '消息内容',
-  				create_time bigint NOT NULL DEFAULT '0' COMMENT '创建时间',
-  				PRIMARY KEY (id),
-  				KEY idx_convertId_createTime (convert_id,create_time)
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;`).Error
-		if err != nil {
+
+		// 创建表
+		createTableSQL := fmt.Sprintf(`
+			 CREATE TABLE IF NOT EXISTS %s (
+				 id bigint NOT NULL,
+				 from_user_id bigint NOT NULL DEFAULT 0,
+				 to_user_id bigint NOT NULL DEFAULT 0,
+				 convert_id varchar NOT NULL DEFAULT '',
+				 content varchar NOT NULL DEFAULT '',
+				 create_time bigint NOT NULL DEFAULT 0,
+				 PRIMARY KEY (id)
+			 );`, table)
+
+		if err := db.Exec(createTableSQL).Error; err != nil {
 			panic(err)
+		}
+
+		// 创建索引
+		createIndexSQL := fmt.Sprintf(`
+			 CREATE INDEX IF NOT EXISTS idx_convertId_createTime_%s
+			 ON %s (convert_id, create_time);`, table, table)
+
+		if err := db.Exec(createIndexSQL).Error; err != nil {
+			panic(err)
+		}
+
+		// 添加列注释
+		commentColumns := []struct {
+			column  string
+			comment string
+		}{
+			{"from_user_id", "发送者ID"},
+			{"to_user_id", "接收者ID"},
+			{"convert_id", "会话ID"},
+			{"content", "消息内容"},
+			{"create_time", "创建时间"},
+		}
+
+		for _, col := range commentColumns {
+			commentSQL := fmt.Sprintf(`
+				 COMMENT ON COLUMN %s.%s IS '%s';`, table, col.column, col.comment)
+
+			if err := db.Exec(commentSQL).Error; err != nil {
+				panic(err)
+			}
 		}
 	}
 }
