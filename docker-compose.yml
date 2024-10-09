@@ -540,7 +540,7 @@ services:
     container_name: Nebula-graphd
 
   nebula-console:
-    image: docker.io/vesoft/nebula-console:v3.6.0
+    image: docker.io/vesoft/nebula-console:latest
     environment:
       TZ: Asia/Shanghai
     entrypoint: ""
