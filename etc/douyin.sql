@@ -50,6 +50,7 @@ CREATE TABLE videos (
 );
 
 CREATE INDEX idx_author_id ON videos (author_id);
+CREATE INDEX idx_videos_upload_time ON videos (upload_time);
 
 -- Add comments
 COMMENT ON COLUMN videos.author_id IS '作者ID';
