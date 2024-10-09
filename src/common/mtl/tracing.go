@@ -2,22 +2,40 @@ package mtl
 
 import (
 	"context"
+
 	"douyin/src/config"
 
-	"github.com/kitex-contrib/obs-opentelemetry/provider"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 )
 
-var p provider.OtelProvider
+var tp *trace.TracerProvider
 
 func InitTracing(serviceName string) {
-	p = provider.NewOpenTelemetryProvider(
-		provider.WithServiceName(serviceName),
-		provider.WithExportEndpoint(config.Conf.JaegerAddr),
-		provider.WithInsecure(),
-		provider.WithEnableMetrics(false),
+	exporter, err := otlptracehttp.New(context.Background(),
+		otlptracehttp.WithEndpoint(config.Conf.OpenTelemetryConfig.JaegerAddr),
+		otlptracehttp.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+
+	tp = trace.NewTracerProvider(
+		trace.WithBatcher(exporter),
+		trace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName(serviceName),
+		)),
 	)
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 }
 
 func ShutdownTracing() {
-	p.Shutdown(context.Background()) //nolint:errcheck
+	if err := tp.Shutdown(context.Background()); err != nil {
+		panic(err)
+	}
 }
