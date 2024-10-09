@@ -5,6 +5,7 @@ import (
 	"douyin/src/common/jwt"
 	"douyin/src/common/mtl"
 	"douyin/src/config"
+	"douyin/src/dal"
 	"douyin/src/service/api/router"
 )
 
@@ -30,6 +31,10 @@ func main() {
 	// 初始化RPC客户端
 	client.Init()
 
+	// 初始化Redis
+	dal.InitRedis()
+	defer dal.Close()
+
 	// 注册路由
 	h := router.Setup(config.Conf.HertzConfig)
 
@@ -47,6 +52,9 @@ func watchConfig() {
 
 		case <-config.NoticeLog:
 			mtl.InitLog()
+
+		case <-config.NoticeRedis:
+			dal.InitRedis()
 		}
 	}
 }
