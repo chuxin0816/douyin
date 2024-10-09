@@ -24,9 +24,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql-master:
+      postgres-master:
         condition: service_healthy
-      mysql-slave:
+      postgres-slave:
         condition: service_healthy
       redis-slave:
         condition: service_healthy
@@ -45,9 +45,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql-master:
+      postgres-master:
         condition: service_healthy
-      mysql-slave:
+      postgres-slave:
         condition: service_healthy
       redis-slave:
         condition: service_healthy
@@ -66,9 +66,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql-master:
+      postgres-master:
         condition: service_healthy
-      mysql-slave:
+      postgres-slave:
         condition: service_healthy
       redis-slave:
         condition: service_healthy
@@ -87,9 +87,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql-master:
+      postgres-master:
         condition: service_healthy
-      mysql-slave:
+      postgres-slave:
         condition: service_healthy
       redis-slave:
         condition: service_healthy
@@ -108,9 +108,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql-master:
+      postgres-master:
         condition: service_healthy
-      mysql-slave:
+      postgres-slave:
         condition: service_healthy
       redis-slave:
         condition: service_healthy
@@ -129,9 +129,9 @@ services:
     depends_on:
       consul:
         condition: service_healthy
-      mysql-master:
+      postgres-master:
         condition: service_healthy
-      mysql-slave:
+      postgres-slave:
         condition: service_healthy 
       redis-slave:
         condition: service_healthy
@@ -204,13 +204,13 @@ services:
         condition: service_healthy
     volumes:
       - ./etc/debezium.json:/etc/debezium/debezium.json
-      - ./etc/start-debezium.sh:/etc/debezium/debezium-start.sh
-    entrypoint: ["/etc/debezium/start-debezium.sh"]
+      - ./etc/debezium-start.sh:/etc/debezium/debezium-start.sh
+    entrypoint: ["/etc/debezium/debezium-start.sh"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/connectors/postgres-connector/status"]
       interval: 10s
       timeout: 2s
-      retries: 3
+      retries: 10
     container_name: Debezium
   
   redis-master:
