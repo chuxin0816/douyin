@@ -317,13 +317,12 @@ func generateMessageTables() {
 		// 创建表
 		createTableSQL := fmt.Sprintf(`
 			 CREATE TABLE IF NOT EXISTS %s (
-				 id bigint NOT NULL,
-				 from_user_id bigint NOT NULL DEFAULT 0,
-				 to_user_id bigint NOT NULL DEFAULT 0,
+				 id BIGINT PRIMARY KEY NOT NULL,
+				 from_user_id BIGINT NOT NULL DEFAULT 0,
+				 to_user_id BIGINT NOT NULL DEFAULT 0,
 				 convert_id varchar NOT NULL DEFAULT '',
 				 content varchar NOT NULL DEFAULT '',
-				 create_time bigint NOT NULL DEFAULT 0,
-				 PRIMARY KEY (id)
+				 create_time BIGINT NOT NULL DEFAULT 0,
 			 );`, table)
 
 		if err := db.Exec(createTableSQL).Error; err != nil {
