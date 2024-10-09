@@ -17,16 +17,9 @@ func main() {
 	// 初始化jwt
 	jwt.Init()
 
-	// 初始化监控指标
-	mtl.InitMetric(config.Conf.OpenTelemetryConfig.ApiName, config.Conf.OpenTelemetryConfig.MetricAddr, config.Conf.ConsulConfig.ConsulAddr)
-	defer mtl.DeregisterMetric()
-
-	// 初始化链路追踪
-	mtl.InitTracing(config.Conf.OpenTelemetryConfig.ApiName)
-	defer mtl.ShutdownTracing()
-
-	// 初始化日志
-	mtl.InitLog()
+	// 初始化监控指标,链路追踪,日志
+	mtl.Init()
+	defer mtl.Close()
 
 	// 初始化RPC客户端
 	client.Init()

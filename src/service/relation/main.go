@@ -17,11 +17,8 @@ import (
 func main() {
 	config.Init()
 	go watchConfig()
-	mtl.InitMetric(config.Conf.OpenTelemetryConfig.RelationName, config.Conf.OpenTelemetryConfig.MetricAddr, config.Conf.ConsulConfig.ConsulAddr)
-	defer mtl.DeregisterMetric()
-	mtl.InitTracing(config.Conf.OpenTelemetryConfig.RelationName)
-	defer mtl.ShutdownTracing()
-	mtl.InitLog()
+	mtl.Init()
+	defer mtl.Close()
 	snowflake.Init()
 	dal.Init()
 	defer dal.Close()
